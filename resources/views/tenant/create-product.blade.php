@@ -3,153 +3,419 @@
 @section('title', 'Tambah Menu Baru')
 
 @section('content')
-    <!-- Tombol Kembali -->
-    <div class="mb-6">
-        <a href="{{ url('/tenant/products') }}" class="inline-flex items-center text-sm font-semibold text-[#005ea2] hover:text-blue-800 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-            Kembali ke Katalog
-        </a>
+
+<div class="mb-6">
+    <a href="{{ route('tenant.products') }}"
+       class="text-sm font-semibold text-[#005ea2] hover:underline">
+        ← Kembali ke Katalog
+    </a>
+</div>
+
+@if ($errors->any())
+    <div class="mb-5 bg-red-50 border border-red-200 rounded-xl p-4">
+        @foreach ($errors->all() as $error)
+            <p class="text-sm text-red-600">• {{ $error }}</p>
+        @endforeach
+    </div>
+@endif
+
+<form action="{{ route('tenant.products.store') }}"
+      method="POST"
+      enctype="multipart/form-data">
+
+    @csrf
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        {{-- KIRI --}}
+        <div class="lg:col-span-2 space-y-6">
+
+            {{-- INFORMASI DASAR --}}
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+
+                <h2 class="text-lg font-bold text-gray-800 mb-5 border-b pb-3">
+                    Informasi Dasar Menu
+                </h2>
+
+                <div class="space-y-4">
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">
+                            Nama Menu <span class="text-red-500">*</span>
+                        </label>
+
+                        <input type="text"
+                               name="name"
+                               value="{{ old('name') }}"
+                               required
+                               placeholder="Contoh: Kopi Susu"
+                               class="w-full border border-gray-300 rounded-lg
+                                      px-4 py-2.5 text-sm focus:border-[#005ea2]
+                                      focus:ring-1 focus:ring-[#005ea2] outline-none">
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">
+                                Kategori
+                            </label>
+
+                            <select name="category"
+                                    class="w-full border border-gray-300 rounded-lg
+                                           px-4 py-2.5 text-sm bg-white">
+                                <option value="">Pilih kategori...</option>
+                                <option value="Makanan Utama">Makanan Utama</option>
+                                <option value="Camilan">Camilan / Snack</option>
+                                <option value="Minuman">Minuman</option>
+                                <option value="Dessert">Dessert / Bakery</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">
+                                Harga Dasar (Rp)
+                                <span class="text-red-500">*</span>
+                            </label>
+
+                            <input type="number"
+                                   name="price"
+                                   value="{{ old('price') }}"
+                                   min="0"
+                                   required
+                                   placeholder="5000"
+                                   class="w-full border border-gray-300 rounded-lg
+                                          px-4 py-2.5 text-sm focus:border-[#005ea2]
+                                          outline-none">
+                        </div>
+
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">
+                            Deskripsi Menu
+                        </label>
+
+                        <textarea name="description"
+                                  rows="3"
+                                  maxlength="300"
+                                  placeholder="Deskripsi menu..."
+                                  class="w-full border border-gray-300 rounded-lg
+                                         px-4 py-2.5 text-sm outline-none">{{ old('description') }}</textarea>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox"
+                               name="is_available"
+                               value="1"
+                               checked
+                               class="rounded border-gray-300 text-[#8dc63f]">
+
+                        <span class="text-sm font-medium text-gray-700">
+                            Produk tersedia
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+
+            {{-- VARIAN --}}
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+
+                <div class="flex justify-between items-center border-b pb-3 mb-4">
+
+                    <h2 class="text-lg font-bold">
+                        Opsi Kustomisasi (Varian/Topping)
+                    </h2>
+
+                    <button type="button"
+                            onclick="addVariantGroup()"
+                            class="text-sm font-bold text-[#8dc63f]">
+                        + Tambah Grup Opsi
+                    </button>
+
+                </div>
+
+                <p class="text-sm text-gray-500 mb-4">
+                    Contoh: Ukuran Gelas, Pilihan Saus, Level Gula.
+                </p>
+
+                <div id="variant-list" class="space-y-4">
+
+                    <div class="variant-group border border-blue-100
+                                bg-blue-50/30 rounded-lg p-4">
+
+                        <div class="flex justify-between mb-3">
+
+                            <input type="text"
+                                   name="variant_groups[0][name]"
+                                   placeholder="Nama grup, contoh: Ukuran Gelas"
+                                   class="w-1/2 border rounded px-3 py-2 text-sm">
+
+                            <button type="button"
+                                    onclick="removeGroup(this)"
+                                    class="text-red-500 text-sm">
+                                Hapus Grup
+                            </button>
+
+                        </div>
+
+                        <select name="variant_groups[0][required]"
+                                class="border rounded px-3 py-2 text-sm mb-3 bg-white">
+
+                            <option value="1">Wajib pilih satu</option>
+                            <option value="0">Opsional</option>
+
+                        </select>
+
+                        <div class="option-list space-y-2">
+
+                            <div class="option-row flex gap-2">
+
+                                <input type="text"
+                                       name="variant_groups[0][options][0][name]"
+                                       placeholder="Contoh: Small"
+                                       class="flex-1 border rounded px-3 py-2 text-sm">
+
+                                <input type="number"
+                                       name="variant_groups[0][options][0][price]"
+                                       placeholder="+ Rp"
+                                       value="0"
+                                       class="w-32 border rounded px-3 py-2 text-sm">
+
+                                <button type="button"
+                                        onclick="removeOption(this)"
+                                        class="text-red-400 px-2">
+                                    ✕
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <button type="button"
+                                onclick="addOption(this)"
+                                class="mt-3 text-xs font-semibold text-[#005ea2]">
+                            + Tambah pilihan lain
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {{-- KANAN --}}
+        <div class="space-y-6">
+
+            {{-- FOTO --}}
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+
+                <h2 class="text-lg font-bold mb-4 border-b pb-3">
+                    Foto Produk
+                </h2>
+
+                <label for="image"
+                       class="block border-2 border-dashed border-gray-300
+                              rounded-xl p-5 text-center cursor-pointer
+                              hover:bg-gray-50">
+
+                    <div id="uploadPlaceholder">
+
+                        <div class="text-4xl text-gray-300 mb-2">
+                            🖼️
+                        </div>
+
+                        <p class="text-sm font-semibold text-[#005ea2]">
+                            Upload file foto
+                        </p>
+
+                        <p class="text-xs text-gray-400 mt-1">
+                            JPG, JPEG, PNG maksimal 5 MB
+                        </p>
+
+                    </div>
+
+                    <img id="imagePreview"
+                         class="hidden w-full h-52 object-cover rounded-lg"
+                         alt="Preview">
+
+                </label>
+
+                <input id="image"
+                       type="file"
+                       name="image"
+                       accept="image/png,image/jpeg"
+                       class="hidden"
+                       onchange="previewImage(event)">
+
+            </div>
+
+
+            {{-- SUBMIT --}}
+            <div class="bg-white p-6 rounded-xl shadow-sm border">
+
+                <button type="submit"
+                        class="w-full bg-[#8dc63f] hover:bg-green-600
+                               text-white py-3 rounded-lg text-sm
+                               font-bold shadow-md">
+
+                    SIMPAN & PUBLIKASIKAN
+
+                </button>
+
+                <a href="{{ route('tenant.products') }}"
+                   class="block text-center w-full mt-3
+                          border border-gray-300 py-3 rounded-lg
+                          text-sm font-bold text-gray-600">
+
+                    Batal
+
+                </a>
+
+            </div>
+
+        </div>
+
     </div>
 
-    <!-- Form Utama -->
-    <form action="#" method="POST" enctype="multipart/form-data">
-        @csrf
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            <!-- Kolom Kiri: Informasi Dasar & Varian Dinamis -->
-            <div class="lg:col-span-2 space-y-6">
-                <!-- Card 1: Informasi Dasar -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Informasi Dasar Menu</h2>
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Menu <span class="text-red-500">*</span></label>
-                            <input type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:border-[#005ea2] focus:ring-1 focus:ring-[#005ea2] outline-none" placeholder="Contoh: Kopi Tarik (Coffee Shop) atau Paket Combo (Fast Food)">
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Kategori Internal <span class="text-red-500">*</span></label>
-                                <select class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:border-[#005ea2] focus:ring-1 focus:ring-[#005ea2] outline-none bg-white">
-                                    <option disabled selected>Pilih kategori...</option>
-                                    <option>Makanan Utama</option>
-                                    <option>Camilan / Snack</option>
-                                    <option>Minuman</option>
-                                    <option>Dessert / Bakery</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Harga Dasar (Rp) <span class="text-red-500">*</span></label>
-                                <input type="number" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:border-[#005ea2] focus:ring-1 focus:ring-[#005ea2] outline-none" placeholder="Misal: 45000">
-                            </div>
-                        </div>
+</form>
 
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Deskripsi Menu</label>
-                            <textarea rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:border-[#005ea2] focus:ring-1 focus:ring-[#005ea2] outline-none" placeholder="Ceritakan kelezatan menu ini (maks 300 karakter)..."></textarea>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Card 2: Kustomisasi Varian Dinamis -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100" id="variant-container">
-                    <div class="flex justify-between items-center mb-4 border-b pb-2">
-                        <h2 class="text-lg font-bold text-gray-800">Opsi Kustomisasi (Varian/Topping)</h2>
-                        <button type="button" onclick="addVariantGroup()" class="text-sm font-bold text-[#8dc63f] hover:text-green-700 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                            Tambah Grup Opsi
-                        </button>
-                    </div>
-                    
-                    <p class="text-sm text-gray-500 mb-4">Buat opsi khusus sesuai jenis tenant Anda (misal: "Suhu Minuman", "Pilihan Saus", "Ukuran").</p>
+<script>
+    let groupIndex = 1;
 
-                    <!-- Tempat Grup Varian akan ditambahkan via JS -->
-                    <div id="variant-list" class="space-y-4">
-                        <!-- Grup Varian Contoh (Bisa Dihapus) -->
-                        <div class="border border-blue-100 bg-blue-50/30 rounded-lg p-4 variant-group relative">
-                            <button type="button" onclick="this.parentElement.remove()" class="absolute top-3 right-3 text-red-400 hover:text-red-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                            </button>
-                            
-                            <div class="grid grid-cols-2 gap-4 mb-3 pr-8">
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-700 mb-1">Nama Grup Opsi</label>
-                                    <input type="text" class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm" placeholder="Misal: Ukuran Gelas">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-700 mb-1">Wajib Dipilih?</label>
-                                    <select class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm bg-white">
-                                        <option value="1">Ya, pembeli wajib memilih 1</option>
-                                        <option value="0">Tidak (Opsional / Bisa pilih banyak)</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <!-- Daftar Pilihan dalam Grup -->
-                            <div class="pl-4 border-l-2 border-[#8dc63f] space-y-2">
-                                <div class="flex gap-2">
-                                    <input type="text" class="flex-1 border border-gray-300 rounded px-2 py-1 text-sm" placeholder="Nama pilihan (Misal: Reguler)">
-                                    <input type="number" class="w-32 border border-gray-300 rounded px-2 py-1 text-sm" placeholder="+ Rp (Misal: 0)">
-                                    <button type="button" class="text-gray-400 hover:text-red-500 px-1">✕</button>
-                                </div>
-                                <div class="flex gap-2">
-                                    <input type="text" class="flex-1 border border-gray-300 rounded px-2 py-1 text-sm" placeholder="Nama pilihan (Misal: Large)">
-                                    <input type="number" class="w-32 border border-gray-300 rounded px-2 py-1 text-sm" placeholder="+ Rp (Misal: 5000)">
-                                    <button type="button" class="text-gray-400 hover:text-red-500 px-1">✕</button>
-                                </div>
-                                <button type="button" class="text-xs text-[#005ea2] font-semibold mt-1 hover:underline">+ Tambah pilihan lain</button>
-                            </div>
-                        </div>
-                    </div>
+    function previewImage(event) {
+        const file = event.target.files[0];
 
-                </div>
-            </div>
+        if (!file) return;
 
-            <!-- Kolom Kanan: Foto & Submit -->
-            <div class="lg:col-span-1 space-y-6">
-                <!-- Upload Foto -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Foto Resolusi Tinggi</h2>
-                    
-                    <div class="mt-2 flex justify-center rounded-lg border border-dashed border-gray-400 px-6 py-10 hover:bg-gray-50 transition-colors cursor-pointer">
-                        <div class="text-center">
-                            <svg class="mx-auto h-12 w-12 text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                <path fill-rule="evenodd" d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z" clip-rule="evenodd" />
-                            </svg>
-                            <div class="mt-4 flex text-sm leading-6 text-gray-600 justify-center">
-                                <label for="file-upload" class="relative cursor-pointer rounded-md bg-white font-semibold text-[#005ea2] focus-within:outline-none focus-within:ring-2 focus-within:ring-[#005ea2] focus-within:ring-offset-2 hover:text-blue-800">
-                                    <span>Upload file foto</span>
-                                    <input id="file-upload" name="file-upload" type="file" class="sr-only">
-                                </label>
-                            </div>
-                            <p class="text-xs leading-5 text-gray-500 mt-1">PNG, JPG up to 5MB</p>
-                        </div>
-                    </div>
-                </div>
+        const preview = document.getElementById('imagePreview');
+        const placeholder = document.getElementById('uploadPlaceholder');
 
-                <!-- Tombol Submit -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <button type="submit" class="w-full bg-[#8dc63f] hover:bg-green-600 text-white px-4 py-3 rounded-lg text-sm font-bold shadow-md transition-colors uppercase tracking-wide">
-                        Simpan & Publikasikan
-                    </button>
-                    <button type="button" class="w-full mt-3 bg-white border border-gray-300 hover:bg-gray-50 text-gray-600 px-4 py-3 rounded-lg text-sm font-bold shadow-sm transition-colors">
-                        Batal
-                    </button>
-                </div>
-            </div>
-        </div>
-    </form>
+        preview.src = URL.createObjectURL(file);
+        preview.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+    }
 
-    <!-- Script Sederhana untuk nambah grup Varian di Frontend (Opsional untuk MVP visual) -->
-    <script>
-        function addVariantGroup() {
-            const container = document.getElementById('variant-list');
-            const clone = container.children[0].cloneNode(true);
-            // Kosongkan input di clone baru
-            const inputs = clone.querySelectorAll('input[type="text"], input[type="number"]');
-            inputs.forEach(input => input.value = '');
-            container.appendChild(clone);
+    function addOption(button) {
+        const group = button.closest('.variant-group');
+        const list = group.querySelector('.option-list');
+        const groupPosition =
+            [...document.querySelectorAll('.variant-group')].indexOf(group);
+
+        const optionIndex = list.querySelectorAll('.option-row').length;
+
+        const row = document.createElement('div');
+
+        row.className = 'option-row flex gap-2';
+
+        row.innerHTML = `
+            <input type="text"
+                name="variant_groups[${groupPosition}][options][${optionIndex}][name]"
+                placeholder="Nama pilihan"
+                class="flex-1 border rounded px-3 py-2 text-sm">
+
+            <input type="number"
+                name="variant_groups[${groupPosition}][options][${optionIndex}][price]"
+                value="0"
+                placeholder="+ Rp"
+                class="w-32 border rounded px-3 py-2 text-sm">
+
+            <button type="button"
+                onclick="removeOption(this)"
+                class="text-red-400 px-2">✕</button>
+        `;
+
+        list.appendChild(row);
+    }
+
+    function removeOption(button) {
+        button.closest('.option-row').remove();
+    }
+
+    function removeGroup(button) {
+        const groups = document.querySelectorAll('.variant-group');
+
+        if (groups.length > 1) {
+            button.closest('.variant-group').remove();
         }
-    </script>
+    }
+
+    function addVariantGroup() {
+        const container = document.getElementById('variant-list');
+
+        const div = document.createElement('div');
+
+        div.className =
+            'variant-group border border-blue-100 bg-blue-50/30 rounded-lg p-4';
+
+        div.innerHTML = `
+            <div class="flex justify-between mb-3">
+
+                <input type="text"
+                    name="variant_groups[${groupIndex}][name]"
+                    placeholder="Nama grup opsi"
+                    class="w-1/2 border rounded px-3 py-2 text-sm">
+
+                <button type="button"
+                    onclick="removeGroup(this)"
+                    class="text-red-500 text-sm">
+                    Hapus Grup
+                </button>
+
+            </div>
+
+            <select name="variant_groups[${groupIndex}][required]"
+                class="border rounded px-3 py-2 text-sm mb-3 bg-white">
+
+                <option value="1">Wajib pilih satu</option>
+                <option value="0">Opsional</option>
+
+            </select>
+
+            <div class="option-list space-y-2">
+
+                <div class="option-row flex gap-2">
+
+                    <input type="text"
+                        name="variant_groups[${groupIndex}][options][0][name]"
+                        placeholder="Nama pilihan"
+                        class="flex-1 border rounded px-3 py-2 text-sm">
+
+                    <input type="number"
+                        name="variant_groups[${groupIndex}][options][0][price]"
+                        value="0"
+                        placeholder="+ Rp"
+                        class="w-32 border rounded px-3 py-2 text-sm">
+
+                    <button type="button"
+                        onclick="removeOption(this)"
+                        class="text-red-400 px-2">
+                        ✕
+                    </button>
+
+                </div>
+
+            </div>
+
+            <button type="button"
+                onclick="addOption(this)"
+                class="mt-3 text-xs font-semibold text-[#005ea2]">
+
+                + Tambah pilihan lain
+
+            </button>
+        `;
+
+        container.appendChild(div);
+
+        groupIndex++;
+    }
+</script>
+
 @endsection
