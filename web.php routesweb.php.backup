@@ -1,0 +1,182 @@
+[1mdiff --git a/routes/web.php b/routes/web.php[m
+[1mindex 0d69281..77a6f2f 100644[m
+[1m--- a/routes/web.php[m
+[1m+++ b/routes/web.php[m
+[36m@@ -1,11 +1,30 @@[m
+ <?php[m
+ [m
+ use App\Http\Controllers\ProfileController;[m
+[32m+[m[32m<<<<<<< HEAD[m
+[32m+[m[32muse App\Http\Controllers\TenantProductController;[m
+[32m+[m[32muse App\Models\Product;[m
+ use Illuminate\Support\Facades\Route;[m
+ [m
+[32m+[m[32m/* Home */[m
+ Route::get('/', function () {[m
+     return view('welcome');[m
+ });[m
+[32m+[m[32m=======[m
+[32m+[m[32muse App\Http\Controllers\CustomerCatalogController;[m
+[32m+[m[32muse Illuminate\Support\Facades\Route;[m
+[32m+[m
+[32m+[m[32m/*[m
+[32m+[m[32m|--------------------------------------------------------------------------[m
+[32m+[m[32m| RUTE PENUMPANG (PUBLIK)[m
+[32m+[m[32m|--------------------------------------------------------------------------[m
+[32m+[m[32m*/[m
+[32m+[m[32m// Menggunakan Controller untuk halaman depan pelanggan[m
+[32m+[m[32mRoute::get('/', [CustomerCatalogController::class, 'index'])->name('customer.menu');[m
+[32m+[m[32mRoute::get('/cart', [CustomerCatalogController::class, 'cart'])->name('customer.cart');[m
+[32m+[m[32mRoute::get('/tracking', [CustomerCatalogController::class, 'tracking'])->name('customer.tracking');[m
+[32m+[m[32m>>>>>>> 3a84dc870484311d5a410cd6e72d5d78faccab33[m
+[32m+[m
+ [m
+ /* Preview Reset Password (Utility) */[m
+ Route::get('/preview/reset-password', function () {[m
+[36m@@ -14,23 +33,143 @@[m
+     return view('auth.reset-password', compact('request'));[m
+ });[m
+ [m
+[31m-/* Dashboard */[m
+[32m+[m[32m<<<<<<< HEAD[m
+[32m+[m[32m/* Dashboard Redirect */[m
+[32m+[m[32m=======[m
+[32m+[m
+[32m+[m[32m/*[m
+[32m+[m[32m|--------------------------------------------------------------------------[m
+[32m+[m[32m| REDIRECT UTAMA SETELAH LOGIN[m
+[32m+[m[32m|--------------------------------------------------------------------------[m
+[32m+[m[32m*/[m
+[32m+[m[32m>>>>>>> 3a84dc870484311d5a410cd6e72d5d78faccab33[m
+ Route::get('/dashboard', function () {[m
+     return match (auth()->user()->role) {[m
+         'admin_ops' => redirect('/admin/dashboard'),[m
+         'tenant_staff' => redirect('/tenant/dashboard'),[m
+[31m-        default => abort(403)[m
+[32m+[m[32m<<<<<<< HEAD[m
+[32m+[m[32m        default => abort(403),[m
+[32m+[m[32m=======[m
+[32m+[m[32m        default => abort(403, 'Akses Tidak Diizinkan')[m
+[32m+[m[32m>>>>>>> 3a84dc870484311d5a410cd6e72d5d78faccab33[m
+     };[m
+ })->middleware(['auth', 'verified'])->name('dashboard');[m
+ [m
+[31m-[m
+[32m+[m[32m<<<<<<< HEAD[m
+ /* Admin */[m
+ Route::get('/admin/dashboard', function () {[m
+     abort_unless(auth()->user()->role === 'admin_ops', 403);[m
+[32m+[m
+     return view('admin.dashboard');[m
+ })->middleware('auth')->name('admin.dashboard');[m
+ [m
+[32m+[m[32m/* Tenant */[m
+[32m+[m[32mRoute::middleware('auth')[m
+[32m+[m[32m    ->prefix('tenant')[m
+[32m+[m[32m    ->name('tenant.')[m
+[32m+[m[32m    ->group(function () {[m
+[32m+[m
+[32m+[m[32m        Route::get('/dashboard', function () {[m
+[32m+[m[32m            abort_unless(auth()->user()->role === 'tenant_staff', 403);[m
+[32m+[m
+[32m+[m[32m            return view('tenant.dashboard');[m
+[32m+[m[32m        })->name('dashboard');[m
+[32m+[m
+[32m+[m[32m        Route::get('/orders', function () {[m
+[32m+[m[32m            abort_unless(auth()->user()->role === 'tenant_staff', 403);[m
+[32m+[m
+[32m+[m[32m            return view('tenant.orders');[m
+[32m+[m[32m        })->name('orders');[m
+[32m+[m
+[32m+[m[32m        /* Daftar Produk */[m
+[32m+[m[32m        Route::get('/products', function () {[m
+[32m+[m[32m            abort_unless(auth()->user()->role === 'tenant_staff', 403);[m
+[32m+[m
+[32m+[m[32m            $products = Product::where([m
+[32m+[m[32m                'tenant_id',[m
+[32m+[m[32m                auth()->user()->tenant_id[m
+[32m+[m[32m            )->latest()->get();[m
+[32m+[m
+[32m+[m[32m            return view('tenant.products', compact('products'));[m
+[32m+[m[32m        })->name('products');[m
+[32m+[m
+[32m+[m[32m        /* Form Tambah Produk */[m
+[32m+[m[32m        Route::get([m
+[32m+[m[32m            '/products/create',[m
+[32m+[m[32m            [TenantProductController::class, 'create'][m
+[32m+[m[32m        )->name('products.create');[m
+[32m+[m
+[32m+[m[32m        /* Simpan Produk */[m
+[32m+[m[32m        Route::post([m
+[32m+[m[32m            '/products',[m
+[32m+[m[32m            [TenantProductController::class, 'store'][m
+[32m+[m[32m        )->name('products.store');[m
+[32m+[m[32m    });[m
+[32m+[m
+ /* Profile */[m
+[32m+[m[32m=======[m
+[32m+[m
+[32m+[m[32m/*[m
+[32m+[m[32m|--------------------------------------------------------------------------[m
+[32m+[m[32m| RUTE ADMIN OPERASIONAL[m
+[32m+[m[32m|--------------------------------------------------------------------------[m
+[32m+[m[32m*/[m
+[32m+[m[32mRoute::middleware(['auth', 'verified'])->prefix('admin')->group(function () {[m
+[32m+[m
+[32m+[m[32m    Route::get('/dashboard', function () {[m
+[32m+[m[32m        abort_unless(auth()->user()->role === 'admin_ops', 403);[m
+[32m+[m[32m        return view('admin.dashboard');[m
+[32m+[m[32m    })->name('admin.dashboard');[m
+[32m+[m
+[32m+[m[32m    Route::get('/tenants-management', function () {[m
+[32m+[m[32m        abort_unless(auth()->user()->role === 'admin_ops', 403);[m
+[32m+[m[32m        return view('admin.tenants-management');[m
+[32m+[m[32m    });[m
+[32m+[m
+[32m+[m[32m    Route::get('/complaints', function () {[m
+[32m+[m[32m        abort_unless(auth()->user()->role === 'admin_ops', 403);[m
+[32m+[m[32m        return view('admin.complaints');[m
+[32m+[m[32m    });[m
+[32m+[m
+[32m+[m[32m});[m
+[32m+[m
+[32m+[m
+[32m+[m[32m/*[m
+[32m+[m[32m|--------------------------------------------------------------------------[m
+[32m+[m[32m| RUTE TENANT RESTORAN[m
+[32m+[m[32m|--------------------------------------------------------------------------[m
+[32m+[m[32m*/[m
+[32m+[m[32mRoute::middleware(['auth', 'verified'])->prefix('tenant')->group(function () {[m
+[32m+[m
+[32m+[m[32m    Route::get('/dashboard', function () {[m
+[32m+[m[32m        abort_unless(auth()->user()->role === 'tenant_staff', 403);[m
+[32m+[m[32m        return view('tenant.dashboard');[m
+[32m+[m[32m    });[m
+[32m+[m
+[32m+[m[32m    Route::get('/orders', function () {[m
+[32m+[m[32m        abort_unless(auth()->user()->role === 'tenant_staff', 403);[m
+[32m+[m[32m        return view('tenant.orders');[m
+[32m+[m[32m    });[m
+[32m+[m
+[32m+[m[32m    Route::get('/products', function () {[m
+[32m+[m[32m        abort_unless(auth()->user()->role === 'tenant_staff', 403);[m
+[32m+[m[32m        return view('tenant.products');[m
+[32m+[m[32m    });[m
+[32m+[m
+[32m+[m[32m    Route::get('/products/create', function () {[m
+[32m+[m[32m        abort_unless(auth()->user()->role === 'tenant_staff', 403);[m
+[32m+[m[32m        return view('tenant.create-product');[m
+[32m+[m[32m    });[m
+[32m+[m
+[32m+[m[32m});[m
+[32m+[m
+[32m+[m
+[32m+[m[32m/*[m
+[32m+[m[32m|--------------------------------------------------------------------------[m
+[32m+[m[32m| RUTE PROFIL & AUTH BAWAAN BREEZE[m
+[32m+[m[32m|--------------------------------------------------------------------------[m
+[32m+[m[32m*/[m
+[32m+[m[32m>>>>>>> 3a84dc870484311d5a410cd6e72d5d78faccab33[m
+ Route::middleware('auth')->group(function () {[m
+ [m
+     Route::get('/profile', [ProfileController::class, 'edit'])[m
