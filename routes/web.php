@@ -7,6 +7,15 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+/* Preview Reset Password */
+Route::get('/preview/reset-password', function () {
+    $request = request();
+    $request->merge(['email' => 'admin@flydine.com']);
+
+    return view('auth.reset-password', compact('request'));
+});
+
+/* Dashboard */
 Route::get('/dashboard', function () {
     return match (auth()->user()->role) {
         'admin_ops' => redirect('/admin/dashboard'),
@@ -21,7 +30,7 @@ Route::get('/admin/dashboard', function () {
     return view('admin.dashboard');
 })->middleware('auth')->name('admin.dashboard');
 
-/* Tenant */
+/* Profile */
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
