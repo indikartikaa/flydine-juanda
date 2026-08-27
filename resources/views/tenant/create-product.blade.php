@@ -12,9 +12,9 @@
 </div>
 
 @if ($errors->any())
-    <div class="mb-5 bg-red-50 border border-red-200 rounded-xl p-4">
+    <div class="mb-5 bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-600">
         @foreach ($errors->all() as $error)
-            <p class="text-sm text-red-600">• {{ $error }}</p>
+            <p>• {{ $error }}</p>
         @endforeach
     </div>
 @endif
@@ -25,112 +25,139 @@
 
     @csrf
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-7">
 
         {{-- KIRI --}}
         <div class="lg:col-span-2 space-y-6">
 
-            {{-- INFORMASI DASAR --}}
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            {{-- INFORMASI PRODUK --}}
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
 
-                <h2 class="text-lg font-bold text-gray-800 mb-5 border-b pb-3">
+                <h2 class="text-lg font-bold text-gray-800 border-b pb-3 mb-5">
                     Informasi Dasar Menu
                 </h2>
 
                 <div class="space-y-4">
 
+                    {{-- Nama --}}
                     <div>
-                        <label class="block text-sm font-semibold mb-1">
+                        <label class="block text-sm font-semibold mb-2">
                             Nama Menu <span class="text-red-500">*</span>
                         </label>
 
                         <input type="text"
                                name="name"
                                value="{{ old('name') }}"
-                               required
                                placeholder="Contoh: Kopi Susu"
-                               class="w-full border border-gray-300 rounded-lg
-                                      px-4 py-2.5 text-sm focus:border-[#005ea2]
-                                      focus:ring-1 focus:ring-[#005ea2] outline-none">
+                               required
+                               maxlength="120"
+                               class="w-full border border-gray-300 rounded-xl
+                                      px-4 py-3 text-sm outline-none
+                                      focus:border-[#005ea2]">
                     </div>
 
+                    {{-- Kategori + Harga --}}
                     <div class="grid md:grid-cols-2 gap-4">
 
                         <div>
-                            <label class="block text-sm font-semibold mb-1">
+                            <label class="block text-sm font-semibold mb-2">
                                 Kategori
                             </label>
 
                             <select name="category"
-                                    class="w-full border border-gray-300 rounded-lg
-                                           px-4 py-2.5 text-sm bg-white">
+                                    class="w-full border border-gray-300 rounded-xl
+                                           px-4 py-3 text-sm bg-white">
+
                                 <option value="">Pilih kategori...</option>
                                 <option value="Makanan Utama">Makanan Utama</option>
-                                <option value="Camilan">Camilan / Snack</option>
+                                <option value="Snack">Snack</option>
                                 <option value="Minuman">Minuman</option>
-                                <option value="Dessert">Dessert / Bakery</option>
+                                <option value="Dessert">Dessert</option>
+
                             </select>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold mb-1">
-                                Harga Dasar (Rp)
-                                <span class="text-red-500">*</span>
+                            <label class="block text-sm font-semibold mb-2">
+                                Harga Dasar (Rp) <span class="text-red-500">*</span>
                             </label>
 
                             <input type="number"
                                    name="price"
                                    value="{{ old('price') }}"
+                                   placeholder="5000"
                                    min="0"
                                    required
-                                   placeholder="5000"
-                                   class="w-full border border-gray-300 rounded-lg
-                                          px-4 py-2.5 text-sm focus:border-[#005ea2]
-                                          outline-none">
+                                   class="w-full border border-gray-300 rounded-xl
+                                          px-4 py-3 text-sm">
                         </div>
 
                     </div>
 
+                    {{-- Stok --}}
                     <div>
-                        <label class="block text-sm font-semibold mb-1">
+                        <label class="block text-sm font-semibold mb-2">
+                            Jumlah Stok <span class="text-red-500">*</span>
+                        </label>
+
+                        <input type="number"
+                               name="stock"
+                               value="{{ old('stock', 0) }}"
+                               min="0"
+                               required
+                               class="w-full border border-gray-300 rounded-xl
+                                      px-4 py-3 text-sm">
+                    </div>
+
+                    {{-- Deskripsi --}}
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">
                             Deskripsi Menu
                         </label>
 
                         <textarea name="description"
                                   rows="3"
                                   maxlength="300"
-                                  placeholder="Deskripsi menu..."
-                                  class="w-full border border-gray-300 rounded-lg
-                                         px-4 py-2.5 text-sm outline-none">{{ old('description') }}</textarea>
+                                  placeholder="Contoh: Kopi susu creamy dengan rasa manis yang ringan..."
+                                  class="w-full border border-gray-300 rounded-xl
+                                         px-4 py-3 text-sm outline-none
+                                         focus:border-[#005ea2]">{{ old('description') }}</textarea>
+
+                        <p class="text-xs text-gray-400 mt-1">
+                            Maksimal 300 karakter.
+                        </p>
                     </div>
 
-                    <div class="flex items-center gap-2">
+                    {{-- Status --}}
+                    <label class="flex items-center gap-2">
+
                         <input type="checkbox"
                                name="is_available"
                                value="1"
                                checked
-                               class="rounded border-gray-300 text-[#8dc63f]">
+                               class="rounded text-[#8dc63f]">
 
                         <span class="text-sm font-medium text-gray-700">
                             Produk tersedia
                         </span>
-                    </div>
+
+                    </label>
 
                 </div>
             </div>
 
 
-            {{-- VARIAN --}}
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            {{-- OPSI KUSTOMISASI --}}
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
 
                 <div class="flex justify-between items-center border-b pb-3 mb-4">
 
                     <h2 class="text-lg font-bold">
-                        Opsi Kustomisasi (Varian/Topping)
+                        Opsi Kustomisasi
                     </h2>
 
                     <button type="button"
-                            onclick="addVariantGroup()"
+                            onclick="addGroup()"
                             class="text-sm font-bold text-[#8dc63f]">
                         + Tambah Grup Opsi
                     </button>
@@ -138,33 +165,34 @@
                 </div>
 
                 <p class="text-sm text-gray-500 mb-4">
-                    Contoh: Ukuran Gelas, Pilihan Saus, Level Gula.
+                    Contoh: Ukuran Gelas, Level Gula, Pilihan Saus, atau Topping.
                 </p>
 
-                <div id="variant-list" class="space-y-4">
+                <div id="groupList">
 
-                    <div class="variant-group border border-blue-100
-                                bg-blue-50/30 rounded-lg p-4">
+                    {{-- GROUP DEFAULT --}}
+                    <div class="group-box border border-blue-100
+                                bg-blue-50/30 rounded-xl p-4">
 
-                        <div class="flex justify-between mb-3">
+                        <div class="flex justify-between items-center mb-3">
 
                             <input type="text"
-                                   name="variant_groups[0][name]"
+                                   name="groups[0][name]"
                                    placeholder="Nama grup, contoh: Ukuran Gelas"
-                                   class="w-1/2 border rounded px-3 py-2 text-sm">
+                                   class="w-1/2 border rounded-lg px-3 py-2 text-sm">
 
                             <button type="button"
-                                    onclick="removeGroup(this)"
-                                    class="text-red-500 text-sm">
+                                    onclick="this.closest('.group-box').remove()"
+                                    class="text-red-500 text-xs font-semibold">
                                 Hapus Grup
                             </button>
 
                         </div>
 
-                        <select name="variant_groups[0][required]"
-                                class="border rounded px-3 py-2 text-sm mb-3 bg-white">
+                        <select name="groups[0][required]"
+                                class="border rounded-lg px-3 py-2 text-sm bg-white mb-3">
 
-                            <option value="1">Wajib pilih satu</option>
+                            <option value="1">Wajib dipilih</option>
                             <option value="0">Opsional</option>
 
                         </select>
@@ -174,18 +202,60 @@
                             <div class="option-row flex gap-2">
 
                                 <input type="text"
-                                       name="variant_groups[0][options][0][name]"
-                                       placeholder="Contoh: Small"
-                                       class="flex-1 border rounded px-3 py-2 text-sm">
+                                       name="groups[0][options][0][name]"
+                                       placeholder="Ukuran S"
+                                       class="flex-1 border rounded-lg px-3 py-2 text-sm">
 
                                 <input type="number"
-                                       name="variant_groups[0][options][0][price]"
-                                       placeholder="+ Rp"
+                                       name="groups[0][options][0][price]"
                                        value="0"
-                                       class="w-32 border rounded px-3 py-2 text-sm">
+                                       min="0"
+                                       class="w-28 border rounded-lg px-3 py-2 text-sm">
 
                                 <button type="button"
-                                        onclick="removeOption(this)"
+                                        onclick="this.closest('.option-row').remove()"
+                                        class="text-red-400 px-2">
+                                    ✕
+                                </button>
+
+                            </div>
+
+                            <div class="option-row flex gap-2">
+
+                                <input type="text"
+                                       name="groups[0][options][1][name]"
+                                       placeholder="Ukuran M"
+                                       class="flex-1 border rounded-lg px-3 py-2 text-sm">
+
+                                <input type="number"
+                                       name="groups[0][options][1][price]"
+                                       value="3000"
+                                       min="0"
+                                       class="w-28 border rounded-lg px-3 py-2 text-sm">
+
+                                <button type="button"
+                                        onclick="this.closest('.option-row').remove()"
+                                        class="text-red-400 px-2">
+                                    ✕
+                                </button>
+
+                            </div>
+
+                            <div class="option-row flex gap-2">
+
+                                <input type="text"
+                                       name="groups[0][options][2][name]"
+                                       placeholder="Ukuran L"
+                                       class="flex-1 border rounded-lg px-3 py-2 text-sm">
+
+                                <input type="number"
+                                       name="groups[0][options][2][price]"
+                                       value="5000"
+                                       min="0"
+                                       class="w-28 border rounded-lg px-3 py-2 text-sm">
+
+                                <button type="button"
+                                        onclick="this.closest('.option-row').remove()"
                                         class="text-red-400 px-2">
                                     ✕
                                 </button>
@@ -203,7 +273,6 @@
                     </div>
 
                 </div>
-
             </div>
 
         </div>
@@ -213,9 +282,10 @@
         <div class="space-y-6">
 
             {{-- FOTO --}}
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div class="bg-white rounded-2xl border border-gray-100
+                        shadow-sm p-6">
 
-                <h2 class="text-lg font-bold mb-4 border-b pb-3">
+                <h2 class="text-lg font-bold border-b pb-3 mb-4">
                     Foto Produk
                 </h2>
 
@@ -226,7 +296,7 @@
 
                     <div id="uploadPlaceholder">
 
-                        <div class="text-4xl text-gray-300 mb-2">
+                        <div class="text-4xl mb-2">
                             🖼️
                         </div>
 
@@ -240,41 +310,56 @@
 
                     </div>
 
-                    <img id="imagePreview"
-                         class="hidden w-full h-52 object-cover rounded-lg"
-                         alt="Preview">
+                    <img id="preview"
+                         class="hidden w-full h-48 object-cover rounded-xl">
 
                 </label>
 
                 <input id="image"
                        type="file"
                        name="image"
-                       accept="image/png,image/jpeg"
+                       accept="image/jpeg,image/png"
                        class="hidden"
                        onchange="previewImage(event)">
 
             </div>
 
 
-            {{-- SUBMIT --}}
-            <div class="bg-white p-6 rounded-xl shadow-sm border">
+            {{-- CATATAN --}}
+            <div class="bg-white rounded-2xl border border-gray-100
+                        shadow-sm p-6">
+
+                <h2 class="font-bold mb-3">
+                    Catatan Produk
+                </h2>
+
+                <textarea name="note"
+                          rows="4"
+                          maxlength="1000"
+                          placeholder="Contoh: Sajikan tanpa es jika pelanggan memilih..."
+                          class="w-full border border-gray-300 rounded-xl
+                                 px-4 py-3 text-sm outline-none
+                                 focus:border-[#005ea2]">{{ old('note') }}</textarea>
+
+            </div>
+
+
+            {{-- ACTION --}}
+            <div class="bg-white rounded-2xl border border-gray-100
+                        shadow-sm p-6">
 
                 <button type="submit"
-                        class="w-full bg-[#8dc63f] hover:bg-green-600
-                               text-white py-3 rounded-lg text-sm
-                               font-bold shadow-md">
-
+                        class="w-full bg-[#8dc63f]
+                               hover:bg-green-600 text-white
+                               py-3 rounded-xl text-sm font-bold">
                     SIMPAN & PUBLIKASIKAN
-
                 </button>
 
                 <a href="{{ route('tenant.products') }}"
                    class="block text-center w-full mt-3
-                          border border-gray-300 py-3 rounded-lg
-                          text-sm font-bold text-gray-600">
-
+                          border border-gray-300
+                          py-3 rounded-xl text-sm font-semibold">
                     Batal
-
                 </a>
 
             </div>
@@ -287,135 +372,128 @@
 
 
 <script>
-    let groupIndex = 1;
 
-    function previewImage(event) {
-        const file = event.target.files[0];
+let groupIndex = 1;
 
-        if (!file) return;
+function previewImage(event)
+{
+    const file = event.target.files[0];
 
-        const preview = document.getElementById('imagePreview');
-        const placeholder = document.getElementById('uploadPlaceholder');
+    if (!file) return;
 
-        preview.src = URL.createObjectURL(file);
-        preview.classList.remove('hidden');
-        placeholder.classList.add('hidden');
-    }
+    const preview = document.getElementById('preview');
+    const placeholder = document.getElementById('uploadPlaceholder');
 
-    function addOption(button) {
-        const group = button.closest('.variant-group');
-        const list = group.querySelector('.option-list');
-        const groupPosition =
-            [...document.querySelectorAll('.variant-group')].indexOf(group);
+    preview.src = URL.createObjectURL(file);
+    preview.classList.remove('hidden');
+    placeholder.classList.add('hidden');
+}
 
-        const optionIndex = list.querySelectorAll('.option-row').length;
+function addOption(button)
+{
+    const group = button.closest('.group-box');
+    const list = group.querySelector('.option-list');
+    const groupId = [...document.querySelectorAll('.group-box')]
+        .indexOf(group);
 
-        const row = document.createElement('div');
+    const index = list.querySelectorAll('.option-row').length;
 
-        row.className = 'option-row flex gap-2';
+    const row = document.createElement('div');
 
-        row.innerHTML = `
+    row.className = 'option-row flex gap-2';
+
+    row.innerHTML = `
+        <input type="text"
+               name="groups[${groupId}][options][${index}][name]"
+               placeholder="Nama pilihan"
+               class="flex-1 border rounded-lg px-3 py-2 text-sm">
+
+        <input type="number"
+               name="groups[${groupId}][options][${index}][price]"
+               value="0"
+               min="0"
+               class="w-28 border rounded-lg px-3 py-2 text-sm">
+
+        <button type="button"
+                onclick="this.closest('.option-row').remove()"
+                class="text-red-400 px-2">
+            ✕
+        </button>
+    `;
+
+    list.appendChild(row);
+}
+
+function addGroup()
+{
+    const container = document.getElementById('groupList');
+
+    const groupId = groupIndex++;
+
+    const group = document.createElement('div');
+
+    group.className =
+        'group-box border border-blue-100 bg-blue-50/30 rounded-xl p-4 mt-4';
+
+    group.innerHTML = `
+        <div class="flex justify-between items-center mb-3">
+
             <input type="text"
-                name="variant_groups[${groupPosition}][options][${optionIndex}][name]"
-                placeholder="Nama pilihan"
-                class="flex-1 border rounded px-3 py-2 text-sm">
-
-            <input type="number"
-                name="variant_groups[${groupPosition}][options][${optionIndex}][price]"
-                value="0"
-                placeholder="+ Rp"
-                class="w-32 border rounded px-3 py-2 text-sm">
+                   name="groups[${groupId}][name]"
+                   placeholder="Nama grup opsi"
+                   class="w-1/2 border rounded-lg px-3 py-2 text-sm">
 
             <button type="button"
-                onclick="removeOption(this)"
-                class="text-red-400 px-2">✕</button>
-        `;
+                    onclick="this.closest('.group-box').remove()"
+                    class="text-red-500 text-xs font-semibold">
+                Hapus Grup
+            </button>
 
-        list.appendChild(row);
-    }
+        </div>
 
-    function removeOption(button) {
-        button.closest('.option-row').remove();
-    }
+        <select name="groups[${groupId}][required]"
+                class="border rounded-lg px-3 py-2 text-sm bg-white mb-3">
 
-    function removeGroup(button) {
-        const groups = document.querySelectorAll('.variant-group');
+            <option value="1">Wajib dipilih</option>
+            <option value="0">Opsional</option>
 
-        if (groups.length > 1) {
-            button.closest('.variant-group').remove();
-        }
-    }
+        </select>
 
-    function addVariantGroup() {
-        const container = document.getElementById('variant-list');
+        <div class="option-list">
 
-        const div = document.createElement('div');
-
-        div.className =
-            'variant-group border border-blue-100 bg-blue-50/30 rounded-lg p-4';
-
-        div.innerHTML = `
-            <div class="flex justify-between mb-3">
+            <div class="option-row flex gap-2">
 
                 <input type="text"
-                    name="variant_groups[${groupIndex}][name]"
-                    placeholder="Nama grup opsi"
-                    class="w-1/2 border rounded px-3 py-2 text-sm">
+                       name="groups[${groupId}][options][0][name]"
+                       placeholder="Nama pilihan"
+                       class="flex-1 border rounded-lg px-3 py-2 text-sm">
+
+                <input type="number"
+                       name="groups[${groupId}][options][0][price]"
+                       value="0"
+                       min="0"
+                       class="w-28 border rounded-lg px-3 py-2 text-sm">
 
                 <button type="button"
-                    onclick="removeGroup(this)"
-                    class="text-red-500 text-sm">
-                    Hapus Grup
+                        onclick="this.closest('.option-row').remove()"
+                        class="text-red-400 px-2">
+                    ✕
                 </button>
 
             </div>
 
-            <select name="variant_groups[${groupIndex}][required]"
-                class="border rounded px-3 py-2 text-sm mb-3 bg-white">
+        </div>
 
-                <option value="1">Wajib pilih satu</option>
-                <option value="0">Opsional</option>
-
-            </select>
-
-            <div class="option-list space-y-2">
-
-                <div class="option-row flex gap-2">
-
-                    <input type="text"
-                        name="variant_groups[${groupIndex}][options][0][name]"
-                        placeholder="Nama pilihan"
-                        class="flex-1 border rounded px-3 py-2 text-sm">
-
-                    <input type="number"
-                        name="variant_groups[${groupIndex}][options][0][price]"
-                        value="0"
-                        placeholder="+ Rp"
-                        class="w-32 border rounded px-3 py-2 text-sm">
-
-                    <button type="button"
-                        onclick="removeOption(this)"
-                        class="text-red-400 px-2">
-                        ✕
-                    </button>
-
-                </div>
-
-            </div>
-
-            <button type="button"
+        <button type="button"
                 onclick="addOption(this)"
                 class="mt-3 text-xs font-semibold text-[#005ea2]">
+            + Tambah pilihan lain
+        </button>
+    `;
 
-                + Tambah pilihan lain
+    container.appendChild(group);
+}
 
-            </button>
-        `;
-
-        container.appendChild(div);
-
-        groupIndex++;
-    }
 </script>
 
 @endsection

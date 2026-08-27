@@ -11,14 +11,15 @@ Route::get('/', [CustomerCatalogController::class, 'index'])->name('customer.men
 Route::get('/cart', [CustomerCatalogController::class, 'cart'])->name('customer.cart');
 Route::get('/tracking', [CustomerCatalogController::class, 'tracking'])->name('customer.tracking');
 
-/* Preview Reset */
+/* Preview Reset Password */
 Route::get('/preview/reset-password', function () {
     $request = request();
     $request->merge(['email' => 'admin@flydine.com']);
+
     return view('auth.reset-password', compact('request'));
 });
 
-/* Redirect Dashboard */
+/* Dashboard */
 Route::get('/dashboard', function () {
     return match (auth()->user()->role) {
         'admin_ops' => redirect('/admin/dashboard'),
@@ -32,16 +33,19 @@ Route::middleware('auth')->prefix('admin')->group(function () {
 
     Route::get('/dashboard', function () {
         abort_unless(auth()->user()->role === 'admin_ops', 403);
+
         return view('admin.dashboard');
     })->name('admin.dashboard');
 
     Route::get('/tenants-management', function () {
         abort_unless(auth()->user()->role === 'admin_ops', 403);
+
         return view('admin.tenants-management');
     });
 
     Route::get('/complaints', function () {
         abort_unless(auth()->user()->role === 'admin_ops', 403);
+
         return view('admin.complaints');
     });
 });
@@ -54,14 +58,17 @@ Route::middleware('auth')
 
         Route::get('/dashboard', function () {
             abort_unless(auth()->user()->role === 'tenant_staff', 403);
+
             return view('tenant.dashboard');
         })->name('dashboard');
 
         Route::get('/orders', function () {
             abort_unless(auth()->user()->role === 'tenant_staff', 403);
+
             return view('tenant.orders');
         })->name('orders');
 
+        /* Produk */
         Route::get('/products', function () {
             abort_unless(auth()->user()->role === 'tenant_staff', 403);
 
@@ -80,6 +87,22 @@ Route::middleware('auth')
         Route::post('/products',
             [TenantProductController::class, 'store']
         )->name('products.store');
+
+        Route::get('/products/{product}',
+            [TenantProductController::class, 'show']
+        )->name('products.show');
+
+        Route::get('/products/{product}/edit',
+            [TenantProductController::class, 'edit']
+        )->name('products.edit');
+
+        Route::put('/products/{product}',
+            [TenantProductController::class, 'update']
+        )->name('products.update');
+
+        Route::delete('/products/{product}',
+            [TenantProductController::class, 'destroy']
+        )->name('products.destroy');
     });
 
 /* Profile */
