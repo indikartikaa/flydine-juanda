@@ -9,6 +9,8 @@ class OrderItem extends Model
 {
     use HasFactory;
 
+    const UPDATED_AT = null;
+
     protected $fillable = [
         'order_id',
         'product_id',

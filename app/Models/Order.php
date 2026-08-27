@@ -18,6 +18,8 @@ class Order extends Model
         'gate',
         'boarding_time',
         'status',
+        'payment_method',
+        'is_paid',
         'heading_to_tenant_at',
         'auto_cancel_at',
         'total_amount',

@@ -4,18 +4,29 @@
 
 @section('content')
 
-<div class="mb-6">
+<div class="mb-6 flex items-center justify-between">
     <a href="{{ route('tenant.products') }}"
-       class="text-sm font-semibold text-[#005ea2] hover:underline">
-        ← Kembali ke Katalog
+       class="flex items-center text-sm font-bold text-slate-500 hover:text-[#005ea2] transition-colors bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Kembali ke Katalog
     </a>
 </div>
 
 @if ($errors->any())
-    <div class="mb-5 bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-600">
-        @foreach ($errors->all() as $error)
-            <p>• {{ $error }}</p>
-        @endforeach
+    <div class="mb-8 bg-rose-50 border border-rose-200 rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-rose-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <h3 class="text-sm font-bold text-rose-800">Terdapat kesalahan pada input Anda:</h3>
+        </div>
+        <ul class="list-disc list-inside text-sm text-rose-600 pl-2 space-y-1">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
     </div>
 @endif
 
@@ -25,79 +36,79 @@
 
     @csrf
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-7">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
         {{-- KIRI --}}
-        <div class="lg:col-span-2 space-y-6">
+        <div class="lg:col-span-2 space-y-8">
 
             {{-- INFORMASI PRODUK --}}
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="p-6 md:p-8 border-b border-slate-100 bg-slate-50/50">
+                    <h2 class="text-lg font-extrabold text-slate-800 tracking-tight">
+                        Informasi Dasar Menu
+                    </h2>
+                    <p class="text-sm text-slate-500 font-medium mt-1">Lengkapi detail dasar tentang produk yang akan dijual.</p>
+                </div>
 
-                <h2 class="text-lg font-bold text-gray-800 border-b pb-3 mb-5">
-                    Informasi Dasar Menu
-                </h2>
-
-                <div class="space-y-4">
+                <div class="p-6 md:p-8 space-y-6">
 
                     {{-- Nama --}}
                     <div>
-                        <label class="block text-sm font-semibold mb-2">
-                            Nama Menu <span class="text-red-500">*</span>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">
+                            Nama Menu <span class="text-rose-500">*</span>
                         </label>
 
                         <input type="text"
                                name="name"
                                value="{{ old('name') }}"
-                               placeholder="Contoh: Kopi Susu"
+                               placeholder="Contoh: Kopi Susu Aren"
                                required
                                maxlength="120"
-                               class="w-full border border-gray-300 rounded-xl
-                                      px-4 py-3 text-sm outline-none
-                                      focus:border-[#005ea2]">
+                               class="w-full border border-slate-200 rounded-xl
+                                      px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20
+                                      focus:border-[#005ea2] transition-colors bg-slate-50 focus:bg-white">
                     </div>
 
                     {{-- Kategori + Harga --}}
-                    <div class="grid md:grid-cols-2 gap-4">
+                    <div class="grid md:grid-cols-2 gap-6">
 
                         <div>
-                            <label class="block text-sm font-semibold mb-2">
+                            <label class="block text-sm font-bold text-slate-700 mb-2">
                                 Kategori
                             </label>
 
                             <select name="category"
-                                    class="w-full border border-gray-300 rounded-xl
-                                           px-4 py-3 text-sm bg-white">
-
+                                    class="w-full border border-slate-200 rounded-xl
+                                           px-4 py-3 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] transition-colors appearance-none">
                                 <option value="">Pilih kategori...</option>
                                 <option value="Makanan Utama">Makanan Utama</option>
                                 <option value="Snack">Snack</option>
                                 <option value="Minuman">Minuman</option>
                                 <option value="Dessert">Dessert</option>
-
                             </select>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold mb-2">
-                                Harga Dasar (Rp) <span class="text-red-500">*</span>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">
+                                Harga Dasar (Rp) <span class="text-rose-500">*</span>
                             </label>
 
                             <input type="number"
                                    name="price"
                                    value="{{ old('price') }}"
-                                   placeholder="5000"
+                                   placeholder="15000"
                                    min="0"
                                    required
-                                   class="w-full border border-gray-300 rounded-xl
-                                          px-4 py-3 text-sm">
+                                   class="w-full border border-slate-200 rounded-xl
+                                          px-4 py-3 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] transition-colors">
                         </div>
 
                     </div>
 
                     {{-- Stok --}}
                     <div>
-                        <label class="block text-sm font-semibold mb-2">
-                            Jumlah Stok <span class="text-red-500">*</span>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">
+                            Jumlah Stok <span class="text-rose-500">*</span>
                         </label>
 
                         <input type="number"
@@ -105,173 +116,140 @@
                                value="{{ old('stock', 0) }}"
                                min="0"
                                required
-                               class="w-full border border-gray-300 rounded-xl
-                                      px-4 py-3 text-sm">
+                               class="w-full border border-slate-200 rounded-xl
+                                      px-4 py-3 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] transition-colors">
                     </div>
 
                     {{-- Deskripsi --}}
                     <div>
-                        <label class="block text-sm font-semibold mb-2">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">
                             Deskripsi Menu
                         </label>
 
                         <textarea name="description"
-                                  rows="3"
+                                  rows="4"
                                   maxlength="300"
-                                  placeholder="Contoh: Kopi susu creamy dengan rasa manis yang ringan..."
-                                  class="w-full border border-gray-300 rounded-xl
-                                         px-4 py-3 text-sm outline-none
-                                         focus:border-[#005ea2]">{{ old('description') }}</textarea>
+                                  placeholder="Berikan deskripsi menarik tentang menu ini..."
+                                  class="w-full border border-slate-200 rounded-xl
+                                         px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20
+                                         focus:border-[#005ea2] transition-colors bg-slate-50 focus:bg-white">{{ old('description') }}</textarea>
 
-                        <p class="text-xs text-gray-400 mt-1">
+                        <p class="text-[11px] font-bold text-slate-400 mt-2 uppercase tracking-wider">
                             Maksimal 300 karakter.
                         </p>
                     </div>
 
                     {{-- Status --}}
-                    <label class="flex items-center gap-2">
-
-                        <input type="checkbox"
-                               name="is_available"
-                               value="1"
-                               checked
-                               class="rounded text-[#8dc63f]">
-
-                        <span class="text-sm font-medium text-gray-700">
-                            Produk tersedia
-                        </span>
-
-                    </label>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 mt-2">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox"
+                                   name="is_available"
+                                   value="1"
+                                   checked
+                                   class="w-5 h-5 rounded border-slate-300 text-[#005ea2] focus:ring-[#005ea2] cursor-pointer">
+                            <span class="ml-3 text-sm font-bold text-slate-700">
+                                Produk langsung tersedia (Aktif)
+                            </span>
+                        </label>
+                    </div>
 
                 </div>
             </div>
 
 
             {{-- OPSI KUSTOMISASI --}}
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-
-                <div class="flex justify-between items-center border-b pb-3 mb-4">
-
-                    <h2 class="text-lg font-bold">
-                        Opsi Kustomisasi
-                    </h2>
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="p-6 md:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <div>
+                        <h2 class="text-lg font-extrabold text-slate-800 tracking-tight">
+                            Opsi Kustomisasi
+                        </h2>
+                        <p class="text-sm text-slate-500 font-medium mt-1">
+                            Contoh: Ukuran Gelas, Level Gula, Topping.
+                        </p>
+                    </div>
 
                     <button type="button"
                             onclick="addGroup()"
-                            class="text-sm font-bold text-[#8dc63f]">
-                        + Tambah Grup Opsi
+                            class="text-sm font-bold text-[#005ea2] bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-xl transition-colors">
+                        + Tambah Grup
                     </button>
-
                 </div>
 
-                <p class="text-sm text-gray-500 mb-4">
-                    Contoh: Ukuran Gelas, Level Gula, Pilihan Saus, atau Topping.
-                </p>
-
-                <div id="groupList">
-
+                <div class="p-6 md:p-8" id="groupList">
                     {{-- GROUP DEFAULT --}}
-                    <div class="group-box border border-blue-100
-                                bg-blue-50/30 rounded-xl p-4">
+                    <div class="group-box border border-slate-200 bg-slate-50 rounded-2xl p-6 relative group mb-6">
+                        <button type="button"
+                                onclick="this.closest('.group-box').remove()"
+                                class="absolute top-4 right-4 h-8 w-8 bg-white border border-rose-200 text-rose-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-50 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
 
-                        <div class="flex justify-between items-center mb-3">
-
-                            <input type="text"
-                                   name="groups[0][name]"
-                                   placeholder="Nama grup, contoh: Ukuran Gelas"
-                                   class="w-1/2 border rounded-lg px-3 py-2 text-sm">
-
-                            <button type="button"
-                                    onclick="this.closest('.group-box').remove()"
-                                    class="text-red-500 text-xs font-semibold">
-                                Hapus Grup
-                            </button>
-
+                        <div class="grid sm:grid-cols-2 gap-4 mb-5 pr-8">
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Nama Grup</label>
+                                <input type="text"
+                                       name="groups[0][name]"
+                                       placeholder="Contoh: Ukuran Gelas"
+                                       class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Sifat Pilihan</label>
+                                <select name="groups[0][required]"
+                                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] bg-white appearance-none">
+                                    <option value="1">Wajib dipilih</option>
+                                    <option value="0">Opsional</option>
+                                </select>
+                            </div>
                         </div>
 
-                        <select name="groups[0][required]"
-                                class="border rounded-lg px-3 py-2 text-sm bg-white mb-3">
-
-                            <option value="1">Wajib dipilih</option>
-                            <option value="0">Opsional</option>
-
-                        </select>
-
-                        <div class="option-list space-y-2">
-
-                            <div class="option-row flex gap-2">
-
+                        <div class="option-list space-y-3 bg-white p-4 rounded-xl border border-slate-200">
+                            <div class="option-row flex items-center gap-3">
                                 <input type="text"
                                        name="groups[0][options][0][name]"
-                                       placeholder="Ukuran S"
-                                       class="flex-1 border rounded-lg px-3 py-2 text-sm">
-
+                                       placeholder="Nama pilihan (ex: Regular)"
+                                       class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#005ea2]">
                                 <input type="number"
                                        name="groups[0][options][0][price]"
                                        value="0"
                                        min="0"
-                                       class="w-28 border rounded-lg px-3 py-2 text-sm">
-
+                                       placeholder="+ Harga"
+                                       class="w-28 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#005ea2]">
                                 <button type="button"
                                         onclick="this.closest('.option-row').remove()"
-                                        class="text-red-400 px-2">
-                                    ✕
+                                        class="text-rose-400 hover:text-rose-600 p-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                                 </button>
-
                             </div>
 
-                            <div class="option-row flex gap-2">
-
+                            <div class="option-row flex items-center gap-3">
                                 <input type="text"
                                        name="groups[0][options][1][name]"
-                                       placeholder="Ukuran M"
-                                       class="flex-1 border rounded-lg px-3 py-2 text-sm">
-
+                                       placeholder="Nama pilihan (ex: Large)"
+                                       class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#005ea2]">
                                 <input type="number"
                                        name="groups[0][options][1][price]"
                                        value="3000"
                                        min="0"
-                                       class="w-28 border rounded-lg px-3 py-2 text-sm">
-
+                                       placeholder="+ Harga"
+                                       class="w-28 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#005ea2]">
                                 <button type="button"
                                         onclick="this.closest('.option-row').remove()"
-                                        class="text-red-400 px-2">
-                                    ✕
+                                        class="text-rose-400 hover:text-rose-600 p-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                                 </button>
-
                             </div>
-
-                            <div class="option-row flex gap-2">
-
-                                <input type="text"
-                                       name="groups[0][options][2][name]"
-                                       placeholder="Ukuran L"
-                                       class="flex-1 border rounded-lg px-3 py-2 text-sm">
-
-                                <input type="number"
-                                       name="groups[0][options][2][price]"
-                                       value="5000"
-                                       min="0"
-                                       class="w-28 border rounded-lg px-3 py-2 text-sm">
-
-                                <button type="button"
-                                        onclick="this.closest('.option-row').remove()"
-                                        class="text-red-400 px-2">
-                                    ✕
-                                </button>
-
-                            </div>
-
                         </div>
 
                         <button type="button"
                                 onclick="addOption(this)"
-                                class="mt-3 text-xs font-semibold text-[#005ea2]">
-                            + Tambah pilihan lain
+                                class="mt-4 flex items-center text-[13px] font-bold text-[#005ea2] hover:text-blue-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                            Tambah Pilihan Lain
                         </button>
-
                     </div>
-
                 </div>
             </div>
 
@@ -279,89 +257,81 @@
 
 
         {{-- KANAN --}}
-        <div class="space-y-6">
+        <div class="space-y-8">
 
             {{-- FOTO --}}
-            <div class="bg-white rounded-2xl border border-gray-100
-                        shadow-sm p-6">
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+                    <h2 class="text-lg font-extrabold text-slate-800 tracking-tight">
+                        Foto Produk
+                    </h2>
+                </div>
+                
+                <div class="p-6">
+                    <label for="image"
+                           class="block border-2 border-dashed border-slate-200 bg-slate-50 rounded-2xl p-8 text-center cursor-pointer hover:bg-slate-100 hover:border-blue-300 transition-all group overflow-hidden relative">
 
-                <h2 class="text-lg font-bold border-b pb-3 mb-4">
-                    Foto Produk
-                </h2>
-
-                <label for="image"
-                       class="block border-2 border-dashed border-gray-300
-                              rounded-xl p-5 text-center cursor-pointer
-                              hover:bg-gray-50">
-
-                    <div id="uploadPlaceholder">
-
-                        <div class="text-4xl mb-2">
-                            🖼️
+                        <div id="uploadPlaceholder" class="flex flex-col items-center">
+                            <div class="h-16 w-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4 group-hover:scale-110 transition-transform">
+                                <span class="text-2xl">📸</span>
+                            </div>
+                            <p class="text-sm font-extrabold text-[#005ea2]">
+                                Upload file foto
+                            </p>
+                            <p class="text-xs font-medium text-slate-400 mt-2">
+                                Format JPG/PNG maksimal 5 MB
+                            </p>
                         </div>
 
-                        <p class="text-sm font-semibold text-[#005ea2]">
-                            Upload file foto
-                        </p>
+                        <img id="preview"
+                             class="hidden absolute inset-0 w-full h-full object-cover">
+                        
+                        <div id="previewOverlay" class="hidden absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <p class="text-white font-bold text-sm">Ganti Foto</p>
+                        </div>
 
-                        <p class="text-xs text-gray-400 mt-1">
-                            JPG, JPEG, PNG maksimal 5 MB
-                        </p>
+                    </label>
 
-                    </div>
-
-                    <img id="preview"
-                         class="hidden w-full h-48 object-cover rounded-xl">
-
-                </label>
-
-                <input id="image"
-                       type="file"
-                       name="image"
-                       accept="image/jpeg,image/png"
-                       class="hidden"
-                       onchange="previewImage(event)">
-
+                    <input id="image"
+                           type="file"
+                           name="image"
+                           accept="image/jpeg,image/png"
+                           class="hidden"
+                           onchange="previewImage(event)">
+                </div>
             </div>
 
 
             {{-- CATATAN --}}
-            <div class="bg-white rounded-2xl border border-gray-100
-                        shadow-sm p-6">
-
-                <h2 class="font-bold mb-3">
-                    Catatan Produk
-                </h2>
-
-                <textarea name="note"
-                          rows="4"
-                          maxlength="1000"
-                          placeholder="Contoh: Sajikan tanpa es jika pelanggan memilih..."
-                          class="w-full border border-gray-300 rounded-xl
-                                 px-4 py-3 text-sm outline-none
-                                 focus:border-[#005ea2]">{{ old('note') }}</textarea>
-
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+                    <h2 class="text-lg font-extrabold text-slate-800 tracking-tight">
+                        Catatan Internal
+                    </h2>
+                </div>
+                
+                <div class="p-6">
+                    <textarea name="note"
+                              rows="4"
+                              maxlength="1000"
+                              placeholder="Catatan khusus untuk staf saat menyiapkan menu ini..."
+                              class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] transition-colors bg-slate-50 focus:bg-white">{{ old('note') }}</textarea>
+                </div>
             </div>
 
 
             {{-- ACTION --}}
-            <div class="bg-white rounded-2xl border border-gray-100
-                        shadow-sm p-6">
-
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
                 <button type="submit"
-                        class="w-full bg-[#8dc63f]
-                               hover:bg-green-600 text-white
-                               py-3 rounded-xl text-sm font-bold">
-                    SIMPAN & PUBLIKASIKAN
+                        class="w-full bg-[#005ea2] hover:bg-blue-700 text-white py-3.5 rounded-xl text-sm font-extrabold shadow-md shadow-blue-500/20 transition-all hover:-translate-y-0.5 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                    Simpan & Publikasikan
                 </button>
 
                 <a href="{{ route('tenant.products') }}"
-                   class="block text-center w-full mt-3
-                          border border-gray-300
-                          py-3 rounded-xl text-sm font-semibold">
-                    Batal
+                   class="block text-center w-full mt-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 py-3 rounded-xl text-sm font-bold transition-colors">
+                    Batalkan
                 </a>
-
             </div>
 
         </div>
@@ -378,14 +348,15 @@ let groupIndex = 1;
 function previewImage(event)
 {
     const file = event.target.files[0];
-
     if (!file) return;
 
     const preview = document.getElementById('preview');
     const placeholder = document.getElementById('uploadPlaceholder');
+    const overlay = document.getElementById('previewOverlay');
 
     preview.src = URL.createObjectURL(file);
     preview.classList.remove('hidden');
+    overlay.classList.remove('hidden');
     placeholder.classList.add('hidden');
 }
 
@@ -393,107 +364,94 @@ function addOption(button)
 {
     const group = button.closest('.group-box');
     const list = group.querySelector('.option-list');
-    const groupId = [...document.querySelectorAll('.group-box')]
-        .indexOf(group);
-
+    const groupId = [...document.querySelectorAll('.group-box')].indexOf(group);
     const index = list.querySelectorAll('.option-row').length;
 
     const row = document.createElement('div');
-
-    row.className = 'option-row flex gap-2';
-
+    row.className = 'option-row flex items-center gap-3';
     row.innerHTML = `
         <input type="text"
                name="groups[${groupId}][options][${index}][name]"
                placeholder="Nama pilihan"
-               class="flex-1 border rounded-lg px-3 py-2 text-sm">
+               class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#005ea2]">
 
         <input type="number"
                name="groups[${groupId}][options][${index}][price]"
                value="0"
                min="0"
-               class="w-28 border rounded-lg px-3 py-2 text-sm">
+               class="w-28 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#005ea2]">
 
         <button type="button"
                 onclick="this.closest('.option-row').remove()"
-                class="text-red-400 px-2">
-            ✕
+                class="text-rose-400 hover:text-rose-600 p-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
     `;
-
     list.appendChild(row);
 }
 
 function addGroup()
 {
     const container = document.getElementById('groupList');
-
     const groupId = groupIndex++;
 
     const group = document.createElement('div');
-
-    group.className =
-        'group-box border border-blue-100 bg-blue-50/30 rounded-xl p-4 mt-4';
-
+    group.className = 'group-box border border-slate-200 bg-slate-50 rounded-2xl p-6 relative group mb-6';
     group.innerHTML = `
-        <div class="flex justify-between items-center mb-3">
+        <button type="button"
+                onclick="this.closest('.group-box').remove()"
+                class="absolute top-4 right-4 h-8 w-8 bg-white border border-rose-200 text-rose-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-50 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+        </button>
 
-            <input type="text"
-                   name="groups[${groupId}][name]"
-                   placeholder="Nama grup opsi"
-                   class="w-1/2 border rounded-lg px-3 py-2 text-sm">
-
-            <button type="button"
-                    onclick="this.closest('.group-box').remove()"
-                    class="text-red-500 text-xs font-semibold">
-                Hapus Grup
-            </button>
-
+        <div class="grid sm:grid-cols-2 gap-4 mb-5 pr-8">
+            <div>
+                <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Nama Grup</label>
+                <input type="text"
+                       name="groups[${groupId}][name]"
+                       placeholder="Contoh: Ukuran Gelas"
+                       class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] bg-white">
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Sifat Pilihan</label>
+                <select name="groups[${groupId}][required]"
+                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] bg-white appearance-none">
+                    <option value="1">Wajib dipilih</option>
+                    <option value="0">Opsional</option>
+                </select>
+            </div>
         </div>
 
-        <select name="groups[${groupId}][required]"
-                class="border rounded-lg px-3 py-2 text-sm bg-white mb-3">
-
-            <option value="1">Wajib dipilih</option>
-            <option value="0">Opsional</option>
-
-        </select>
-
-        <div class="option-list">
-
-            <div class="option-row flex gap-2">
-
+        <div class="option-list space-y-3 bg-white p-4 rounded-xl border border-slate-200">
+            <div class="option-row flex items-center gap-3">
                 <input type="text"
                        name="groups[${groupId}][options][0][name]"
                        placeholder="Nama pilihan"
-                       class="flex-1 border rounded-lg px-3 py-2 text-sm">
-
+                       class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#005ea2]">
                 <input type="number"
                        name="groups[${groupId}][options][0][price]"
                        value="0"
                        min="0"
-                       class="w-28 border rounded-lg px-3 py-2 text-sm">
-
+                       class="w-28 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#005ea2]">
                 <button type="button"
                         onclick="this.closest('.option-row').remove()"
-                        class="text-red-400 px-2">
-                    ✕
+                        class="text-rose-400 hover:text-rose-600 p-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
-
             </div>
-
         </div>
 
         <button type="button"
                 onclick="addOption(this)"
-                class="mt-3 text-xs font-semibold text-[#005ea2]">
-            + Tambah pilihan lain
+                class="mt-4 flex items-center text-[13px] font-bold text-[#005ea2] hover:text-blue-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+            Tambah Pilihan Lain
         </button>
     `;
-
     container.appendChild(group);
 }
-
 </script>
 
 @endsection
