@@ -31,7 +31,7 @@
         </header>
 
         <!-- Main Scrollable Content -->
-        <main class="flex-grow px-4 sm:px-6 py-8 pb-32" x-data="{ loaded: false }" x-init="setTimeout(() => loaded = true, 100)">
+        <main class="flex-grow px-4 sm:px-6 py-8 pb-32" x-data="{ loaded: false, showComplaintModal: false }" x-init="setTimeout(() => loaded = true, 100)">
             
             @if(session('success'))
             <div class="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-2xl text-sm font-bold flex items-center justify-center">
@@ -225,8 +225,12 @@
         </main>
 
         <!-- Sticky Bottom CTA -->
-        <div class="fixed bottom-0 w-full max-w-lg bg-white/90 backdrop-blur-lg border-t border-slate-200/80 p-4 pb-safe z-50">
-            <a href="/" class="flex items-center justify-center w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold py-4 rounded-[1.25rem] text-sm uppercase tracking-widest transition-all active:scale-[0.98]">
+        <div class="fixed bottom-0 w-full max-w-lg bg-white/90 backdrop-blur-lg border-t border-slate-200/80 p-4 pb-safe z-40 space-y-3">
+            <a href="{{ route('page.faq', ['order' => $order->order_code]) }}" class="flex items-center justify-center w-full bg-rose-50 hover:bg-rose-100 text-rose-600 font-extrabold py-3.5 rounded-[1.25rem] text-sm uppercase tracking-widest transition-all shadow-sm border border-rose-100 active:scale-[0.98]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                Laporkan Kendala Pesanan
+            </a>
+            <a href="/" class="flex items-center justify-center w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold py-3.5 rounded-[1.25rem] text-sm uppercase tracking-widest transition-all active:scale-[0.98]">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                 Kembali ke Katalog
             </a>

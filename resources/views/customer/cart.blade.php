@@ -126,36 +126,78 @@
                 </div>
             </div>
 
-            <!-- Form Data Boarding -->
-            <form action="{{ route('customer.checkout') }}" method="POST" id="checkoutForm">
+            <!-- Form Data Pemesan (Checkout) -->
+            <form action="{{ route('customer.checkout') }}" method="POST" id="checkoutForm" x-data="{ customerType: 'penumpang' }">
                 @csrf
+                
+                @if ($errors->any())
+                <div class="mb-4 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-2xl text-sm font-bold">
+                    <ul class="list-disc pl-5">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+                
                 <div class="mb-4">
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 ml-2">Informasi Keberangkatan</p>
-                    <div class="space-y-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 ml-2">Informasi Pemesan</p>
+                    <div class="space-y-5 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
                         
-                        <!-- Input Pemesan -->
+                        <!-- Tipe Pemesan (Radio) -->
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5 ml-1">Nama Pemesan</label>
-                            <input type="text" name="customer_name" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] outline-none transition-all placeholder:text-slate-400" placeholder="Sesuai boarding pass">
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-4">
-                            <!-- Input No Penerbangan -->
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1.5 ml-1">No. Penerbangan</label>
-                                <input type="text" name="flight_number" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium uppercase focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] outline-none transition-all placeholder:text-slate-400" placeholder="JT-012">
-                            </div>
-                            <!-- Input Gate -->
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1.5 ml-1">Gate (Pintu)</label>
-                                <input type="text" name="gate" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium uppercase focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] outline-none transition-all placeholder:text-slate-400" placeholder="Gate 8">
+                            <label class="block text-xs font-bold text-slate-700 mb-2 ml-1">Tipe Pemesan</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="relative flex items-center justify-center p-3 border rounded-xl cursor-pointer transition-all" :class="customerType === 'penumpang' ? 'border-[#005ea2] bg-blue-50/50' : 'border-slate-200 hover:bg-slate-50'">
+                                    <input type="radio" name="customer_type" value="penumpang" class="sr-only" x-model="customerType">
+                                    <div class="text-center">
+                                        <span class="block text-sm font-bold text-slate-800" :class="customerType === 'penumpang' ? 'text-[#005ea2]' : ''">Penumpang</span>
+                                        <span class="block text-[10px] text-slate-500 mt-0.5">Berangkat penerbangan</span>
+                                    </div>
+                                    <div x-show="customerType === 'penumpang'" class="absolute top-2 right-2 text-[#005ea2]">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                                    </div>
+                                </label>
+                                
+                                <label class="relative flex items-center justify-center p-3 border rounded-xl cursor-pointer transition-all" :class="customerType === 'pengunjung' ? 'border-[#005ea2] bg-blue-50/50' : 'border-slate-200 hover:bg-slate-50'">
+                                    <input type="radio" name="customer_type" value="pengunjung" class="sr-only" x-model="customerType">
+                                    <div class="text-center">
+                                        <span class="block text-sm font-bold text-slate-800" :class="customerType === 'pengunjung' ? 'text-[#005ea2]' : ''">Umum / Staf</span>
+                                        <span class="block text-[10px] text-slate-500 mt-0.5">Pengunjung bandara</span>
+                                    </div>
+                                    <div x-show="customerType === 'pengunjung'" class="absolute top-2 right-2 text-[#005ea2]" style="display: none;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                                    </div>
+                                </label>
                             </div>
                         </div>
 
-                        <!-- Input Boarding Time -->
+                        <!-- Input Nama Pemesan -->
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5 ml-1">Waktu Boarding</label>
-                            <input type="time" name="boarding_time" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] outline-none transition-all text-slate-700">
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5 ml-1" x-text="customerType === 'penumpang' ? 'Nama (Sesuai Boarding Pass)' : 'Nama Pemesan'"></label>
+                            <input type="text" name="customer_name" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] outline-none transition-all placeholder:text-slate-400" placeholder="Masukkan nama Anda">
+                        </div>
+                        
+                        <!-- Input Penerbangan (Disembunyikan jika bukan penumpang) -->
+                        <div x-show="customerType === 'penumpang'">
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <!-- Input No Penerbangan -->
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1.5 ml-1">No. Penerbangan</label>
+                                    <input type="text" name="flight_number" :required="customerType === 'penumpang'" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium uppercase focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] outline-none transition-all placeholder:text-slate-400" placeholder="JT-012">
+                                </div>
+                                <!-- Input Gate -->
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1.5 ml-1">Gate (Pintu)</label>
+                                    <input type="text" name="gate" :required="customerType === 'penumpang'" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium uppercase focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] outline-none transition-all placeholder:text-slate-400" placeholder="Gate 8">
+                                </div>
+                            </div>
+
+                            <!-- Input Boarding Time -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5 ml-1">Waktu Boarding</label>
+                                <input type="time" name="boarding_time" :required="customerType === 'penumpang'" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] outline-none transition-all text-slate-700">
+                            </div>
                         </div>
                         
                     </div>
@@ -165,13 +207,12 @@
                     <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 ml-2">Metode Pembayaran</p>
                     <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
                         <select name="payment_method" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] outline-none transition-all text-slate-700">
-                            <option value="qris">QRIS (Scan Barcode di Kasir)</option>
-                            <option value="transfer">Transfer Bank</option>
-                            <option value="cash">Tunai (Bayar di Kasir)</option>
+                            <option value="qris">QRIS (Langsung Proses)</option>
+                            <option value="transfer">Transfer Bank (Virtual Account)</option>
                         </select>
                         <p class="text-[11px] text-slate-500 mt-3 flex items-start">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            Cukup tunjukkan kode pesanan di kasir saat mengambil makanan untuk verifikasi dan pembayaran.
+                            Pesanan Anda baru akan dibuat oleh restoran setelah pembayaran online berhasil dikonfirmasi.
                         </p>
                     </div>
                 </div>

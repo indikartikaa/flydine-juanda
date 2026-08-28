@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,    // dummy
             CustomerSeeder::class,   // dummy
             // OrderSeeder::class,      // dummy (order_items dibuat sekaligus di sini)
-            ComplaintSeeder::class,  // dummy
+            // ComplaintSeeder::class,  // dummy
         ]);
     }
 }

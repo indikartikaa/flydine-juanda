@@ -19,26 +19,30 @@ class TenantOrderController extends Controller
         $today = now()->startOfDay();
 
         $countMenunggu = Order::where('tenant_id', $tenantId)
+            ->where('is_paid', true)
             ->where('status', 'menunggu')
             ->count();
 
         $countDiproses = Order::where('tenant_id', $tenantId)
+            ->where('is_paid', true)
             ->where('status', 'diproses')
             ->count();
 
         $countSelesai = Order::where('tenant_id', $tenantId)
+            ->where('is_paid', true)
             ->where('status', 'selesai')
             ->where('updated_at', '>=', $today)
             ->count();
 
         // Produk Aktif
         $countProduk = Product::where('tenant_id', $tenantId)
-            ->where('is_active', true)
+            ->where('is_available', true)
             ->count();
 
         // 5 Pesanan Terbaru
         $recentOrders = Order::with('orderItems')
             ->where('tenant_id', $tenantId)
+            ->where('is_paid', true)
             ->latest('ordered_at')
             ->take(5)
             ->get();
@@ -61,6 +65,7 @@ class TenantOrderController extends Controller
 
         $orders = Order::with('orderItems')
             ->where('tenant_id', $tenantId)
+            ->where('is_paid', true)
             ->latest('ordered_at')
             ->get();
 

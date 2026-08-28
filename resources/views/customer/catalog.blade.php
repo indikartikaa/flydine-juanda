@@ -178,7 +178,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </div>
-                        <input name="search" value="{{ request('search') }}" type="text" placeholder="Cari nama restoran..." class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-full text-sm font-medium focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-[#005ea2] focus:bg-white transition-all placeholder:text-slate-400">
+                        <input name="search" value="{{ request('search') }}" oninput="clearTimeout(this.timer); this.timer = setTimeout(() => { this.closest('form').submit(); }, 500)" type="text" placeholder="Cari nama restoran..." class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-full text-sm font-medium focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-[#005ea2] focus:bg-white transition-all placeholder:text-slate-400">
                     </div>
                 </form>
             </div>

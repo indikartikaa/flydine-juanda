@@ -16,6 +16,7 @@ Route::post('/cart/clear', [CustomerCatalogController::class, 'clearCart'])->nam
 Route::post('/checkout', [CustomerCatalogController::class, 'checkout'])->name('customer.checkout');
 Route::get('/tracking', [CustomerCatalogController::class, 'tracking'])->name('customer.tracking');
 Route::post('/tracking/pay', [CustomerCatalogController::class, 'simulatePayment'])->name('customer.simulate_payment');
+Route::post('/faq/complaint', [CustomerCatalogController::class, 'storeComplaint'])->name('customer.complaint');
 
 /* Static Pages */
 Route::view('/cara-pesan', 'customer.pages.cara-pesan')->name('page.cara-pesan');
@@ -59,9 +60,25 @@ Route::middleware('auth')->prefix('admin')->group(function () {
 
     Route::get('/complaints', function () {
         abort_unless(auth()->user()->role === 'admin_ops', 403);
+        
+        $complaints = \App\Models\Complaint::with(['order.tenant'])->latest()->get();
+        return view('admin.complaints', compact('complaints'));
+    })->name('admin.complaints');
 
-        return view('admin.complaints');
-    });
+    Route::post('/complaints/{complaint}/status', function (Illuminate\Http\Request $request, \App\Models\Complaint $complaint) {
+        abort_unless(auth()->user()->role === 'admin_ops', 403);
+        
+        $request->validate(['status' => 'required|in:in_progress,resolved,closed']);
+        
+        $complaint->status = $request->status;
+        if ($request->status === 'resolved' || $request->status === 'closed') {
+            $complaint->resolved_at = now();
+        }
+        $complaint->handled_by_user_id = auth()->id();
+        $complaint->save();
+        
+        return redirect()->back()->with('success', 'Status komplain berhasil diperbarui!');
+    })->name('admin.complaints.status');
 });
 
 /* Tenant */

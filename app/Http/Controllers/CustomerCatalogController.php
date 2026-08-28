@@ -172,12 +172,19 @@ class CustomerCatalogController extends Controller
             return redirect()->route('customer.menu')->with('error', 'Keranjang Anda kosong.');
         }
 
-        $request->validate([
+        $rules = [
+            'customer_type' => 'required|in:penumpang,pengunjung',
             'customer_name' => 'required|string|max:100',
-            'flight_number' => 'required|string|max:15',
-            'gate' => 'required|string|max:20',
-            'boarding_time' => 'required',
-        ]);
+            'payment_method' => 'required|in:qris,transfer'
+        ];
+
+        if ($request->customer_type === 'penumpang') {
+            $rules['flight_number'] = 'required|string|max:15';
+            $rules['gate'] = 'required|string|max:20';
+            $rules['boarding_time'] = 'required';
+        }
+
+        $request->validate($rules);
 
         $firstItem = reset($cart);
         $tenantId = $firstItem['tenant_id'];
@@ -195,11 +202,11 @@ class CustomerCatalogController extends Controller
             'tenant_id' => $tenantId,
             'customer_id' => $customerId,
             'customer_name' => $request->customer_name,
-            'flight_number' => strtoupper($request->flight_number),
-            'gate' => strtoupper($request->gate),
-            'boarding_time' => date('Y-m-d') . ' ' . $request->boarding_time . ':00',
+            'flight_number' => $request->customer_type === 'penumpang' ? strtoupper($request->flight_number) : null,
+            'gate' => $request->customer_type === 'penumpang' ? strtoupper($request->gate) : null,
+            'boarding_time' => $request->customer_type === 'penumpang' ? date('Y-m-d') . ' ' . $request->boarding_time . ':00' : null,
             'status' => 'menunggu',
-            'payment_method' => $request->payment_method ?? 'cash',
+            'payment_method' => $request->payment_method,
             'is_paid' => false,
             'auto_cancel_at' => date('Y-m-d H:i:s', strtotime('+15 minutes')),
             'total_amount' => $totalAmount,
@@ -221,5 +228,36 @@ class CustomerCatalogController extends Controller
         session()->put('order_code', $order->order_code); // Simpan permanen di session agar tidak hilang saat direfresh
         
         return redirect()->route('customer.tracking', ['order' => $order->order_code])->with('success', 'Pesanan berhasil dibuat!');
+    }
+
+    public function storeComplaint(Request $request)
+    {
+        $request->validate([
+            'order_code' => 'nullable|exists:orders,order_code',
+            'reporter_name' => 'required|string|max:100',
+            'reporter_contact' => 'required|string|max:50',
+            'category' => 'required|in:pesanan_salah,status_tidak_update,lainnya',
+            'description' => 'required|string|max:1000'
+        ]);
+
+        $orderId = null;
+        if ($request->filled('order_code')) {
+            $order = Order::where('order_code', $request->order_code)->first();
+            if ($order) {
+                $orderId = $order->id;
+            }
+        }
+
+        \App\Models\Complaint::create([
+            'complaint_code' => 'CMP-' . strtoupper(Str::random(6)),
+            'order_id' => $orderId,
+            'reporter_name' => $request->reporter_name,
+            'reporter_contact' => $request->reporter_contact,
+            'category' => $request->category,
+            'description' => $request->description,
+            'status' => 'open'
+        ]);
+
+        return redirect()->route('page.faq')->with('success', 'Pesan Anda berhasil dikirim! Tim Support kami akan menghubungi Anda melalui WhatsApp secepatnya.');
     }
 }
