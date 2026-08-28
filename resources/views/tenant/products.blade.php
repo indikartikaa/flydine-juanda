@@ -20,8 +20,8 @@
 
 <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
     <div>
-        <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Katalog Produk</h1>
-        <p class="text-sm text-slate-500 font-medium mt-1">
+        <h1 class="text-2xl font-bold text-gray-800">Katalog Produk</h1>
+        <p class="text-sm text-gray-500">
             Kelola menu tenant Anda.
         </p>
     </div>
@@ -38,20 +38,13 @@
 
 
 {{-- SEARCH --}}
-<div class="relative w-full md:w-96 mb-8">
-    <input id="searchProduct"
-           type="text"
-           placeholder="Cari produk Anda..."
-           class="w-full border border-slate-200 rounded-xl
-                  pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20
-                  focus:border-[#005ea2] shadow-sm transition-all bg-white">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 absolute left-4 top-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-    </svg>
-</div>
+<input id="searchProduct"
+       type="text"
+       placeholder="Cari produk..."
+       class="w-full md:w-80 border border-gray-200 rounded-xl
+              px-4 py-2.5 text-sm mb-6 focus:outline-none
+              focus:border-[#006ca8]">
 
-
-{{-- PRODUK --}}
 @if($products->count())
 
 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -109,38 +102,49 @@
             Rp {{ number_format($product->price, 0, ',', '.') }}
         </p>
 
+        <p class="text-xs text-gray-500 mt-1">
+            Stok:
+            <span class="font-semibold
+                {{ $product->stock > 0 ? 'text-gray-700' : 'text-red-500' }}">
+                {{ $product->stock }}
+            </span>
+        </p>
 
-        <div class="mt-auto space-y-2">
-            {{-- DETAIL --}}
-            <button type="button"
-                    onclick="showDetail(this)"
-                    data-name="{{ $product->name }}"
-                    data-category="{{ $product->category ?? '-' }}"
-                    data-price="{{ number_format($product->price, 0, ',', '.') }}"
-                    data-description="{{ $product->description ?? '-' }}"
-                    data-note="{{ $product->note ?? '-' }}"
-                    data-image="{{ $product->image ? asset('storage/'.$product->image) : '' }}"
-                    data-status="{{ $product->is_available ? 'Aktif' : 'Tidak tersedia' }}"
-                    class="w-full border border-slate-200 text-slate-600 hover:text-[#005ea2] hover:border-[#005ea2] hover:bg-blue-50 py-2.5 rounded-xl text-xs font-bold transition-colors">
-                Lihat Detail
-            </button>
+
+        {{-- DETAIL --}}
+        <button type="button"
+                onclick="showDetail(this)"
+                data-name="{{ $product->name }}"
+                data-category="{{ $product->category ?? '-' }}"
+                data-price="{{ number_format($product->price, 0, ',', '.') }}"
+                data-description="{{ $product->description ?? '-' }}"
+                data-note="{{ $product->note ?? '-' }}"
+                data-image="{{ $product->image ? asset('storage/'.$product->image) : '' }}"
+                data-status="{{ $product->is_available ? 'Aktif' : 'Tidak tersedia' }}"
+                class="w-full mt-4 border border-[#006ca8]
+                       text-[#006ca8] hover:bg-blue-50
+                       py-2 rounded-lg text-xs font-semibold">
+            Lihat Detail
+        </button>
 
 
             {{-- EDIT / HAPUS --}}
             <div class="grid grid-cols-2 gap-2">
 
-                <button type="button"
-                        onclick="editProduct(this)"
-                        data-id="{{ $product->id }}"
-                        data-name="{{ $product->name }}"
-                        data-category="{{ $product->category ?? '' }}"
-                        data-description="{{ $product->description ?? '' }}"
-                        data-note="{{ $product->note ?? '' }}"
-                        data-price="{{ $product->price }}"
-                        data-status="{{ $product->is_available }}"
-                        class="bg-blue-50 hover:bg-blue-100 text-[#005ea2] py-2.5 rounded-xl text-xs font-bold transition-colors">
-                    Edit
-                </button>
+            <button type="button"
+                    onclick="editProduct(this)"
+                    data-id="{{ $product->id }}"
+                    data-name="{{ $product->name }}"
+                    data-category="{{ $product->category ?? '' }}"
+                    data-description="{{ $product->description ?? '' }}"
+                    data-note="{{ $product->note ?? '' }}"
+                    data-price="{{ $product->price }}"
+                    data-status="{{ $product->is_available }}"
+                    class="bg-blue-50 hover:bg-blue-100
+                           text-[#006ca8] py-2 rounded-lg
+                           text-xs font-semibold">
+                Edit
+            </button>
 
                 <form method="POST"
                       action="{{ route('tenant.products.destroy', $product) }}"
@@ -170,7 +174,7 @@
 @else
 
 {{-- EMPTY --}}
-<div class="bg-white rounded-2xl border border-slate-100 shadow-sm text-center py-20 px-4">
+<div class="bg-white rounded-2xl border text-center py-16">
 
     <div class="h-24 w-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-5">
         <span class="text-5xl">🍽️</span>
@@ -197,10 +201,10 @@
 @endif
 
 
-{{-- ================= DETAIL MODAL ================= --}}
+{{-- DETAIL MODAL --}}
 <div id="detailModal"
-     class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50
-            items-center justify-center p-4 transition-opacity">
+     class="hidden fixed inset-0 bg-black/50 z-50
+            items-center justify-center p-5">
 
     <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl max-h-[90vh] overflow-hidden flex flex-col transform transition-transform scale-95" id="detailModalCard">
 
@@ -229,164 +233,189 @@
 
             <div class="mt-6 space-y-4 text-sm bg-slate-50 p-4 rounded-xl border border-slate-100">
 
-                <div class="flex justify-between items-start">
-                    <p class="text-slate-500 font-medium">Kategori</p>
-                    <p id="detailCategory" class="font-bold text-slate-800 text-right"></p>
+                <div>
+                    <p class="text-xs text-gray-400">
+                        Kategori
+                    </p>
+                    <p id="detailCategory"
+                       class="font-semibold text-gray-700">
+                    </p>
                 </div>
-                
-                <hr class="border-slate-200">
 
-                <div class="flex flex-col">
-                    <p class="text-slate-500 font-medium mb-1">Deskripsi</p>
-                    <p id="detailDescription" class="font-medium text-slate-700"></p>
+                <div>
+                    <p class="text-xs text-gray-400">
+                        Deskripsi
+                    </p>
+                    <p id="detailDescription"
+                       class="text-gray-600">
+                    </p>
                 </div>
-                
-                <hr class="border-slate-200">
 
-                <div class="flex flex-col">
-                    <p class="text-slate-500 font-medium mb-1">Catatan</p>
-                    <p id="detailNote" class="font-medium text-slate-700 italic"></p>
+                <div>
+                    <p class="text-xs text-gray-400">
+                        Catatan
+                    </p>
+                    <p id="detailNote"
+                       class="text-gray-600">
+                    </p>
                 </div>
-                
-                <hr class="border-slate-200">
 
-                <div class="flex justify-between items-center">
-                    <p class="text-slate-500 font-medium">Status</p>
-                    <p id="detailStatus" class="font-extrabold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100 text-xs tracking-wider uppercase"></p>
+                <div>
+                    <p class="text-xs text-gray-400">
+                        Status
+                    </p>
+                    <p id="detailStatus"
+                       class="font-semibold">
+                    </p>
                 </div>
 
             </div>
+
+            <button onclick="closeModal('detailModal')"
+                    class="w-full mt-6 bg-[#006ca8]
+                           text-white py-3 rounded-xl
+                           font-semibold">
+                Tutup
+            </button>
 
         </div>
     </div>
 </div>
 
 
-{{-- ================= EDIT MODAL ================= --}}
+{{-- EDIT MODAL --}}
 <div id="editModal"
-     class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50
-            items-center justify-center p-4 transition-opacity">
+     class="hidden fixed inset-0 bg-black/50 z-50
+            items-center justify-center p-5">
 
-    <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl max-h-[90vh] flex flex-col transform transition-transform scale-95" id="editModalCard">
-        
-        <div class="p-6 border-b border-slate-100 flex items-center justify-between shrink-0">
-            <h2 class="text-xl font-extrabold text-slate-800 tracking-tight">
-                Edit Produk
-            </h2>
-            <button onclick="closeModal('editModal')" class="h-8 w-8 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-500 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
+    <div class="bg-white rounded-2xl max-w-lg w-full
+                max-h-[90vh] overflow-y-auto p-6">
 
-        <div class="overflow-y-auto p-6 md:p-8">
-            <form id="editForm"
-                  method="POST"
-                  enctype="multipart/form-data">
+        <h2 class="text-xl font-bold text-gray-800 mb-5">
+            Edit Produk
+        </h2>
 
-                @csrf
-                @method('PUT')
+        <form id="editForm"
+              method="POST"
+              enctype="multipart/form-data">
 
-                {{-- Nama --}}
-                <div class="mb-4">
-                    <label class="block text-sm font-bold text-slate-700 mb-2">
-                        Nama Produk
-                    </label>
-                    <input id="editName"
-                           name="name"
-                           required
-                           class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] transition-colors bg-slate-50 focus:bg-white">
-                </div>
+            @csrf
+            @method('PUT')
 
-                {{-- Kategori --}}
-                <div class="mb-4">
-                    <label class="block text-sm font-bold text-slate-700 mb-2">
-                        Kategori
-                    </label>
-                    <select id="editCategory"
-                            name="category"
-                            class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] transition-colors bg-slate-50 focus:bg-white appearance-none">
-                        <option value="">Pilih kategori</option>
-                        <option value="Makanan Utama">Makanan Utama</option>
-                        <option value="Snack">Snack</option>
-                        <option value="Minuman">Minuman</option>
-                        <option value="Dessert">Dessert</option>
-                    </select>
-                </div>
+            {{-- Nama --}}
+            <label class="text-sm font-semibold">
+                Nama Produk
+            </label>
 
-                {{-- Deskripsi --}}
-                <div class="mb-4">
-                    <label class="block text-sm font-bold text-slate-700 mb-2">
-                        Deskripsi
-                    </label>
-                    <textarea id="editDescription"
-                              name="description"
-                              rows="3"
-                              class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] transition-colors bg-slate-50 focus:bg-white"></textarea>
-                </div>
+            <input id="editName"
+                   name="name"
+                   required
+                   class="w-full border rounded-xl
+                          px-4 py-3 mt-2 mb-4">
 
-                {{-- Harga --}}
-                <div class="mb-4">
-                    <label class="block text-sm font-bold text-slate-700 mb-2">
-                        Harga (Rp)
-                    </label>
-                    <input id="editPrice"
-                           type="number"
-                           name="price"
-                           required
-                           class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] transition-colors bg-slate-50 focus:bg-white">
-                </div>
 
-                {{-- Foto --}}
-                <div class="mb-4">
-                    <label class="block text-sm font-bold text-slate-700 mb-2">
-                        Foto Produk (Opsional)
-                    </label>
-                    <input type="file"
-                           name="image"
-                           accept="image/png,image/jpeg"
-                           class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-[#005ea2] hover:file:bg-blue-100 transition-colors">
-                </div>
+            {{-- Kategori --}}
+            <label class="text-sm font-semibold">
+                Kategori
+            </label>
 
-                {{-- Catatan --}}
-                <div class="mb-5">
-                    <label class="block text-sm font-bold text-slate-700 mb-2">
-                        Catatan Internal
-                    </label>
-                    <textarea id="editNote"
-                              name="note"
-                              rows="2"
-                              class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] transition-colors bg-slate-50 focus:bg-white"></textarea>
-                </div>
+            <select id="editCategory"
+                    name="category"
+                    class="w-full border rounded-xl
+                           px-4 py-3 mt-2 mb-4">
 
-                {{-- Status --}}
-                <div class="mb-8 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <label class="flex items-center cursor-pointer">
-                        <input id="editStatus"
-                               type="checkbox"
-                               name="is_available"
-                               value="1"
-                               class="w-5 h-5 rounded border-slate-300 text-[#005ea2] focus:ring-[#005ea2] cursor-pointer">
-                        <span class="ml-3 text-sm font-bold text-slate-700">
-                            Produk Aktif / Tersedia
-                        </span>
-                    </label>
-                </div>
+                <option value="">Pilih kategori</option>
+                <option value="Makanan Utama">Makanan Utama</option>
+                <option value="Snack">Snack</option>
+                <option value="Minuman">Minuman</option>
+                <option value="Dessert">Dessert</option>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <button type="button"
-                            onclick="closeModal('editModal')"
-                            class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl py-3 text-sm font-bold transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="bg-[#005ea2] hover:bg-blue-700 text-white rounded-xl py-3 text-sm font-bold shadow-md shadow-blue-500/20 transition-all hover:-translate-y-0.5">
-                        Simpan Perubahan
-                    </button>
-                </div>
-            </form>
-        </div>
+            </select>
+
+
+            {{-- Deskripsi --}}
+            <label class="text-sm font-semibold">
+                Deskripsi
+            </label>
+
+            <textarea id="editDescription"
+                      name="description"
+                      rows="3"
+                      class="w-full border rounded-xl
+                             px-4 py-3 mt-2 mb-4"></textarea>
+
+
+            {{-- Harga --}}
+            <label class="text-sm font-semibold">
+                Harga
+            </label>
+
+            <input id="editPrice"
+                   type="number"
+                   name="price"
+                   required
+                   class="w-full border rounded-xl
+                          px-4 py-3 mt-2 mb-4">
+
+
+            {{-- Foto --}}
+            <label class="text-sm font-semibold">
+                Foto Produk
+            </label>
+
+            <input type="file"
+                   name="image"
+                   accept="image/png,image/jpeg"
+                   class="w-full mt-2 mb-4">
+
+
+            {{-- Catatan --}}
+            <label class="text-sm font-semibold">
+                Catatan
+            </label>
+
+            <textarea id="editNote"
+                      name="note"
+                      rows="3"
+                      class="w-full border rounded-xl
+                             px-4 py-3 mt-2 mb-4"></textarea>
+
+
+            {{-- Status --}}
+            <label class="flex items-center gap-2 mb-5">
+
+                <input id="editStatus"
+                       type="checkbox"
+                       name="is_available"
+                       value="1">
+
+                <span class="text-sm">
+                    Produk tersedia
+                </span>
+
+            </label>
+
+
+            <div class="grid grid-cols-2 gap-3">
+
+                <button type="button"
+                        onclick="closeModal('editModal')"
+                        class="border rounded-xl py-3
+                               text-sm font-semibold">
+                    Batal
+                </button>
+
+                <button type="submit"
+                        class="bg-[#8dc63f]
+                               text-white rounded-xl
+                               py-3 text-sm font-bold">
+                    Simpan
+                </button>
+
+            </div>
+
+        </form>
+
     </div>
 </div>
 
@@ -409,20 +438,25 @@ search?.addEventListener('input', function () {
     });
 });
 
-function showDetail(button) {
-    document.getElementById('detailName').textContent = button.dataset.name;
-    document.getElementById('detailCategory').textContent = button.dataset.category;
-    document.getElementById('detailPrice').textContent = 'Rp ' + button.dataset.price;
-    document.getElementById('detailDescription').textContent = button.dataset.description;
-    document.getElementById('detailNote').textContent = button.dataset.note;
-    
-    const statusEl = document.getElementById('detailStatus');
-    statusEl.textContent = button.dataset.status;
-    if (button.dataset.status === 'Aktif') {
-        statusEl.className = 'font-extrabold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100 text-[10px] tracking-wider uppercase';
-    } else {
-        statusEl.className = 'font-extrabold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 text-[10px] tracking-wider uppercase';
-    }
+function showDetail(button)
+{
+    document.getElementById('detailName').textContent =
+        button.dataset.name;
+
+    document.getElementById('detailCategory').textContent =
+        button.dataset.category;
+
+    document.getElementById('detailPrice').textContent =
+        'Rp ' + button.dataset.price;
+
+    document.getElementById('detailDescription').textContent =
+        button.dataset.description;
+
+    document.getElementById('detailNote').textContent =
+        button.dataset.note;
+
+    document.getElementById('detailStatus').textContent =
+        button.dataset.status;
 
     const image = document.getElementById('detailImage');
     if (button.dataset.image) {
@@ -436,14 +470,28 @@ function showDetail(button) {
     openModal('detailModal', 'detailModalCard');
 }
 
-function editProduct(button) {
-    document.getElementById('editName').value = button.dataset.name;
-    document.getElementById('editCategory').value = button.dataset.category;
-    document.getElementById('editDescription').value = button.dataset.description;
-    document.getElementById('editPrice').value = button.dataset.price.replace(/\./g, '');
-    document.getElementById('editNote').value = button.dataset.note;
-    document.getElementById('editStatus').checked = button.dataset.status === '1';
-    document.getElementById('editForm').action = `/tenant/products/${button.dataset.id}`;
+function editProduct(button)
+{
+    document.getElementById('editName').value =
+        button.dataset.name;
+
+    document.getElementById('editCategory').value =
+        button.dataset.category;
+
+    document.getElementById('editDescription').value =
+        button.dataset.description;
+
+    document.getElementById('editPrice').value =
+        button.dataset.price;
+
+    document.getElementById('editNote').value =
+        button.dataset.note;
+
+    document.getElementById('editStatus').checked =
+        button.dataset.status === '1';
+
+    document.getElementById('editForm').action =
+        `/tenant/products/${button.dataset.id}`;
 
     openModal('editModal', 'editModalCard');
 }
@@ -451,10 +499,10 @@ function editProduct(button) {
 function openModal(modalId, cardId) {
     const modal = document.getElementById(modalId);
     const card = document.getElementById(cardId);
-    
+
     modal.classList.remove('hidden');
     modal.classList.add('flex');
-    
+
     // Slight delay for animation
     setTimeout(() => {
         card.classList.remove('scale-95');
@@ -466,12 +514,12 @@ function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     // Find the card inside this modal
     const card = modal.querySelector('div[id$="Card"]');
-    
+
     if (card) {
         card.classList.remove('scale-100');
         card.classList.add('scale-95');
     }
-    
+
     setTimeout(() => {
         modal.classList.add('hidden');
         modal.classList.remove('flex');

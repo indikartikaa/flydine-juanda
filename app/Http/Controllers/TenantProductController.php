@@ -43,13 +43,6 @@ class TenantProductController extends Controller
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
             'note' => 'nullable|string|max:1000',
             'stock' => 'required|integer|min:0',
-
-            'groups' => 'nullable|array',
-            'groups.*.name' => 'nullable|string|max:100',
-            'groups.*.required' => 'nullable|boolean',
-            'groups.*.options' => 'nullable|array',
-            'groups.*.options.*.name' => 'nullable|string|max:100',
-            'groups.*.options.*.price' => 'nullable|numeric|min:0',
         ]);
 
         if ($request->hasFile('image')) {
@@ -57,7 +50,7 @@ class TenantProductController extends Controller
                 ->store('products', 'public');
         }
 
-        $product = Product::create([
+        Product::create([
             'tenant_id' => auth()->user()->tenant_id,
             'name' => $data['name'],
             'category' => $data['category'] ?? null,
@@ -68,28 +61,6 @@ class TenantProductController extends Controller
             'stock' => $data['stock'],
             'is_available' => $request->boolean('is_available'),
         ]);
-
-        foreach ($data['groups'] ?? [] as $group) {
-            if (empty($group['name'])) {
-                continue;
-            }
-
-            $variantGroup = $product->variantGroups()->create([
-                'name' => $group['name'],
-                'is_required' => !empty($group['required']),
-            ]);
-
-            foreach ($group['options'] ?? [] as $option) {
-                if (empty($option['name'])) {
-                    continue;
-                }
-
-                $variantGroup->options()->create([
-                    'name' => $option['name'],
-                    'additional_price' => $option['price'] ?? 0,
-                ]);
-            }
-        }
 
         return redirect()
             ->route('tenant.products')

@@ -31,9 +31,4 @@ class Product extends Model
     {
         return $this->belongsTo(Tenant::class);
     }
-
-    public function variantGroups()
-    {
-        return $this->hasMany(ProductVariantGroup::class);
-    }
 }
