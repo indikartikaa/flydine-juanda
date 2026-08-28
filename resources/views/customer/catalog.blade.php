@@ -40,8 +40,8 @@
 
 <body class="text-slate-800 flex flex-col min-h-screen selection:bg-[#005ea2] selection:text-white relative" x-data="{ mobileMenuOpen: false }">
 
-    <!-- Header / Navigation (Floating Glassmorphism) -->
-    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-slate-200/50 shadow-sm transition-all duration-300">
+    <!-- Header / Navigation -->
+    <header class="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm transition-all duration-300">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 sm:h-20">
                 <!-- Logo & Location -->
@@ -116,6 +116,16 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
                         <span data-id="PORTAL LOGIN TENANT" data-en="TENANT LOGIN PORTAL">PORTAL LOGIN TENANT</span>
                     </a>
+
+                    <!-- Other Links -->
+                    <div class="pt-4 mt-4 border-t border-slate-100 grid grid-cols-2 gap-3">
+                        <a href="{{ route('page.cara-pesan') }}" class="text-xs font-semibold text-slate-600 hover:text-[#005ea2]">Cara Pesan</a>
+                        <a href="{{ route('page.faq') }}" class="text-xs font-semibold text-slate-600 hover:text-[#005ea2]">Pusat Bantuan</a>
+                        <a href="{{ route('page.terms') }}" class="text-xs font-semibold text-slate-600 hover:text-[#005ea2]">Syarat & Ketentuan</a>
+                        <a href="{{ route('page.privacy') }}" class="text-xs font-semibold text-slate-600 hover:text-[#005ea2]">Kebijakan Privasi</a>
+                        <a href="{{ route('page.daftar-tenant') }}" class="text-xs font-semibold text-slate-600 hover:text-[#005ea2]">Daftar Tenant</a>
+                        <a href="{{ route('page.promosi') }}" class="text-xs font-semibold text-slate-600 hover:text-[#005ea2]">Promosi</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -289,19 +299,19 @@
                 <div>
                     <h4 class="font-bold text-sm text-slate-800 mb-5 uppercase tracking-wider">Layanan Pelanggan</h4>
                     <ul class="space-y-3 text-sm font-medium text-slate-500">
-                        <li><a href="#" class="hover:text-[#005ea2] hover:underline transition-all">Cara Pesan</a></li>
-                        <li><a href="#" class="hover:text-[#005ea2] hover:underline transition-all">Pusat Bantuan (FAQ)</a></li>
-                        <li><a href="#" class="hover:text-[#005ea2] hover:underline transition-all">Syarat & Ketentuan</a></li>
-                        <li><a href="#" class="hover:text-[#005ea2] hover:underline transition-all">Kebijakan Privasi</a></li>
+                        <li><a href="{{ route('page.cara-pesan') }}" class="hover:text-[#005ea2] hover:underline transition-all">Cara Pesan</a></li>
+                        <li><a href="{{ route('page.faq') }}" class="hover:text-[#005ea2] hover:underline transition-all">Pusat Bantuan (FAQ)</a></li>
+                        <li><a href="{{ route('page.terms') }}" class="hover:text-[#005ea2] hover:underline transition-all">Syarat & Ketentuan</a></li>
+                        <li><a href="{{ route('page.privacy') }}" class="hover:text-[#005ea2] hover:underline transition-all">Kebijakan Privasi</a></li>
                     </ul>
                 </div>
 
                 <div>
                     <h4 class="font-bold text-sm text-slate-800 mb-5 uppercase tracking-wider">Kemitraan</h4>
                     <ul class="space-y-3 text-sm font-medium text-slate-500">
-                        <li><a href="#" class="hover:text-[#005ea2] hover:underline transition-all">Daftar Menjadi Tenant</a></li>
+                        <li><a href="{{ route('page.daftar-tenant') }}" class="hover:text-[#005ea2] hover:underline transition-all">Daftar Menjadi Tenant</a></li>
                         <li><a href="{{ route('login') }}" class="hover:text-[#005ea2] hover:underline transition-all text-[#005ea2] font-bold">Portal Login Tenant</a></li>
-                        <li><a href="#" class="hover:text-[#005ea2] hover:underline transition-all">Promosi Kolaborasi</a></li>
+                        <li><a href="{{ route('page.promosi') }}" class="hover:text-[#005ea2] hover:underline transition-all">Promosi Kolaborasi</a></li>
                     </ul>
                 </div>
                 
@@ -320,7 +330,6 @@
             <!-- Bottom Copyright -->
             <div class="pb-safe py-6 flex flex-col md:flex-row items-center justify-between text-xs font-medium text-slate-400 gap-4 text-center md:text-left">
                 <p>&copy; {{ date('Y') }} FlyDine Juanda. All rights reserved.</p>
-                <p>Designed for Juanda International Airport</p>
             </div>
         </div>
     </footer>

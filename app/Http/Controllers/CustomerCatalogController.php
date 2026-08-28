@@ -27,7 +27,7 @@ class CustomerCatalogController extends Controller
             // Adjust logic based on how floor_location stores terminal data.
             // The previous frontend mapped it using: substr(strtolower($tenant->floor_location ?? '1'), 0, 1)
             $terminalStr = str_replace('t', '', $request->terminal); // 't1' becomes '1'
-            $query->where('floor_location', 'like', $terminalStr . '%');
+            $query->where('floor_location', 'like', '%' . $terminalStr . '%');
         }
 
         $tenants = $query->paginate(6)->withQueryString();

@@ -67,10 +67,10 @@
         </div>
         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Pesanan Masuk</p>
         <div class="flex items-baseline space-x-2">
-            <h3 class="text-4xl font-extrabold text-slate-800">0</h3>
+            <h3 class="text-4xl font-extrabold text-slate-800">{{ $countMenunggu ?? 0 }}</h3>
         </div>
         <div class="mt-3 flex items-center text-xs font-medium text-slate-500">
-            <span class="text-[#005ea2]">Hari ini</span>
+            <span class="text-[#005ea2]">Perlu Dikonfirmasi</span>
         </div>
     </div>
 
@@ -83,10 +83,10 @@
         </div>
         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Diproses</p>
         <div class="flex items-baseline space-x-2">
-            <h3 class="text-4xl font-extrabold text-slate-800">0</h3>
+            <h3 class="text-4xl font-extrabold text-slate-800">{{ $countDiproses ?? 0 }}</h3>
         </div>
         <div class="mt-3 flex items-center text-xs font-medium text-slate-500">
-            <span class="text-amber-500">Pesanan aktif</span>
+            <span class="text-amber-500">Sedang Dimasak</span>
         </div>
     </div>
 
@@ -99,10 +99,10 @@
         </div>
         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Selesai</p>
         <div class="flex items-baseline space-x-2">
-            <h3 class="text-4xl font-extrabold text-slate-800">0</h3>
+            <h3 class="text-4xl font-extrabold text-slate-800">{{ $countSelesai ?? 0 }}</h3>
         </div>
         <div class="mt-3 flex items-center text-xs font-medium text-slate-500">
-            <span class="text-[#8dc63f]">Hari ini</span>
+            <span class="text-[#8dc63f]">Hari Ini</span>
         </div>
     </div>
 
@@ -115,7 +115,7 @@
         </div>
         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Produk Aktif</p>
         <div class="flex items-baseline space-x-2">
-            <h3 class="text-4xl font-extrabold text-slate-800">{{ $tenant?->products?->where('is_active', true)->count() ?? 0 }}</h3>
+            <h3 class="text-4xl font-extrabold text-slate-800">{{ $countProduk ?? 0 }}</h3>
         </div>
         <div class="mt-3 flex items-center text-xs font-medium text-slate-500">
             <span class="text-indigo-500">Dalam katalog</span>
@@ -141,6 +141,41 @@
             </a>
         </div>
 
+        @if(isset($recentOrders) && $recentOrders->count() > 0)
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <tbody class="text-sm divide-y divide-slate-100">
+                    @foreach($recentOrders as $order)
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-6 py-4">
+                            <span class="font-extrabold text-[#005ea2]">{{ $order->order_code }}</span>
+                            <div class="text-xs text-slate-400 mt-1">{{ $order->ordered_at->format('H:i') }} WIB</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-slate-800">{{ $order->flight_number }}</div>
+                            <div class="text-xs text-slate-500 mt-1">Gate {{ $order->gate }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="font-bold text-slate-700">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>
+                            <div class="text-xs text-slate-500 mt-1">{{ $order->orderItems->sum('quantity') }} items</div>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            @if($order->status === 'menunggu')
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-600 border border-amber-200">Menunggu</span>
+                            @elseif($order->status === 'diproses')
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-600 border border-blue-200">Diproses</span>
+                            @elseif($order->status === 'selesai')
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-green-50 text-green-600 border border-green-200">Selesai</span>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-50 text-rose-600 border border-rose-200">Ditolak</span>
+                            @endif
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @else
         <div class="flex-1 p-8 flex flex-col items-center justify-center text-center bg-slate-50/50">
             <div class="h-20 w-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
                 <span class="text-4xl text-slate-300">🛍️</span>
@@ -150,6 +185,7 @@
                 Pesanan dari customer akan otomatis muncul di sini. Pastikan produk Anda tersedia!
             </p>
         </div>
+        @endif
     </div>
 
     <!-- Tenant Info Card -->

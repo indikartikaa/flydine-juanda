@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,       // dummy
             ProductSeeder::class,    // dummy
             CustomerSeeder::class,   // dummy
-            OrderSeeder::class,      // dummy (order_items dibuat sekaligus di sini)
+            // OrderSeeder::class,      // dummy (order_items dibuat sekaligus di sini)
             ComplaintSeeder::class,  // dummy
         ]);
     }

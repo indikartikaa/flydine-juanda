@@ -15,15 +15,16 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $tenantIds = DB::table('tenants')->inRandomOrder()->limit(4)->pluck('id', 'name');
+        $tenants = DB::table('tenants')->get();
 
-        foreach ($tenantIds as $name => $tenantId) {
+        foreach ($tenants as $tenant) {
+            $slug = Str::slug($tenant->name . '-' . $tenant->tenant_code);
             DB::table('users')->insert([
-                'name' => 'Staff ' . $name,
-                'email' => 'staff.' . Str::slug($name) . '@flydine.test',
+                'name' => 'Staff ' . $tenant->name . ' (' . $tenant->tenant_code . ')',
+                'email' => 'staff.' . $slug . '@flydine.test',
                 'password' => Hash::make('password'),
                 'role' => 'tenant_staff',
-                'tenant_id' => $tenantId,
+                'tenant_id' => $tenant->id,
                 'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),

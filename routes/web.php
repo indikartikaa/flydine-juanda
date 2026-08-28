@@ -17,6 +17,14 @@ Route::post('/checkout', [CustomerCatalogController::class, 'checkout'])->name('
 Route::get('/tracking', [CustomerCatalogController::class, 'tracking'])->name('customer.tracking');
 Route::post('/tracking/pay', [CustomerCatalogController::class, 'simulatePayment'])->name('customer.simulate_payment');
 
+/* Static Pages */
+Route::view('/cara-pesan', 'customer.pages.cara-pesan')->name('page.cara-pesan');
+Route::view('/faq', 'customer.pages.faq')->name('page.faq');
+Route::view('/syarat-ketentuan', 'customer.pages.terms')->name('page.terms');
+Route::view('/kebijakan-privasi', 'customer.pages.privacy')->name('page.privacy');
+Route::view('/daftar-tenant', 'customer.pages.daftar-tenant')->name('page.daftar-tenant');
+Route::view('/promosi', 'customer.pages.promosi')->name('page.promosi');
+
 /* Preview Reset Password */
 Route::get('/preview/reset-password', function () {
     $request = request();
@@ -62,17 +70,10 @@ Route::middleware('auth')
     ->name('tenant.')
     ->group(function () {
 
-        Route::get('/dashboard', function () {
-            abort_unless(auth()->user()->role === 'tenant_staff', 403);
+        Route::get('/dashboard', [\App\Http\Controllers\TenantOrderController::class, 'dashboard'])->name('dashboard');
 
-            return view('tenant.dashboard');
-        })->name('dashboard');
-
-        Route::get('/orders', function () {
-            abort_unless(auth()->user()->role === 'tenant_staff', 403);
-
-            return view('tenant.orders');
-        })->name('orders');
+        Route::get('/orders', [\App\Http\Controllers\TenantOrderController::class, 'index'])->name('orders');
+        Route::post('/orders/{order}/status', [\App\Http\Controllers\TenantOrderController::class, 'updateStatus'])->name('orders.status');
 
         /* Produk */
         Route::get('/products', function () {
