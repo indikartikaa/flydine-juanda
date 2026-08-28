@@ -8,8 +8,14 @@ use Illuminate\Support\Facades\Route;
 
 /* Customer */
 Route::get('/', [CustomerCatalogController::class, 'index'])->name('customer.menu');
+Route::get('/menu/{tenant}', [CustomerCatalogController::class, 'show'])->name('customer.tenant.show');
 Route::get('/cart', [CustomerCatalogController::class, 'cart'])->name('customer.cart');
+Route::post('/cart/add', [CustomerCatalogController::class, 'addToCart'])->name('customer.cart.add');
+Route::post('/cart/update', [CustomerCatalogController::class, 'updateCart'])->name('customer.cart.update');
+Route::post('/cart/clear', [CustomerCatalogController::class, 'clearCart'])->name('customer.cart.clear');
+Route::post('/checkout', [CustomerCatalogController::class, 'checkout'])->name('customer.checkout');
 Route::get('/tracking', [CustomerCatalogController::class, 'tracking'])->name('customer.tracking');
+Route::post('/tracking/pay', [CustomerCatalogController::class, 'simulatePayment'])->name('customer.simulate_payment');
 
 /* Preview Reset Password */
 Route::get('/preview/reset-password', function () {
