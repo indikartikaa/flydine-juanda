@@ -14,9 +14,7 @@
 <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
     <div>
         <h1 class="text-2xl font-bold text-gray-800">Katalog Produk</h1>
-        <p class="text-sm text-gray-500">
-            Kelola menu tenant Anda.
-        </p>
+        <p class="text-sm text-gray-500">Kelola menu tenant Anda.</p>
     </div>
 
     <a href="{{ route('tenant.products.create') }}"
@@ -26,8 +24,6 @@
     </a>
 </div>
 
-
-{{-- SEARCH --}}
 <input id="searchProduct"
        type="text"
        placeholder="Cari produk..."
@@ -35,8 +31,6 @@
               px-4 py-2.5 text-sm mb-6 focus:outline-none
               focus:border-[#006ca8]">
 
-
-{{-- PRODUK --}}
 @if($products->count())
 
 <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -94,6 +88,14 @@
             Rp {{ number_format($product->price, 0, ',', '.') }}
         </p>
 
+        <p class="text-xs text-gray-500 mt-1">
+            Stok:
+            <span class="font-semibold
+                {{ $product->stock > 0 ? 'text-gray-700' : 'text-red-500' }}">
+                {{ $product->stock }}
+            </span>
+        </p>
+
 
         {{-- DETAIL --}}
         <button type="button"
@@ -101,6 +103,7 @@
                 data-name="{{ $product->name }}"
                 data-category="{{ $product->category ?? '-' }}"
                 data-price="{{ number_format($product->price, 0, ',', '.') }}"
+                data-stock="{{ $product->stock }}"
                 data-description="{{ $product->description ?? '-' }}"
                 data-note="{{ $product->note ?? '-' }}"
                 data-image="{{ $product->image ? asset('storage/'.$product->image) : '' }}"
@@ -121,9 +124,11 @@
                     data-name="{{ $product->name }}"
                     data-category="{{ $product->category ?? '' }}"
                     data-description="{{ $product->description ?? '' }}"
-                    data-note="{{ $product->note ?? '' }}"
                     data-price="{{ $product->price }}"
-                    data-status="{{ $product->is_available }}"
+                    data-stock="{{ $product->stock }}"
+                    data-note="{{ $product->note ?? '' }}"
+                    data-status="{{ $product->is_available ? '1' : '0' }}"
+                    data-image="{{ $product->image ? asset('storage/'.$product->image) : '' }}"
                     class="bg-blue-50 hover:bg-blue-100
                            text-[#006ca8] py-2 rounded-lg
                            text-xs font-semibold">
@@ -158,7 +163,6 @@
 
 @else
 
-{{-- EMPTY --}}
 <div class="bg-white rounded-2xl border text-center py-16">
 
     <div class="text-5xl mb-3">🍽️</div>
@@ -182,10 +186,10 @@
 @endif
 
 
-{{-- ================= DETAIL MODAL ================= --}}
+{{-- DETAIL MODAL --}}
 <div id="detailModal"
      class="hidden fixed inset-0 bg-black/50 z-50
-            items-center justify-center p-5">
+            items-center justify-center p-4">
 
     <div class="bg-white rounded-2xl max-w-lg w-full
                 max-h-[90vh] overflow-y-auto">
@@ -212,44 +216,39 @@
             <div class="mt-4 space-y-3 text-sm">
 
                 <div>
-                    <p class="text-xs text-gray-400">
-                        Kategori
-                    </p>
+                    <p class="text-xs text-gray-400">Kategori</p>
                     <p id="detailCategory"
-                       class="font-semibold text-gray-700">
-                    </p>
+                       class="font-semibold text-gray-700"></p>
                 </div>
 
                 <div>
-                    <p class="text-xs text-gray-400">
-                        Deskripsi
-                    </p>
+                    <p class="text-xs text-gray-400">Stok</p>
+                    <p id="detailStock"
+                       class="font-semibold text-gray-700"></p>
+                </div>
+
+                <div>
+                    <p class="text-xs text-gray-400">Deskripsi</p>
                     <p id="detailDescription"
-                       class="text-gray-600">
-                    </p>
+                       class="text-gray-600"></p>
                 </div>
 
                 <div>
-                    <p class="text-xs text-gray-400">
-                        Catatan
-                    </p>
+                    <p class="text-xs text-gray-400">Catatan</p>
                     <p id="detailNote"
-                       class="text-gray-600">
-                    </p>
+                       class="text-gray-600"></p>
                 </div>
 
                 <div>
-                    <p class="text-xs text-gray-400">
-                        Status
-                    </p>
+                    <p class="text-xs text-gray-400">Status</p>
                     <p id="detailStatus"
-                       class="font-semibold">
-                    </p>
+                       class="font-semibold"></p>
                 </div>
 
             </div>
 
-            <button onclick="closeModal('detailModal')"
+            <button type="button"
+                    onclick="closeModal('detailModal')"
                     class="w-full mt-6 bg-[#006ca8]
                            text-white py-3 rounded-xl
                            font-semibold">
@@ -261,120 +260,179 @@
 </div>
 
 
-{{-- ================= EDIT MODAL ================= --}}
+{{-- EDIT MODAL --}}
 <div id="editModal"
      class="hidden fixed inset-0 bg-black/50 z-50
-            items-center justify-center p-5">
+            items-center justify-center p-4">
 
     <div class="bg-white rounded-2xl max-w-lg w-full
-                max-h-[90vh] overflow-y-auto p-6">
+                max-h-[90vh] overflow-y-auto">
 
-        <h2 class="text-xl font-bold text-gray-800 mb-5">
-            Edit Produk
-        </h2>
+        <div class="px-6 py-4 border-b flex justify-between items-center">
+
+            <div>
+                <h2 class="text-xl font-bold text-gray-800">
+                    Edit Produk
+                </h2>
+
+                <p class="text-xs text-gray-400 mt-1">
+                    Perbarui informasi produk
+                </p>
+            </div>
+
+            <button type="button"
+                    onclick="closeModal('editModal')"
+                    class="text-gray-400 hover:text-gray-700 text-xl">
+                ✕
+            </button>
+
+        </div>
+
 
         <form id="editForm"
               method="POST"
-              enctype="multipart/form-data">
+              enctype="multipart/form-data"
+              class="p-6">
 
             @csrf
             @method('PUT')
 
-            {{-- Nama --}}
-            <label class="text-sm font-semibold">
-                Nama Produk
-            </label>
+            <div class="space-y-4">
 
-            <input id="editName"
-                   name="name"
-                   required
-                   class="w-full border rounded-xl
-                          px-4 py-3 mt-2 mb-4">
+                {{-- Nama --}}
+                <div>
+                    <label class="text-sm font-semibold text-gray-700">
+                        Nama Produk
+                    </label>
 
-
-            {{-- Kategori --}}
-            <label class="text-sm font-semibold">
-                Kategori
-            </label>
-
-            <select id="editCategory"
-                    name="category"
-                    class="w-full border rounded-xl
-                           px-4 py-3 mt-2 mb-4">
-
-                <option value="">Pilih kategori</option>
-                <option value="Makanan Utama">Makanan Utama</option>
-                <option value="Snack">Snack</option>
-                <option value="Minuman">Minuman</option>
-                <option value="Dessert">Dessert</option>
-
-            </select>
+                    <input id="editName"
+                           name="name"
+                           required
+                           class="w-full border rounded-xl
+                                  px-4 py-3 mt-2">
+                </div>
 
 
-            {{-- Deskripsi --}}
-            <label class="text-sm font-semibold">
-                Deskripsi
-            </label>
+                {{-- Kategori --}}
+                <div>
+                    <label class="text-sm font-semibold text-gray-700">
+                        Kategori
+                    </label>
 
-            <textarea id="editDescription"
-                      name="description"
-                      rows="3"
-                      class="w-full border rounded-xl
-                             px-4 py-3 mt-2 mb-4"></textarea>
+                    <select id="editCategory"
+                            name="category"
+                            class="w-full border rounded-xl
+                                   px-4 py-3 mt-2">
 
+                        <option value="">Pilih kategori</option>
+                        <option value="Makanan Utama">Makanan Utama</option>
+                        <option value="Snack">Snack</option>
+                        <option value="Minuman">Minuman</option>
+                        <option value="Dessert">Dessert</option>
 
-            {{-- Harga --}}
-            <label class="text-sm font-semibold">
-                Harga
-            </label>
-
-            <input id="editPrice"
-                   type="number"
-                   name="price"
-                   required
-                   class="w-full border rounded-xl
-                          px-4 py-3 mt-2 mb-4">
+                    </select>
+                </div>
 
 
-            {{-- Foto --}}
-            <label class="text-sm font-semibold">
-                Foto Produk
-            </label>
+                {{-- Harga + Stok --}}
+                <div class="grid grid-cols-2 gap-4">
 
-            <input type="file"
-                   name="image"
-                   accept="image/png,image/jpeg"
-                   class="w-full mt-2 mb-4">
+                    <div>
+                        <label class="text-sm font-semibold text-gray-700">
+                            Harga
+                        </label>
 
+                        <input id="editPrice"
+                               type="number"
+                               name="price"
+                               min="0"
+                               required
+                               class="w-full border rounded-xl
+                                      px-4 py-3 mt-2">
+                    </div>
 
-            {{-- Catatan --}}
-            <label class="text-sm font-semibold">
-                Catatan
-            </label>
+                    <div>
+                        <label class="text-sm font-semibold text-gray-700">
+                            Stok
+                        </label>
 
-            <textarea id="editNote"
-                      name="note"
-                      rows="3"
-                      class="w-full border rounded-xl
-                             px-4 py-3 mt-2 mb-4"></textarea>
+                        <input id="editStock"
+                               type="number"
+                               name="stock"
+                               min="0"
+                               required
+                               class="w-full border rounded-xl
+                                      px-4 py-3 mt-2">
+                    </div>
 
-
-            {{-- Status --}}
-            <label class="flex items-center gap-2 mb-5">
-
-                <input id="editStatus"
-                       type="checkbox"
-                       name="is_available"
-                       value="1">
-
-                <span class="text-sm">
-                    Produk tersedia
-                </span>
-
-            </label>
+                </div>
 
 
-            <div class="grid grid-cols-2 gap-3">
+                {{-- Deskripsi --}}
+                <div>
+                    <label class="text-sm font-semibold text-gray-700">
+                        Deskripsi
+                    </label>
+
+                    <textarea id="editDescription"
+                              name="description"
+                              rows="3"
+                              maxlength="300"
+                              class="w-full border rounded-xl
+                                     px-4 py-3 mt-2"></textarea>
+                </div>
+
+
+                {{-- Foto --}}
+                <div>
+                    <label class="text-sm font-semibold text-gray-700">
+                        Foto Produk
+                    </label>
+
+                    <img id="editImagePreview"
+                         class="hidden w-full h-48 object-cover
+                                rounded-xl mt-2 mb-3">
+
+                    <input type="file"
+                           name="image"
+                           accept="image/png,image/jpeg"
+                           class="w-full border rounded-xl
+                                  px-4 py-3 mt-2">
+                </div>
+
+
+                {{-- Note --}}
+                <div>
+                    <label class="text-sm font-semibold text-gray-700">
+                        Catatan
+                    </label>
+
+                    <textarea id="editNote"
+                              name="note"
+                              rows="3"
+                              class="w-full border rounded-xl
+                                     px-4 py-3 mt-2"></textarea>
+                </div>
+
+
+                {{-- Status --}}
+                <label class="flex items-center gap-3">
+
+                    <input id="editStatus"
+                           type="checkbox"
+                           name="is_available"
+                           value="1">
+
+                    <span class="text-sm font-medium">
+                        Produk tersedia
+                    </span>
+
+                </label>
+
+            </div>
+
+
+            <div class="grid grid-cols-2 gap-3 mt-6">
 
                 <button type="button"
                         onclick="closeModal('editModal')"
@@ -384,10 +442,10 @@
                 </button>
 
                 <button type="submit"
-                        class="bg-[#8dc63f]
-                               text-white rounded-xl
-                               py-3 text-sm font-bold">
-                    Simpan
+                        class="bg-[#8dc63f] hover:bg-green-600
+                               text-white rounded-xl py-3
+                               text-sm font-bold">
+                    Simpan Perubahan
                 </button>
 
             </div>
@@ -431,6 +489,9 @@ function showDetail(button)
     document.getElementById('detailPrice').textContent =
         'Rp ' + button.dataset.price;
 
+    document.getElementById('detailStock').textContent =
+        button.dataset.stock + ' tersedia';
+
     document.getElementById('detailDescription').textContent =
         button.dataset.description;
 
@@ -467,11 +528,25 @@ function editProduct(button)
     document.getElementById('editPrice').value =
         button.dataset.price;
 
+    document.getElementById('editStock').value =
+        button.dataset.stock;
+
     document.getElementById('editNote').value =
         button.dataset.note;
 
     document.getElementById('editStatus').checked =
         button.dataset.status === '1';
+
+    const preview =
+        document.getElementById('editImagePreview');
+
+    if (button.dataset.image) {
+        preview.src = button.dataset.image;
+        preview.classList.remove('hidden');
+    } else {
+        preview.src = '';
+        preview.classList.add('hidden');
+    }
 
     document.getElementById('editForm').action =
         `/tenant/products/${button.dataset.id}`;
