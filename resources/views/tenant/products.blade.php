@@ -1,6 +1,6 @@
 @extends('layouts.tenant')
 
-@section('title', 'Katalog Produk Saya')
+@section('title', 'Katalog Produk Tenant')
 
 @section('content')
 
@@ -47,33 +47,28 @@
 
 @if($products->count())
 
-<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+<div class="flex flex-wrap -mx-3">
 
 @foreach($products as $product)
 
-<div class="product-card bg-white rounded-2xl border border-slate-100
-            shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group">
+<div class="w-full sm:w-1/2 md:w-1/3 xl:w-1/4 px-3 mb-6">
+
+<div class="product-card bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 relative group flex flex-col h-full">
 
     {{-- FOTO --}}
-    <div class="h-48 bg-slate-50 relative overflow-hidden">
+    <div class="h-40 w-full bg-slate-100 relative overflow-hidden rounded-t-2xl shrink-0">
 
         @if($product->image)
-
             <img src="{{ asset('storage/'.$product->image) }}"
                  alt="{{ $product->name }}"
                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-
         @else
-
             <div class="w-full h-full flex items-center justify-center
-                        bg-gradient-to-br from-blue-50 to-slate-100 group-hover:scale-105 transition-transform duration-500">
-
-                <span class="text-4xl font-extrabold text-blue-200">
+                        bg-gradient-to-br from-blue-50 to-slate-200 group-hover:scale-105 transition-transform duration-500">
+                <span class="text-5xl font-extrabold text-blue-200">
                     {{ strtoupper(substr($product->name, 0, 1)) }}
                 </span>
-
             </div>
-
         @endif
 
         <span class="absolute top-3 left-3
@@ -88,17 +83,17 @@
 
 
     {{-- INFORMASI --}}
-    <div class="p-5 flex flex-col flex-1">
+    <div class="p-4 flex-1 flex flex-col">
 
-        <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
             {{ $product->category ?? 'Tanpa kategori' }}
         </p>
 
-        <h3 class="product-name font-bold text-slate-800 text-lg mt-1 leading-tight line-clamp-2">
+        <h3 class="product-name font-bold text-slate-800 text-base mt-1 leading-snug">
             {{ $product->name }}
         </h3>
 
-        <p class="text-lg font-extrabold text-[#005ea2] mt-2 mb-4">
+        <p class="text-base font-extrabold text-[#005ea2] mt-2 mb-3">
             Rp {{ number_format($product->price, 0, ',', '.') }}
         </p>
 
@@ -164,6 +159,8 @@
         </div>
 
     </div>
+
+</div>
 
 </div>
 
@@ -430,10 +427,10 @@ search?.addEventListener('input', function () {
         const name = card.querySelector('.product-name').textContent.toLowerCase();
         if (name.includes(keyword)) {
             card.classList.remove('hidden');
-            card.classList.add('flex');
+            card.classList.add('block');
         } else {
             card.classList.add('hidden');
-            card.classList.remove('flex');
+            card.classList.remove('block');
         }
     });
 });
