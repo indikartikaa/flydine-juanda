@@ -200,23 +200,21 @@
 
                         <!-- Status Label -->
                         @php
-                            $open = false;
-                            if($tenant->opening_time && $tenant->closing_time){
-                                $now = now()->format('H:i:s');
-                                $open = $now >= $tenant->opening_time && $now <= $tenant->closing_time;
-                            }
+                            $open = $tenant->isOpen();
                         @endphp
                         
                         @if($open)
-                            <div class="absolute top-4 right-4 bg-white/95 text-emerald-600 text-[10px] font-extrabold px-3 py-1.5 rounded-full shadow-sm border border-emerald-100 tracking-wider flex items-center space-x-1.5">
+                            <div class="absolute top-4 right-4 bg-white/95 text-emerald-600 text-[10px] font-extrabold px-3 py-1.5 rounded-full shadow-sm border border-emerald-100 tracking-wider flex items-center space-x-1.5 z-10">
                                 <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> 
                                 <span>OPEN</span>
                             </div>
                         @else
-                            <div class="absolute top-4 right-4 bg-white/95 text-rose-500 text-[10px] font-extrabold px-3 py-1.5 rounded-full shadow-sm border border-rose-100 tracking-wider flex items-center space-x-1.5">
+                            <div class="absolute top-4 right-4 bg-white/95 text-rose-500 text-[10px] font-extrabold px-3 py-1.5 rounded-full shadow-sm border border-rose-100 tracking-wider flex items-center space-x-1.5 z-10">
                                 <span class="w-1.5 h-1.5 bg-rose-500 rounded-full"></span> 
                                 <span>CLOSED</span>
                             </div>
+                            <!-- Grayscale Overlay when closed -->
+                            <div class="absolute inset-0 bg-white/40 backdrop-grayscale z-0"></div>
                         @endif
                         
                         <!-- Location Badge -->
@@ -248,10 +246,16 @@
                         </div>
 
                         <!-- CTA Button -->
-                        <a href="{{ route('customer.tenant.show', $tenant->id) }}" class="mt-auto w-full bg-[#005ea2] hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl text-sm transition-all shadow-md shadow-blue-500/20 hover:-translate-y-0.5 flex items-center justify-center group/btn">
-                            <span data-id="Lihat Menu & Pesan" data-en="View Menu & Order">Lihat Menu & Pesan</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2 group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                        </a>
+                        @if($open)
+                            <a href="{{ route('customer.tenant.show', $tenant->id) }}" class="mt-auto w-full bg-[#005ea2] hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl text-sm transition-all shadow-md shadow-blue-500/20 hover:-translate-y-0.5 flex items-center justify-center group/btn relative z-10">
+                                <span data-id="Lihat Menu & Pesan" data-en="View Menu & Order">Lihat Menu & Pesan</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2 group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                            </a>
+                        @else
+                            <div class="mt-auto w-full bg-slate-100 text-slate-400 font-bold py-3.5 rounded-xl text-sm flex items-center justify-center cursor-not-allowed relative z-10 border border-slate-200">
+                                <span data-id="Restoran Tutup" data-en="Restaurant Closed">Restoran Tutup</span>
+                            </div>
+                        @endif
                     </div>
                 </div>
                 @empty

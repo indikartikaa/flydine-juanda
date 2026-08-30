@@ -127,7 +127,19 @@
             </div>
 
             <!-- Form Data Pemesan (Checkout) -->
-            <form action="{{ route('customer.checkout') }}" method="POST" id="checkoutForm" x-data="{ customerType: 'penumpang' }">
+            <form action="{{ route('customer.checkout') }}" method="POST" id="checkoutForm" x-data="{ 
+                customerType: 'penumpang', 
+                boardingTime: '',
+                get isTimeWarning() {
+                    if (this.customerType !== 'penumpang' || !this.boardingTime) return false;
+                    const now = new Date();
+                    const [hours, minutes] = this.boardingTime.split(':');
+                    const boardTime = new Date();
+                    boardTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                    const diffInMinutes = (boardTime - now) / 60000;
+                    return diffInMinutes >= 0 && diffInMinutes < 30;
+                }
+            }">
                 @csrf
                 
                 @if ($errors->any())
@@ -196,7 +208,17 @@
                             <!-- Input Boarding Time -->
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1.5 ml-1">Waktu Boarding</label>
-                                <input type="time" name="boarding_time" :required="customerType === 'penumpang'" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] outline-none transition-all text-slate-700">
+                                <input type="time" name="boarding_time" x-model="boardingTime" :required="customerType === 'penumpang'" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] outline-none transition-all text-slate-700">
+                            </div>
+
+                            <!-- Peringatan Soft Warning Boarding Time -->
+                            <div x-show="isTimeWarning" class="mt-3 p-3 bg-rose-50/80 rounded-xl border border-rose-200/50 flex items-start space-x-3" style="display: none;">
+                                <div class="bg-rose-100 p-1.5 rounded-lg shrink-0 text-rose-600 mt-0.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                </div>
+                                <p class="text-[11px] sm:text-xs text-rose-800 font-medium leading-relaxed">
+                                    Waktu boarding kurang dari <span class="font-bold">30 menit</span>! Mohon pastikan Anda bisa mengambil pesanan sesegera mungkin. <span class="font-bold underline">Tidak ada refund</span> jika tertinggal penerbangan.
+                                </p>
                             </div>
                         </div>
                         
@@ -224,7 +246,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                 </div>
                 <p class="text-[11px] sm:text-xs text-amber-800 font-medium leading-relaxed">
-                    Pesanan akan otomatis dibatalkan jika waktu boarding Anda tersisa kurang dari <span class="font-bold">15 menit</span>.
+                    Pesanan akan otomatis dibatalkan tepat pada <span class="font-bold">jadwal boarding</span> (atau maksimal 15 menit) jika pembayaran belum diselesaikan.
                 </p>
             </div>
             

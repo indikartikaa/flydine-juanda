@@ -248,6 +248,22 @@
                     <p class="font-semibold text-slate-800 mt-0.5">{{ $tenant?->phone ?? '-' }}</p>
                 </div>
             </div>
+
+            <hr class="border-slate-100 my-2">
+
+            <form action="{{ route('tenant.settings.hours') }}" method="POST">
+                @csrf
+                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Jam Operasional (WIB)</p>
+                <div class="flex items-center space-x-2">
+                    <input type="time" name="opening_time" value="{{ $tenant?->opening_time ? substr($tenant->opening_time, 0, 5) : '' }}" class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500">
+                    <span class="text-xs text-slate-400 font-bold">-</span>
+                    <input type="time" name="closing_time" value="{{ $tenant?->closing_time ? substr($tenant->closing_time, 0, 5) : '' }}" class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500">
+                </div>
+                <p class="text-[10px] text-slate-400 mt-1.5">*Kosongkan jam jika tenant buka 24 Jam</p>
+                <button type="submit" class="mt-3 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-xl text-xs font-bold transition-colors">
+                    Simpan Jam Buka/Tutup
+                </button>
+            </form>
         </div>
 
         <div class="mt-8">

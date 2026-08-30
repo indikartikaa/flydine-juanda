@@ -88,6 +88,7 @@ Route::middleware('auth')
     ->group(function () {
 
         Route::get('/dashboard', [\App\Http\Controllers\TenantOrderController::class, 'dashboard'])->name('dashboard');
+        Route::post('/settings/hours', [\App\Http\Controllers\TenantOrderController::class, 'updateHours'])->name('settings.hours');
 
         Route::get('/orders', [\App\Http\Controllers\TenantOrderController::class, 'index'])->name('orders');
         Route::post('/orders/{order}/status', [\App\Http\Controllers\TenantOrderController::class, 'updateStatus'])->name('orders.status');
@@ -143,3 +144,8 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+Route::get('/test-products', function () {
+    $products = \App\Models\Product::take(3)->get();
+    return view('tenant.products', compact('products'));
+});

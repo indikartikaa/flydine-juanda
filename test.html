@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katalog Produk Tenant - FlyDine Juanda</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', 'Poppins', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 flex h-full overflow-hidden antialiased">
+
+    <!-- Sidebar Tenant -->
+    <aside class="w-64 bg-white border-r border-slate-200/80 flex flex-col h-full shadow-sm z-20 shrink-0">
+        
+        <!-- Logo Area -->
+        <div class="h-20 flex items-center px-6 border-b border-slate-100">
+            <a href="http://127.0.0.1:8000/tenant/dashboard" class="flex items-center space-x-3 group">
+                <div class="h-10 w-10 rounded-2xl bg-gradient-to-tr from-[#005ea2] to-blue-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#8dc63f]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-xl font-extrabold tracking-tight text-slate-900 leading-tight">
+                        FlyDine<span class="text-[#8dc63f]">.</span>
+                    </h2>
+                    <p class="text-[11px] font-semibold text-slate-400 tracking-wide uppercase">Tenant Portal</p>
+                </div>
+            </a>
+        </div>
+        
+        <!-- Menu Navigasi -->
+        <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+            <p class="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Menu Utama</p>
+            
+            <a href="http://127.0.0.1:8000/tenant/dashboard" 
+               class="flex items-center px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-200 text-slate-600 hover:bg-slate-50 hover:text-[#005ea2]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                Dashboard
+            </a>
+
+            <a href="http://127.0.0.1:8000/tenant/orders" 
+               class="flex items-center px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-200 text-slate-600 hover:bg-slate-50 hover:text-[#005ea2]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+                Manajemen Pesanan
+            </a>
+
+            <a href="http://127.0.0.1:8000/tenant/products" 
+               class="flex items-center px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-200 text-slate-600 hover:bg-slate-50 hover:text-[#005ea2]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                Katalog Produk
+            </a>
+            
+        </nav>
+        
+        <!-- Area Logout -->
+        <div class="p-4 border-t border-slate-100 bg-slate-50/50">
+            <form method="POST" action="http://127.0.0.1:8000/logout">
+                <input type="hidden" name="_token" value="yYhiI3qiA4hMUc68HA5HJUivVmQ8n2wIO1XHQAnK" autocomplete="off">                <button type="submit" class="w-full flex items-center justify-center px-4 py-2.5 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 rounded-xl transition-all shadow-sm text-xs font-bold group">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Keluar Sistem
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-[#f8fafc]">
+        
+        <!-- Header Atas -->
+        <header class="bg-white/90 backdrop-blur-md shadow-xs h-20 flex items-center justify-between px-8 shrink-0 z-10 border-b border-slate-200/80">
+            <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">Katalog Produk Tenant</h1>
+            
+            <div class="flex items-center space-x-5">
+                <!-- Tenant Profile Card -->
+                <a href="http://127.0.0.1:8000/profile" class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-50 p-1.5 pr-3 rounded-2xl transition-colors">
+                    <div class="relative">
+                        <div class="h-10 w-10 bg-gradient-to-tr from-[#005ea2] to-blue-600 rounded-2xl flex items-center justify-center text-white font-extrabold text-sm shadow-md shadow-blue-600/20 group-hover:scale-105 transition-transform">
+                            TN
+                        </div>
+                        <span class="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-[#8dc63f] border-2 border-white rounded-full"></span>
+                    </div>
+                    <div class="hidden sm:block text-left">
+                        <span class="block text-xs font-bold text-slate-800 group-hover:text-[#005ea2] transition-colors">Tenant User</span>
+                        <span class="block text-[11px] font-semibold text-slate-400">Mitra FlyDine</span>
+                    </div>
+                </a>
+            </div>
+        </header>
+
+        <!-- Area Konten Utama -->
+        <div class="flex-1 overflow-y-auto p-6 md:p-8">
+            
+
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800">Katalog Produk</h1>
+        <p class="text-sm text-gray-500">
+            Kelola menu tenant Anda.
+        </p>
+    </div>
+
+    <a href="http://127.0.0.1:8000/tenant/products/create"
+       class="bg-[#005ea2] hover:bg-blue-700 text-white
+              px-5 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-blue-500/20 transition-all hover:-translate-y-0.5 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+        Tambah Produk
+    </a>
+</div>
+
+
+
+<input id="searchProduct"
+       type="text"
+       placeholder="Cari produk..."
+       class="w-full md:w-80 border border-gray-200 rounded-xl
+              px-4 py-2.5 text-sm mb-6 focus:outline-none
+              focus:border-[#006ca8]">
+
+
+<div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+
+
+<div class="product-card bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden relative group">
+
+    
+    <div class="h-40 w-full bg-slate-100 relative overflow-hidden block">
+
+                    <div class="w-full h-full flex items-center justify-center
+                        bg-gradient-to-br from-blue-50 to-slate-200 group-hover:scale-105 transition-transform duration-500">
+                <span class="text-5xl font-extrabold text-blue-200">
+                    A
+                </span>
+            </div>
+        
+        <span class="absolute top-3 left-3
+            bg-emerald-500 shadow-emerald-500/30
+            text-white text-[10px] font-extrabold px-3 py-1 rounded-full shadow-md tracking-wider uppercase">
+
+            Aktif
+
+        </span>
+
+    </div>
+
+
+    
+    <div class="p-4">
+
+        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            Tanpa kategori
+        </p>
+
+        <h3 class="product-name font-bold text-slate-800 text-base mt-1 leading-tight line-clamp-2" title="Ayam Goreng Original (1pc)">
+            Ayam Goreng Original (1pc)
+        </h3>
+
+        <p class="text-base font-extrabold text-[#005ea2] mt-2 mb-3">
+            Rp 28.000
+        </p>
+
+        <p class="text-xs text-gray-500 mt-1">
+            Stok:
+            <span class="font-semibold
+                text-red-500">
+                
+            </span>
+        </p>
+
+
+        
+        <button type="button"
+                onclick="showDetail(this)"
+                data-name="Ayam Goreng Original (1pc)"
+                data-category="-"
+                data-price="28.000"
+                data-description="-"
+                data-note="-"
+                data-image=""
+                data-status="Aktif"
+                class="w-full mt-4 border border-[#006ca8]
+                       text-[#006ca8] hover:bg-blue-50
+                       py-2 rounded-lg text-xs font-semibold">
+            Lihat Detail
+        </button>
+
+
+            
+            <div class="grid grid-cols-2 gap-2">
+
+            <button type="button"
+                    onclick="editProduct(this)"
+                    data-id="1"
+                    data-name="Ayam Goreng Original (1pc)"
+                    data-category=""
+                    data-description=""
+                    data-note=""
+                    data-price="28000.00"
+                    data-status="1"
+                    class="bg-blue-50 hover:bg-blue-100
+                           text-[#006ca8] py-2 rounded-lg
+                           text-xs font-semibold">
+                Edit
+            </button>
+
+                <form method="POST"
+                      action="http://127.0.0.1:8000/tenant/products/1"
+                      onsubmit="return confirm('Hapus produk ini?')">
+
+                    <input type="hidden" name="_token" value="yYhiI3qiA4hMUc68HA5HJUivVmQ8n2wIO1XHQAnK" autocomplete="off">                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit"
+                            class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 py-2.5 rounded-xl text-xs font-bold transition-colors">
+                        Hapus
+                    </button>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="product-card bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden relative group">
+
+    
+    <div class="h-40 w-full bg-slate-100 relative overflow-hidden block">
+
+                    <div class="w-full h-full flex items-center justify-center
+                        bg-gradient-to-br from-blue-50 to-slate-200 group-hover:scale-105 transition-transform duration-500">
+                <span class="text-5xl font-extrabold text-blue-200">
+                    A
+                </span>
+            </div>
+        
+        <span class="absolute top-3 left-3
+            bg-emerald-500 shadow-emerald-500/30
+            text-white text-[10px] font-extrabold px-3 py-1 rounded-full shadow-md tracking-wider uppercase">
+
+            Aktif
+
+        </span>
+
+    </div>
+
+
+    
+    <div class="p-4">
+
+        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            Tanpa kategori
+        </p>
+
+        <h3 class="product-name font-bold text-slate-800 text-base mt-1 leading-tight line-clamp-2" title="Ayam Goreng Crispy (1pc)">
+            Ayam Goreng Crispy (1pc)
+        </h3>
+
+        <p class="text-base font-extrabold text-[#005ea2] mt-2 mb-3">
+            Rp 30.000
+        </p>
+
+        <p class="text-xs text-gray-500 mt-1">
+            Stok:
+            <span class="font-semibold
+                text-red-500">
+                
+            </span>
+        </p>
+
+
+        
+        <button type="button"
+                onclick="showDetail(this)"
+                data-name="Ayam Goreng Crispy (1pc)"
+                data-category="-"
+                data-price="30.000"
+                data-description="-"
+                data-note="-"
+                data-image=""
+                data-status="Aktif"
+                class="w-full mt-4 border border-[#006ca8]
+                       text-[#006ca8] hover:bg-blue-50
+                       py-2 rounded-lg text-xs font-semibold">
+            Lihat Detail
+        </button>
+
+
+            
+            <div class="grid grid-cols-2 gap-2">
+
+            <button type="button"
+                    onclick="editProduct(this)"
+                    data-id="2"
+                    data-name="Ayam Goreng Crispy (1pc)"
+                    data-category=""
+                    data-description=""
+                    data-note=""
+                    data-price="30000.00"
+                    data-status="1"
+                    class="bg-blue-50 hover:bg-blue-100
+                           text-[#006ca8] py-2 rounded-lg
+                           text-xs font-semibold">
+                Edit
+            </button>
+
+                <form method="POST"
+                      action="http://127.0.0.1:8000/tenant/products/2"
+                      onsubmit="return confirm('Hapus produk ini?')">
+
+                    <input type="hidden" name="_token" value="yYhiI3qiA4hMUc68HA5HJUivVmQ8n2wIO1XHQAnK" autocomplete="off">                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit"
+                            class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 py-2.5 rounded-xl text-xs font-bold transition-colors">
+                        Hapus
+                    </button>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="product-card bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden relative group">
+
+    
+    <div class="h-40 w-full bg-slate-100 relative overflow-hidden block">
+
+                    <div class="w-full h-full flex items-center justify-center
+                        bg-gradient-to-br from-blue-50 to-slate-200 group-hover:scale-105 transition-transform duration-500">
+                <span class="text-5xl font-extrabold text-blue-200">
+                    C
+                </span>
+            </div>
+        
+        <span class="absolute top-3 left-3
+            bg-emerald-500 shadow-emerald-500/30
+            text-white text-[10px] font-extrabold px-3 py-1 rounded-full shadow-md tracking-wider uppercase">
+
+            Aktif
+
+        </span>
+
+    </div>
+
+
+    
+    <div class="p-4">
+
+        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            Tanpa kategori
+        </p>
+
+        <h3 class="product-name font-bold text-slate-800 text-base mt-1 leading-tight line-clamp-2" title="Coney Dog">
+            Coney Dog
+        </h3>
+
+        <p class="text-base font-extrabold text-[#005ea2] mt-2 mb-3">
+            Rp 25.000
+        </p>
+
+        <p class="text-xs text-gray-500 mt-1">
+            Stok:
+            <span class="font-semibold
+                text-red-500">
+                
+            </span>
+        </p>
+
+
+        
+        <button type="button"
+                onclick="showDetail(this)"
+                data-name="Coney Dog"
+                data-category="-"
+                data-price="25.000"
+                data-description="-"
+                data-note="-"
+                data-image=""
+                data-status="Aktif"
+                class="w-full mt-4 border border-[#006ca8]
+                       text-[#006ca8] hover:bg-blue-50
+                       py-2 rounded-lg text-xs font-semibold">
+            Lihat Detail
+        </button>
+
+
+            
+            <div class="grid grid-cols-2 gap-2">
+
+            <button type="button"
+                    onclick="editProduct(this)"
+                    data-id="3"
+                    data-name="Coney Dog"
+                    data-category=""
+                    data-description=""
+                    data-note=""
+                    data-price="25000.00"
+                    data-status="1"
+                    class="bg-blue-50 hover:bg-blue-100
+                           text-[#006ca8] py-2 rounded-lg
+                           text-xs font-semibold">
+                Edit
+            </button>
+
+                <form method="POST"
+                      action="http://127.0.0.1:8000/tenant/products/3"
+                      onsubmit="return confirm('Hapus produk ini?')">
+
+                    <input type="hidden" name="_token" value="yYhiI3qiA4hMUc68HA5HJUivVmQ8n2wIO1XHQAnK" autocomplete="off">                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit"
+                            class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 py-2.5 rounded-xl text-xs font-bold transition-colors">
+                        Hapus
+                    </button>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+</div>
+
+
+
+
+<div id="detailModal"
+     class="hidden fixed inset-0 bg-black/50 z-50
+            items-center justify-center p-5">
+
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl max-h-[90vh] overflow-hidden flex flex-col transform transition-transform scale-95" id="detailModalCard">
+
+        <div id="detailImage"
+             class="h-64 bg-slate-100 flex items-center justify-center relative">
+            <button onclick="closeModal('detailModal')" class="absolute top-4 right-4 h-8 w-8 bg-black/20 hover:bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="p-6 md:p-8 overflow-y-auto">
+
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                Detail Produk
+            </p>
+
+            <h2 id="detailName"
+                class="text-2xl font-extrabold text-slate-800 mt-1 leading-tight">
+            </h2>
+
+            <p id="detailPrice"
+               class="text-2xl font-extrabold text-[#005ea2] mt-3">
+            </p>
+
+            <div class="mt-6 space-y-4 text-sm bg-slate-50 p-4 rounded-xl border border-slate-100">
+
+                <div>
+                    <p class="text-xs text-gray-400">
+                        Kategori
+                    </p>
+                    <p id="detailCategory"
+                       class="font-semibold text-gray-700">
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-xs text-gray-400">
+                        Deskripsi
+                    </p>
+                    <p id="detailDescription"
+                       class="text-gray-600">
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-xs text-gray-400">
+                        Catatan
+                    </p>
+                    <p id="detailNote"
+                       class="text-gray-600">
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-xs text-gray-400">
+                        Status
+                    </p>
+                    <p id="detailStatus"
+                       class="font-semibold">
+                    </p>
+                </div>
+
+            </div>
+
+            <button onclick="closeModal('detailModal')"
+                    class="w-full mt-6 bg-[#006ca8]
+                           text-white py-3 rounded-xl
+                           font-semibold">
+                Tutup
+            </button>
+
+        </div>
+    </div>
+</div>
+
+
+
+<div id="editModal"
+     class="hidden fixed inset-0 bg-black/50 z-50
+            items-center justify-center p-5">
+
+    <div class="bg-white rounded-2xl max-w-lg w-full
+                max-h-[90vh] overflow-y-auto p-6">
+
+        <h2 class="text-xl font-bold text-gray-800 mb-5">
+            Edit Produk
+        </h2>
+
+        <form id="editForm"
+              method="POST"
+              enctype="multipart/form-data">
+
+            <input type="hidden" name="_token" value="yYhiI3qiA4hMUc68HA5HJUivVmQ8n2wIO1XHQAnK" autocomplete="off">            <input type="hidden" name="_method" value="PUT">
+            
+            <label class="text-sm font-semibold">
+                Nama Produk
+            </label>
+
+            <input id="editName"
+                   name="name"
+                   required
+                   class="w-full border rounded-xl
+                          px-4 py-3 mt-2 mb-4">
+
+
+            
+            <label class="text-sm font-semibold">
+                Kategori
+            </label>
+
+            <select id="editCategory"
+                    name="category"
+                    class="w-full border rounded-xl
+                           px-4 py-3 mt-2 mb-4">
+
+                <option value="">Pilih kategori</option>
+                <option value="Makanan Utama">Makanan Utama</option>
+                <option value="Snack">Snack</option>
+                <option value="Minuman">Minuman</option>
+                <option value="Dessert">Dessert</option>
+
+            </select>
+
+
+            
+            <label class="text-sm font-semibold">
+                Deskripsi
+            </label>
+
+            <textarea id="editDescription"
+                      name="description"
+                      rows="3"
+                      class="w-full border rounded-xl
+                             px-4 py-3 mt-2 mb-4"></textarea>
+
+
+            
+            <label class="text-sm font-semibold">
+                Harga
+            </label>
+
+            <input id="editPrice"
+                   type="number"
+                   name="price"
+                   required
+                   class="w-full border rounded-xl
+                          px-4 py-3 mt-2 mb-4">
+
+
+            
+            <label class="text-sm font-semibold">
+                Foto Produk
+            </label>
+
+            <input type="file"
+                   name="image"
+                   accept="image/png,image/jpeg"
+                   class="w-full mt-2 mb-4">
+
+
+            
+            <label class="text-sm font-semibold">
+                Catatan
+            </label>
+
+            <textarea id="editNote"
+                      name="note"
+                      rows="3"
+                      class="w-full border rounded-xl
+                             px-4 py-3 mt-2 mb-4"></textarea>
+
+
+            
+            <label class="flex items-center gap-2 mb-5">
+
+                <input id="editStatus"
+                       type="checkbox"
+                       name="is_available"
+                       value="1">
+
+                <span class="text-sm">
+                    Produk tersedia
+                </span>
+
+            </label>
+
+
+            <div class="grid grid-cols-2 gap-3">
+
+                <button type="button"
+                        onclick="closeModal('editModal')"
+                        class="border rounded-xl py-3
+                               text-sm font-semibold">
+                    Batal
+                </button>
+
+                <button type="submit"
+                        class="bg-[#8dc63f]
+                               text-white rounded-xl
+                               py-3 text-sm font-bold">
+                    Simpan
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+
+<script>
+
+const search = document.getElementById('searchProduct');
+
+search?.addEventListener('input', function () {
+    const keyword = this.value.toLowerCase();
+    document.querySelectorAll('.product-card').forEach(card => {
+        const name = card.querySelector('.product-name').textContent.toLowerCase();
+        if (name.includes(keyword)) {
+            card.classList.remove('hidden');
+            card.classList.add('block');
+        } else {
+            card.classList.add('hidden');
+            card.classList.remove('block');
+        }
+    });
+});
+
+function showDetail(button)
+{
+    document.getElementById('detailName').textContent =
+        button.dataset.name;
+
+    document.getElementById('detailCategory').textContent =
+        button.dataset.category;
+
+    document.getElementById('detailPrice').textContent =
+        'Rp ' + button.dataset.price;
+
+    document.getElementById('detailDescription').textContent =
+        button.dataset.description;
+
+    document.getElementById('detailNote').textContent =
+        button.dataset.note;
+
+    document.getElementById('detailStatus').textContent =
+        button.dataset.status;
+
+    const image = document.getElementById('detailImage');
+    if (button.dataset.image) {
+        image.innerHTML = `<img src="${button.dataset.image}" class="w-full h-full object-cover">
+                           <button onclick="closeModal('detailModal')" class="absolute top-4 right-4 h-8 w-8 bg-black/20 hover:bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-colors z-10"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>`;
+    } else {
+        image.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-blue-50 to-slate-100 flex items-center justify-center"><span class="text-6xl font-extrabold text-blue-200">${button.dataset.name.charAt(0).toUpperCase()}</span></div>
+                           <button onclick="closeModal('detailModal')" class="absolute top-4 right-4 h-8 w-8 bg-black/5 hover:bg-black/10 rounded-full flex items-center justify-center text-slate-500 transition-colors z-10"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>`;
+    }
+
+    openModal('detailModal', 'detailModalCard');
+}
+
+function editProduct(button)
+{
+    document.getElementById('editName').value =
+        button.dataset.name;
+
+    document.getElementById('editCategory').value =
+        button.dataset.category;
+
+    document.getElementById('editDescription').value =
+        button.dataset.description;
+
+    document.getElementById('editPrice').value =
+        button.dataset.price;
+
+    document.getElementById('editNote').value =
+        button.dataset.note;
+
+    document.getElementById('editStatus').checked =
+        button.dataset.status === '1';
+
+    document.getElementById('editForm').action =
+        `/tenant/products/${button.dataset.id}`;
+
+    openModal('editModal', 'editModalCard');
+}
+
+function openModal(modalId, cardId) {
+    const modal = document.getElementById(modalId);
+    const card = document.getElementById(cardId);
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    // Slight delay for animation
+    setTimeout(() => {
+        card.classList.remove('scale-95');
+        card.classList.add('scale-100');
+    }, 10);
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    // Find the card inside this modal
+    const card = modal.querySelector('div[id$="Card"]');
+
+    if (card) {
+        card.classList.remove('scale-100');
+        card.classList.add('scale-95');
+    }
+
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }, 200);
+}
+</script>
+        </div>
+    </main>
+
+</body>
+</html>

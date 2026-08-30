@@ -46,4 +46,20 @@ class Tenant extends Model
     {
         return $this->hasMany(Order::class);
     }
+
+    /**
+     * Helper: Cek apakah tenant sedang buka (berdasarkan waktu saat ini)
+     */
+    public function isOpen()
+    {
+        if (!$this->is_active) return false;
+        if (!$this->opening_time || !$this->closing_time) return true;
+        
+        $now = now()->format('H:i:s');
+        if ($this->closing_time < $this->opening_time) {
+            // Jam operasional melewati tengah malam
+            return $now >= $this->opening_time || $now <= $this->closing_time;
+        }
+        return $now >= $this->opening_time && $now <= $this->closing_time;
+    }
 }

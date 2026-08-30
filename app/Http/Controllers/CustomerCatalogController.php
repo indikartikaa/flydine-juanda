@@ -39,6 +39,10 @@ class CustomerCatalogController extends Controller
     {
         $tenant = Tenant::with('products')->findOrFail($id);
         
+        if (!$tenant->isOpen()) {
+            return redirect()->route('customer.menu')->with('error', 'Restoran sedang tutup.');
+        }
+
         // Cek apakah view tenant-menu sudah ada, jika tidak render halaman fallback
         if (view()->exists('customer.tenant-menu')) {
             return view('customer.tenant-menu', compact('tenant'));
@@ -110,6 +114,12 @@ class CustomerCatalogController extends Controller
         }
 
         $product = Product::find($request->product_id);
+        $tenant = Tenant::find($request->tenant_id);
+
+        if (!$tenant->isOpen()) {
+            return response()->json(['error' => 'closed', 'message' => 'Restoran sedang tutup.'], 400);
+        }
+
         $productId = $product->id;
 
         if (isset($cart[$productId])) {
@@ -196,6 +206,19 @@ class CustomerCatalogController extends Controller
         // Mock customer for MVP
         $customer = Customer::first();
         $customerId = $customer ? $customer->id : 1; 
+
+        // Hitung Auto-Cancel Dinamis
+        $autoCancelAt = now()->addMinutes(15);
+        $fullBoardingTime = null;
+
+        if ($request->customer_type === 'penumpang') {
+            $fullBoardingTime = \Carbon\Carbon::parse(date('Y-m-d') . ' ' . $request->boarding_time . ':00');
+            // Jika boarding time lebih awal dari waktu pembatalan otomatis standar (15 menit),
+            // batasi pembatalan tepat pada saat boarding time agar pelanggan tidak membayar setelah pesawat terbang.
+            if ($fullBoardingTime->isBefore($autoCancelAt)) {
+                $autoCancelAt = $fullBoardingTime;
+            }
+        }
         
         $order = Order::create([
             'order_code' => 'ORD-' . strtoupper(Str::random(6)),
@@ -204,11 +227,11 @@ class CustomerCatalogController extends Controller
             'customer_name' => $request->customer_name,
             'flight_number' => $request->customer_type === 'penumpang' ? strtoupper($request->flight_number) : null,
             'gate' => $request->customer_type === 'penumpang' ? strtoupper($request->gate) : null,
-            'boarding_time' => $request->customer_type === 'penumpang' ? date('Y-m-d') . ' ' . $request->boarding_time . ':00' : null,
+            'boarding_time' => $fullBoardingTime,
             'status' => 'menunggu',
             'payment_method' => $request->payment_method,
             'is_paid' => false,
-            'auto_cancel_at' => date('Y-m-d H:i:s', strtotime('+15 minutes')),
+            'auto_cancel_at' => $autoCancelAt,
             'total_amount' => $totalAmount,
             'ordered_at' => now(),
         ]);

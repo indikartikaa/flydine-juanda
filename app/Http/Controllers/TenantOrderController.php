@@ -100,4 +100,27 @@ class TenantOrderController extends Controller
             'order' => $order
         ]);
     }
+
+    /**
+     * Update Jam Operasional Tenant
+     */
+    public function updateHours(Request $request)
+    {
+        $request->validate([
+            'opening_time' => 'nullable|date_format:H:i',
+            'closing_time' => 'nullable|date_format:H:i'
+        ]);
+
+        $tenant = auth()->user()->tenant;
+        
+        if ($tenant) {
+            $tenant->opening_time = $request->opening_time;
+            $tenant->closing_time = $request->closing_time;
+            $tenant->save();
+
+            return redirect()->back()->with('success', 'Jam operasional berhasil diperbarui!');
+        }
+
+        return redirect()->back()->with('error', 'Gagal memperbarui jam operasional.');
+    }
 }
