@@ -91,6 +91,7 @@ Route::middleware('auth')
         Route::post('/settings/hours', [\App\Http\Controllers\TenantOrderController::class, 'updateHours'])->name('settings.hours');
 
         Route::get('/orders', [\App\Http\Controllers\TenantOrderController::class, 'index'])->name('orders');
+        Route::get('/orders/history', [\App\Http\Controllers\TenantOrderController::class, 'history'])->name('orders.history');
         Route::post('/orders/{order}/status', [\App\Http\Controllers\TenantOrderController::class, 'updateStatus'])->name('orders.status');
 
         /* Produk */

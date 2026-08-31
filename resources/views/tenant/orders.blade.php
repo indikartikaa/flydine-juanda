@@ -40,9 +40,6 @@
                 <span>Sedang Dimasak</span>
                 <span :class="{'bg-white text-[#005ea2]': activeTab === 'diproses', 'bg-amber-100 text-amber-600': activeTab !== 'diproses'}" class="px-1.5 py-0.5 rounded-md text-[10px] font-extrabold" x-text="countDiproses"></span>
             </button>
-            <button @click="activeTab = 'selesai'" :class="{'bg-[#005ea2] text-white shadow-md shadow-blue-500/20 font-bold border-transparent': activeTab === 'selesai', 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200 font-medium': activeTab !== 'selesai'}" class="px-5 py-2.5 rounded-full text-sm transition-all whitespace-nowrap border flex items-center space-x-2">
-                <span>Selesai</span>
-            </button>
         </div>
 
         <!-- Tabel Pesanan Lengkap -->
@@ -209,10 +206,15 @@
                         const data = await response.json();
                         
                         if (data.success) {
-                            // Update order in state
+                            // Update order in state or remove if completed/rejected
                             const index = this.orders.findIndex(o => o.id === orderId);
                             if (index !== -1) {
-                                this.orders[index].status = newStatus;
+                                if (newStatus === 'selesai' || newStatus === 'ditolak') {
+                                    // Remove from active list
+                                    this.orders.splice(index, 1);
+                                } else {
+                                    this.orders[index].status = newStatus;
+                                }
                             }
                         } else {
                             alert('Gagal mengupdate pesanan: ' + (data.message || 'Unknown error'));

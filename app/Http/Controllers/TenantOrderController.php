@@ -57,7 +57,7 @@ class TenantOrderController extends Controller
     }
 
     /**
-     * Menampilkan Halaman Manajemen Pesanan
+     * Menampilkan Halaman Manajemen Pesanan (Aktif Saja)
      */
     public function index(Request $request)
     {
@@ -66,10 +66,43 @@ class TenantOrderController extends Controller
         $orders = Order::with('orderItems')
             ->where('tenant_id', $tenantId)
             ->where('is_paid', true)
-            ->latest('ordered_at')
+            ->whereIn('status', ['menunggu', 'diproses'])
+            ->orderBy('ordered_at', 'asc')
             ->get();
 
         return view('tenant.orders', compact('orders'));
+    }
+
+    /**
+     * Menampilkan Halaman Riwayat Pesanan (Selesai/Ditolak)
+     */
+    public function history(Request $request)
+    {
+        $tenantId = auth()->user()->tenant_id;
+
+        $query = Order::with('orderItems')
+            ->where('tenant_id', $tenantId)
+            ->where('is_paid', true)
+            ->whereIn('status', ['selesai', 'ditolak', 'dibatalkan']);
+
+        // Filter Tanggal
+        if ($request->filled('date_filter')) {
+            $filter = $request->date_filter;
+            if ($filter === 'today') {
+                $query->whereDate('ordered_at', today());
+            } elseif ($filter === 'yesterday') {
+                $query->whereDate('ordered_at', today()->subDay());
+            } elseif ($filter === 'this_week') {
+                $query->whereBetween('ordered_at', [now()->startOfWeek(), now()->endOfWeek()]);
+            } elseif ($filter === 'this_month') {
+                $query->whereMonth('ordered_at', now()->month)
+                      ->whereYear('ordered_at', now()->year);
+            }
+        }
+
+        $orders = $query->latest('ordered_at')->paginate(15)->withQueryString();
+
+        return view('tenant.history', compact('orders'));
     }
 
     /**
