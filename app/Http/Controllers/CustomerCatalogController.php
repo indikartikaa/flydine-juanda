@@ -185,6 +185,7 @@ class CustomerCatalogController extends Controller
         $rules = [
             'customer_type' => 'required|in:penumpang,pengunjung',
             'customer_name' => 'required|string|max:100',
+            'phone_number' => 'required|string|max:20',
             'payment_method' => 'required|in:qris,transfer'
         ];
 
@@ -203,9 +204,28 @@ class CustomerCatalogController extends Controller
             return $carry + ($item['price'] * $item['quantity']);
         }, 0);
 
-        // Mock customer for MVP
-        $customer = Customer::first();
-        $customerId = $customer ? $customer->id : 1; 
+        // Auto Create / Reuse Customer by Phone Number
+        $phoneNumber = preg_replace('/[^0-9+]/', '', $request->phone_number); // Clean up phone number
+        
+        $customer = Customer::where('phone_number', $phoneNumber)->first();
+        if ($customer) {
+            // Customer exists, update name and last order time
+            $customer->name = $request->customer_name;
+            $customer->last_order_at = now();
+            $customer->total_orders += 1;
+            $customer->save();
+        } else {
+            // Create new customer
+            $customer = Customer::create([
+                'phone_number' => $phoneNumber,
+                'name' => $request->customer_name,
+                'first_order_at' => now(),
+                'last_order_at' => now(),
+                'total_orders' => 1,
+            ]);
+        }
+        
+        $customerId = $customer->id;
 
         // Hitung Auto-Cancel Dinamis
         $autoCancelAt = now()->addMinutes(15);

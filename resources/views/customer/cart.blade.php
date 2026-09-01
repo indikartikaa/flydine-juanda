@@ -186,8 +186,15 @@
 
                         <!-- Input Nama Pemesan -->
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5 ml-1" x-text="customerType === 'penumpang' ? 'Nama (Sesuai Boarding Pass)' : 'Nama Pemesan'"></label>
-                            <input type="text" name="customer_name" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] outline-none transition-all placeholder:text-slate-400" placeholder="Masukkan nama Anda">
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5 ml-1" x-text="customerType === 'penumpang' ? 'Nama (Sesuai Boarding Pass)' : 'Nama Lengkap'"></label>
+                            <input type="text" name="customer_name" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] outline-none transition-all placeholder:text-slate-400" placeholder="Contoh: Budi Santoso">
+                        </div>
+                        
+                        <!-- Input Nomor HP / WA -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5 ml-1">No. WhatsApp / Telepon</label>
+                            <input type="tel" name="phone_number" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] outline-none transition-all placeholder:text-slate-400" placeholder="Contoh: 08123456789">
+                            <p class="text-[10px] text-slate-500 mt-1.5 ml-1">Nomor ini digunakan untuk menghubungi Anda & melacak riwayat pesanan.</p>
                         </div>
                         
                         <!-- Input Penerbangan (Disembunyikan jika bukan penumpang) -->
