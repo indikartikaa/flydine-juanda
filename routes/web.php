@@ -16,6 +16,7 @@ Route::post('/cart/clear', [CustomerCatalogController::class, 'clearCart'])->nam
 Route::post('/checkout', [CustomerCatalogController::class, 'checkout'])->name('customer.checkout');
 Route::get('/tracking', [CustomerCatalogController::class, 'tracking'])->name('customer.tracking');
 Route::post('/tracking/pay', [CustomerCatalogController::class, 'simulatePayment'])->name('customer.simulate_payment');
+Route::get('/history', [CustomerCatalogController::class, 'history'])->name('customer.history');
 Route::post('/faq/complaint', [CustomerCatalogController::class, 'storeComplaint'])->name('customer.complaint');
 
 /* Static Pages */

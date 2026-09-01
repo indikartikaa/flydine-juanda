@@ -74,6 +74,11 @@
                         <span data-id="PESANAN" data-en="CART">PESANAN</span>
                     </a>
 
+                    <a href="{{ route('customer.history') }}" class="flex items-center space-x-2 text-sm font-bold text-slate-600 hover:text-[#005ea2] transition-colors group">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                        <span data-id="RIWAYAT" data-en="HISTORY">RIWAYAT</span>
+                    </a>
+
                     @if(session('order_code'))
                     <a href="{{ route('customer.tracking', ['order' => session('order_code')]) }}" class="flex items-center space-x-2 text-sm font-bold text-amber-500 hover:text-amber-600 transition-colors group bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200 shadow-sm">
                         <div class="relative">
@@ -110,6 +115,11 @@
                     <a href="{{ route('customer.cart') }}" class="flex items-center justify-center space-x-2 text-sm font-bold text-slate-700 bg-slate-50 py-3 rounded-xl hover:bg-slate-100">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                         <span data-id="PESANAN SAYA" data-en="MY CART">PESANAN SAYA</span>
+                    </a>
+                    
+                    <a href="{{ route('customer.history') }}" class="flex items-center justify-center space-x-2 text-sm font-bold text-slate-700 bg-slate-50 py-3 rounded-xl hover:bg-slate-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                        <span data-id="RIWAYAT PESANAN" data-en="ORDER HISTORY">RIWAYAT PESANAN</span>
                     </a>
                     
                     <a href="{{ route('login') }}" class="flex items-center justify-center space-x-2 text-sm font-bold text-white bg-[#005ea2] py-3 rounded-xl hover:bg-blue-700">
@@ -303,6 +313,7 @@
                 <div>
                     <h4 class="font-bold text-sm text-slate-800 mb-5 uppercase tracking-wider">Layanan Pelanggan</h4>
                     <ul class="space-y-3 text-sm font-medium text-slate-500">
+                        <li><a href="{{ route('customer.history') }}" class="hover:text-[#005ea2] hover:underline transition-all text-[#005ea2] font-bold">Riwayat Pesanan</a></li>
                         <li><a href="{{ route('page.cara-pesan') }}" class="hover:text-[#005ea2] hover:underline transition-all">Cara Pesan</a></li>
                         <li><a href="{{ route('page.faq') }}" class="hover:text-[#005ea2] hover:underline transition-all">Pusat Bantuan (FAQ)</a></li>
                         <li><a href="{{ route('page.terms') }}" class="hover:text-[#005ea2] hover:underline transition-all">Syarat & Ketentuan</a></li>

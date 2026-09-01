@@ -83,6 +83,28 @@ class CustomerCatalogController extends Controller
         return view('customer.tracking', compact('order'));
     }
 
+    public function history(Request $request)
+    {
+        $orders = collect();
+        $customer = null;
+        $searched = false;
+
+        if ($request->filled('phone_number')) {
+            $searched = true;
+            $phoneNumber = preg_replace('/[^0-9+]/', '', $request->phone_number);
+            $customer = Customer::where('phone_number', $phoneNumber)->first();
+
+            if ($customer) {
+                $orders = Order::with(['tenant'])
+                    ->where('customer_id', $customer->id)
+                    ->latest('ordered_at')
+                    ->get();
+            }
+        }
+
+        return view('customer.history', compact('orders', 'customer', 'searched'));
+    }
+
     public function simulatePayment(Request $request)
     {
         $order = Order::where('order_code', $request->order_code)->firstOrFail();
