@@ -83,6 +83,12 @@ class CustomerCatalogController extends Controller
         return view('customer.tracking', compact('order'));
     }
 
+    public function checkStatus($orderCode)
+    {
+        $order = Order::where('order_code', $orderCode)->firstOrFail();
+        return response()->json(['status' => $order->status]);
+    }
+
     public function history(Request $request)
     {
         $orders = collect();

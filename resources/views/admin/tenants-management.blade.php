@@ -6,7 +6,7 @@
 <div x-data="{ addTenantModalOpen: false, searchKeyword: '' }">
 
     <!-- Quick Stats Khusus Tenant (rounded-2xl cards with hover elevation) -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 mb-8">
         <!-- Stat Card 1 (Royal Blue Gradient) -->
         <div class="bg-gradient-to-br from-[#005ea2] to-blue-800 rounded-2xl p-6 text-white shadow-md shadow-blue-900/10 relative overflow-hidden group hover:shadow-xl hover:shadow-blue-900/20 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
             <div class="absolute -right-4 -bottom-4 opacity-15 text-white group-hover:scale-110 transition-transform duration-500 pointer-events-none">
@@ -14,65 +14,32 @@
                     <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z"/>
                 </svg>
             </div>
-            <p class="text-blue-100 text-xs font-bold uppercase tracking-wider mb-1 relative z-10">Total Mitra Beroperasi</p>
-            <h3 class="text-3xl md:text-4xl font-extrabold relative z-10 tracking-tight">18 <span class="text-sm font-medium opacity-80">Gerai Bandara</span></h3>
-            <p class="text-xs text-blue-200 mt-2 relative z-10 font-semibold">T1 (12 Gerai) &bull; T2 (6 Gerai)</p>
-        </div>
-        
-        <!-- Stat Card 2 (Pending Verification) -->
-        <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex justify-between items-center group hover:shadow-xl hover:shadow-slate-200/60 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
-            <div>
-                <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Menunggu Verifikasi</p>
-                <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">2 <span class="text-xs font-bold text-slate-400">Pendaftar</span></h3>
-                <p class="text-xs text-amber-600 font-semibold mt-2 flex items-center">
-                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5"></span>
-                    Dokumen belum ditinjau
-                </p>
-            </div>
-            <div class="h-14 w-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-xs">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-        </div>
-        
-        <!-- Stat Card 3 (Expiring Contract) -->
-        <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex justify-between items-center group hover:shadow-xl hover:shadow-slate-200/60 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
-            <div>
-                <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Kontrak Segera Habis</p>
-                <h3 class="text-3xl md:text-4xl font-extrabold text-rose-600 tracking-tight">1 <span class="text-xs font-bold text-slate-400">Tenant</span></h3>
-                <p class="text-xs text-rose-600 font-semibold mt-2 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    &lt; 30 Hari tersisa
-                </p>
-            </div>
-            <div class="h-14 w-14 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-xs">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-            </div>
+            <p class="text-blue-100 text-xs font-bold uppercase tracking-wider mb-1 relative z-10">Total Mitra Terdaftar</p>
+            <h3 class="text-3xl md:text-4xl font-extrabold relative z-10 tracking-tight">{{ $total_tenants }} <span class="text-sm font-medium opacity-80">Gerai Bandara</span></h3>
+            <p class="text-xs text-blue-200 mt-2 relative z-10 font-semibold">{{ $active_tenants }} Tenant Sedang Buka</p>
         </div>
     </div>
 
+
     <!-- Toolbar: Search, Filter, Action Button (#005ea2 CTA) -->
     <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 mb-6 flex flex-col md:flex-row justify-between items-center gap-4 hover:shadow-md transition-shadow">
-        <div class="flex flex-col md:flex-row w-full md:w-auto gap-3">
+        <form method="GET" action="{{ url('/admin/tenants-management') }}" class="flex flex-col md:flex-row w-full md:w-auto gap-3">
             <div class="relative w-full md:w-80">
-                <input type="text" x-model="searchKeyword" placeholder="Cari nama brand, PT, atau kode ruang..." 
+                <input type="text" name="search" value="{{ request('search') }}" oninput="clearTimeout(this.timer); this.timer = setTimeout(() => { this.closest('form').submit(); }, 500)" placeholder="Cari nama brand, PT, atau kode ruang..." 
                        class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-xs font-medium focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none transition-all bg-slate-50 focus:bg-white placeholder-slate-400">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 absolute left-3.5 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <button type="submit" class="absolute left-3.5 top-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 hover:text-[#005ea2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </button>
             </div>
             
-            <select class="border border-slate-200 rounded-xl px-4 py-2.5 text-xs bg-slate-50 hover:bg-white focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none transition-colors cursor-pointer text-slate-700 font-bold">
+            <select name="terminal" onchange="this.form.submit()" class="border border-slate-200 rounded-xl px-4 py-2.5 text-xs bg-slate-50 hover:bg-white focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none transition-colors cursor-pointer text-slate-700 font-bold">
                 <option value="">Filter: Semua Terminal</option>
-                <option value="1">Hanya Terminal 1 (T1)</option>
-                <option value="2">Hanya Terminal 2 (T2)</option>
+                <option value="1" {{ request('terminal') == '1' ? 'selected' : '' }}>Hanya Terminal 1 (T1)</option>
+                <option value="2" {{ request('terminal') == '2' ? 'selected' : '' }}>Hanya Terminal 2 (T2)</option>
             </select>
-        </div>
+        </form>
         
         <!-- Highly Prominent Primary CTA Button in #005ea2 -->
         <button @click="addTenantModalOpen = true" 
@@ -98,39 +65,44 @@
                     </tr>
                 </thead>
                 <tbody class="text-xs divide-y divide-slate-100 font-medium">
-                    
-                    <!-- Tenant 1 -->
+                    @forelse($tenants as $tenant)
                     <tr class="hover:bg-slate-50/80 transition-colors group">
                         <td class="px-6 py-5">
                             <div class="flex items-center">
                                 <div class="h-12 w-12 flex-shrink-0 bg-blue-50 rounded-2xl border border-blue-100 flex items-center justify-center text-[#005ea2] font-extrabold text-base shadow-xs group-hover:scale-105 transition-transform">
-                                    BP
+                                    {{ strtoupper(substr($tenant->name, 0, 2)) }}
                                 </div>
                                 <div class="ml-4">
-                                    <div class="font-extrabold text-slate-900 text-sm group-hover:text-[#005ea2] transition-colors">Beard Papa's</div>
-                                    <div class="text-xs text-slate-500 font-semibold mt-0.5">PT Sebastian Citra Indonesia</div>
+                                    <div class="font-extrabold text-slate-900 text-sm group-hover:text-[#005ea2] transition-colors">{{ $tenant->name }}</div>
+                                    <div class="text-xs text-slate-500 font-semibold mt-0.5">Kode: {{ $tenant->tenant_code }}</div>
                                 </div>
                             </div>
                         </td>
                         <td class="px-6 py-5">
                             <div class="font-bold text-slate-800">
-                                Terminal 1 <span class="bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded-md text-[11px] ml-1">EP-01-01</span>
+                                Lokasi <span class="bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded-md text-[11px] ml-1">{{ $tenant->floor_location ?? 'TBD' }}</span>
                             </div>
                             <div class="text-[11px] text-[#005ea2] font-extrabold bg-blue-50 border border-blue-100 inline-block px-2.5 py-0.5 rounded-full mt-1.5">
-                                F&B &bull; Bakery
+                                Kategori: {{ $tenant->category ?? 'Umum' }}
                             </div>
                         </td>
                         <td class="px-6 py-5">
-                            <div class="text-xs font-extrabold text-slate-800">02 Jan 2025</div>
+                            <div class="text-xs font-extrabold text-slate-800">{{ $tenant->products_count }} Produk</div>
                             <div class="text-[11px] text-slate-400 mt-0.5 font-semibold">
-                                s/d <span class="text-slate-600 font-bold">31 Des 2025</span>
+                                {{ $tenant->orders_count }} Pesanan Terselesaikan
                             </div>
                         </td>
                         <td class="px-6 py-5">
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-xs">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                Beroperasi
-                            </span>
+                            @if($tenant->isOpen())
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    Buka / Beroperasi
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-extrabold bg-rose-50 text-rose-700 border border-rose-200/80 shadow-xs">
+                                    Tutup / Tidak Aktif
+                                </span>
+                            @endif
                         </td>
                         <td class="px-6 py-5 text-right space-x-1">
                             <button class="p-2 text-slate-400 hover:text-[#005ea2] hover:bg-blue-50 rounded-xl transition-all" title="Edit Tenant">
@@ -145,65 +117,19 @@
                             </button>
                         </td>
                     </tr>
-
-                    <!-- Tenant 2 -->
-                    <tr class="hover:bg-slate-50/80 transition-colors group">
-                        <td class="px-6 py-5">
-                            <div class="flex items-center">
-                                <div class="h-12 w-12 flex-shrink-0 bg-amber-50 rounded-2xl border border-amber-100 flex items-center justify-center text-amber-600 font-extrabold text-base shadow-xs group-hover:scale-105 transition-transform">
-                                    AW
-                                </div>
-                                <div class="ml-4">
-                                    <div class="font-extrabold text-slate-900 text-sm group-hover:text-[#005ea2] transition-colors">A&W Restaurant</div>
-                                    <div class="text-xs text-slate-500 font-semibold mt-0.5">PT Fast Food Indonesia</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-5">
-                            <div class="font-bold text-slate-800">
-                                Terminal 1 <span class="bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded-md text-[11px] ml-1">EP-01-02</span>
-                            </div>
-                            <div class="text-[11px] text-amber-700 font-extrabold bg-amber-50 border border-amber-100 inline-block px-2.5 py-0.5 rounded-full mt-1.5">
-                                F&B &bull; Fast Food
-                            </div>
-                        </td>
-                        <td class="px-6 py-5">
-                            <div class="text-xs font-extrabold text-slate-800">01 Mar 2025</div>
-                            <div class="text-[11px] text-slate-400 mt-0.5 font-semibold">
-                                s/d <span class="text-slate-600 font-bold">28 Feb 2026</span>
-                            </div>
-                        </td>
-                        <td class="px-6 py-5">
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-xs">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                Beroperasi
-                            </span>
-                        </td>
-                        <td class="px-6 py-5 text-right space-x-1">
-                            <button class="p-2 text-slate-400 hover:text-[#005ea2] hover:bg-blue-50 rounded-xl transition-all" title="Edit Tenant">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                            </button>
-                            <button class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all" title="Tangguhkan (Suspend)">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                                </svg>
-                            </button>
-                        </td>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="px-6 py-10 text-center text-slate-500 font-medium">Belum ada tenant yang terdaftar.</td>
                     </tr>
+                    @endforelse
 
                 </tbody>
             </table>
         </div>
         
-        <!-- Paginasi (Mockup) -->
-        <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/50">
-            <span class="text-xs text-slate-500 font-semibold">Menampilkan <span class="font-extrabold text-slate-800">1</span> sampai <span class="font-extrabold text-slate-800">2</span> dari <span class="font-extrabold text-slate-800">18</span> mitra tenant</span>
-            <div class="inline-flex rounded-xl shadow-xs">
-                <button class="px-4 py-2 text-xs font-bold text-slate-300 bg-white border border-slate-200 rounded-l-xl cursor-not-allowed">Sebelumnya</button>
-                <button class="px-4 py-2 text-xs font-bold text-[#005ea2] bg-white border-t border-b border-r border-slate-200 rounded-r-xl hover:bg-slate-50 transition-colors">Selanjutnya</button>
-            </div>
+        <!-- Paginasi -->
+        <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50">
+            {{ $tenants->links() }}
         </div>
     </div>
 

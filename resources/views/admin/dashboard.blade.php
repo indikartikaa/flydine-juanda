@@ -56,12 +56,12 @@
                 <span class="text-blue-100 text-xs font-bold uppercase tracking-wider">Mitra Terdaftar</span>
                 <span class="h-8 w-8 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white text-xs font-bold">T1/T2</span>
             </div>
-            <h3 class="text-3xl md:text-4xl font-extrabold relative z-10 tracking-tight">18 <span class="text-sm font-medium opacity-80">Tenant</span></h3>
+            <h3 class="text-3xl md:text-4xl font-extrabold relative z-10 tracking-tight">{{ $total_tenants }} <span class="text-sm font-medium opacity-80">Tenant</span></h3>
             <p class="text-xs text-blue-200 mt-2 relative z-10 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1 text-[#8dc63f]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7 7 7M5 19l7-7 7 7" />
                 </svg>
-                +2 tenant baru bulan ini
+                Terdaftar di database
             </p>
         </div>
 
@@ -69,10 +69,10 @@
         <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex justify-between items-center group hover:shadow-xl hover:shadow-slate-200/60 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
             <div>
                 <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Mitra Beroperasi</p>
-                <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">16</h3>
+                <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">{{ $active_tenants }}</h3>
                 <p class="text-xs text-emerald-600 font-semibold mt-2 flex items-center">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>
-                    88.8% Operational Rate
+                    Tenant saat ini buka
                 </p>
             </div>
             <div class="h-14 w-14 bg-emerald-50 text-[#8dc63f] rounded-2xl flex items-center justify-center group-hover:bg-[#8dc63f] group-hover:text-white transition-all duration-300 shadow-sm">
@@ -87,7 +87,7 @@
             <div class="absolute top-0 left-0 w-1.5 h-full bg-amber-500"></div>
             <div>
                 <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Menunggu Respon</p>
-                <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">3 <span class="text-xs font-extrabold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full ml-1 animate-pulse">Baru!</span></h3>
+                <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">{{ $open_complaints }} @if($open_complaints > 0)<span class="text-xs font-extrabold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full ml-1 animate-pulse">Baru!</span>@endif</h3>
                 <p class="text-xs text-amber-600 font-semibold mt-2 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -106,12 +106,12 @@
         <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex justify-between items-center group hover:shadow-xl hover:shadow-slate-200/60 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
             <div>
                 <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Pesanan Hari Ini</p>
-                <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">142</h3>
+                <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">{{ $today_orders }}</h3>
                 <p class="text-xs text-indigo-600 font-semibold mt-2 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                     </svg>
-                    +12% dibanding kemarin
+                    Transaksi aktif hari ini
                 </p>
             </div>
             <div class="h-14 w-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-sm">
@@ -145,45 +145,37 @@
         <div class="p-6 md:p-8">
             <div class="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-slate-200">
                 
-                <!-- Log 1: Aktivasi Tenant -->
+                @forelse($recent_logs as $log)
+                <!-- Log Item -->
                 <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                    <div class="flex items-center justify-center w-10 h-10 rounded-2xl border-4 border-white bg-[#005ea2] text-white font-extrabold text-xs shadow-md shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 relative z-10">
-                        SYS
+                    <div class="flex items-center justify-center w-10 h-10 rounded-2xl border-4 border-white {{ $log['color'] }} text-white font-extrabold text-xs shadow-md shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 relative z-10">
+                        {{ $log['icon'] }}
                     </div>
-                    <div class="w-[calc(100%-3.5rem)] md:w-[calc(50%-2.5rem)] bg-white p-5 rounded-2xl border border-slate-100 shadow-sm group-hover:shadow-md hover:border-blue-200 transition-all">
+                    <div class="w-[calc(100%-3.5rem)] md:w-[calc(50%-2.5rem)] bg-white p-5 rounded-2xl border border-slate-100 shadow-sm group-hover:shadow-md hover:border-slate-300 transition-all">
                         <div class="flex items-center justify-between mb-1.5">
-                            <span class="font-bold text-slate-900 text-sm">Aktivasi Tenant Baru</span>
-                            <span class="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">14:30 WIB</span>
+                            <span class="font-bold text-slate-900 text-sm">{{ $log['title'] }}</span>
+                            <span class="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{{ \Carbon\Carbon::parse($log['time'])->format('H:i') }} WIB</span>
                         </div>
                         <p class="text-xs leading-relaxed text-slate-500">
-                            Tenant <span class="font-bold text-[#005ea2]">A&W Terminal 1</span> telah resmi diaktifkan dan siap melayani pemesanan makanan penumpang.
+                            {{ $log['description'] }}
                         </p>
-                    </div>
-                </div>
-
-                <!-- Log 2: Komplain Masuk -->
-                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                    <div class="flex items-center justify-center w-10 h-10 rounded-2xl border-4 border-white bg-amber-500 text-white font-extrabold text-xs shadow-md shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 relative z-10">
-                        CMP
-                    </div>
-                    <div class="w-[calc(100%-3.5rem)] md:w-[calc(50%-2.5rem)] bg-white p-5 rounded-2xl border border-amber-100 shadow-sm group-hover:shadow-md hover:border-amber-200 transition-all">
-                        <div class="flex items-center justify-between mb-1.5">
-                            <span class="font-bold text-slate-900 text-sm">Komplain Diterima</span>
-                            <span class="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">13:15 WIB</span>
-                        </div>
-                        <p class="text-xs leading-relaxed text-slate-500">
-                            Komplain baru dilaporkan oleh Budi Santoso untuk pesanan <span class="font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">#ORD-98765</span> (A&W T1).
-                        </p>
+                        @if(isset($log['link']))
                         <div class="mt-3 flex justify-end">
-                            <a href="{{ url('/admin/complaints') }}" class="bg-[#005ea2] hover:bg-blue-800 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl transition-all shadow-sm flex items-center gap-1">
-                                Tindak Lanjuti
+                            <a href="{{ $log['link'] }}" class="bg-[#005ea2] hover:bg-blue-800 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl transition-all shadow-sm flex items-center gap-1">
+                                Lihat Detail
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                 </svg>
                             </a>
                         </div>
+                        @endif
                     </div>
                 </div>
+                @empty
+                <div class="text-center py-6 text-slate-500 font-medium text-sm">
+                    Belum ada aktivitas hari ini.
+                </div>
+                @endforelse
 
             </div>
         </div>

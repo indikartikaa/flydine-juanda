@@ -250,5 +250,27 @@
 
     </div>
 
+    <!-- Auto Refresh Polling Script -->
+    <script>
+        document.addEventListener('alpine:init', () => {
+            const currentStatus = '{{ $order->status }}';
+            const orderCode = '{{ $order->order_code }}';
+            
+            // Do not poll if the order is already finished, rejected, or cancelled
+            if (!['selesai', 'ditolak', 'dibatalkan'].includes(currentStatus)) {
+                setInterval(() => {
+                    fetch(`/tracking/${orderCode}/status`)
+                        .then(response => response.json())
+                        .then(data => {
+                            // If the status from the server is different from what is currently displayed, reload the page
+                            if (data.status && data.status !== currentStatus) {
+                                window.location.reload();
+                            }
+                        })
+                        .catch(err => console.error('Error polling status:', err));
+                }, 5000); // Check every 5 seconds
+            }
+        });
+    </script>
 </body>
 </html>

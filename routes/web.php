@@ -15,6 +15,7 @@ Route::post('/cart/update', [CustomerCatalogController::class, 'updateCart'])->n
 Route::post('/cart/clear', [CustomerCatalogController::class, 'clearCart'])->name('customer.cart.clear');
 Route::post('/checkout', [CustomerCatalogController::class, 'checkout'])->name('customer.checkout');
 Route::get('/tracking', [CustomerCatalogController::class, 'tracking'])->name('customer.tracking');
+Route::get('/tracking/{order}/status', [CustomerCatalogController::class, 'checkStatus'])->name('customer.tracking.status');
 Route::post('/tracking/pay', [CustomerCatalogController::class, 'simulatePayment'])->name('customer.simulate_payment');
 Route::get('/history', [CustomerCatalogController::class, 'history'])->name('customer.history');
 Route::post('/faq/complaint', [CustomerCatalogController::class, 'storeComplaint'])->name('customer.complaint');
@@ -47,17 +48,9 @@ Route::get('/dashboard', function () {
 /* Admin */
 Route::middleware('auth')->prefix('admin')->group(function () {
 
-    Route::get('/dashboard', function () {
-        abort_unless(auth()->user()->role === 'admin_ops', 403);
+    Route::get('/dashboard', [\App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
 
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
-
-    Route::get('/tenants-management', function () {
-        abort_unless(auth()->user()->role === 'admin_ops', 403);
-
-        return view('admin.tenants-management');
-    });
+    Route::get('/tenants-management', [\App\Http\Controllers\AdminController::class, 'tenantsManagement']);
 
     Route::get('/complaints', function () {
         abort_unless(auth()->user()->role === 'admin_ops', 403);
