@@ -59,16 +59,27 @@
                     <tbody class="text-sm divide-y divide-slate-100">
                         <template x-for="order in filteredOrders" :key="order.id">
                             <tr class="hover:bg-slate-50/50 transition-colors group">
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 align-top">
                                     <div class="flex items-center space-x-2">
                                         <div class="w-2 h-2 rounded-full" :class="order.status === 'menunggu' ? 'bg-rose-500 animate-pulse' : 'bg-slate-300'"></div>
                                         <span class="font-bold text-slate-700" x-text="formatTime(order.ordered_at)"></span>
                                     </div>
+                                    <div x-show="order.status === 'menunggu' || order.status === 'diproses'" class="mt-2 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-md inline-flex items-center shadow-xs transition-colors"
+                                        :class="{
+                                            'bg-emerald-50 text-emerald-700 border border-emerald-200': getSlaStatus(order.ordered_at).status === 'aman',
+                                            'bg-amber-50 text-amber-700 border border-amber-200': getSlaStatus(order.ordered_at).status === 'peringatan',
+                                            'bg-rose-50 text-rose-700 border border-rose-200 animate-pulse': getSlaStatus(order.ordered_at).status === 'terlambat'
+                                        }">
+                                        <svg x-show="getSlaStatus(order.ordered_at).status === 'aman'" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        <svg x-show="getSlaStatus(order.ordered_at).status === 'peringatan'" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        <svg x-show="getSlaStatus(order.ordered_at).status === 'terlambat'" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                        <span x-text="getSlaStatus(order.ordered_at).label + ' (' + getSlaStatus(order.ordered_at).minutes + 'm)'"></span>
+                                    </div>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 align-top">
                                     <span class="font-extrabold text-[#005ea2] bg-blue-50 px-2 py-1 rounded-lg border border-blue-100" x-text="order.order_code"></span>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 align-top">
                                     <div class="font-bold text-slate-800" x-text="order.flight_number"></div>
                                     <div class="flex items-center mt-1 space-x-1">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" :class="order.status === 'selesai' ? 'text-emerald-500' : 'text-rose-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -77,7 +88,7 @@
                                         <span class="text-[11px] font-bold uppercase tracking-wider" :class="order.status === 'selesai' ? 'text-emerald-600' : 'text-rose-500'" x-text="'Boarding: ' + formatTime(order.boarding_time)"></span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 align-top">
                                     <ul class="text-slate-600 font-medium space-y-1">
                                         <template x-for="item in order.order_items" :key="item.id">
                                             <li class="flex items-start">
@@ -87,7 +98,7 @@
                                         </template>
                                     </ul>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 align-top">
                                     <!-- Status Menunggu -->
                                     <span x-show="order.status === 'menunggu'" class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-600 border border-amber-200 shadow-sm">
                                         <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5"></span>
@@ -115,7 +126,7 @@
                                         Ditolak
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-center">
+                                <td class="px-6 py-4 text-center align-top">
                                     <div class="flex flex-col space-y-2">
                                         <!-- Actions for Menunggu -->
                                         <template x-if="order.status === 'menunggu'">
@@ -162,7 +173,29 @@
                 activeTab: 'semua',
                 searchQuery: '',
                 orders: @json($orders),
+                currentTime: new Date(),
+
+                init() {
+                    setInterval(() => {
+                        this.currentTime = new Date();
+                    }, 10000); // 10 seconds refresh
+                },
                 
+                getSlaStatus(orderedAt) {
+                    if (!orderedAt) return { status: 'aman', minutes: 0, label: 'Aman' };
+                    const ordered = new Date(orderedAt);
+                    const diffMs = this.currentTime - ordered;
+                    const diffMins = Math.floor(diffMs / 60000);
+
+                    if (diffMins < 10) {
+                        return { status: 'aman', minutes: diffMins, label: 'Aman' };
+                    } else if (diffMins >= 10 && diffMins < 15) {
+                        return { status: 'peringatan', minutes: diffMins, label: 'Peringatan' };
+                    } else {
+                        return { status: 'terlambat', minutes: diffMins, label: 'Terlambat' };
+                    }
+                },
+
                 get filteredOrders() {
                     let result = this.orders;
                     

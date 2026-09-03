@@ -76,6 +76,9 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         
         return redirect()->back()->with('success', 'Status komplain berhasil diperbarui!');
     })->name('admin.complaints.status');
+
+    Route::get('/fraud-monitoring', [\App\Http\Controllers\AdminFraudController::class, 'index'])->name('admin.fraud');
+    Route::post('/fraud-monitoring/{customer}/unblock', [\App\Http\Controllers\AdminFraudController::class, 'unblock'])->name('admin.fraud.unblock');
 });
 
 /* Tenant */

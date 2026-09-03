@@ -252,6 +252,17 @@ class CustomerCatalogController extends Controller
                 'total_orders' => 1,
             ]);
         }
+
+        // 1. Cek apakah customer sudah dalam status terblokir sebelumnya
+        if ($customer->is_blocked) {
+            return redirect()->route('customer.menu')->with('error', 'Pemesanan gagal. Nomor HP Anda ditangguhkan sementara karena sistem mendeteksi aktivitas mencurigakan. Silakan hubungi Pusat Bantuan FlyDine jika ini adalah sebuah kesalahan.');
+        }
+
+        // 2. Jalankan Fraud Detection (cek histori 30 menit terakhir)
+        $fraudService = app(\App\Services\FraudDetectionService::class);
+        if ($fraudService->checkCancelledOrderPattern($customer->id)) {
+            return redirect()->route('customer.menu')->with('error', 'Pemesanan gagal. Nomor HP Anda ditangguhkan karena sistem mendeteksi terlalu banyak pesanan batal. Hubungi Pusat Bantuan FlyDine untuk konfirmasi.');
+        }
         
         $customerId = $customer->id;
 

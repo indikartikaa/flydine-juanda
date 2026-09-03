@@ -28,6 +28,14 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Catat aktivitas login ke Centralized Activity Logger
+        app(\App\Services\ActivityLogger::class)->log(
+            'LOGIN_SUCCESS',
+            'users',
+            auth()->id(),
+            'Pengguna berhasil login ke sistem'
+        );
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 
