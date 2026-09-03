@@ -116,11 +116,17 @@ class TenantOrderController extends Controller
         }
 
         $request->validate([
-            'status' => 'required|in:diproses,selesai,ditolak'
+            'status' => 'required|in:diproses,siap,selesai,dibatalkan'
         ]);
 
         $order->status = $request->status;
         
+        if ($request->status === 'siap' || $request->status === 'selesai') {
+            if (!$order->ready_at) {
+                $order->ready_at = now();
+            }
+        }
+
         if ($request->status === 'selesai') {
             $order->completed_at = now();
         }

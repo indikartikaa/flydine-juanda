@@ -50,6 +50,9 @@ Route::middleware('auth')->prefix('admin')->group(function () {
 
     Route::get('/dashboard', [\App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
 
+    Route::get('/executive-dashboard', [\App\Http\Controllers\ExecutiveDashboardController::class, 'index'])->name('admin.executive-dashboard');
+    Route::get('/executive-dashboard/export', [\App\Http\Controllers\ExecutiveDashboardController::class, 'export'])->name('admin.executive-dashboard.export');
+
     Route::get('/tenants-management', [\App\Http\Controllers\AdminController::class, 'tenantsManagement']);
 
     Route::get('/complaints', function () {

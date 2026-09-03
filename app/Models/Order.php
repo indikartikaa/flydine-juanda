@@ -21,6 +21,7 @@ class Order extends Model
         'payment_method',
         'is_paid',
         'heading_to_tenant_at',
+        'ready_at',
         'auto_cancel_at',
         'total_amount',
         'ordered_at',
@@ -30,6 +31,7 @@ class Order extends Model
     protected $casts = [
         'boarding_time' => 'datetime',
         'heading_to_tenant_at' => 'datetime',
+        'ready_at' => 'datetime',
         'auto_cancel_at' => 'datetime',
         'ordered_at' => 'datetime',
         'completed_at' => 'datetime',

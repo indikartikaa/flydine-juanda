@@ -58,8 +58,12 @@ class OrderSeeder extends Seeder
             $status = $faker->randomElement($statuses);
             $heading_to_tenant_at = in_array($status, ['diproses', 'siap', 'selesai'])
                 ? (clone $ordered_at)->addMinutes(rand(2, 15)) : null;
+            
+            $ready_at = in_array($status, ['siap', 'selesai'])
+                ? (clone $ordered_at)->addMinutes(rand(5, 25)) : null;
+
             $completed_at = $status === 'selesai'
-                ? (clone $ordered_at)->addMinutes(rand(15, 40)) : null;
+                ? (clone $ready_at ?? $ordered_at)->addMinutes(rand(5, 15)) : null;
 
             $orderCode = 'FD-' . $ordered_at->format('Ymd') . '-' . str_pad($i, 4, '0', STR_PAD_LEFT);
 
@@ -73,6 +77,7 @@ class OrderSeeder extends Seeder
                 'boarding_time' => $boarding_time,
                 'status' => $status,
                 'heading_to_tenant_at' => $heading_to_tenant_at,
+                'ready_at' => $ready_at,
                 'auto_cancel_at' => $auto_cancel_at,
                 'total_amount' => 0, // diisi ulang setelah order_items dibuat
                 'ordered_at' => $ordered_at,
