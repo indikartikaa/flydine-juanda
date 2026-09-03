@@ -38,30 +38,22 @@
     </script>
 </head>
 
-<body class="text-slate-800 flex flex-col min-h-screen selection:bg-[#005ea2] selection:text-white relative" x-data="{ mobileMenuOpen: false }">
+<body class="text-slate-800 flex flex-col min-h-screen selection:bg-[#005ea2] selection:text-white relative" x-data="{ mobileMenuOpen: false, lang: 'id' }">
 
     <!-- Header / Navigation -->
     <header class="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm transition-all duration-300">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 sm:h-20">
                 <!-- Logo & Location -->
-                <div class="flex items-center space-x-3 group cursor-pointer">
-                    <div class="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-gradient-to-tr from-[#005ea2] to-blue-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform duration-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-7 sm:w-7 text-[#8dc63f]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-none">FlyDine<span class="text-[#8dc63f]">.</span></h1>
-                        <p class="text-[10px] sm:text-xs text-slate-500 font-bold tracking-widest uppercase mt-0.5">Juanda Airport</p>
-                    </div>
-                </div>
+                <a href="{{ route('customer.menu') }}" class="group cursor-pointer">
+                    <img src="{{ asset('images/logo-flydine.png') }}" alt="FlyDine Juanda Airport" class="h-16 sm:h-20 w-auto object-contain group-hover:scale-105 transition-transform duration-300">
+                </a>
 
                 <!-- Desktop Nav -->
                 <div class="hidden md:flex items-center space-x-6">
                     <div class="bg-slate-100/80 p-1 rounded-full flex items-center">
-                        <button onclick="changeLanguage('id')" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-white text-[#005ea2] shadow-sm">ID</button>
-                        <button onclick="changeLanguage('en')" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all text-slate-500 hover:text-slate-700">EN</button>
+                        <button @click="lang = 'id'; changeLanguage('id')" :class="lang === 'id' ? 'bg-white text-[#005ea2] shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all">ID</button>
+                        <button @click="lang = 'en'; changeLanguage('en')" :class="lang === 'en' ? 'bg-white text-[#005ea2] shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all">EN</button>
                     </div>
                     
                     <a href="{{ route('customer.cart') }}" class="flex items-center space-x-2 text-sm font-bold text-slate-600 hover:text-[#005ea2] transition-colors group">
@@ -108,8 +100,8 @@
             <div x-show="mobileMenuOpen" x-collapse class="md:hidden border-t border-slate-100 bg-white">
                 <div class="py-4 space-y-4 px-2">
                     <div class="bg-slate-50 p-1.5 rounded-full flex items-center w-max mx-auto mb-4">
-                        <button onclick="changeLanguage('id')" class="px-6 py-2 rounded-full text-xs font-bold transition-all bg-white text-[#005ea2] shadow-sm">ID</button>
-                        <button onclick="changeLanguage('en')" class="px-6 py-2 rounded-full text-xs font-bold transition-all text-slate-500">EN</button>
+                        <button @click="lang = 'id'; changeLanguage('id')" :class="lang === 'id' ? 'bg-white text-[#005ea2] shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-6 py-2 rounded-full text-xs font-bold transition-all">ID</button>
+                        <button @click="lang = 'en'; changeLanguage('en')" :class="lang === 'en' ? 'bg-white text-[#005ea2] shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-6 py-2 rounded-full text-xs font-bold transition-all">EN</button>
                     </div>
                     
                     <a href="{{ route('customer.cart') }}" class="flex items-center justify-center space-x-2 text-sm font-bold text-slate-700 bg-slate-50 py-3 rounded-xl hover:bg-slate-100">
@@ -117,25 +109,10 @@
                         <span data-id="PESANAN SAYA" data-en="MY CART">PESANAN SAYA</span>
                     </a>
                     
-                    <a href="{{ route('customer.history') }}" class="flex items-center justify-center space-x-2 text-sm font-bold text-slate-700 bg-slate-50 py-3 rounded-xl hover:bg-slate-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                        <span data-id="RIWAYAT PESANAN" data-en="ORDER HISTORY">RIWAYAT PESANAN</span>
-                    </a>
-                    
                     <a href="{{ route('login') }}" class="flex items-center justify-center space-x-2 text-sm font-bold text-white bg-[#005ea2] py-3 rounded-xl hover:bg-blue-700">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
                         <span data-id="PORTAL LOGIN TENANT" data-en="TENANT LOGIN PORTAL">PORTAL LOGIN TENANT</span>
                     </a>
-
-                    <!-- Other Links -->
-                    <div class="pt-4 mt-4 border-t border-slate-100 grid grid-cols-2 gap-3">
-                        <a href="{{ route('page.cara-pesan') }}" class="text-xs font-semibold text-slate-600 hover:text-[#005ea2]">Cara Pesan</a>
-                        <a href="{{ route('page.faq') }}" class="text-xs font-semibold text-slate-600 hover:text-[#005ea2]">Pusat Bantuan</a>
-                        <a href="{{ route('page.terms') }}" class="text-xs font-semibold text-slate-600 hover:text-[#005ea2]">Syarat & Ketentuan</a>
-                        <a href="{{ route('page.privacy') }}" class="text-xs font-semibold text-slate-600 hover:text-[#005ea2]">Kebijakan Privasi</a>
-                        <a href="{{ route('page.daftar-tenant') }}" class="text-xs font-semibold text-slate-600 hover:text-[#005ea2]">Daftar Tenant</a>
-                        <a href="{{ route('page.promosi') }}" class="text-xs font-semibold text-slate-600 hover:text-[#005ea2]">Promosi</a>
-                    </div>
                 </div>
             </div>
         </div>
@@ -144,7 +121,7 @@
     <!-- Main Content -->
     <main class="flex-grow flex flex-col relative">
         
-        <!-- HD Hero Background -->
+        <!-- HD Hero Background (Dari Desain Asli) -->
         <div class="absolute top-0 inset-x-0 h-[340px] md:h-[420px] -z-10 bg-cover bg-center bg-no-repeat" style="background-image: linear-gradient(to bottom, rgba(0,59,102,0.9), rgba(0,94,162,0.6), rgba(248,250,252,1)), url('{{ asset('images/juanda.jpg') }}');"></div>
 
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
@@ -162,12 +139,12 @@
             </div>
 
             <!-- Search & Filter (Floating Island) -->
-            <div class="mb-10 sticky top-[72px] sm:top-24 z-40 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-8 sticky top-[72px] sm:top-24 z-40 max-w-5xl mx-auto">
                 <form method="GET" action="{{ route('customer.menu') }}" class="bg-white/95 backdrop-blur-xl p-3 sm:p-2 rounded-3xl sm:rounded-full shadow-xl shadow-slate-200/50 border border-white flex flex-col md:flex-row md:items-center justify-between gap-3">
                     
                     <input type="hidden" name="terminal" id="terminalInput" value="{{ request('terminal', 'semua') }}">
                     
-                    <!-- Chips / Pills Filter -->
+                    <!-- Chips / Pills Filter (Terminal) -->
                     <div class="flex space-x-2 overflow-x-auto scrollbar-hide pb-1 md:pb-0 md:pl-2 order-2 md:order-1">
                         @php $activeCategory = request('terminal', 'semua'); @endphp
                         <button type="button" onclick="document.getElementById('terminalInput').value='semua'; this.closest('form').submit();" class="px-5 py-2.5 rounded-full border text-sm transition-all whitespace-nowrap {{ $activeCategory === 'semua' ? 'bg-[#005ea2] text-white font-bold shadow-md shadow-blue-500/20 border-transparent' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 font-medium' }}">
@@ -193,26 +170,24 @@
                 </form>
             </div>
 
+
             <!-- Tenant Cards Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 pb-10">
                 
                 @forelse($tenants as $tenant)
-                <div class="tenant-card bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex-col group">
+                <div class="tenant-card bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group relative">
                     
                     <!-- Cover Image Area -->
-                    <div class="h-48 bg-gradient-to-br from-slate-100 to-slate-50 relative flex items-center justify-center p-6">
+                    <div class="h-44 bg-gradient-to-br from-slate-100 to-slate-50 relative flex items-center justify-center p-6">
                         <!-- Pseudo-Logo -->
-                        <div class="h-24 w-24 bg-white rounded-full shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-                            <h2 class="text-4xl font-black text-[#005ea2] tracking-tighter">
+                        <div class="h-20 w-20 bg-white rounded-full shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-500 border border-slate-100">
+                            <h2 class="text-3xl font-black text-[#005ea2] tracking-tighter">
                                 {{ strtoupper(substr(str_replace([' ', "'"], '', $tenant->name), 0, 2)) }}
                             </h2>
                         </div>
 
                         <!-- Status Label -->
-                        @php
-                            $open = $tenant->isOpen();
-                        @endphp
-                        
+                        @php $open = $tenant->isOpen(); @endphp
                         @if($open)
                             <div class="absolute top-4 right-4 bg-white/95 text-emerald-600 text-[10px] font-extrabold px-3 py-1.5 rounded-full shadow-sm border border-emerald-100 tracking-wider flex items-center space-x-1.5 z-10">
                                 <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> 
@@ -224,21 +199,36 @@
                                 <span>CLOSED</span>
                             </div>
                             <!-- Grayscale Overlay when closed -->
-                            <div class="absolute inset-0 bg-white/40 backdrop-grayscale z-0"></div>
+                            <div class="absolute inset-0 bg-white/50 backdrop-grayscale z-0"></div>
                         @endif
                         
                         <!-- Location Badge -->
                         <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur text-slate-600 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm border border-slate-100 tracking-wider flex items-center space-x-1.5">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-amber-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-[#005ea2]" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" /></svg>
                             <span>T1 - {{ $tenant->floor_location ?? 'Lounge' }}</span>
                         </div>
                     </div>
 
                     <!-- Card Body -->
                     <div class="p-6 sm:p-7 flex flex-col flex-grow bg-white">
-                        <h3 class="font-extrabold text-xl text-slate-800 tracking-tight mb-4 group-hover:text-[#005ea2] transition-colors line-clamp-1">{{ $tenant->name }}</h3>
+                        <h3 class="font-extrabold text-xl text-slate-800 tracking-tight group-hover:text-[#005ea2] transition-colors line-clamp-1">{{ $tenant->name }}</h3>
                         
-                        <!-- Preview Menu -->
+                        <!-- KOMPONEN BARU: Rating & Estimasi Waktu ala Aplikasi Delivery -->
+                        <div class="flex items-center space-x-3 mt-2 mb-5 text-xs font-bold text-slate-600">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-400 mr-1 pb-0.5" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                                4.8
+                            </div>
+                            <div class="w-1 h-1 bg-slate-300 rounded-full"></div>
+                            <div class="flex items-center text-slate-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-[#8dc63f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                10 - 15 min
+                            </div>
+                            <div class="w-1 h-1 bg-slate-300 rounded-full"></div>
+                            <div class="text-slate-400 font-medium">$$$</div>
+                        </div>
+                        
+                        <!-- Preview Menu (Dari Desain Asli) -->
                         <div class="space-y-3 mb-6 flex-grow">
                             @forelse($tenant->products->take(3) as $product)
                                 <div class="flex justify-between items-center text-sm">
@@ -257,13 +247,13 @@
 
                         <!-- CTA Button -->
                         @if($open)
-                            <a href="{{ route('customer.tenant.show', $tenant->id) }}" class="mt-auto w-full bg-[#005ea2] hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl text-sm transition-all shadow-md shadow-blue-500/20 hover:-translate-y-0.5 flex items-center justify-center group/btn relative z-10">
-                                <span data-id="Lihat Menu & Pesan" data-en="View Menu & Order">Lihat Menu & Pesan</span>
+                            <a href="{{ route('customer.tenant.show', $tenant->id) }}" class="mt-auto w-full bg-white border-2 border-[#005ea2] text-[#005ea2] hover:bg-[#005ea2] hover:text-white font-bold py-3 rounded-xl text-sm transition-all flex items-center justify-center group/btn relative z-10">
+                                <span data-id="Pilih Menu" data-en="Select Menu">Pilih Menu</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2 group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                             </a>
                         @else
-                            <div class="mt-auto w-full bg-slate-100 text-slate-400 font-bold py-3.5 rounded-xl text-sm flex items-center justify-center cursor-not-allowed relative z-10 border border-slate-200">
-                                <span data-id="Restoran Tutup" data-en="Restaurant Closed">Restoran Tutup</span>
+                            <div class="mt-auto w-full bg-slate-50 text-slate-400 font-bold py-3 rounded-xl text-sm flex items-center justify-center cursor-not-allowed relative z-10 border border-slate-200">
+                                <span data-id="Tutup" data-en="Closed">Tutup</span>
                             </div>
                         @endif
                     </div>
@@ -283,73 +273,114 @@
             <div class="pb-12">
                 {{ $tenants->links() }}
             </div>
-        </div>
-    </main>
 
-    <!-- FlyDine Custom Footer -->
-    <footer class="bg-slate-100 border-t-4 border-[#005ea2] pt-16 mt-auto">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <!-- Top Footer Links & Newsletter -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 mb-12 border-b border-slate-100 pb-12">
-                <div class="lg:col-span-1">
-                    <div class="flex items-center space-x-3 mb-6">
-                        <div class="h-10 w-10 rounded-2xl bg-gradient-to-tr from-[#005ea2] to-blue-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#8dc63f]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+          <div class="pt-10 pb-2 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="text-center mb-8 relative">
+                    <span class="text-xs font-extrabold tracking-[0.2em] text-slate-400 uppercase mb-2 block">Pilihan Tersedia</span>
+                    <h3 class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight" data-id="Kategori Favorit" data-en="Favorite Cuisines">Kategori Favorit</h3>
+                    <div class="w-12 h-1.5 bg-gradient-to-r from-[#005ea2] to-[#8dc63f] rounded-full mx-auto mt-4"></div>
+                </div>
+                
+                <div class="flex overflow-x-auto scrollbar-hide space-x-4 sm:space-x-6 md:justify-center pb-4 px-4 -mx-4 snap-x snap-mandatory">
+                    
+                    <button type="button" class="flex flex-col items-center flex-shrink-0 group w-24 sm:w-28 outline-none focus:outline-none snap-start cursor-pointer" style="-webkit-tap-highlight-color: transparent;">
+                        <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 aspect-square rounded-full p-[3px] bg-slate-100 group-hover:bg-gradient-to-tr group-hover:from-[#005ea2] group-hover:to-blue-400 group-active:scale-95 transition-all duration-300 shadow-sm group-hover:shadow-xl group-hover:shadow-blue-500/30 group-hover:-translate-y-1.5">
+                            <div class="w-full h-full bg-white rounded-full p-1.5 relative overflow-hidden">
+                                <img src="{{ asset('images/makanan_berat.jpg') }}" alt="Makanan Berat" class="w-full h-full object-cover rounded-full transition-transform duration-700 group-hover:scale-110">
+                            </div>
                         </div>
-                        <h2 class="text-2xl font-black text-slate-800 tracking-tight">FlyDine<span class="text-[#8dc63f]">.</span></h2>
-                    </div>
-                    <p class="text-sm text-slate-500 leading-relaxed font-medium mb-6">
-                        Layanan pesan antar makanan eksklusif untuk penumpang di Bandara Internasional Juanda. Pesan langsung dari genggaman Anda.
-                    </p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="h-10 w-10 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center hover:bg-[#005ea2] hover:text-white transition-colors"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg></a>
-                        <a href="#" class="h-10 w-10 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center hover:bg-[#005ea2] hover:text-white transition-colors"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.7-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
-                        <a href="#" class="h-10 w-10 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center hover:bg-[#005ea2] hover:text-white transition-colors"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></a>
-                    </div>
-                </div>
-                
-                <div>
-                    <h4 class="font-bold text-sm text-slate-800 mb-5 uppercase tracking-wider">Layanan Pelanggan</h4>
-                    <ul class="space-y-3 text-sm font-medium text-slate-500">
-                        <li><a href="{{ route('customer.history') }}" class="hover:text-[#005ea2] hover:underline transition-all text-[#005ea2] font-bold">Riwayat Pesanan</a></li>
-                        <li><a href="{{ route('page.cara-pesan') }}" class="hover:text-[#005ea2] hover:underline transition-all">Cara Pesan</a></li>
-                        <li><a href="{{ route('page.faq') }}" class="hover:text-[#005ea2] hover:underline transition-all">Pusat Bantuan (FAQ)</a></li>
-                        <li><a href="{{ route('page.terms') }}" class="hover:text-[#005ea2] hover:underline transition-all">Syarat & Ketentuan</a></li>
-                        <li><a href="{{ route('page.privacy') }}" class="hover:text-[#005ea2] hover:underline transition-all">Kebijakan Privasi</a></li>
-                    </ul>
-                </div>
+                        <span class="mt-3 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold text-slate-600 bg-transparent group-hover:bg-blue-50 group-hover:text-[#005ea2] transition-all duration-300 text-center leading-snug">
+                            Makanan Berat
+                        </span>
+                    </button>
 
-                <div>
-                    <h4 class="font-bold text-sm text-slate-800 mb-5 uppercase tracking-wider">Kemitraan</h4>
-                    <ul class="space-y-3 text-sm font-medium text-slate-500">
-                        <li><a href="{{ route('page.daftar-tenant') }}" class="hover:text-[#005ea2] hover:underline transition-all">Daftar Menjadi Tenant</a></li>
-                        <li><a href="{{ route('login') }}" class="hover:text-[#005ea2] hover:underline transition-all text-[#005ea2] font-bold">Portal Login Tenant</a></li>
-                        <li><a href="{{ route('page.promosi') }}" class="hover:text-[#005ea2] hover:underline transition-all">Promosi Kolaborasi</a></li>
-                    </ul>
+                    <button type="button" class="flex flex-col items-center flex-shrink-0 group w-24 sm:w-28 outline-none focus:outline-none snap-start cursor-pointer" style="-webkit-tap-highlight-color: transparent;">
+                        <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 aspect-square rounded-full p-[3px] bg-slate-100 group-hover:bg-gradient-to-tr group-hover:from-[#005ea2] group-hover:to-blue-400 group-active:scale-95 transition-all duration-300 shadow-sm group-hover:shadow-xl group-hover:shadow-blue-500/30 group-hover:-translate-y-1.5">
+                            <div class="w-full h-full bg-white rounded-full p-1.5 relative overflow-hidden">
+                                <img src="{{ asset('images/cepat_saji.jpg') }}" alt="Cepat Saji" class="w-full h-full object-cover rounded-full transition-transform duration-700 group-hover:scale-110">
+                            </div>
+                        </div>
+                        <span class="mt-3 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold text-slate-600 bg-transparent group-hover:bg-blue-50 group-hover:text-[#005ea2] transition-all duration-300 text-center leading-snug">
+                            Cepat Saji
+                        </span>
+                    </button>
+
+                    <button type="button" class="flex flex-col items-center flex-shrink-0 group w-24 sm:w-28 outline-none focus:outline-none snap-start cursor-pointer" style="-webkit-tap-highlight-color: transparent;">
+                        <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 aspect-square rounded-full p-[3px] bg-slate-100 group-hover:bg-gradient-to-tr group-hover:from-[#005ea2] group-hover:to-blue-400 group-active:scale-95 transition-all duration-300 shadow-sm group-hover:shadow-xl group-hover:shadow-blue-500/30 group-hover:-translate-y-1.5">
+                            <div class="w-full h-full bg-white rounded-full p-1.5 relative overflow-hidden">
+                                <img src="{{ asset('images/roti_kue.jpg') }}" alt="Roti & Kue" class="w-full h-full object-cover rounded-full transition-transform duration-700 group-hover:scale-110">
+                            </div>
+                        </div>
+                        <span class="mt-3 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold text-slate-600 bg-transparent group-hover:bg-blue-50 group-hover:text-[#005ea2] transition-all duration-300 text-center leading-snug">
+                            Roti & Kue
+                        </span>
+                    </button>
+
+                    <button type="button" class="flex flex-col items-center flex-shrink-0 group w-24 sm:w-28 outline-none focus:outline-none snap-start cursor-pointer" style="-webkit-tap-highlight-color: transparent;">
+                        <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 aspect-square rounded-full p-[3px] bg-slate-100 group-hover:bg-gradient-to-tr group-hover:from-[#005ea2] group-hover:to-blue-400 group-active:scale-95 transition-all duration-300 shadow-sm group-hover:shadow-xl group-hover:shadow-blue-500/30 group-hover:-translate-y-1.5">
+                            <div class="w-full h-full bg-white rounded-full p-1.5 relative overflow-hidden">
+                                <img src="{{ asset('images/minuman.jpg') }}" alt="Minuman" class="w-full h-full object-cover rounded-full transition-transform duration-700 group-hover:scale-110">
+                            </div>
+                        </div>
+                        <span class="mt-3 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold text-slate-600 bg-transparent group-hover:bg-blue-50 group-hover:text-[#005ea2] transition-all duration-300 text-center leading-snug">
+                            Minuman
+                        </span>
+                    </button>
+                    
+                </div>
+            </div>
+            
+            <!-- SECTION: Cara Pesan (Modern Grid Layout - Jarak Dirapatkan) -->
+            <div class="pt-10 pb-16 md:pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-slate-100/60">
+                
+                <div class="text-center mb-12 max-w-3xl mx-auto">
+                    <span class="text-[#005ea2] font-extrabold text-xs tracking-[0.2em] uppercase mb-4 block" data-id="PANDUAN" data-en="GUIDE">Panduan</span>
+                    <h3 class="text-3xl md:text-4xl font-black text-slate-800 tracking-tight leading-tight" data-id="Cara Mudah Pesan Makanan" data-en="How to Order">Cara Mudah Pesan Makanan</h3>
+                    <p class="text-slate-500 text-sm sm:text-base mt-4 font-medium leading-relaxed">Nikmati hidangan favorit Anda di Bandara Internasional Juanda tanpa perlu repot antre panjang. Ikuti langkah sederhana berikut.</p>
                 </div>
                 
-                <div class="lg:col-span-1">
-                    <h4 class="font-bold text-sm text-slate-800 mb-5 uppercase tracking-wider">Newsletter</h4>
-                    <p class="text-xs mb-4 text-slate-500">Dapatkan update diskon dan menu terbaru langsung di email Anda.</p>
-                    <form action="#" class="flex shadow-sm" onsubmit="event.preventDefault()">
-                        <input type="email" placeholder="Email Anda" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 text-slate-800 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#005ea2] rounded-l-xl" required>
-                        <button type="submit" class="bg-[#005ea2] px-5 py-3 rounded-r-xl border border-[#005ea2] hover:bg-blue-700 transition-colors text-white font-bold">
-                            Kirim
-                        </button>
-                    </form>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
+                    <!-- Sisa kode card Langkah 1, 2, 3, 4 biarkan sama seperti sebelumnya -->
+                    <!-- Step 1 -->
+                    <div class="bg-white rounded-[2rem] p-7 shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-[#005ea2]/5 hover:-translate-y-2 transition-all duration-300 group relative overflow-hidden">
+                        <div class="absolute top-0 right-0 -mr-6 -mt-6 w-24 h-24 bg-blue-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
+                        <div class="w-12 h-12 bg-gradient-to-br from-[#005ea2] to-blue-600 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-md shadow-blue-500/20 mb-5 relative z-10">1</div>
+                        <h4 class="text-lg font-extrabold text-slate-800 mb-2 group-hover:text-[#005ea2] transition-colors relative z-10">Pilih Lokasi</h4>
+                        <p class="text-sm text-slate-500 leading-relaxed font-medium relative z-10">Pilih Terminal dan area keberangkatan Anda (contoh: Terminal 1) untuk menemukan restoran yang relevan.</p>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="bg-white rounded-[2rem] p-7 shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-[#005ea2]/5 hover:-translate-y-2 transition-all duration-300 group relative overflow-hidden">
+                        <div class="absolute top-0 right-0 -mr-6 -mt-6 w-24 h-24 bg-blue-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
+                        <div class="w-12 h-12 bg-gradient-to-br from-[#005ea2] to-blue-600 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-md shadow-blue-500/20 mb-5 relative z-10">2</div>
+                        <h4 class="text-lg font-extrabold text-slate-800 mb-2 group-hover:text-[#005ea2] transition-colors relative z-10">Tentukan Menu</h4>
+                        <p class="text-sm text-slate-500 leading-relaxed font-medium mb-3 relative z-10">Jelajahi direktori dan pilih hidangan favorit Anda.</p>
+                        <div class="inline-flex items-center space-x-1.5 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-100 relative z-10">
+                            <span class="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
+                            <span class="text-[9px] text-amber-700 font-extrabold uppercase tracking-wide">Maks 1 Restoran</span>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="bg-white rounded-[2rem] p-7 shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-[#005ea2]/5 hover:-translate-y-2 transition-all duration-300 group relative overflow-hidden">
+                        <div class="absolute top-0 right-0 -mr-6 -mt-6 w-24 h-24 bg-blue-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
+                        <div class="w-12 h-12 bg-gradient-to-br from-[#005ea2] to-blue-600 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-md shadow-blue-500/20 mb-5 relative z-10">3</div>
+                        <h4 class="text-lg font-extrabold text-slate-800 mb-2 group-hover:text-[#005ea2] transition-colors relative z-10">Data Penerbangan</h4>
+                        <p class="text-sm text-slate-500 leading-relaxed font-medium relative z-10">Masukkan Nomor Penerbangan dan Waktu Boarding agar pesanan Anda selesai tepat waktu.</p>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="bg-white rounded-[2rem] p-7 shadow-sm border border-[#8dc63f]/30 hover:border-[#8dc63f] hover:shadow-xl hover:shadow-green-500/10 hover:-translate-y-2 transition-all duration-300 group relative overflow-hidden">
+                        <div class="absolute top-0 right-0 -mr-6 -mt-6 w-24 h-24 bg-green-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
+                        <div class="w-12 h-12 bg-gradient-to-br from-[#8dc63f] to-green-500 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-md shadow-green-500/30 mb-5 relative z-10 animate-pulse">4</div>
+                        <h4 class="text-lg font-extrabold text-slate-800 mb-2 group-hover:text-[#8dc63f] transition-colors relative z-10">Lacak & Ambil</h4>
+                        <p class="text-sm text-slate-500 leading-relaxed font-medium relative z-10">Lakukan pembayaran, pantau pesanan real-time, dan ambil di konter.</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Bottom Copyright -->
-            <div class="pb-safe py-6 flex flex-col md:flex-row items-center justify-between text-xs font-medium text-slate-400 gap-4 text-center md:text-left">
-                <p>&copy; {{ date('Y') }} FlyDine Juanda. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- End Main Content -->
-
+            <x-footer />
+    
 </body>
 </html>

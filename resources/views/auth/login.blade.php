@@ -59,10 +59,8 @@
                 <div class="h-16 border-l border-white/40"></div>
 
                 <div>
-                    <h1 class="text-4xl xl:text-5xl font-extrabold">
-                        Fly<span class="text-[#8dc63f]">Dine</span>
-                    </h1>
-                    <p class="text-blue-100">Digital Dining Experience</p>
+                    <img src="{{ asset('images/logo-flydine.png') }}" alt="FlyDine Logo" class="h-28 w-auto object-contain brightness-[10] contrast-[200] drop-shadow-md">
+                    <p class="text-blue-100 mt-2 text-lg">Digital Dining Experience</p>
                 </div>
             </div>
 
@@ -111,9 +109,7 @@
                      alt="Angkasa Pura Indonesia"
                      class="w-32 mx-auto">
 
-                <h1 class="mt-3 text-4xl font-extrabold text-[#005ea2]">
-                    Fly<span class="text-[#8dc63f]">Dine</span>
-                </h1>
+                <img src="{{ asset('images/logo-flydine.png') }}" alt="FlyDine Logo" class="h-24 w-auto object-contain mx-auto mt-4">
             </div>
 
 
