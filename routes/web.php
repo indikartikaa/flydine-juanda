@@ -18,6 +18,7 @@ Route::get('/tracking', [CustomerCatalogController::class, 'tracking'])->name('c
 Route::get('/tracking/{order}/status', [CustomerCatalogController::class, 'checkStatus'])->name('customer.tracking.status');
 Route::post('/tracking/pay', [CustomerCatalogController::class, 'simulatePayment'])->name('customer.simulate_payment');
 Route::get('/history', [CustomerCatalogController::class, 'history'])->name('customer.history');
+Route::post('/tracking/{order}/cancel', [CustomerCatalogController::class, 'cancelOrder'])->name('customer.tracking.cancel');
 Route::post('/faq/complaint', [CustomerCatalogController::class, 'storeComplaint'])->name('customer.complaint');
 
 /* Static Pages */

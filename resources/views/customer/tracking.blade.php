@@ -78,11 +78,19 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('customer.simulate_payment') }}" method="POST">
+                    <form action="{{ route('customer.simulate_payment') }}" method="POST" class="mb-3">
                         @csrf
                         <input type="hidden" name="order_code" value="{{ $order->order_code }}">
                         <button type="submit" class="w-full bg-[#005ea2] hover:bg-blue-700 text-white font-extrabold py-3.5 rounded-xl text-sm uppercase tracking-widest transition-all shadow-md shadow-blue-500/30">
                             Simulasi: Saya Sudah Bayar
+                        </button>
+                    </form>
+
+                    <!-- Tombol Batalkan Pesanan oleh Pelanggan -->
+                    <form action="{{ route('customer.tracking.cancel', $order->order_code) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini?');">
+                        @csrf
+                        <button type="submit" class="w-full bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 font-extrabold py-3.5 rounded-xl text-sm uppercase tracking-widest transition-all shadow-sm">
+                            Batalkan Pesanan
                         </button>
                     </form>
 

@@ -83,6 +83,20 @@ class CustomerCatalogController extends Controller
         return view('customer.tracking', compact('order'));
     }
 
+    public function cancelOrder($orderCode)
+    {
+        $order = Order::where('order_code', $orderCode)->firstOrFail();
+
+        // Hanya bisa dibatalkan jika belum dibayar dan statusnya menunggu
+        if (!$order->is_paid && $order->status === 'menunggu') {
+            $order->status = 'dibatalkan';
+            $order->save();
+            return redirect()->back()->with('success', 'Pesanan Anda telah berhasil dibatalkan.');
+        }
+
+        return redirect()->back()->with('error', 'Pesanan ini tidak dapat dibatalkan.');
+    }
+
     public function checkStatus($orderCode)
     {
         $order = Order::where('order_code', $orderCode)->firstOrFail();
@@ -237,6 +251,17 @@ class CustomerCatalogController extends Controller
         
         $customer = Customer::where('phone_number', $phoneNumber)->first();
         if ($customer) {
+            // Validasi Blokir Awal
+            if ($customer->is_blocked) {
+                return redirect()->route('customer.menu')->with('error', 'Nomor HP Anda sementara diblokir karena terdeteksi aktivitas mencurigakan.');
+            }
+
+            // Deteksi Pola Fraud / Spam
+            $fraudService = app(\App\Services\FraudDetectionService::class);
+            if ($fraudService->checkCancelledOrderPattern($customer->id)) {
+                return redirect()->route('customer.menu')->with('error', 'Pesanan ditolak: Anda telah diblokir karena terdeteksi melakukan terlalu banyak pembatalan/spam pesanan dalam waktu singkat.');
+            }
+
             // Customer exists, update name and last order time
             $customer->name = $request->customer_name;
             $customer->last_order_at = now();
