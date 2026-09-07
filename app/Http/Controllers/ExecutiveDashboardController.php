@@ -89,6 +89,15 @@ class ExecutiveDashboardController extends Controller
         $openComplaints = (clone $complaintQuery)->whereIn('status', ['open', 'in_progress'])->count();
         $resolvedComplaints = (clone $complaintQuery)->whereIn('status', ['resolved', 'closed'])->count();
 
+        // 7. Customer Segmentation (CRM)
+        $customerSegmentation = DB::table('customers')
+            ->selectRaw("
+                SUM(CASE WHEN total_orders = 1 THEN 1 ELSE 0 END) as new_customers,
+                SUM(CASE WHEN total_orders BETWEEN 2 AND 5 THEN 1 ELSE 0 END) as regular_customers,
+                SUM(CASE WHEN total_orders > 5 THEN 1 ELSE 0 END) as frequent_customers,
+                COUNT(id) as total_customers
+            ")->first();
+
         $tenants = Tenant::where('is_active', true)->get();
 
         return view('admin.executive-dashboard', compact(
@@ -101,7 +110,8 @@ class ExecutiveDashboardController extends Controller
             'topProducts',
             'slaPerformance',
             'openComplaints',
-            'resolvedComplaints'
+            'resolvedComplaints',
+            'customerSegmentation'
         ));
     }
 
@@ -131,9 +141,16 @@ class ExecutiveDashboardController extends Controller
             ->select('tenants.name', DB::raw('AVG(TIMESTAMPDIFF(MINUTE, ordered_at, ready_at)) as avg_minutes'))
             ->groupBy('tenants.id', 'tenants.name')
             ->get();
+        $customerSegmentation = DB::table('customers')
+            ->selectRaw("
+                SUM(CASE WHEN total_orders = 1 THEN 1 ELSE 0 END) as new_customers,
+                SUM(CASE WHEN total_orders BETWEEN 2 AND 5 THEN 1 ELSE 0 END) as regular_customers,
+                SUM(CASE WHEN total_orders > 5 THEN 1 ELSE 0 END) as frequent_customers,
+                COUNT(id) as total_customers
+            ")->first();
             
         $pdf = Pdf::loadView('admin.exports.executive-dashboard', compact(
-            'days', 'startDate', 'endDate', 'volumePerDay', 'statusDistribution', 'slaPerformance'
+            'days', 'startDate', 'endDate', 'volumePerDay', 'statusDistribution', 'slaPerformance', 'customerSegmentation'
         ));
 
         return $pdf->download('laporan-eksekutif-'.$days.'-hari.pdf');

@@ -15,6 +15,8 @@ class Complaint extends Model
         'category',
         'description',
         'status',
+        'reporter_name',
+        'reporter_contact',
         'handled_by_user_id',
         'resolved_at',
     ];

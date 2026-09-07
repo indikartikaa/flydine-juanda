@@ -7,8 +7,8 @@
     <!-- Header & Filter -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
         <div>
-            <h2 class="text-lg font-extrabold text-slate-800">Sistem Informasi Eksekutif</h2>
-            <p class="text-sm text-slate-500">Analisis Performa Operasional FlyDine</p>
+            <h2 class="text-lg font-extrabold text-slate-800">Executive Summary - Performa Operasional</h2>
+            <p class="text-sm text-slate-500">Modul Sistem Informasi Eksekutif FlyDine</p>
         </div>
         <div class="flex items-center gap-3">
             <form method="GET" action="{{ route('admin.executive-dashboard') }}" class="flex items-center gap-3" id="filterForm">
@@ -129,6 +129,92 @@
         <h3 class="text-sm font-bold text-slate-800 mb-4 uppercase tracking-wide">10 Produk Terlaris</h3>
         <div class="relative h-72">
             <canvas id="productsChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Modul Enterprise CRM - Customer Segmentation -->
+    <div class="pt-6 mt-4 border-t-2 border-dashed border-slate-200">
+        <div class="mb-6">
+            <h2 class="text-lg font-extrabold text-slate-800 border-l-4 border-indigo-500 pl-3">Enterprise CRM - Customer Segmentation</h2>
+            <p class="text-sm text-slate-500 ml-4 mt-1">Profil Loyalitas Pelanggan Berdasarkan Total Pesanan</p>
+        </div>
+
+        @php
+            $newCust = $customerSegmentation->new_customers ?? 0;
+            $regCust = $customerSegmentation->regular_customers ?? 0;
+            $freqCust = $customerSegmentation->frequent_customers ?? 0;
+            $totalCust = $customerSegmentation->total_customers ?? 0;
+            
+            $newPct = $totalCust > 0 ? round(($newCust / $totalCust) * 100) : 0;
+            $regPct = $totalCust > 0 ? round(($regCust / $totalCust) * 100) : 0;
+            $freqPct = $totalCust > 0 ? round(($freqCust / $totalCust) * 100) : 0;
+        @endphp
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <!-- Progress Bar Card -->
+            <div class="md:col-span-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-bold text-slate-700">Distribusi Loyalitas Pelanggan (Total: {{ number_format($totalCust) }} User)</span>
+                </div>
+                
+                <!-- Segmen Bar -->
+                <div class="w-full flex h-6 rounded-full overflow-hidden bg-slate-100">
+                    <div class="bg-sky-400 flex items-center justify-center text-[10px] font-bold text-white transition-all duration-1000" style="width: {{ $newPct }}%" title="Pelanggan Baru ({{ $newPct }}%)">
+                        @if($newPct > 5) {{ $newPct }}% @endif
+                    </div>
+                    <div class="bg-amber-400 flex items-center justify-center text-[10px] font-bold text-white transition-all duration-1000" style="width: {{ $regPct }}%" title="Pelanggan Reguler ({{ $regPct }}%)">
+                        @if($regPct > 5) {{ $regPct }}% @endif
+                    </div>
+                    <div class="bg-emerald-500 flex items-center justify-center text-[10px] font-bold text-white transition-all duration-1000" style="width: {{ $freqPct }}%" title="Pelanggan Setia ({{ $freqPct }}%)">
+                        @if($freqPct > 5) {{ $freqPct }}% @endif
+                    </div>
+                </div>
+                <div class="flex items-center justify-between mt-3 text-xs font-semibold text-slate-500">
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-sky-400 mr-2"></span> Baru (1x)</div>
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-amber-400 mr-2"></span> Reguler (2-5x)</div>
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-emerald-500 mr-2"></span> Setia (>5x)</div>
+                </div>
+            </div>
+
+            <!-- Kartu Detail -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-sky-100 flex items-center justify-between relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 w-16 h-16 bg-sky-50 rounded-full"></div>
+                <div class="relative z-10">
+                    <p class="text-xs font-bold text-sky-600 uppercase tracking-wider">Pelanggan Baru</p>
+                    <p class="text-3xl font-extrabold text-slate-800 mt-1">{{ number_format($newCust) }}</p>
+                    <p class="text-[10px] font-medium text-slate-500 mt-1">1 Kali Pesan</p>
+                </div>
+                <div class="h-12 w-12 rounded-2xl bg-sky-100 flex items-center justify-center text-sky-600 relative z-10">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-amber-100 flex items-center justify-between relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 w-16 h-16 bg-amber-50 rounded-full"></div>
+                <div class="relative z-10">
+                    <p class="text-xs font-bold text-amber-600 uppercase tracking-wider">Pelanggan Reguler</p>
+                    <p class="text-3xl font-extrabold text-slate-800 mt-1">{{ number_format($regCust) }}</p>
+                    <p class="text-[10px] font-medium text-slate-500 mt-1">2 - 5 Kali Pesan</p>
+                </div>
+                <div class="h-12 w-12 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-600 relative z-10">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-emerald-100 flex items-center justify-between relative overflow-hidden md:col-span-2">
+                <div class="absolute -right-8 -bottom-8 w-24 h-24 bg-emerald-50 rounded-full"></div>
+                <div class="relative z-10">
+                    <div class="flex items-center space-x-2">
+                        <p class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Pelanggan Setia</p>
+                        <span class="px-2 py-0.5 bg-emerald-500 text-white text-[9px] font-extrabold rounded-full uppercase tracking-wider animate-pulse">VIP</span>
+                    </div>
+                    <p class="text-3xl font-extrabold text-slate-800 mt-1">{{ number_format($freqCust) }}</p>
+                    <p class="text-[10px] font-medium text-slate-500 mt-1">Lebih dari 5 Kali Pesan</p>
+                </div>
+                <div class="h-12 w-12 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 relative z-10">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                </div>
+            </div>
         </div>
     </div>
 </div>

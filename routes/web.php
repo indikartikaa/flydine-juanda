@@ -60,7 +60,19 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         abort_unless(auth()->user()->role === 'admin_ops', 403);
         
         $complaints = \App\Models\Complaint::with(['order.tenant'])->latest()->get();
-        return view('admin.complaints', compact('complaints'));
+
+        // Analytics: Distribusi Kategori
+        $complaintCategories = \App\Models\Complaint::select('category', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
+            ->groupBy('category')
+            ->orderByDesc('total')
+            ->get();
+
+        // Analytics: Rata-rata Waktu Penyelesaian
+        $avgResolutionTime = \App\Models\Complaint::whereNotNull('resolved_at')
+            ->select(\Illuminate\Support\Facades\DB::raw('AVG(TIMESTAMPDIFF(MINUTE, created_at, resolved_at)) as avg_minutes'))
+            ->value('avg_minutes');
+
+        return view('admin.complaints', compact('complaints', 'complaintCategories', 'avgResolutionTime'));
     })->name('admin.complaints');
 
     Route::post('/complaints/{complaint}/status', function (Illuminate\Http\Request $request, \App\Models\Complaint $complaint) {

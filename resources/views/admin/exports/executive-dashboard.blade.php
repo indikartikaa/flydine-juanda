@@ -95,5 +95,49 @@
         </tbody>
     </table>
 
+    <!-- CRM Segmentasi Pelanggan -->
+    <div class="section-title">Enterprise CRM - Segmentasi Loyalitas Pelanggan</div>
+    @php
+        $newCust = $customerSegmentation->new_customers ?? 0;
+        $regCust = $customerSegmentation->regular_customers ?? 0;
+        $freqCust = $customerSegmentation->frequent_customers ?? 0;
+        $totalCust = $customerSegmentation->total_customers ?? 0;
+    @endphp
+    <table>
+        <thead>
+            <tr>
+                <th>Segmen Pelanggan</th>
+                <th>Kriteria</th>
+                <th class="text-right">Total (User)</th>
+                <th class="text-right">Persentase</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Pelanggan Baru</td>
+                <td>1 Kali Pesan</td>
+                <td class="text-right">{{ number_format($newCust) }}</td>
+                <td class="text-right">{{ $totalCust > 0 ? round(($newCust / $totalCust) * 100, 1) : 0 }}%</td>
+            </tr>
+            <tr>
+                <td>Pelanggan Reguler</td>
+                <td>2 - 5 Kali Pesan</td>
+                <td class="text-right">{{ number_format($regCust) }}</td>
+                <td class="text-right">{{ $totalCust > 0 ? round(($regCust / $totalCust) * 100, 1) : 0 }}%</td>
+            </tr>
+            <tr>
+                <td>Pelanggan Setia (VIP)</td>
+                <td>Lebih dari 5 Kali Pesan</td>
+                <td class="text-right">{{ number_format($freqCust) }}</td>
+                <td class="text-right">{{ $totalCust > 0 ? round(($freqCust / $totalCust) * 100, 1) : 0 }}%</td>
+            </tr>
+            <tr style="background-color: #f8fafc; font-weight: bold;">
+                <td colspan="2" class="text-right">Total Basis Pengguna:</td>
+                <td class="text-right">{{ number_format($totalCust) }}</td>
+                <td class="text-right">100%</td>
+            </tr>
+        </tbody>
+    </table>
+
 </body>
 </html>
