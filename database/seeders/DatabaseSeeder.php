@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             TenantSeeder::class,     // data NYATA dari mitra usaha (F&B), lihat catatan di file ini
+            DeliveryLocationSeeder::class,
             UserSeeder::class,       // dummy
             ProductSeeder::class,    // dummy
             CustomerSeeder::class,   // dummy

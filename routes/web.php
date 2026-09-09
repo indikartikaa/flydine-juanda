@@ -20,6 +20,7 @@ Route::post('/tracking/pay', [CustomerCatalogController::class, 'simulatePayment
 Route::get('/history', [CustomerCatalogController::class, 'history'])->name('customer.history');
 Route::post('/tracking/{order}/cancel', [CustomerCatalogController::class, 'cancelOrder'])->name('customer.tracking.cancel');
 Route::post('/faq/complaint', [CustomerCatalogController::class, 'storeComplaint'])->name('customer.complaint');
+Route::get('/api/delivery-locations', [CustomerCatalogController::class, 'getDeliveryLocations'])->name('api.delivery-locations');
 
 /* Static Pages */
 Route::view('/cara-pesan', 'customer.pages.cara-pesan')->name('page.cara-pesan');
@@ -102,6 +103,7 @@ Route::middleware('auth')
 
         Route::get('/dashboard', [\App\Http\Controllers\TenantOrderController::class, 'dashboard'])->name('dashboard');
         Route::post('/settings/hours', [\App\Http\Controllers\TenantOrderController::class, 'updateHours'])->name('settings.hours');
+        Route::post('/settings/delivery', [\App\Http\Controllers\TenantOrderController::class, 'updateDelivery'])->name('settings.delivery');
 
         Route::get('/orders', [\App\Http\Controllers\TenantOrderController::class, 'index'])->name('orders');
         Route::get('/orders/history', [\App\Http\Controllers\TenantOrderController::class, 'history'])->name('orders.history');

@@ -17,6 +17,7 @@ class Tenant extends Model
         'closing_time',
         'phone',
         'is_active',
+        'delivery_fee',
     ];
 
     protected $casts = [

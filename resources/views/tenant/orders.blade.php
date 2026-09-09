@@ -80,12 +80,18 @@
                                     <span class="font-extrabold text-[#005ea2] bg-blue-50 px-2 py-1 rounded-lg border border-blue-100" x-text="order.order_code"></span>
                                 </td>
                                 <td class="px-6 py-4 align-top">
-                                    <div class="font-bold text-slate-800" x-text="order.flight_number"></div>
+                                    <div class="font-bold text-slate-800 flex items-center space-x-2">
+                                        <span x-text="order.flight_number || 'Umum/Staf'"></span>
+                                    </div>
                                     <div class="flex items-center mt-1 space-x-1">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" :class="order.status === 'selesai' ? 'text-emerald-500' : 'text-rose-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-                                        <span class="text-[11px] font-bold uppercase tracking-wider" :class="order.status === 'selesai' ? 'text-emerald-600' : 'text-rose-500'" x-text="'Boarding: ' + formatTime(order.boarding_time)"></span>
+                                        <span class="text-[11px] font-bold uppercase tracking-wider" :class="order.status === 'selesai' ? 'text-emerald-600' : 'text-rose-500'" x-text="order.boarding_time ? 'Boarding: ' + formatTime(order.boarding_time) : 'Waktu Fleksibel'"></span>
+                                    </div>
+                                    <div class="mt-2 inline-flex items-center space-x-1 border rounded-md px-1.5 py-0.5 text-[10px] font-extrabold"
+                                         :class="order.pickup_method === 'diantar' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-slate-50 text-slate-500 border-slate-200'">
+                                        <span x-text="order.pickup_method === 'diantar' ? '🛵 Diantar: ' + (order.delivery_location ? order.delivery_location.name : '') : '🏃 Ambil Sendiri'"></span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 align-top">

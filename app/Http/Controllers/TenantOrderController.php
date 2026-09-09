@@ -63,7 +63,7 @@ class TenantOrderController extends Controller
     {
         $tenantId = auth()->user()->tenant_id;
 
-        $orders = Order::with('orderItems')
+        $orders = Order::with(['orderItems', 'deliveryLocation'])
             ->where('tenant_id', $tenantId)
             ->where('is_paid', true)
             ->whereIn('status', ['menunggu', 'diproses'])
@@ -80,7 +80,7 @@ class TenantOrderController extends Controller
     {
         $tenantId = auth()->user()->tenant_id;
 
-        $query = Order::with('orderItems')
+        $query = Order::with(['orderItems', 'deliveryLocation'])
             ->where('tenant_id', $tenantId)
             ->where('is_paid', true)
             ->whereIn('status', ['selesai', 'ditolak', 'dibatalkan']);
@@ -161,5 +161,21 @@ class TenantOrderController extends Controller
         }
 
         return redirect()->back()->with('error', 'Gagal memperbarui jam operasional.');
+    }
+
+    public function updateDelivery(Request $request)
+    {
+        $tenant = auth()->user()->tenant;
+        
+        if ($request->has('delivery_active')) {
+            $request->validate([
+                'delivery_fee' => 'required|numeric|min:0',
+            ]);
+            $tenant->update(['delivery_fee' => $request->delivery_fee]);
+        } else {
+            $tenant->update(['delivery_fee' => null]);
+        }
+
+        return redirect()->back()->with('success', 'Pengaturan layanan antar berhasil diperbarui.');
     }
 }

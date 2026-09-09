@@ -66,6 +66,42 @@
                 </div>
             </div>
 
+            <!-- Main Wrapper for Alpine JS State -->
+            <div x-data="{ 
+                customerType: 'penumpang', 
+                boardingTime: '',
+                pickupMethod: 'ambil_sendiri',
+                deliveryTerminal: '',
+                deliveryLocations: [],
+                deliveryFee: {{ !is_null($tenant->delivery_fee) ? $tenant->delivery_fee : 'null' }},
+                baseTotal: {{ $total }},
+                get grandTotal() {
+                    return (this.pickupMethod === 'diantar' && this.deliveryFee !== null) 
+                        ? this.baseTotal + this.deliveryFee 
+                        : this.baseTotal;
+                },
+                fetchLocations() {
+                    if (!this.deliveryTerminal) {
+                        this.deliveryLocations = [];
+                        return;
+                    }
+                    fetch(`/api/delivery-locations?terminal=${this.deliveryTerminal}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            this.deliveryLocations = data;
+                        });
+                },
+                get isTimeWarning() {
+                    if (this.customerType !== 'penumpang' || !this.boardingTime) return false;
+                    const now = new Date();
+                    const [hours, minutes] = this.boardingTime.split(':');
+                    const boardTime = new Date();
+                    boardTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                    const diffInMinutes = (boardTime - now) / 60000;
+                    return diffInMinutes >= 0 && diffInMinutes < 30;
+                }
+            }">
+
             <!-- Receipt / Rincian Pesanan -->
             <div class="mb-8">
                 <div class="flex justify-between items-center mb-3">
@@ -118,28 +154,22 @@
                     <!-- Divider -->
                     <div class="my-5 border-b-2 border-dashed border-slate-200"></div>
 
+                    <!-- Ongkos Kirim (Delivery Fee) -->
+                    <div x-show="pickupMethod === 'diantar' && deliveryFee !== null" class="flex justify-between items-center mb-3 text-sm font-bold text-slate-700" style="display: none;">
+                        <span>Biaya Layanan Porter</span>
+                        <span>Rp <span x-text="deliveryFee.toLocaleString('id-ID')"></span></span>
+                    </div>
+
                     <!-- Total -->
                     <div class="flex justify-between items-end">
                         <span class="font-extrabold text-sm text-slate-800">Total Pembayaran</span>
-                        <span class="font-black text-2xl text-[#005ea2] tracking-tight">Rp {{ number_format($total, 0, ',', '.') }}</span>
+                        <span class="font-black text-2xl text-[#005ea2] tracking-tight">Rp <span x-text="grandTotal.toLocaleString('id-ID')"></span></span>
                     </div>
                 </div>
             </div>
 
             <!-- Form Data Pemesan (Checkout) -->
-            <form action="{{ route('customer.checkout') }}" method="POST" id="checkoutForm" x-data="{ 
-                customerType: 'penumpang', 
-                boardingTime: '',
-                get isTimeWarning() {
-                    if (this.customerType !== 'penumpang' || !this.boardingTime) return false;
-                    const now = new Date();
-                    const [hours, minutes] = this.boardingTime.split(':');
-                    const boardTime = new Date();
-                    boardTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-                    const diffInMinutes = (boardTime - now) / 60000;
-                    return diffInMinutes >= 0 && diffInMinutes < 30;
-                }
-            }">
+            <form action="{{ route('customer.checkout') }}" method="POST" id="checkoutForm">
                 @csrf
                 
                 @if ($errors->any())
@@ -151,6 +181,61 @@
                     </ul>
                 </div>
                 @endif
+                
+                <div class="mb-4">
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 ml-2">Metode Pengambilan</p>
+                    <div class="space-y-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                        <div class="grid grid-cols-2 gap-3">
+                            <!-- Ambil Sendiri -->
+                            <label class="relative flex flex-col items-center justify-center p-3 border rounded-xl cursor-pointer transition-all" :class="pickupMethod === 'ambil_sendiri' ? 'border-[#005ea2] bg-blue-50/50' : 'border-slate-200 hover:bg-slate-50'">
+                                <input type="radio" name="pickup_method" value="ambil_sendiri" class="sr-only" x-model="pickupMethod">
+                                <span class="text-2xl mb-1">🏃</span>
+                                <span class="block text-sm font-bold text-slate-800 text-center" :class="pickupMethod === 'ambil_sendiri' ? 'text-[#005ea2]' : ''">Ambil di Counter Sendiri</span>
+                                <div x-show="pickupMethod === 'ambil_sendiri'" class="absolute top-2 right-2 text-[#005ea2]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                                </div>
+                            </label>
+                            
+                            <!-- Diantar Porter -->
+                            <label class="relative flex flex-col items-center justify-center p-3 border rounded-xl transition-all" 
+                                   :class="deliveryFee !== null ? (pickupMethod === 'diantar' ? 'border-[#005ea2] bg-blue-50/50 cursor-pointer' : 'border-slate-200 hover:bg-slate-50 cursor-pointer') : 'border-slate-100 bg-slate-50 opacity-50 cursor-not-allowed'">
+                                <input type="radio" name="pickup_method" value="diantar" class="sr-only" x-model="pickupMethod" :disabled="deliveryFee === null">
+                                <span class="text-2xl mb-1">🛵</span>
+                                <span class="block text-sm font-bold text-slate-800 text-center" :class="pickupMethod === 'diantar' ? 'text-[#005ea2]' : ''">Diantar Porter</span>
+                                
+                                <template x-if="deliveryFee === null">
+                                    <span class="block text-[9px] text-rose-500 font-bold mt-1 text-center bg-rose-50 px-2 py-0.5 rounded-full">Belum Tersedia</span>
+                                </template>
+                                
+                                <div x-show="pickupMethod === 'diantar'" class="absolute top-2 right-2 text-[#005ea2]" style="display: none;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Dropdown Lokasi (Hanya muncul jika Diantar) -->
+                        <div x-show="pickupMethod === 'diantar'" class="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-4" style="display: none;">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5 ml-1">Terminal Pengantaran</label>
+                                <select x-model="deliveryTerminal" @change="fetchLocations" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 text-slate-700">
+                                    <option value="" disabled selected>Pilih Terminal</option>
+                                    <option value="1">Terminal 1</option>
+                                    <option value="2">Terminal 2</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5 ml-1">Lokasi Antar</label>
+                                <select name="delivery_location_id" :disabled="deliveryLocations.length === 0" :required="pickupMethod === 'diantar'" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 text-slate-700 disabled:bg-slate-100 disabled:opacity-70">
+                                    <option value="" disabled selected>Pilih Titik Lokasi</option>
+                                    <template x-for="loc in deliveryLocations" :key="loc.id">
+                                        <option :value="loc.id" x-text="loc.name"></option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 
                 <div class="mb-4">
                     <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 ml-2">Informasi Pemesan</p>
@@ -199,17 +284,9 @@
                         
                         <!-- Input Penerbangan (Disembunyikan jika bukan penumpang) -->
                         <div x-show="customerType === 'penumpang'">
-                            <div class="grid grid-cols-2 gap-4 mb-4">
-                                <!-- Input No Penerbangan -->
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1.5 ml-1">No. Penerbangan</label>
-                                    <input type="text" name="flight_number" :required="customerType === 'penumpang'" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium uppercase focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] outline-none transition-all placeholder:text-slate-400" placeholder="JT-012">
-                                </div>
-                                <!-- Input Gate -->
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1.5 ml-1">Gate (Pintu)</label>
-                                    <input type="text" name="gate" :required="customerType === 'penumpang'" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium uppercase focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] outline-none transition-all placeholder:text-slate-400" placeholder="Gate 8">
-                                </div>
+                            <div class="mb-4">
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5 ml-1">No. Penerbangan</label>
+                                <input type="text" name="flight_number" :required="customerType === 'penumpang'" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium uppercase focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] outline-none transition-all placeholder:text-slate-400" placeholder="JT-012">
                             </div>
 
                             <!-- Input Boarding Time -->
@@ -256,6 +333,8 @@
                     Pesanan akan otomatis dibatalkan tepat pada <span class="font-bold">jadwal boarding</span> (atau maksimal 15 menit) jika pembayaran belum diselesaikan.
                 </p>
             </div>
+            
+            </div> <!-- End Main Wrapper x-data -->
             
             @else
             <!-- Empty State -->

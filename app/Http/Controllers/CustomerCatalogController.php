@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Customer;
+use App\Models\DeliveryLocation;
 use Illuminate\Support\Str;
 
 class CustomerCatalogController extends Controller
@@ -220,31 +221,47 @@ class CustomerCatalogController extends Controller
     public function checkout(Request $request)
     {
         $cart = session()->get('cart', []);
+        
         if (empty($cart)) {
-            return redirect()->route('customer.menu')->with('error', 'Keranjang Anda kosong.');
+            return redirect()->route('customer.cart')->withErrors(['Keranjang kosong']);
         }
 
+        $tenantId = reset($cart)['tenant_id'];
+        $tenant = Tenant::findOrFail($tenantId);
+
         $rules = [
-            'customer_type' => 'required|in:penumpang,pengunjung',
-            'customer_name' => 'required|string|max:100',
+            'customer_name' => 'required|string|max:255',
             'phone_number' => 'required|string|max:20',
-            'payment_method' => 'required|in:qris,transfer'
+            'customer_type' => 'required|in:penumpang,pengunjung',
+            'payment_method' => 'required|in:qris,transfer',
+            'pickup_method' => 'required|in:ambil_sendiri,diantar',
         ];
 
+        // Validasi conditional untuk penumpang
         if ($request->customer_type === 'penumpang') {
-            $rules['flight_number'] = 'required|string|max:15';
-            $rules['gate'] = 'required|string|max:20';
-            $rules['boarding_time'] = 'required';
+            $rules['flight_number'] = 'required|string|max:20';
+            $rules['boarding_time'] = 'required|date_format:H:i';
+        }
+
+        // Validasi conditional untuk delivery
+        if ($request->pickup_method === 'diantar') {
+            $rules['delivery_location_id'] = 'required|exists:delivery_locations,id';
+            if (is_null($tenant->delivery_fee)) {
+                return redirect()->back()->withErrors(['Tenant ini tidak menyediakan layanan antar.']);
+            }
         }
 
         $request->validate($rules);
 
-        $firstItem = reset($cart);
-        $tenantId = $firstItem['tenant_id'];
-
         $totalAmount = array_reduce($cart, function($carry, $item) {
             return $carry + ($item['price'] * $item['quantity']);
         }, 0);
+
+        $deliveryFee = 0;
+        if ($request->pickup_method === 'diantar') {
+            $deliveryFee = $tenant->delivery_fee;
+            $totalAmount += $deliveryFee;
+        }
 
         // Auto Create / Reuse Customer by Phone Number
         $phoneNumber = preg_replace('/[^0-9+]/', '', $request->phone_number); // Clean up phone number
@@ -277,17 +294,6 @@ class CustomerCatalogController extends Controller
                 'total_orders' => 1,
             ]);
         }
-
-        // 1. Cek apakah customer sudah dalam status terblokir sebelumnya
-        if ($customer->is_blocked) {
-            return redirect()->route('customer.menu')->with('error', 'Pemesanan gagal. Nomor HP Anda ditangguhkan sementara karena sistem mendeteksi aktivitas mencurigakan. Silakan hubungi Pusat Bantuan FlyDine jika ini adalah sebuah kesalahan.');
-        }
-
-        // 2. Jalankan Fraud Detection (cek histori 30 menit terakhir)
-        $fraudService = app(\App\Services\FraudDetectionService::class);
-        if ($fraudService->checkCancelledOrderPattern($customer->id)) {
-            return redirect()->route('customer.menu')->with('error', 'Pemesanan gagal. Nomor HP Anda ditangguhkan karena sistem mendeteksi terlalu banyak pesanan batal. Hubungi Pusat Bantuan FlyDine untuk konfirmasi.');
-        }
         
         $customerId = $customer->id;
 
@@ -310,8 +316,11 @@ class CustomerCatalogController extends Controller
             'customer_id' => $customerId,
             'customer_name' => $request->customer_name,
             'flight_number' => $request->customer_type === 'penumpang' ? strtoupper($request->flight_number) : null,
-            'gate' => $request->customer_type === 'penumpang' ? strtoupper($request->gate) : null,
+            'gate' => null, // Gate manual dihapus dari form, gunakan delivery_location_id jika diantar
             'boarding_time' => $fullBoardingTime,
+            'pickup_method' => $request->pickup_method,
+            'delivery_location_id' => $request->pickup_method === 'diantar' ? $request->delivery_location_id : null,
+            'delivery_fee' => $request->pickup_method === 'diantar' ? $deliveryFee : null,
             'status' => 'menunggu',
             'payment_method' => $request->payment_method,
             'is_paid' => false,
@@ -335,6 +344,16 @@ class CustomerCatalogController extends Controller
         session()->put('order_code', $order->order_code); // Simpan permanen di session agar tidak hilang saat direfresh
         
         return redirect()->route('customer.tracking', ['order' => $order->order_code])->with('success', 'Pesanan berhasil dibuat!');
+    }
+
+    public function getDeliveryLocations(Request $request)
+    {
+        $terminal = $request->get('terminal');
+        if (!$terminal) {
+            return response()->json([]);
+        }
+        $locations = DeliveryLocation::active()->byTerminal($terminal)->get(['id', 'name']);
+        return response()->json($locations);
     }
 
     public function storeComplaint(Request $request)

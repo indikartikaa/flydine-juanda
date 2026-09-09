@@ -20,6 +20,9 @@ class Order extends Model
         'status',
         'payment_method',
         'is_paid',
+        'pickup_method',
+        'delivery_location_id',
+        'delivery_fee',
         'heading_to_tenant_at',
         'ready_at',
         'auto_cancel_at',
@@ -59,5 +62,10 @@ class Order extends Model
     public function complaints()
     {
         return $this->hasMany(Complaint::class);
+    }
+
+    public function deliveryLocation()
+    {
+        return $this->belongsTo(DeliveryLocation::class);
     }
 }
