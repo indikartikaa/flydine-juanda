@@ -27,19 +27,9 @@
     <aside class="w-64 bg-white border-r border-slate-200/80 flex flex-col h-full shadow-sm z-20 shrink-0">
         
         <!-- Logo Area -->
-        <div class="h-20 flex items-center px-6 border-b border-slate-100">
-            <a href="{{ url('/admin/dashboard') }}" class="flex items-center space-x-3 group">
-                <div class="h-10 w-10 rounded-2xl bg-gradient-to-tr from-[#005ea2] to-blue-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#8dc63f]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
-                </div>
-                <div>
-                    <h2 class="text-xl font-extrabold tracking-tight text-slate-900 leading-tight">
-                        FlyDine<span class="text-[#8dc63f]">.</span>
-                    </h2>
-                    <p class="text-[11px] font-semibold text-slate-400 tracking-wide uppercase">Admin Portal</p>
-                </div>
+        <div class="h-24 flex items-center px-6 border-b border-slate-100">
+            <a href="{{ url('/admin/dashboard') }}" class="flex items-center group w-full justify-center">
+                <img src="{{ asset('images/logo-flydine.png') }}" alt="FlyDine Logo" class="w-48 object-contain group-hover:scale-105 transition-transform drop-shadow-sm">
             </a>
         </div>
         
@@ -115,7 +105,7 @@
     <main class="flex-1 flex flex-col h-full overflow-hidden bg-[#f8fafc]">
         
         <!-- Header Atas (Clean Glassmorphic) -->
-        <header class="bg-white/90 backdrop-blur-md shadow-xs h-20 flex items-center justify-between px-8 shrink-0 z-10 border-b border-slate-200/80">
+        <header class="bg-white/90 backdrop-blur-md shadow-xs h-24 flex items-center justify-between px-8 shrink-0 z-10 border-b border-slate-200/80">
             <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">@yield('title')</h1>
             
             <div class="flex items-center space-x-5">

@@ -6,11 +6,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 mb-12">
                 
                 <!-- Brand & Contact Info (Lebih Lebar) -->
-                <div class="lg:col-span-4">
-                    <div class="mb-6">
-                        <img src="{{ asset('images/logo-flydine.png') }}" alt="FlyDine Juanda Airport" class="h-20 w-auto object-contain">
-                    </div>
-                    
+                <div class="lg:col-span-4 flex flex-col justify-start">
                     <p class="text-sm text-slate-500 leading-relaxed font-medium mb-6 pr-4">
                         Platform pemesanan makanan terintegrasi pertama di Bandara Internasional Juanda. Pesan dari lounge, ambil tanpa antre.
                     </p>
@@ -78,9 +74,9 @@
                         </button>
                     </form>
 
-                    <h4 class="font-bold text-xs text-slate-800 mb-4 uppercase tracking-wider">Didukung Oleh</h4>
-                    <div class="flex items-center">
-                        <img src="{{ asset('images/angkasa-pura.png') }}" alt="InJourney Angkasa Pura Airports" class="h-10 md:h-12 w-auto object-contain opacity-90 hover:opacity-100 transition-opacity">
+                    <div class="flex items-center space-x-4">
+                        <h4 class="font-bold text-xs text-slate-800 uppercase tracking-wider shrink-0">Didukung Oleh</h4>
+                        <img src="{{ asset('images/angkasa-pura.png') }}" alt="InJourney Angkasa Pura Airports" class="h-12 md:h-14 w-auto object-contain opacity-90 hover:opacity-100 transition-opacity">
                     </div>
                 </div>
             </div>

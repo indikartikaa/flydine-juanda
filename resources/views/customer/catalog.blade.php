@@ -46,7 +46,7 @@
             <div class="flex items-center justify-between h-16 sm:h-20">
                 <!-- Logo & Location -->
                 <a href="{{ route('customer.menu') }}" class="group cursor-pointer">
-                    <img src="{{ asset('images/logo-flydine.png') }}" alt="FlyDine Juanda Airport" class="h-16 sm:h-20 w-auto object-contain group-hover:scale-105 transition-transform duration-300">
+                    <img src="{{ asset('images/logo-flydine.png') }}" alt="FlyDine Juanda Airport" class="w-40 sm:w-48 object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-sm">
                 </a>
 
                 <!-- Desktop Nav -->

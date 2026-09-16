@@ -41,35 +41,23 @@
 
 <div class="min-h-screen flex">
 
+    {{-- Mobile Background --}}
+    <div class="absolute inset-0 lg:hidden z-0 bg-[#004c80]">
+        <div class="absolute inset-0 bg-cover bg-center opacity-30" style="background-image: url('{{ asset('images/juanda.jpg') }}');"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-[#001f3f]/90"></div>
+    </div>
+
     {{-- LEFT --}}
     <section class="airport-bg hidden lg:flex lg:w-[59%] relative">
         <div class="w-full flex flex-col justify-center px-14 xl:px-20 text-white">
 
-            <div class="flex items-center gap-6 mb-10">
-                <div class="bg-white rounded-xl px-4 py-3 shadow-lg">
-                    <img src="{{ asset('images/angkasa-pura.png') }}"
-                         alt="Angkasa Pura Indonesia"
-                         class="w-32 xl:w-36">
-                </div>
-
-                <div class="h-16 border-l border-white/40"></div>
-
-                <div>
-                    <h1 class="text-4xl xl:text-5xl font-extrabold">
-                        Fly<span class="text-[#8dc63f]">Dine</span>
-                    </h1>
-                    <p class="text-blue-100">Digital Dining Experience</p>
-                </div>
-            </div>
-
-            <h2 data-i18n="headline"
-                class="max-w-xl text-3xl xl:text-5xl font-bold leading-tight">
-                Pulihkan Akses Portal FlyDine
+            <!-- Teks Utama Tanpa Logo -->
+            <h2 data-i18n="headline" class="max-w-xl text-4xl xl:text-5xl font-bold leading-tight">
+                Lupa Kata Sandi?
             </h2>
 
-            <p data-i18n="description"
-               class="mt-6 max-w-xl text-lg leading-8 text-white/90">
-                Gunakan email Admin atau Staff Tenant yang terdaftar untuk membuat kata sandi baru.
+            <p data-i18n="description" class="mt-6 max-w-xl text-lg leading-8 text-white/90">
+                Gunakan email Admin atau Staff Tenant yang terdaftar untuk menerima link pemulihan akun Anda.
             </p>
 
             <div class="flex gap-4 mt-9">
@@ -77,7 +65,7 @@
                     <p data-i18n="location" class="text-[10px] tracking-widest text-blue-100">
                         LOKASI
                     </p>
-                    <p class="font-bold text-sm mt-1">Terminal 1 Juanda</p>
+                    <p class="font-bold text-sm mt-1">T1, T2 Bandara Juanda</p>
                 </div>
 
                 <div class="bg-white/15 border border-white/20 rounded-2xl px-5 py-4 min-w-[160px]">
@@ -92,144 +80,80 @@
 
         </div>
 
-        <div class="absolute bottom-0 inset-x-0 h-1.5 bg-[#8dc63f]"></div>
     </section>
 
 
     {{-- RIGHT --}}
-    <section class="w-full lg:w-[41%] min-h-screen flex items-center justify-center p-6">
+    <section class="w-full lg:w-[41%] min-h-screen flex items-center justify-center p-6 relative z-10 lg:bg-[#f8fafc]">
 
-        <div class="w-full max-w-[450px]">
-
-            <div class="bg-white rounded-[26px] shadow-2xl overflow-hidden border border-gray-100">
-
-                {{-- HEADER --}}
-                <header class="bg-gradient-to-br from-[#004c80] via-[#0069a9] to-[#0787c7] px-7 py-7 text-white">
-
-                    <div class="flex justify-between items-start">
-
-                        <div class="bg-white rounded-xl px-3 py-2">
-                            <img src="{{ asset('images/angkasa-pura.png') }}"
-                                 alt="Angkasa Pura Indonesia"
-                                 class="w-28 h-10 object-contain">
-                        </div>
-
-                        <div class="flex bg-white/10 border border-white/20 rounded-full p-1 text-xs font-semibold">
-                            <button id="btn-id"
-                                    type="button"
-                                    onclick="setLanguage('id')"
-                                    class="lang-btn px-3 py-1.5 rounded-full">
-                                ID
-                            </button>
-
-                            <button id="btn-en"
-                                    type="button"
-                                    onclick="setLanguage('en')"
-                                    class="lang-btn px-3 py-1.5 rounded-full">
-                                EN
-                            </button>
-                        </div>
-
-                    </div>
-
-                    <h2 data-i18n="pageTitle"
-                        class="mt-7 text-3xl font-extrabold">
-                        Lupa Kata Sandi?
-                    </h2>
-
-                    <p data-i18n="pageSubtitle"
-                       class="mt-1 text-sm text-blue-100">
-                        Pulihkan akses akun Anda
-                    </p>
-
-                </header>
-
-
-                {{-- CONTENT --}}
-                <main class="px-7 sm:px-9 py-8">
-
-                    <div class="text-center mb-6">
-                        <div class="w-14 h-14 mx-auto rounded-2xl bg-blue-50 text-[#005ea2] flex items-center justify-center">
-                            ✉
-                        </div>
-
-                        <h3 data-i18n="formTitle"
-                            class="mt-4 text-xl font-bold text-gray-800">
-                            Reset Kata Sandi
-                        </h3>
-
-                        <p data-i18n="formDescription"
-                           class="mt-2 text-sm text-gray-500">
-                            Masukkan email terdaftar untuk menerima link reset.
-                        </p>
-                    </div>
-
-
-                    {{-- STATUS SUKSES --}}
-                    @if (session('status'))
-                        <div class="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3">
-                            <p data-i18n="successMessage"
-                               class="text-sm font-medium text-green-700">
-                                Link reset kata sandi telah dikirim ke email Anda.
-                            </p>
-                        </div>
-                    @endif
-
-
-                    {{-- FORM --}}
-                    <form method="POST" action="{{ route('password.email') }}">
-                        @csrf
-
-                        <label data-i18n="emailLabel"
-                               for="email"
-                               class="block text-sm font-semibold text-gray-700 mb-2">
-                            Email Terdaftar
-                        </label>
-
-                        <input id="email"
-                               type="email"
-                               name="email"
-                               value="{{ old('email') }}"
-                               data-placeholder="emailPlaceholder"
-                               placeholder="contoh@flydine.com"
-                               required
-                               autofocus
-                               autocomplete="email"
-                               class="input-flydine">
-
-                        <x-input-error
-                            :messages="$errors->get('email')"
-                            class="mt-2"
-                        />
-
-                        <button type="submit"
-                                class="mt-7 w-full bg-[#006bac] hover:bg-[#004d80]
-                                       text-white font-bold py-3.5 rounded-xl shadow-lg transition">
-                            <span data-i18n="submit">KIRIM LINK RESET</span> →
-                        </button>
-                    </form>
-
-
-                    <div class="mt-6 text-center">
-                        <a href="{{ route('login') }}"
-                           class="text-sm font-semibold text-[#005ea2] hover:underline">
-                            ← <span data-i18n="back">Kembali ke Login</span>
-                        </a>
-                    </div>
-
-                </main>
-
-
-                <footer class="border-t bg-[#fafbfc] text-center py-4">
-                    <p class="text-[11px] text-gray-400">© 2026 FlyDine System</p>
-                    <p class="text-[10px] text-gray-400 mt-1">
-                        Juanda International Airport
-                    </p>
-                </footer>
-
-            </div>
+        <!-- Tombol Bahasa -->
+        <div class="absolute top-4 right-4 sm:top-8 sm:right-8 flex bg-white/30 backdrop-blur-md p-1 rounded-lg border border-white/40 shadow-sm z-20">
+            <button id="btn-id" type="button" onclick="setLanguage('id')" class="px-3 py-1.5 rounded-md text-xs font-bold bg-white text-[#005ea2] shadow-sm transition-all">ID</button>
+            <button id="btn-en" type="button" onclick="setLanguage('en')" class="px-3 py-1.5 rounded-md text-xs font-bold text-slate-600 hover:text-slate-900 transition-all">EN</button>
         </div>
 
+        <div class="w-full max-w-[420px] flex flex-col items-center mt-16 sm:mt-6">
+
+            {{-- 1. LOGO AREA: Responsif --}}
+            <div class="flex items-center gap-5 sm:gap-8 bg-white border border-slate-200/80 rounded-2xl px-6 sm:px-8 py-3 sm:py-3.5 shadow-md shadow-slate-200/50 mb-7 relative z-10 scale-90 sm:scale-100">
+                <img src="{{ asset('images/angkasa-pura.png') }}" alt="Angkasa Pura" class="h-9 sm:h-14 w-auto object-contain transform scale-[1.15] sm:scale-[1.35] origin-center transition-transform">
+                <!-- Garis Pemisah (Divider) -->
+                <div class="w-px h-9 sm:h-11 bg-slate-300 rounded-full"></div>
+                <img src="{{ asset('images/logo-flydine.png') }}" alt="FlyDine" class="h-8 sm:h-13 w-auto object-contain transform scale-150 sm:scale-[1.85] origin-center transition-transform">
+            </div>
+
+            {{-- 2. BLUE CARD: Form Area --}}
+            <div class="w-full bg-[#005ea2] rounded-[2rem] shadow-2xl shadow-blue-900/20 p-8 sm:p-12 relative overflow-hidden">
+                
+                <!-- Aksen cahaya tipis di dalam card biru -->
+                <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+
+                {{-- HEADER TEKS (Di Dalam Card) --}}
+                <div class="mb-8 relative z-10 text-center">
+                    <h2 data-i18n="pageTitle" class="text-3xl font-extrabold text-white tracking-tight">
+                        Lupa Kata Sandi?
+                    </h2>
+                    <p data-i18n="pageSubtitle" class="mt-3 text-sm text-blue-100 font-medium leading-relaxed px-4">
+                        Masukkan email Anda dan kami akan mengirimkan link untuk memulihkan akun Anda.
+                    </p>
+                </div>
+
+                <x-auth-session-status class="mb-5 relative z-10" :status="session('status')" />
+
+                {{-- FORM --}}
+                <form method="POST" action="{{ route('password.email') }}" class="space-y-5 relative z-10">
+                    @csrf
+
+                    <div>
+                        <label data-i18n="emailLabel" for="email" class="block text-sm font-bold text-blue-50 mb-2">
+                            Email Terdaftar
+                        </label>
+                        <input id="email" type="email" name="email" value="{{ old('email') }}" 
+                               data-placeholder="emailPlaceholder" placeholder="contoh@flydine.com" required autofocus autocomplete="email"
+                               class="input-flydine shadow-inner">
+                        <x-input-error :messages="$errors->get('email')" class="mt-2 text-xs text-red-300" />
+                    </div>
+
+                    <!-- Tombol (Putih, teks Biru) -->
+                    <button type="submit" class="mt-6 w-full bg-white hover:bg-slate-50 text-[#005ea2] font-black py-4 rounded-xl transition-all flex items-center justify-center group shadow-md hover:-translate-y-0.5">
+                        <span data-i18n="submit" class="tracking-wide uppercase text-sm">KIRIM LINK RESET</span>
+                        <svg class="h-4 w-4 ml-2 opacity-80 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Footer Small -->
+            <div class="text-center mt-8">
+                <a href="{{ route('login') }}" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-full hover:text-[#005ea2] hover:border-blue-200 hover:bg-blue-50/50 shadow-sm transition-all group">
+                    <svg class="w-4 h-4 text-slate-400 group-hover:text-[#005ea2] group-hover:-translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    <span data-i18n="back">Kembali ke Login</span>
+                </a>
+                <p class="text-xs font-semibold text-slate-400 mt-6">
+                    &copy; {{ date('Y') }} FlyDine PT Angkasa Pura Indonesia.
+                </p>
+            </div>
+
+        </div>
     </section>
 
 </div>
@@ -285,13 +209,11 @@ function setLanguage(lang) {
         el.placeholder = t[el.dataset.placeholder] ?? el.placeholder;
     });
 
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.className = 'lang-btn px-3 py-1.5 rounded-full text-white';
-    });
+    const activeClass = 'px-3 py-1.5 rounded-md text-xs font-bold bg-white text-[#005ea2] shadow-sm transition-all';
+    const inactiveClass = 'px-3 py-1.5 rounded-md text-xs font-bold text-slate-600 hover:text-slate-900 transition-all';
 
-    const active = document.getElementById(`btn-${lang}`);
-    active.className =
-        'lang-btn px-3 py-1.5 rounded-full bg-white text-[#005ea2]';
+    document.getElementById('btn-id').className = lang === 'id' ? activeClass : inactiveClass;
+    document.getElementById('btn-en').className = lang === 'en' ? activeClass : inactiveClass;
 
     document.title =
         lang === 'id'
