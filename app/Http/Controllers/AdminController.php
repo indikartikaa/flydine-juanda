@@ -91,4 +91,81 @@ class AdminController extends Controller
 
         return view('admin.tenants-management', compact('tenants', 'total_tenants', 'active_tenants'));
     }
+
+    public function storeTenant(Request $request)
+    {
+        abort_unless(auth()->user()->role === 'admin_ops', 403);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:120',
+            'company_name' => 'nullable|string|max:255',
+            'tenant_code' => 'required|string|max:30|unique:tenants,tenant_code',
+            'terminal' => 'required|in:T1,T2',
+            'zone' => 'required|in:Landside,Airside',
+            'floor_location' => 'required|string|max:50',
+            'category' => 'required|string|max:255',
+            'contract_start' => 'nullable|date',
+            'contract_end' => 'nullable|date|after_or_equal:contract_start',
+            'email' => 'required|email|unique:users,email',
+        ]);
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($validated) {
+            $tenant = Tenant::create([
+                'name' => $validated['name'],
+                'company_name' => $validated['company_name'],
+                'tenant_code' => $validated['tenant_code'],
+                'terminal' => $validated['terminal'],
+                'zone' => $validated['zone'],
+                'floor_location' => $validated['floor_location'],
+                'category' => $validated['category'],
+                'contract_start' => $validated['contract_start'],
+                'contract_end' => $validated['contract_end'],
+                'is_active' => true,
+            ]);
+
+            \App\Models\User::create([
+                'name' => 'PIC ' . $validated['name'],
+                'email' => $validated['email'],
+                'password' => \Illuminate\Support\Facades\Hash::make('juanda123'),
+                'role' => 'tenant_staff',
+                'tenant_id' => $tenant->id,
+                'is_active' => true,
+            ]);
+        });
+
+        return redirect()->back()->with('success', 'Mitra tenant baru dan akun akses berhasil ditambahkan!');
+    }
+
+    public function updateTenant(Request $request, Tenant $tenant)
+    {
+        abort_unless(auth()->user()->role === 'admin_ops', 403);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:120',
+            'company_name' => 'nullable|string|max:255',
+            'tenant_code' => 'required|string|max:30|unique:tenants,tenant_code,'.$tenant->id,
+            'terminal' => 'required|in:T1,T2',
+            'zone' => 'required|in:Landside,Airside',
+            'floor_location' => 'required|string|max:50',
+            'category' => 'required|string|max:255',
+            'contract_start' => 'nullable|date',
+            'contract_end' => 'nullable|date|after_or_equal:contract_start',
+        ]);
+
+        $tenant->update($validated);
+
+        return redirect()->back()->with('success', 'Data mitra tenant berhasil diperbarui!');
+    }
+
+    public function toggleTenantStatus(Tenant $tenant)
+    {
+        abort_unless(auth()->user()->role === 'admin_ops', 403);
+
+        $tenant->update([
+            'is_active' => !$tenant->is_active
+        ]);
+
+        $statusText = $tenant->is_active ? 'diaktifkan' : 'ditangguhkan (suspend)';
+        return redirect()->back()->with('success', "Tenant berhasil $statusText!");
+    }
 }

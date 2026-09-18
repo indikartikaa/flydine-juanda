@@ -18,6 +18,7 @@ class Product extends Model
         'image',
         'note',
         'stock',
+        'preparation_time',
         'is_available',
     ];
 

@@ -24,11 +24,16 @@ class CustomerCatalogController extends Controller
 
         // Filter by Terminal
         if ($request->filled('terminal') && $request->terminal !== 'semua') {
-            // Because terminal in DB is like '1', '2' or 'Terminal 1', etc.
-            // Adjust logic based on how floor_location stores terminal data.
-            // The previous frontend mapped it using: substr(strtolower($tenant->floor_location ?? '1'), 0, 1)
-            $terminalStr = str_replace('t', '', $request->terminal); // 't1' becomes '1'
-            $query->where('floor_location', 'like', '%' . $terminalStr . '%');
+            $terminalStr = strtoupper($request->terminal); // 'T1' atau 'T2'
+            $query->where(function($q) use ($terminalStr, $request) {
+                $q->where('terminal', $terminalStr)
+                  ->orWhere('floor_location', 'like', '%' . str_replace('t', '', $request->terminal) . '%');
+            });
+        }
+
+        // Filter by Zone
+        if ($request->filled('zone') && $request->zone !== 'semua') {
+            $query->where('zone', $request->zone);
         }
 
         $tenants = $query->paginate(6)->withQueryString();

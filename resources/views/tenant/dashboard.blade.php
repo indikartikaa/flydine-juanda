@@ -49,8 +49,12 @@
         </div>
         
         <div class="hidden lg:block shrink-0">
-            <div class="h-32 w-32 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 shadow-xl">
-                <span class="text-5xl">🏪</span>
+            <div class="h-32 w-32 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 shadow-xl overflow-hidden">
+                @if($tenant?->logo)
+                    <img src="{{ asset($tenant->logo) }}" alt="Logo {{ $tenant->name }}" class="h-full w-full object-cover">
+                @else
+                    <span class="text-5xl">🏪</span>
+                @endif
             </div>
         </div>
     </div>
@@ -244,10 +248,66 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">No. Telepon</p>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">No. Telepon Restoran</p>
                     <p class="font-semibold text-slate-800 mt-0.5">{{ $tenant?->phone ?? '-' }}</p>
                 </div>
             </div>
+
+            <div class="flex items-start">
+                <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center mr-4 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Penanggung Jawab (PIC)</p>
+                    <p class="font-semibold text-slate-800 mt-0.5">
+                        {{ $tenant?->pic_name ?? '-' }} 
+                        @if($tenant?->pic_phone)
+                            <span class="text-xs text-slate-500 font-normal">({{ $tenant->pic_phone }})</span>
+                        @endif
+                    </p>
+                </div>
+            </div>
+
+            <hr class="border-slate-100 my-4">
+
+            <!-- Formulir Kelengkapan Profil -->
+            <form action="{{ route('tenant.settings.profile') }}" method="POST" enctype="multipart/form-data" class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 space-y-4">
+                @csrf
+                <p class="text-xs font-bold text-[#005ea2] uppercase tracking-wider mb-2">Lengkapi Data Tenant</p>
+                
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 mb-1">Logo Restoran (Opsional)</label>
+                    <input type="file" name="logo" accept="image/*" class="w-full text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#005ea2]/10 file:text-[#005ea2] hover:file:bg-[#005ea2]/20 border border-slate-200 rounded-xl bg-white focus:outline-none">
+                    @if($tenant?->logo)
+                        <div class="mt-3 flex items-center gap-3 p-2 bg-white rounded-lg border border-slate-200">
+                            <img src="{{ asset($tenant->logo) }}" alt="Logo Saat Ini" class="h-8 w-8 object-cover rounded-md border border-slate-100">
+                            <span class="text-xs font-semibold text-slate-600">Logo tersimpan</span>
+                        </div>
+                    @endif
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 mb-1">No. Telepon Restoran</label>
+                    <input type="text" name="phone" value="{{ $tenant?->phone }}" placeholder="Contoh: 08123456789" class="w-full text-xs px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 mb-1">Nama PIC</label>
+                        <input type="text" name="pic_name" value="{{ $tenant?->pic_name }}" placeholder="Nama Penanggung Jawab" class="w-full text-xs px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 mb-1">No. HP PIC</label>
+                        <input type="text" name="pic_phone" value="{{ $tenant?->pic_phone }}" placeholder="Nomor WhatsApp" class="w-full text-xs px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-[#005ea2] hover:bg-blue-700 text-white py-2 rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 transition-colors">
+                    Simpan Kelengkapan Data
+                </button>
+            </form>
 
             <hr class="border-slate-100 my-2">
 

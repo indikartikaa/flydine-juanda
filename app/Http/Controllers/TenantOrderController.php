@@ -66,7 +66,7 @@ class TenantOrderController extends Controller
         $orders = Order::with(['orderItems', 'deliveryLocation'])
             ->where('tenant_id', $tenantId)
             ->where('is_paid', true)
-            ->whereIn('status', ['menunggu', 'diproses'])
+            ->whereIn('status', ['menunggu', 'diproses', 'siap'])
             ->orderBy('ordered_at', 'asc')
             ->get();
 
@@ -177,5 +177,47 @@ class TenantOrderController extends Controller
         }
 
         return redirect()->back()->with('success', 'Pengaturan layanan antar berhasil diperbarui.');
+    }
+
+    /**
+     * Update Profil Lengkap Tenant (Logo & Kontak PIC)
+     */
+    public function updateProfile(Request $request)
+    {
+        $tenant = auth()->user()->tenant;
+        
+        $request->validate([
+            'phone' => 'nullable|string|max:20',
+            'pic_name' => 'nullable|string|max:100',
+            'pic_phone' => 'nullable|string|max:20',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048' // max 2MB
+        ]);
+
+        $tenant->phone = $request->phone;
+        $tenant->pic_name = $request->pic_name;
+        $tenant->pic_phone = $request->pic_phone;
+
+        if ($request->hasFile('logo')) {
+            $file = $request->file('logo');
+            $filename = time() . '_' . \Str::slug($tenant->name) . '.' . $file->getClientOriginalExtension();
+            
+            // Simpan langsung ke folder public/images/logos agar lebih aman di Windows tanpa perlu symlink
+            $destinationPath = public_path('images/logos');
+            if (!file_exists($destinationPath)) {
+                mkdir($destinationPath, 0777, true);
+            }
+            $file->move($destinationPath, $filename);
+            
+            // Hapus logo lama jika ada dan bukan bawaan
+            if ($tenant->logo && file_exists(public_path($tenant->logo))) {
+                @unlink(public_path($tenant->logo));
+            }
+
+            $tenant->logo = 'images/logos/' . $filename;
+        }
+
+        $tenant->save();
+
+        return redirect()->back()->with('success', 'Profil restoran berhasil diperbarui!');
     }
 }

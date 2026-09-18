@@ -12,12 +12,18 @@ class Tenant extends Model
     protected $fillable = [
         'tenant_code',
         'name',
+        'company_name',
+        'category',
+        'terminal',
+        'zone',
         'floor_location',
         'opening_time',
         'closing_time',
         'phone',
         'is_active',
         'delivery_fee',
+        'contract_start',
+        'contract_end',
     ];
 
     protected $casts = [

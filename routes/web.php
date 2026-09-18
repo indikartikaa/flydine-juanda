@@ -55,8 +55,10 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/executive-dashboard', [\App\Http\Controllers\ExecutiveDashboardController::class, 'index'])->name('admin.executive-dashboard');
     Route::get('/executive-dashboard/export', [\App\Http\Controllers\ExecutiveDashboardController::class, 'export'])->name('admin.executive-dashboard.export');
 
-    Route::get('/tenants-management', [\App\Http\Controllers\AdminController::class, 'tenantsManagement']);
-
+    Route::get('/tenants-management', [\App\Http\Controllers\AdminController::class, 'tenantsManagement'])->name('admin.tenants.index');
+    Route::post('/tenants-management', [\App\Http\Controllers\AdminController::class, 'storeTenant'])->name('admin.tenants.store');
+    Route::put('/tenants-management/{tenant}', [\App\Http\Controllers\AdminController::class, 'updateTenant'])->name('admin.tenants.update');
+    Route::patch('/tenants-management/{tenant}/toggle-status', [\App\Http\Controllers\AdminController::class, 'toggleTenantStatus'])->name('admin.tenants.toggle-status');
     Route::get('/complaints', function () {
         abort_unless(auth()->user()->role === 'admin_ops', 403);
         
@@ -104,6 +106,7 @@ Route::middleware('auth')
         Route::get('/dashboard', [\App\Http\Controllers\TenantOrderController::class, 'dashboard'])->name('dashboard');
         Route::post('/settings/hours', [\App\Http\Controllers\TenantOrderController::class, 'updateHours'])->name('settings.hours');
         Route::post('/settings/delivery', [\App\Http\Controllers\TenantOrderController::class, 'updateDelivery'])->name('settings.delivery');
+        Route::post('/settings/profile', [\App\Http\Controllers\TenantOrderController::class, 'updateProfile'])->name('settings.profile');
 
         Route::get('/orders', [\App\Http\Controllers\TenantOrderController::class, 'index'])->name('orders');
         Route::get('/orders/history', [\App\Http\Controllers\TenantOrderController::class, 'history'])->name('orders.history');

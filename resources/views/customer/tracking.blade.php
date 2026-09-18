@@ -114,7 +114,7 @@
                         $labels = [
                             'menunggu' => 'Pesanan Diterima',
                             'diproses' => 'Sedang Dimasak',
-                            'siap' => 'Siap Diambil',
+                            'siap' => $order->pickup_method === 'diantar' ? 'Sedang Diantar' : 'Siap Diambil',
                             'selesai' => 'Pesanan Selesai',
                             'dibatalkan' => 'Dibatalkan'
                         ];
@@ -136,7 +136,11 @@
                         @elseif($order->status == 'diproses')
                             Pesanan Anda sedang dipersiapkan oleh <span class="font-extrabold text-[#005ea2]">{{ $order->tenant->name }}</span>.
                         @elseif($order->status == 'siap')
-                            Makanan sudah siap! Silakan ambil pesanan Anda.
+                            @if($order->pickup_method === 'diantar')
+                                Staf kami sedang dalam perjalanan mengantar pesanan ke <span class="font-extrabold text-[#005ea2]">{{ $order->deliveryLocation->name }}</span>.
+                            @else
+                                Makanan sudah siap! Silakan menuju kasir restoran <span class="font-extrabold text-[#005ea2]">{{ $order->tenant->name }}</span>.
+                            @endif
                         @endif
                     </p>
                 @endif
@@ -207,8 +211,12 @@
                                 @endif
                             </div>
                             <div class="ml-4 mt-1">
-                                <h4 class="text-sm {{ in_array($order->status, ['siap', 'selesai']) ? 'font-bold text-blue-600' : 'font-medium text-slate-400' }}">Siap Diambil</h4>
-                                <p class="text-xs text-slate-400 font-medium mt-1">Silakan ambil di lokasi counter.</p>
+                                <h4 class="text-sm {{ in_array($order->status, ['siap', 'selesai']) ? 'font-bold text-blue-600' : 'font-medium text-slate-400' }}">
+                                    {{ $order->pickup_method === 'diantar' ? 'Sedang Diantar' : 'Siap Diambil' }}
+                                </h4>
+                                <p class="text-xs text-slate-400 font-medium mt-1">
+                                    {{ $order->pickup_method === 'diantar' ? 'Porter sedang menuju ke lokasi Anda.' : 'Silakan ambil di lokasi counter.' }}
+                                </p>
                             </div>
                         </div>
                     </div>

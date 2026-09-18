@@ -40,6 +40,10 @@
                 <span>Sedang Dimasak</span>
                 <span :class="{'bg-white text-[#005ea2]': activeTab === 'diproses', 'bg-amber-100 text-amber-600': activeTab !== 'diproses'}" class="px-1.5 py-0.5 rounded-md text-[10px] font-extrabold" x-text="countDiproses"></span>
             </button>
+            <button @click="activeTab = 'siap'" :class="{'bg-[#005ea2] text-white shadow-md shadow-blue-500/20 font-bold border-transparent': activeTab === 'siap', 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200 font-medium': activeTab !== 'siap'}" class="px-5 py-2.5 rounded-full text-sm transition-all whitespace-nowrap border flex items-center space-x-2">
+                <span>Siap Antar/Ambil</span>
+                <span :class="{'bg-white text-[#005ea2]': activeTab === 'siap', 'bg-purple-100 text-purple-600': activeTab !== 'siap'}" class="px-1.5 py-0.5 rounded-md text-[10px] font-extrabold" x-text="countSiap"></span>
+            </button>
         </div>
 
         <!-- Tabel Pesanan Lengkap -->
@@ -119,6 +123,12 @@
                                         </svg>
                                         Sedang Dimasak
                                     </span>
+                                    
+                                    <!-- Status Siap -->
+                                    <span x-show="order.status === 'siap'" class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-50 text-purple-600 border border-purple-200 shadow-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                        <span x-text="order.pickup_method === 'diantar' ? 'Siap Diantar' : 'Siap Diambil'"></span>
+                                    </span>
 
                                     <!-- Status Selesai -->
                                     <span x-show="order.status === 'selesai'" class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-sm">
@@ -148,8 +158,15 @@
 
                                         <!-- Actions for Diproses -->
                                         <template x-if="order.status === 'diproses'">
+                                            <button @click="updateStatus(order.id, 'siap')" class="w-full bg-[#005ea2] hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 transition-all hover:-translate-y-0.5">
+                                                <span x-text="order.pickup_method === 'diantar' ? 'Pesanan Siap, Antar Sekarang!' : 'Pesanan Siap Diambil'"></span>
+                                            </button>
+                                        </template>
+
+                                        <!-- Actions for Siap -->
+                                        <template x-if="order.status === 'siap'">
                                             <button @click="updateStatus(order.id, 'selesai')" class="w-full bg-[#8dc63f] hover:bg-green-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md shadow-green-500/20 transition-all hover:-translate-y-0.5">
-                                                Tandai Selesai
+                                                <span x-text="order.pickup_method === 'diantar' ? 'Selesai (Sudah Diserahkan)' : 'Selesai (Sudah Diambil)'"></span>
                                             </button>
                                         </template>
                                         
@@ -223,6 +240,10 @@
                 
                 get countDiproses() {
                     return this.orders.filter(order => order.status === 'diproses').length;
+                },
+
+                get countSiap() {
+                    return this.orders.filter(order => order.status === 'siap').length;
                 },
 
                 formatTime(dateString) {

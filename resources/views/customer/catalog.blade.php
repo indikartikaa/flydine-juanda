@@ -138,35 +138,85 @@
                 <p class="font-medium max-w-lg mx-auto md:mx-0 text-sm md:text-base text-blue-100 drop-shadow-md" data-id="Temukan hidangan favorit Anda sebelum penerbangan." data-en="Find your favorite meals before your flight.">Temukan hidangan favorit Anda sebelum penerbangan.</p>
             </div>
 
-            <!-- Search & Filter (Floating Island) -->
-            <div class="mb-8 sticky top-[72px] sm:top-24 z-40 max-w-5xl mx-auto">
-                <form method="GET" action="{{ route('customer.menu') }}" class="bg-white/95 backdrop-blur-xl p-3 sm:p-2 rounded-3xl sm:rounded-full shadow-xl shadow-slate-200/50 border border-white flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <!-- Search & Filter (Premium Unified Bar) -->
+            <div class="mb-10 sticky top-[72px] sm:top-24 z-40 max-w-4xl mx-auto px-2 sm:px-0">
+                <form id="catalog-form" method="GET" action="{{ route('customer.menu') }}" class="bg-white/95 backdrop-blur-xl p-1.5 sm:p-2 rounded-3xl sm:rounded-full shadow-2xl shadow-blue-900/10 border border-white/50 flex flex-col md:flex-row md:items-center divide-y md:divide-y-0 md:divide-x divide-slate-100 transition-all hover:shadow-blue-900/20">
                     
-                    <input type="hidden" name="terminal" id="terminalInput" value="{{ request('terminal', 'semua') }}">
-                    
-                    <!-- Chips / Pills Filter (Terminal) -->
-                    <div class="flex space-x-2 overflow-x-auto scrollbar-hide pb-1 md:pb-0 md:pl-2 order-2 md:order-1">
-                        @php $activeCategory = request('terminal', 'semua'); @endphp
-                        <button type="button" onclick="document.getElementById('terminalInput').value='semua'; this.closest('form').submit();" class="px-5 py-2.5 rounded-full border text-sm transition-all whitespace-nowrap {{ $activeCategory === 'semua' ? 'bg-[#005ea2] text-white font-bold shadow-md shadow-blue-500/20 border-transparent' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 font-medium' }}">
-                            Semua Terminal
-                        </button>
-                        <button type="button" onclick="document.getElementById('terminalInput').value='t1'; this.closest('form').submit();" class="px-5 py-2.5 rounded-full border text-sm transition-all whitespace-nowrap flex items-center {{ $activeCategory === 't1' ? 'bg-[#005ea2] text-white font-bold shadow-md shadow-blue-500/20 border-transparent' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 font-medium' }}">
-                            <span class="w-2 h-2 rounded-full mr-2 {{ $activeCategory === 't1' ? 'bg-white' : 'bg-amber-400' }}"></span> Terminal 1
-                        </button>
-                        <button type="button" onclick="document.getElementById('terminalInput').value='t2'; this.closest('form').submit();" class="px-5 py-2.5 rounded-full border text-sm transition-all whitespace-nowrap flex items-center {{ $activeCategory === 't2' ? 'bg-[#005ea2] text-white font-bold shadow-md shadow-blue-500/20 border-transparent' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 font-medium' }}">
-                            <span class="w-2 h-2 rounded-full mr-2 {{ $activeCategory === 't2' ? 'bg-white' : 'bg-purple-400' }}"></span> Terminal 2
+                    <!-- Real inputs for form submission -->
+                    <input type="hidden" name="terminal" id="hidden_terminal" value="{{ request('terminal', 'semua') }}">
+                    <input type="hidden" name="zone" id="hidden_zone" value="{{ request('zone', 'semua') }}">
+
+                    <!-- Terminal Custom Dropdown (Alpine) -->
+                    <div x-data="{ openTerminal: false, terminal: '{{ request('terminal', 'semua') }}' }" @click.away="openTerminal = false" class="flex-1 w-full relative group">
+                        
+                        <!-- Trigger Area -->
+                        <div @click="openTerminal = !openTerminal" class="px-5 sm:px-6 py-2.5 sm:py-2 w-full h-full flex flex-col justify-center hover:bg-slate-50 rounded-full transition-colors cursor-pointer">
+                            <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5 cursor-pointer group-hover:text-[#005ea2] transition-colors" data-id="LOKASI" data-en="LOCATION">LOKASI</label>
+                            <div class="flex justify-between items-center w-full">
+                                <span class="font-bold text-slate-700 truncate text-sm sm:text-base pointer-events-none" x-text="
+                                    terminal === 't1' ? 'Terminal 1' : 
+                                    (terminal === 't2' ? 'Terminal 2' : 'Semua Terminal')
+                                ">Semua Terminal</span>
+                                <svg class="fill-current h-4 w-4 text-slate-400 group-hover:text-[#005ea2] transition-transform duration-200 pointer-events-none" :class="{'rotate-180': openTerminal}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                            </div>
+                        </div>
+
+                        <!-- Dropdown Menu -->
+                        <div x-cloak x-show="openTerminal" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95 transform -translate-y-2" x-transition:enter-end="opacity-100 scale-100 transform translate-y-0" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute left-0 mt-3 md:mt-4 w-[110%] min-w-[200px] bg-white border border-slate-100 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] rounded-2xl py-2 z-50 overflow-hidden" style="display: none;">
+                            <div @click="document.getElementById('hidden_terminal').value = 'semua'; document.getElementById('catalog-form').submit();" class="px-5 py-3 hover:bg-blue-50 cursor-pointer font-bold text-sm text-slate-600 hover:text-[#005ea2] transition-colors flex items-center" :class="{'bg-blue-50/50 text-[#005ea2]': terminal === 'semua'}">
+                                <span class="w-1.5 h-1.5 rounded-full mr-2" :class="terminal === 'semua' ? 'bg-[#005ea2]' : 'bg-transparent'"></span>Semua Terminal
+                            </div>
+                            <div @click="document.getElementById('hidden_terminal').value = 't1'; document.getElementById('catalog-form').submit();" class="px-5 py-3 hover:bg-blue-50 cursor-pointer font-bold text-sm text-slate-600 hover:text-[#005ea2] transition-colors flex items-center" :class="{'bg-blue-50/50 text-[#005ea2]': terminal === 't1'}">
+                                <span class="w-1.5 h-1.5 rounded-full mr-2" :class="terminal === 't1' ? 'bg-[#005ea2]' : 'bg-transparent'"></span>Terminal 1
+                            </div>
+                            <div @click="document.getElementById('hidden_terminal').value = 't2'; document.getElementById('catalog-form').submit();" class="px-5 py-3 hover:bg-blue-50 cursor-pointer font-bold text-sm text-slate-600 hover:text-[#005ea2] transition-colors flex items-center" :class="{'bg-blue-50/50 text-[#005ea2]': terminal === 't2'}">
+                                <span class="w-1.5 h-1.5 rounded-full mr-2" :class="terminal === 't2' ? 'bg-[#005ea2]' : 'bg-transparent'"></span>Terminal 2
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Zone Custom Dropdown (Alpine) -->
+                    <div x-data="{ openZone: false, zone: '{{ request('zone', 'semua') }}' }" @click.away="openZone = false" class="flex-1 w-full relative group">
+                        
+                        <!-- Trigger Area -->
+                        <div @click="openZone = !openZone" class="px-5 sm:px-6 py-2.5 sm:py-2 w-full h-full flex flex-col justify-center hover:bg-slate-50 rounded-full transition-colors cursor-pointer">
+                            <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5 cursor-pointer group-hover:text-[#8dc63f] transition-colors" data-id="AREA" data-en="ZONE">AREA</label>
+                            <div class="flex justify-between items-center w-full">
+                                <span class="font-bold text-slate-700 truncate text-sm sm:text-base pointer-events-none" x-text="
+                                    zone === 'Landside' ? 'Area Publik' : 
+                                    (zone === 'Airside' ? 'Ruang Tunggu' : 'Semua Area')
+                                ">Semua Area</span>
+                                <svg class="fill-current h-4 w-4 text-slate-400 group-hover:text-[#8dc63f] transition-transform duration-200 pointer-events-none" :class="{'rotate-180': openZone}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                            </div>
+                        </div>
+
+                        <!-- Dropdown Menu -->
+                        <div x-cloak x-show="openZone" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95 transform -translate-y-2" x-transition:enter-end="opacity-100 scale-100 transform translate-y-0" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute left-0 mt-3 md:mt-4 w-[110%] min-w-[200px] bg-white border border-slate-100 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] rounded-2xl py-2 z-50 overflow-hidden" style="display: none;">
+                            <div @click="document.getElementById('hidden_zone').value = 'semua'; document.getElementById('catalog-form').submit();" class="px-5 py-3 hover:bg-green-50 cursor-pointer font-bold text-sm text-slate-600 hover:text-[#608b26] transition-colors flex items-center" :class="{'bg-green-50/50 text-[#608b26]': zone === 'semua'}">
+                                <span class="w-1.5 h-1.5 rounded-full mr-2" :class="zone === 'semua' ? 'bg-[#608b26]' : 'bg-transparent'"></span>Semua Area
+                            </div>
+                            <div @click="document.getElementById('hidden_zone').value = 'Landside'; document.getElementById('catalog-form').submit();" class="px-5 py-3 hover:bg-green-50 cursor-pointer font-bold text-sm text-slate-600 hover:text-[#608b26] transition-colors flex items-center" :class="{'bg-green-50/50 text-[#608b26]': zone === 'Landside'}">
+                                <span class="w-1.5 h-1.5 rounded-full mr-2" :class="zone === 'Landside' ? 'bg-[#608b26]' : 'bg-transparent'"></span>Area Publik (Landside)
+                            </div>
+                            <div @click="document.getElementById('hidden_zone').value = 'Airside'; document.getElementById('catalog-form').submit();" class="px-5 py-3 hover:bg-green-50 cursor-pointer font-bold text-sm text-slate-600 hover:text-[#608b26] transition-colors flex items-center" :class="{'bg-green-50/50 text-[#608b26]': zone === 'Airside'}">
+                                <span class="w-1.5 h-1.5 rounded-full mr-2" :class="zone === 'Airside' ? 'bg-[#608b26]' : 'bg-transparent'"></span>Ruang Tunggu (Airside)
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search Input & Submit -->
+                    <div class="pl-5 sm:pl-6 pr-2 py-2.5 sm:py-1.5 flex-[1.5] w-full flex items-center relative hover:bg-slate-50 rounded-full transition-colors group">
+                        <div class="flex-grow">
+                            <label for="search_input" class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5 group-hover:text-slate-500 transition-colors" data-id="CARI RESTORAN" data-en="FIND RESTAURANT">CARI RESTORAN</label>
+                            <input id="search_input" name="search" value="{{ request('search') }}" type="text" placeholder="Ketik nama restoran..." class="w-full bg-transparent font-bold text-slate-800 focus:outline-none placeholder:text-slate-300 placeholder:font-medium truncate">
+                        </div>
+                        <button type="submit" class="bg-gradient-to-tr from-[#005ea2] to-blue-500 text-white p-3 sm:p-3.5 rounded-full hover:shadow-lg hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all ml-2 shrink-0 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
                         </button>
                     </div>
 
-                    <!-- Search Bar -->
-                    <div class="relative w-full md:max-w-xs lg:max-w-sm group order-1 md:order-2">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-focus-within:text-[#005ea2] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </div>
-                        <input name="search" value="{{ request('search') }}" oninput="clearTimeout(this.timer); this.timer = setTimeout(() => { this.closest('form').submit(); }, 500)" type="text" placeholder="Cari nama restoran..." class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-full text-sm font-medium focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-[#005ea2] focus:bg-white transition-all placeholder:text-slate-400">
-                    </div>
                 </form>
             </div>
 
