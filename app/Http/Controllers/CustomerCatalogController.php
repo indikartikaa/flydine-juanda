@@ -17,9 +17,19 @@ class CustomerCatalogController extends Controller
     {
         $query = Tenant::with('products')->where('is_active', true);
 
-        // Filter by Search (Tenant Name)
+        // Filter by Search (Nama Tenant, Lokasi / Gate, atau Nama Menu)
         if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
+            $search = trim($request->search);
+            $gateSearch = preg_replace('/^gate\s*(\d+)$/i', 'Gate $1', $search);
+
+            $query->where(function($q) use ($search, $gateSearch) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('floor_location', 'like', '%' . $search . '%')
+                  ->orWhere('floor_location', 'like', '%' . $gateSearch . '%')
+                  ->orWhereHas('products', function($pq) use ($search) {
+                      $pq->where('name', 'like', '%' . $search . '%');
+                  });
+            });
         }
 
         // Filter by Terminal
@@ -33,7 +43,10 @@ class CustomerCatalogController extends Controller
 
         // Filter by Zone
         if ($request->filled('zone') && $request->zone !== 'semua') {
-            $query->where('zone', $request->zone);
+            // Jika user mencari kata "Gate" di kolom pencarian, jangan benturkan dengan filter Landside
+            if (!($request->filled('search') && stripos($request->search, 'gate') !== false && $request->zone === 'Landside')) {
+                $query->where('zone', $request->zone);
+            }
         }
 
         $tenants = $query->paginate(6)->withQueryString();
