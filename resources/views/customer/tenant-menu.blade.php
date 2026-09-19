@@ -148,15 +148,11 @@
                 <div class="flex items-center justify-center space-x-3 mb-6">
                     <div class="bg-amber-100/80 text-amber-700 text-xs font-bold px-3 py-1.5 rounded-full flex items-center space-x-1.5">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" /></svg>
-                        <span>Terminal {{ substr(strtolower($tenant->floor_location ?? '1'), 0, 1) == '1' ? '1' : '2' }} - {{ $tenant->floor_location ?? 'Lounge' }}</span>
+                        <span>{{ $tenant->terminal ?? 'T1' }} - {{ $tenant->floor_location ?? 'Lounge' }}</span>
                     </div>
                     
                     @php
-                        $open = false;
-                        if($tenant->opening_time && $tenant->closing_time){
-                            $now = now()->format('H:i:s');
-                            $open = $now >= $tenant->opening_time && $now <= $tenant->closing_time;
-                        }
+                        $open = $tenant->isOpen();
                     @endphp
                     
                     @if($open)

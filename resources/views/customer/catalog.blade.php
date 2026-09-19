@@ -255,7 +255,7 @@
                         <!-- Location Badge -->
                         <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur text-slate-600 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm border border-slate-100 tracking-wider flex items-center space-x-1.5">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-[#005ea2]" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" /></svg>
-                            <span>T1 - {{ $tenant->floor_location ?? 'Lounge' }}</span>
+                            <span>{{ $tenant->terminal ?? 'T1' }} - {{ $tenant->floor_location ?? 'Lounge' }}</span>
                         </div>
                     </div>
 

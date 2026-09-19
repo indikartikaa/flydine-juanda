@@ -55,9 +55,23 @@ class ImportTenantData extends Command
                 DB::table('tenants')->where('id', 52)->update(['zone' => 'Airside', 'floor_location' => 'Lantai 2 - Gate 10']);
                 DB::table('tenants')->whereIn('id', [53, 54])->update(['zone' => 'Airside', 'floor_location' => 'Lantai 2 - Gate 11']);
                 DB::table('tenants')->whereBetween('id', [55, 60])->update(['zone' => 'Airside', 'floor_location' => 'Lantai 2 - Gate 12']);
+
+                // Sinkronisasi Terminal 2 (T2)
+                DB::table('tenants')->where('tenant_code', 'like', 'FB-T2%')->update(['terminal' => 'T2']);
+
+                // T2 Lantai 1 (Keberangkatan Internasional & Umrah -> Airside, Lobby -> Landside)
+                DB::table('tenants')->where('tenant_code', 'FB-T2-01-01')->update(['zone' => 'Airside', 'floor_location' => 'Lantai 1 - Keberangkatan Internasional']);
+                DB::table('tenants')->whereIn('tenant_code', ['FB-T2-01-02', 'FB-T2-01-03', 'FB-T2-01-04'])->update(['zone' => 'Airside', 'floor_location' => 'Lantai 1 - Keberangkatan Umrah']);
+                DB::table('tenants')->whereIn('tenant_code', ['FB-T2-01-05', 'FB-T2-01-06', 'FB-T2-01-07', 'FB-T2-01-08', 'FB-T2-01-09', 'FB-T2-01-10'])->update(['zone' => 'Landside', 'floor_location' => 'Lantai 1 - Lobby']);
+
+                // T2 Lantai 2 (Gate 1 - 5 -> Airside)
+                DB::table('tenants')->where('tenant_code', 'FB-T2-02-01')->update(['zone' => 'Airside', 'floor_location' => 'Lantai 2 - Gate 1']);
+                DB::table('tenants')->whereIn('tenant_code', ['FB-T2-02-02', 'FB-T2-02-03', 'FB-T2-02-04'])->update(['zone' => 'Airside', 'floor_location' => 'Lantai 2 - Gate 3']);
+                DB::table('tenants')->where('tenant_code', 'FB-T2-02-05')->update(['zone' => 'Airside', 'floor_location' => 'Lantai 2 - Gate 4']);
+                DB::table('tenants')->where('tenant_code', 'FB-T2-02-06')->update(['zone' => 'Airside', 'floor_location' => 'Lantai 2 - Gate 5']);
             });
 
-            $this->info('Sinkronisasi Gate 1 s/d Gate 12 selesai dengan sukses!');
+            $this->info('Sinkronisasi Gate dan Zonasi T1 & T2 selesai dengan sukses!');
             return Command::SUCCESS;
         }
 

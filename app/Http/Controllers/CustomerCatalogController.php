@@ -35,9 +35,11 @@ class CustomerCatalogController extends Controller
         // Filter by Terminal
         if ($request->filled('terminal') && $request->terminal !== 'semua') {
             $terminalStr = strtoupper($request->terminal); // 'T1' atau 'T2'
-            $query->where(function($q) use ($terminalStr, $request) {
+            $terminalNum = str_ireplace('t', '', $request->terminal); // '1' atau '2'
+            $query->where(function($q) use ($terminalStr, $terminalNum) {
                 $q->where('terminal', $terminalStr)
-                  ->orWhere('floor_location', 'like', '%' . str_replace('t', '', $request->terminal) . '%');
+                  ->orWhere('floor_location', 'like', "%Terminal {$terminalNum}%")
+                  ->orWhere('floor_location', 'like', "%T{$terminalNum}%");
             });
         }
 
