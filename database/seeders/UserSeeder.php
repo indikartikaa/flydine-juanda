@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
             DB::table('users')->insert([
                 'name' => 'Staff ' . $tenant->name . ' (' . $tenant->tenant_code . ')',
                 'email' => 'staff.' . $slug . '@flydine.test',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('juanda123'),
                 'role' => 'tenant_staff',
                 'tenant_id' => $tenant->id,
                 'is_active' => true,

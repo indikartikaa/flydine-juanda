@@ -1,3 +1,24 @@
+@if(auth()->user()->role === 'tenant_staff')
+<section class="space-y-3">
+    <header>
+        <h2 class="text-sm font-extrabold text-slate-700 tracking-tight flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#005ea2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {{ __('Ketentuan Akun Mitra Tenant') }}
+        </h2>
+
+        <p class="mt-1 text-xs text-slate-500 leading-relaxed">
+            Akun ini terikat langsung dengan kontrak dan operasional gerai resmi Bandara Juanda. Penonaktifan akun hanya dapat dilakukan melalui konfirmasi tim Admin Operasional & Komersial Bandara.
+        </p>
+    </header>
+
+    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-[11px] text-slate-600 font-medium flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+        <span>Akun Anda terverifikasi sebagai Mitra Resmi FlyDine Juanda</span>
+    </div>
+</section>
+@else
 <section class="space-y-6" x-data="{ confirmingUserDeletion: {{ $errors->userDeletion->isNotEmpty() ? 'true' : 'false' }} }">
     <header>
         <h2 class="text-xl font-extrabold text-rose-600 tracking-tight flex items-center gap-2">
@@ -59,3 +80,4 @@
         </div>
     </div>
 </section>
+@endif

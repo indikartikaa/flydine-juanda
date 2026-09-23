@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             TenantSeeder::class,     // data NYATA dari mitra usaha (F&B), lihat catatan di file ini
             DeliveryLocationSeeder::class,
             Terminal2Seeder::class,  // 16 Tenant & 239 Menu Resmi Terminal 2 (T2)
+            TenantCategorySeeder::class,
             UserSeeder::class,       // dummy
             ProductSeeder::class,    // dummy
             CustomerSeeder::class,   // dummy

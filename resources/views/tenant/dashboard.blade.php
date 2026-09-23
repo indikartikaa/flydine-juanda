@@ -333,7 +333,7 @@
                 
                 <label class="flex items-center cursor-pointer mb-3">
                     <div class="relative">
-                        <input type="checkbox" name="delivery_active" class="sr-only" x-model="deliveryActive">
+                        <input type="checkbox" name="delivery_active" value="1" class="sr-only" x-model="deliveryActive">
                         <div class="block w-10 h-6 rounded-full transition-colors duration-300" :class="deliveryActive ? 'bg-[#005ea2]' : 'bg-slate-200'"></div>
                         <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300" :class="deliveryActive ? 'translate-x-4' : ''"></div>
                     </div>
@@ -342,10 +342,10 @@
 
                 <div x-show="deliveryActive" class="space-y-2 mb-3" style="display: none;">
                     <label class="text-[10px] text-slate-500 font-medium block">Biaya Ongkir (Rp)</label>
-                    <input type="number" name="delivery_fee" min="0" value="{{ $tenant?->delivery_fee ? (int)$tenant->delivery_fee : 15000 }}" class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500">
+                    <input type="number" name="delivery_fee" min="0" step="500" value="{{ $tenant?->delivery_fee ? (int)$tenant->delivery_fee : 15000 }}" class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500">
                 </div>
 
-                <button type="submit" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-xl text-xs font-bold transition-colors">
+                <button type="submit" class="w-full bg-[#005ea2] hover:bg-blue-700 text-white py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-[0.99]">
                     Simpan Pengaturan Antar
                 </button>
             </form>

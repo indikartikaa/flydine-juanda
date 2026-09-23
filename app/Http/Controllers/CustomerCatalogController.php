@@ -51,7 +51,24 @@ class CustomerCatalogController extends Controller
             }
         }
 
-        $tenants = $query->paginate(6)->withQueryString();
+        // Filter by Kategori Favorit Makanan
+        if ($request->filled('category') && $request->category !== 'semua') {
+            $catMap = [
+                'makanan-berat' => 'Makanan Berat',
+                'cepat-saji' => 'Cepat Saji',
+                'roti-kue' => 'Roti & Kue',
+                'minuman' => 'Minuman',
+            ];
+            $catKey = strtolower(trim($request->category));
+            $selectedCategory = $catMap[$catKey] ?? $request->category;
+
+            $query->where(function($q) use ($selectedCategory) {
+                $q->where('category', $selectedCategory)
+                  ->orWhere('category', 'like', '%' . $selectedCategory . '%');
+            });
+        }
+
+        $tenants = $query->paginate(6)->onEachSide(1)->withQueryString();
         
         return view('customer.catalog', compact('tenants'));
     }
@@ -94,14 +111,32 @@ class CustomerCatalogController extends Controller
     // Fungsi untuk menampilkan halaman Pelacakan Pesanan
     public function tracking(Request $request)
     {
-        $orderCode = session('order_code') ?? $request->query('order');
+        $orderCode = $request->query('order') ?? session('order_code');
         if (!$orderCode) {
             return redirect()->route('customer.menu');
         }
 
         $order = Order::with(['orderItems.product', 'tenant'])->where('order_code', $orderCode)->firstOrFail();
 
+        // Jika pesanan telah selesai, dibatalkan, atau ditolak, hapus session order_code
+        // agar tombol pulsing "LACAK" di navbar tidak terus muncul
+        if (in_array($order->status, ['selesai', 'dibatalkan', 'ditolak'])) {
+            if (session('order_code') === $order->order_code) {
+                session()->forget('order_code');
+            }
+        }
+
         return view('customer.tracking', compact('order'));
+    }
+
+    // Fungsi untuk menampilkan Struk Digital / Billing Rincian Pesanan
+    public function receipt($orderCode)
+    {
+        $order = Order::with(['orderItems.product', 'tenant', 'customer', 'deliveryLocation'])
+            ->where('order_code', $orderCode)
+            ->firstOrFail();
+
+        return view('customer.receipt', compact('order'));
     }
 
     public function cancelOrder($orderCode)
@@ -112,6 +147,7 @@ class CustomerCatalogController extends Controller
         if (!$order->is_paid && $order->status === 'menunggu') {
             $order->status = 'dibatalkan';
             $order->save();
+            session()->forget('order_code');
             return redirect()->back()->with('success', 'Pesanan Anda telah berhasil dibatalkan.');
         }
 
@@ -121,6 +157,13 @@ class CustomerCatalogController extends Controller
     public function checkStatus($orderCode)
     {
         $order = Order::where('order_code', $orderCode)->firstOrFail();
+
+        if (in_array($order->status, ['selesai', 'dibatalkan', 'ditolak'])) {
+            if (session('order_code') === $order->order_code) {
+                session()->forget('order_code');
+            }
+        }
+
         return response()->json(['status' => $order->status]);
     }
 
@@ -136,7 +179,7 @@ class CustomerCatalogController extends Controller
             $customer = Customer::where('phone_number', $phoneNumber)->first();
 
             if ($customer) {
-                $orders = Order::with(['tenant'])
+                $orders = Order::with(['tenant', 'orderItems.product'])
                     ->where('customer_id', $customer->id)
                     ->latest('ordered_at')
                     ->get();

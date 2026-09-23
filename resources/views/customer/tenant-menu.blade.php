@@ -127,14 +127,23 @@
         
         <!-- Tenant Cover -->
         <div class="h-64 md:h-80 bg-gradient-to-br from-slate-200 to-slate-100 relative flex items-center justify-center overflow-hidden">
-            <!-- Background pattern for elegance -->
-            <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#005ea2 1px, transparent 1px); background-size: 20px 20px;"></div>
+            @if($tenant->logo)
+                <img src="{{ asset($tenant->logo) }}" alt="{{ $tenant->name }}" class="absolute inset-0 w-full h-full object-cover">
+                <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"></div>
+            @else
+                <!-- Background pattern for elegance -->
+                <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#005ea2 1px, transparent 1px); background-size: 20px 20px;"></div>
+            @endif
             
             <div class="absolute -bottom-16 w-32 h-32 md:w-40 md:h-40 bg-white rounded-3xl shadow-xl flex items-center justify-center transform rotate-3 border-4 border-white z-10 overflow-hidden">
-                <div class="w-full h-full flex items-center justify-center bg-slate-50 transform -rotate-3">
-                    <h2 class="text-4xl md:text-5xl font-black text-[#005ea2] tracking-tighter">
-                        {{ strtoupper(substr(str_replace([' ', "'"], '', $tenant->name), 0, 2)) }}
-                    </h2>
+                <div class="w-full h-full flex items-center justify-center bg-slate-50 transform -rotate-3 overflow-hidden">
+                    @if($tenant->logo)
+                        <img src="{{ asset($tenant->logo) }}" alt="{{ $tenant->name }}" class="w-full h-full object-cover">
+                    @else
+                        <h2 class="text-4xl md:text-5xl font-black text-[#005ea2] tracking-tighter">
+                            {{ strtoupper(substr(str_replace([' ', "'"], '', $tenant->name), 0, 2)) }}
+                        </h2>
+                    @endif
                 </div>
             </div>
         </div>

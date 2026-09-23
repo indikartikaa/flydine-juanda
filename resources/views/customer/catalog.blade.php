@@ -28,6 +28,32 @@
         @supports (padding-bottom: env(safe-area-inset-bottom)) {
             .pb-safe { padding-bottom: calc(env(safe-area-inset-bottom) + 1rem); }
         }
+
+        /* Smooth Catalog Card Transition */
+        @keyframes catalogFadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(24px) scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .animate-catalog-card {
+            animation: catalogFadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        /* Top Loading Shimmer Bar Animation */
+        @keyframes shimmerGlow {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+        
+        .animate-shimmer {
+            animation: shimmerGlow 1.4s ease-in-out infinite;
+        }
     </style>
     <script>
         function changeLanguage(lang) {
@@ -145,6 +171,7 @@
                     <!-- Real inputs for form submission -->
                     <input type="hidden" name="terminal" id="hidden_terminal" value="{{ request('terminal', 'semua') }}">
                     <input type="hidden" name="zone" id="hidden_zone" value="{{ request('zone', 'semua') }}">
+                    <input type="hidden" name="category" id="hidden_category" value="{{ request('category') }}">
 
                     <!-- Terminal Custom Dropdown (Alpine) -->
                     <div x-data="{ openTerminal: false, terminal: '{{ request('terminal', 'semua') }}' }" @click.away="openTerminal = false" class="flex-1 w-full relative group">
@@ -221,20 +248,59 @@
             </div>
 
 
+            <!-- Anchor for smooth scroll -->
+            <div id="catalog-section-anchor" class="scroll-mt-32"></div>
+
+            <!-- Loading Shimmer Bar (Active saat ganti page) -->
+            <div id="catalog-loading-bar" class="w-full h-1.5 bg-slate-100 rounded-full mb-6 overflow-hidden opacity-0 pointer-events-none transition-opacity duration-300">
+                <div class="h-full bg-gradient-to-r from-[#005ea2] via-[#8dc63f] to-[#005ea2] w-1/2 rounded-full animate-shimmer"></div>
+            </div>
+
+            <!-- Category Filter Active Chip -->
+            <div id="catalog-filter-bar">
+                @if(request('category') && request('category') !== 'semua')
+                <div class="mb-6 flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-blue-50/90 via-sky-50/70 to-indigo-50/60 border border-blue-100 rounded-2xl px-5 py-3 shadow-sm">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#005ea2] animate-pulse"></span>
+                        <span class="text-xs font-bold text-slate-500" data-id="Kategori Aktif:" data-en="Active Category:">Kategori Aktif:</span>
+                        <span class="text-xs font-black text-[#005ea2] bg-white px-3.5 py-1.5 rounded-full shadow-sm border border-blue-200/80 flex items-center gap-1.5">
+                            @if(stripos(request('category'), 'makanan') !== false) 🍲 
+                            @elseif(stripos(request('category'), 'cepat') !== false) 🍔
+                            @elseif(stripos(request('category'), 'roti') !== false) 🥐
+                            @elseif(stripos(request('category'), 'minum') !== false) ☕
+                            @endif
+                            <span>{{ request('category') == 'makanan-berat' ? 'Makanan Berat' : (request('category') == 'cepat-saji' ? 'Cepat Saji' : (request('category') == 'roti-kue' ? 'Roti & Kue' : (request('category') == 'minuman' ? 'Minuman' : request('category')))) }}</span>
+                        </span>
+                        <span class="text-xs font-semibold text-slate-400">({{ $tenants->total() }} restoran ditemukan)</span>
+                    </div>
+                    <button type="button" onclick="selectCategory('')" class="text-xs font-extrabold text-rose-500 hover:text-rose-700 bg-white hover:bg-rose-50 border border-rose-200/70 px-3.5 py-1.5 rounded-full transition-all shadow-sm active:scale-95 flex items-center gap-1.5 group">
+                        <span class="group-hover:rotate-90 transition-transform">✕</span>
+                        <span data-id="Hapus Filter" data-en="Clear Filter">Hapus Filter</span>
+                    </button>
+                </div>
+                @endif
+            </div>
+
             <!-- Tenant Cards Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 pb-10">
+            <div id="tenant-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 pb-10 transition-all duration-300">
                 
-                @forelse($tenants as $tenant)
-                <div class="tenant-card bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group relative">
+                @forelse($tenants as $index => $tenant)
+                <div class="tenant-card bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group relative animate-catalog-card" style="animation-delay: {{ $index * 50 }}ms;">
                     
                     <!-- Cover Image Area -->
-                    <div class="h-44 bg-gradient-to-br from-slate-100 to-slate-50 relative flex items-center justify-center p-6">
-                        <!-- Pseudo-Logo -->
-                        <div class="h-20 w-20 bg-white rounded-full shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-500 border border-slate-100">
-                            <h2 class="text-3xl font-black text-[#005ea2] tracking-tighter">
-                                {{ strtoupper(substr(str_replace([' ', "'"], '', $tenant->name), 0, 2)) }}
-                            </h2>
-                        </div>
+                    <div class="h-44 bg-gradient-to-br from-slate-100 to-slate-50 relative flex items-center justify-center p-6 overflow-hidden">
+                        @if($tenant->logo)
+                            <img src="{{ asset($tenant->logo) }}" alt="{{ $tenant->name }}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <!-- Overlay gradien halus agar badge kontras -->
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 pointer-events-none"></div>
+                        @else
+                            <!-- Pseudo-Logo -->
+                            <div class="h-20 w-20 bg-white rounded-full shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-500 border border-slate-100">
+                                <h2 class="text-3xl font-black text-[#005ea2] tracking-tighter">
+                                    {{ strtoupper(substr(str_replace([' ', "'"], '', $tenant->name), 0, 2)) }}
+                                </h2>
+                            </div>
+                        @endif
 
                         <!-- Status Label -->
                         @php $open = $tenant->isOpen(); @endphp
@@ -261,6 +327,14 @@
 
                     <!-- Card Body -->
                     <div class="p-6 sm:p-7 flex flex-col flex-grow bg-white">
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <span class="inline-flex items-center text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-blue-50 text-[#005ea2] border border-blue-100">
+                                {{ $tenant->category ?? 'Kuliner' }}
+                            </span>
+                            <span class="text-[11px] font-bold text-slate-400">
+                                {{ $tenant->products->count() }} Menu
+                            </span>
+                        </div>
                         <h3 class="font-extrabold text-xl text-slate-800 tracking-tight group-hover:text-[#005ea2] transition-colors line-clamp-1 mb-5">{{ $tenant->name }}</h3>
                         
                         <!-- Preview Menu (Dari Desain Asli) -->
@@ -304,61 +378,93 @@
 
             </div>
 
-            <!-- Pagination Links -->
-            <div class="pb-12">
-                {{ $tenants->links() }}
+            <!-- Pagination Links Container -->
+            <div id="catalog-pagination-container" class="pb-12 transition-all duration-300">
+                {{ $tenants->links('components.pagination') }}
             </div>
 
-          <div class="pt-10 pb-2 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div id="favorite-categories-section" class="pt-10 pb-2 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
                 
                 <div class="text-center mb-8 relative">
-                    <span class="text-xs font-extrabold tracking-[0.2em] text-slate-400 uppercase mb-2 block">Pilihan Tersedia</span>
+                    <span class="text-xs font-extrabold tracking-[0.2em] text-slate-400 uppercase mb-2 block" data-id="PILIHAN TERSEDIA" data-en="AVAILABLE OPTIONS">Pilihan Tersedia</span>
                     <h3 class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight" data-id="Kategori Favorit" data-en="Favorite Cuisines">Kategori Favorit</h3>
                     <div class="w-12 h-1.5 bg-gradient-to-r from-[#005ea2] to-[#8dc63f] rounded-full mx-auto mt-4"></div>
                 </div>
                 
+                @php
+                    $activeCategory = strtolower(request('category', ''));
+                    $isMakananBerat = ($activeCategory === 'makanan berat' || $activeCategory === 'makanan-berat');
+                    $isCepatSaji = ($activeCategory === 'cepat saji' || $activeCategory === 'cepat-saji');
+                    $isRotiKue = ($activeCategory === 'roti & kue' || $activeCategory === 'roti-kue');
+                    $isMinuman = ($activeCategory === 'minuman');
+                @endphp
+
                 <div class="flex overflow-x-auto scrollbar-hide space-x-4 sm:space-x-6 md:justify-center pb-4 px-4 -mx-4 snap-x snap-mandatory">
                     
-                    <button type="button" class="flex flex-col items-center flex-shrink-0 group w-24 sm:w-28 outline-none focus:outline-none snap-start cursor-pointer" style="-webkit-tap-highlight-color: transparent;">
-                        <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 aspect-square rounded-full p-[3px] bg-slate-100 group-hover:bg-gradient-to-tr group-hover:from-[#005ea2] group-hover:to-blue-400 group-active:scale-95 transition-all duration-300 shadow-sm group-hover:shadow-xl group-hover:shadow-blue-500/30 group-hover:-translate-y-1.5">
+                    <!-- Makanan Berat -->
+                    <button type="button" onclick="selectCategory('{{ $isMakananBerat ? '' : 'makanan-berat' }}')" class="flex flex-col items-center flex-shrink-0 group w-24 sm:w-28 outline-none focus:outline-none snap-start cursor-pointer" style="-webkit-tap-highlight-color: transparent;">
+                        <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 aspect-square rounded-full p-[3px] transition-all duration-300 relative {{ $isMakananBerat ? 'bg-gradient-to-tr from-[#005ea2] to-[#8dc63f] ring-4 ring-[#005ea2]/30 scale-105 shadow-xl shadow-blue-500/25' : 'bg-slate-100 group-hover:bg-gradient-to-tr group-hover:from-[#005ea2] group-hover:to-blue-400 group-active:scale-95 shadow-sm group-hover:shadow-xl group-hover:shadow-blue-500/30 group-hover:-translate-y-1.5' }}">
                             <div class="w-full h-full bg-white rounded-full p-1.5 relative overflow-hidden">
                                 <img src="{{ asset('images/makanan_berat.jpg') }}" alt="Makanan Berat" class="w-full h-full object-cover rounded-full transition-transform duration-700 group-hover:scale-110">
                             </div>
+                            @if($isMakananBerat)
+                            <div class="absolute -top-1 -right-1 bg-[#005ea2] text-white rounded-full p-1 shadow-md border-2 border-white">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            @endif
                         </div>
-                        <span class="mt-3 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold text-slate-600 bg-transparent group-hover:bg-blue-50 group-hover:text-[#005ea2] transition-all duration-300 text-center leading-snug">
+                        <span class="mt-3 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all duration-300 text-center leading-snug {{ $isMakananBerat ? 'bg-[#005ea2] text-white shadow-md shadow-blue-500/30 font-extrabold' : 'text-slate-600 bg-transparent group-hover:bg-blue-50 group-hover:text-[#005ea2]' }}" data-id="Makanan Berat" data-en="Heavy Meals">
                             Makanan Berat
                         </span>
                     </button>
 
-                    <button type="button" class="flex flex-col items-center flex-shrink-0 group w-24 sm:w-28 outline-none focus:outline-none snap-start cursor-pointer" style="-webkit-tap-highlight-color: transparent;">
-                        <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 aspect-square rounded-full p-[3px] bg-slate-100 group-hover:bg-gradient-to-tr group-hover:from-[#005ea2] group-hover:to-blue-400 group-active:scale-95 transition-all duration-300 shadow-sm group-hover:shadow-xl group-hover:shadow-blue-500/30 group-hover:-translate-y-1.5">
+                    <!-- Cepat Saji -->
+                    <button type="button" onclick="selectCategory('{{ $isCepatSaji ? '' : 'cepat-saji' }}')" class="flex flex-col items-center flex-shrink-0 group w-24 sm:w-28 outline-none focus:outline-none snap-start cursor-pointer" style="-webkit-tap-highlight-color: transparent;">
+                        <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 aspect-square rounded-full p-[3px] transition-all duration-300 relative {{ $isCepatSaji ? 'bg-gradient-to-tr from-[#005ea2] to-[#8dc63f] ring-4 ring-[#005ea2]/30 scale-105 shadow-xl shadow-blue-500/25' : 'bg-slate-100 group-hover:bg-gradient-to-tr group-hover:from-[#005ea2] group-hover:to-blue-400 group-active:scale-95 shadow-sm group-hover:shadow-xl group-hover:shadow-blue-500/30 group-hover:-translate-y-1.5' }}">
                             <div class="w-full h-full bg-white rounded-full p-1.5 relative overflow-hidden">
                                 <img src="{{ asset('images/cepat_saji.jpg') }}" alt="Cepat Saji" class="w-full h-full object-cover rounded-full transition-transform duration-700 group-hover:scale-110">
                             </div>
+                            @if($isCepatSaji)
+                            <div class="absolute -top-1 -right-1 bg-[#005ea2] text-white rounded-full p-1 shadow-md border-2 border-white">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            @endif
                         </div>
-                        <span class="mt-3 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold text-slate-600 bg-transparent group-hover:bg-blue-50 group-hover:text-[#005ea2] transition-all duration-300 text-center leading-snug">
+                        <span class="mt-3 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all duration-300 text-center leading-snug {{ $isCepatSaji ? 'bg-[#005ea2] text-white shadow-md shadow-blue-500/30 font-extrabold' : 'text-slate-600 bg-transparent group-hover:bg-blue-50 group-hover:text-[#005ea2]' }}" data-id="Cepat Saji" data-en="Fast Food">
                             Cepat Saji
                         </span>
                     </button>
 
-                    <button type="button" class="flex flex-col items-center flex-shrink-0 group w-24 sm:w-28 outline-none focus:outline-none snap-start cursor-pointer" style="-webkit-tap-highlight-color: transparent;">
-                        <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 aspect-square rounded-full p-[3px] bg-slate-100 group-hover:bg-gradient-to-tr group-hover:from-[#005ea2] group-hover:to-blue-400 group-active:scale-95 transition-all duration-300 shadow-sm group-hover:shadow-xl group-hover:shadow-blue-500/30 group-hover:-translate-y-1.5">
+                    <!-- Roti & Kue -->
+                    <button type="button" onclick="selectCategory('{{ $isRotiKue ? '' : 'roti-kue' }}')" class="flex flex-col items-center flex-shrink-0 group w-24 sm:w-28 outline-none focus:outline-none snap-start cursor-pointer" style="-webkit-tap-highlight-color: transparent;">
+                        <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 aspect-square rounded-full p-[3px] transition-all duration-300 relative {{ $isRotiKue ? 'bg-gradient-to-tr from-[#005ea2] to-[#8dc63f] ring-4 ring-[#005ea2]/30 scale-105 shadow-xl shadow-blue-500/25' : 'bg-slate-100 group-hover:bg-gradient-to-tr group-hover:from-[#005ea2] group-hover:to-blue-400 group-active:scale-95 shadow-sm group-hover:shadow-xl group-hover:shadow-blue-500/30 group-hover:-translate-y-1.5' }}">
                             <div class="w-full h-full bg-white rounded-full p-1.5 relative overflow-hidden">
                                 <img src="{{ asset('images/roti_kue.jpg') }}" alt="Roti & Kue" class="w-full h-full object-cover rounded-full transition-transform duration-700 group-hover:scale-110">
                             </div>
+                            @if($isRotiKue)
+                            <div class="absolute -top-1 -right-1 bg-[#005ea2] text-white rounded-full p-1 shadow-md border-2 border-white">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            @endif
                         </div>
-                        <span class="mt-3 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold text-slate-600 bg-transparent group-hover:bg-blue-50 group-hover:text-[#005ea2] transition-all duration-300 text-center leading-snug">
+                        <span class="mt-3 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all duration-300 text-center leading-snug {{ $isRotiKue ? 'bg-[#005ea2] text-white shadow-md shadow-blue-500/30 font-extrabold' : 'text-slate-600 bg-transparent group-hover:bg-blue-50 group-hover:text-[#005ea2]' }}" data-id="Roti & Kue" data-en="Bakery & Cakes">
                             Roti & Kue
                         </span>
                     </button>
 
-                    <button type="button" class="flex flex-col items-center flex-shrink-0 group w-24 sm:w-28 outline-none focus:outline-none snap-start cursor-pointer" style="-webkit-tap-highlight-color: transparent;">
-                        <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 aspect-square rounded-full p-[3px] bg-slate-100 group-hover:bg-gradient-to-tr group-hover:from-[#005ea2] group-hover:to-blue-400 group-active:scale-95 transition-all duration-300 shadow-sm group-hover:shadow-xl group-hover:shadow-blue-500/30 group-hover:-translate-y-1.5">
+                    <!-- Minuman -->
+                    <button type="button" onclick="selectCategory('{{ $isMinuman ? '' : 'minuman' }}')" class="flex flex-col items-center flex-shrink-0 group w-24 sm:w-28 outline-none focus:outline-none snap-start cursor-pointer" style="-webkit-tap-highlight-color: transparent;">
+                        <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 aspect-square rounded-full p-[3px] transition-all duration-300 relative {{ $isMinuman ? 'bg-gradient-to-tr from-[#005ea2] to-[#8dc63f] ring-4 ring-[#005ea2]/30 scale-105 shadow-xl shadow-blue-500/25' : 'bg-slate-100 group-hover:bg-gradient-to-tr group-hover:from-[#005ea2] group-hover:to-blue-400 group-active:scale-95 shadow-sm group-hover:shadow-xl group-hover:shadow-blue-500/30 group-hover:-translate-y-1.5' }}">
                             <div class="w-full h-full bg-white rounded-full p-1.5 relative overflow-hidden">
                                 <img src="{{ asset('images/minuman.jpg') }}" alt="Minuman" class="w-full h-full object-cover rounded-full transition-transform duration-700 group-hover:scale-110">
                             </div>
+                            @if($isMinuman)
+                            <div class="absolute -top-1 -right-1 bg-[#005ea2] text-white rounded-full p-1 shadow-md border-2 border-white">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            @endif
                         </div>
-                        <span class="mt-3 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold text-slate-600 bg-transparent group-hover:bg-blue-50 group-hover:text-[#005ea2] transition-all duration-300 text-center leading-snug">
+                        <span class="mt-3 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all duration-300 text-center leading-snug {{ $isMinuman ? 'bg-[#005ea2] text-white shadow-md shadow-blue-500/30 font-extrabold' : 'text-slate-600 bg-transparent group-hover:bg-blue-50 group-hover:text-[#005ea2]' }}" data-id="Minuman" data-en="Beverages">
                             Minuman
                         </span>
                     </button>
@@ -416,6 +522,165 @@
             </div>
 
             <x-footer />
-    
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initPaginationAjax();
+        });
+
+        function initPaginationAjax() {
+            const paginationContainer = document.getElementById('catalog-pagination-container');
+            if (!paginationContainer) return;
+
+            paginationContainer.querySelectorAll('.pagination-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetUrl = this.getAttribute('href');
+                    if (!targetUrl || targetUrl === '#' || targetUrl.trim() === '') return;
+
+                    loadCatalogPage(targetUrl, true);
+                });
+            });
+        }
+
+        function selectCategory(categorySlug) {
+            const url = new URL(window.location.href);
+            if (!categorySlug || categorySlug.trim() === '') {
+                url.searchParams.delete('category');
+            } else {
+                url.searchParams.set('category', categorySlug);
+            }
+            url.searchParams.delete('page'); // Reset ke page 1 saat ganti kategori
+
+            const hiddenCatInput = document.getElementById('hidden_category');
+            if (hiddenCatInput) {
+                hiddenCatInput.value = categorySlug || '';
+            }
+
+            loadCatalogPage(url.toString(), true);
+        }
+
+        function loadCatalogPage(url, pushState = true) {
+            const grid = document.getElementById('tenant-cards-grid');
+            const paginationContainer = document.getElementById('catalog-pagination-container');
+            const loadingBar = document.getElementById('catalog-loading-bar');
+            const anchor = document.getElementById('catalog-section-anchor');
+
+            if (!grid) return;
+
+            // 1. Tampilkan bar progress shimmer di atas grid
+            if (loadingBar) {
+                loadingBar.classList.remove('opacity-0');
+                loadingBar.classList.add('opacity-100');
+            }
+
+            // 2. Efek keluar halus (fade out + skala sedikit mengecil)
+            grid.classList.add('opacity-25', 'scale-[0.98]', 'pointer-events-none');
+            if (paginationContainer) {
+                paginationContainer.classList.add('opacity-40', 'pointer-events-none');
+            }
+
+            // 3. Smooth scroll kembali ke awal grid restoran
+            if (anchor) {
+                const rect = anchor.getBoundingClientRect();
+                if (rect.top < 0 || rect.top > window.innerHeight * 0.4) {
+                    anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+
+            // 4. Ambil halaman baru dengan AJAX Fetch
+            fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Gagal mengambil data halaman.');
+                return response.text();
+            })
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                const newGrid = doc.getElementById('tenant-cards-grid');
+                const newPagination = doc.getElementById('catalog-pagination-container');
+                const newFilterBar = doc.getElementById('catalog-filter-bar');
+                const newCategoriesSection = doc.getElementById('favorite-categories-section');
+                const newHiddenCat = doc.getElementById('hidden_category');
+
+                if (newGrid && grid) {
+                    grid.innerHTML = newGrid.innerHTML;
+
+                    // Berikan efek animasi masuk bertahap (staggered entrance)
+                    const cards = grid.querySelectorAll('.tenant-card');
+                    cards.forEach((card, index) => {
+                        card.classList.remove('animate-catalog-card');
+                        void card.offsetWidth; // Trigger reflow browser
+                        card.classList.add('animate-catalog-card');
+                        card.style.animationDelay = `${index * 60}ms`;
+                    });
+                }
+
+                if (newPagination && paginationContainer) {
+                    paginationContainer.innerHTML = newPagination.innerHTML;
+                }
+
+                // Perbarui bilah filter aktif di atas kartu
+                const currentFilterBar = document.getElementById('catalog-filter-bar');
+                if (newFilterBar && currentFilterBar) {
+                    currentFilterBar.innerHTML = newFilterBar.innerHTML;
+                }
+
+                // Perbarui status aktif pada tombol Kategori Favorit di bawah
+                const currentCategoriesSection = document.getElementById('favorite-categories-section');
+                if (newCategoriesSection && currentCategoriesSection) {
+                    currentCategoriesSection.innerHTML = newCategoriesSection.innerHTML;
+                }
+
+                // Sinkronkan input hidden form
+                const currentHiddenCat = document.getElementById('hidden_category');
+                if (newHiddenCat && currentHiddenCat) {
+                    currentHiddenCat.value = newHiddenCat.value;
+                }
+
+                // 5. Update browser history agar link URL berganti tanpa reload
+                if (pushState) {
+                    window.history.pushState({ path: url }, '', url);
+                }
+
+                // 6. Sinkronisasi bahasa yang dipilih (ID/EN)
+                const langBtn = document.querySelector('[x-data]');
+                const currentLang = (langBtn && langBtn._x_dataStack && langBtn._x_dataStack[0]) 
+                    ? langBtn._x_dataStack[0].lang 
+                    : 'id';
+                if (typeof changeLanguage === 'function') {
+                    changeLanguage(currentLang);
+                }
+
+                // 7. Pasang kembali event listener pada pagination baru
+                initPaginationAjax();
+            })
+            .catch(err => {
+                console.error('Pindah halaman via ajax gagal, fallback ke navigasi standar:', err);
+                window.location.href = url;
+            })
+            .finally(() => {
+                // Sembunyikan loading bar & pulihkan grid
+                if (loadingBar) {
+                    loadingBar.classList.remove('opacity-100');
+                    loadingBar.classList.add('opacity-0');
+                }
+                grid.classList.remove('opacity-25', 'scale-[0.98]', 'pointer-events-none');
+                if (paginationContainer) {
+                    paginationContainer.classList.remove('opacity-40', 'pointer-events-none');
+                }
+            });
+        }
+
+        // Tangani navigasi tombol Back & Forward di browser
+        window.addEventListener('popstate', function() {
+            loadCatalogPage(window.location.href, false);
+        });
+    </script>
 </body>
 </html>

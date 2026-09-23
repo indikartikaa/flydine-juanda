@@ -145,8 +145,23 @@
                             <!-- Divider with dashed line -->
                             <div class="w-full border-t border-dashed border-slate-200 my-4"></div>
 
+                            <!-- Item Breakdown Preview -->
+                            @if($order->orderItems && $order->orderItems->count() > 0)
+                            <div class="mb-4 bg-slate-50/80 rounded-xl p-3 border border-slate-100 space-y-1.5 text-xs">
+                                @foreach($order->orderItems->take(2) as $item)
+                                <div class="flex justify-between items-center text-slate-600">
+                                    <span class="truncate max-w-[210px] font-medium">{{ $item->quantity }}x {{ $item->product_name_snapshot ?? ($item->product->name ?? 'Menu') }}</span>
+                                    <span class="font-bold text-slate-800 shrink-0">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</span>
+                                </div>
+                                @endforeach
+                                @if($order->orderItems->count() > 2)
+                                <p class="text-[10px] text-slate-400 font-semibold italic pt-0.5">+{{ $order->orderItems->count() - 2 }} menu lainnya</p>
+                                @endif
+                            </div>
+                            @endif
+
                             <!-- Body Card: Total & Status -->
-                            <div class="flex justify-between items-end mb-5">
+                            <div class="flex justify-between items-end mb-4">
                                 <div>
                                     <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Total Belanja</p>
                                     <p class="font-black text-lg text-slate-800 tracking-tight">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</p>
@@ -170,10 +185,20 @@
                                 </div>
                             </div>
                             
-                            <!-- Action Button -->
-                            <a href="{{ route('customer.tracking', ['order' => $order->order_code]) }}" class="block w-full text-center bg-slate-50 hover:bg-[#005ea2] text-slate-600 hover:text-white font-extrabold py-3.5 rounded-xl text-xs transition-all duration-300 border border-slate-200 hover:border-[#005ea2] shadow-sm group/btn">
-                                Lihat Struk Digital
-                            </a>
+                            <!-- Action Buttons -->
+                            <div class="space-y-2">
+                                <a href="{{ route('customer.receipt', ['order' => $order->order_code]) }}" class="w-full text-center bg-slate-50 hover:bg-[#005ea2] text-slate-700 hover:text-white font-extrabold py-3.5 rounded-xl text-xs transition-all duration-300 border border-slate-200 hover:border-[#005ea2] shadow-sm group/btn flex items-center justify-center space-x-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                    <span>Lihat Struk Digital</span>
+                                </a>
+
+                                @if(!in_array($order->status, ['selesai', 'dibatalkan', 'ditolak']))
+                                <a href="{{ route('customer.tracking', ['order' => $order->order_code]) }}" class="w-full text-center bg-blue-50 hover:bg-blue-100 text-[#005ea2] font-extrabold py-2.5 rounded-xl text-xs transition-all border border-blue-200/60 flex items-center justify-center space-x-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-[#005ea2] animate-ping"></span>
+                                    <span>Lacak Pesanan Sedang Berlangsung &rarr;</span>
+                                </a>
+                                @endif
+                            </div>
                         </div>
                         @endforeach
                     </div>

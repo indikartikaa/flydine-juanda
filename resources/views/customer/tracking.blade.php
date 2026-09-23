@@ -101,14 +101,14 @@
                             'menunggu' => 'from-amber-600 to-[#f59e0b]',
                             'diproses' => 'from-emerald-600 to-[#8dc63f]',
                             'siap' => 'from-blue-600 to-[#005ea2]',
-                            'selesai' => 'from-slate-600 to-slate-400',
+                            'selesai' => 'from-emerald-600 to-teal-600',
                             'dibatalkan' => 'from-rose-600 to-rose-400'
                         ];
                         $statusDot = [
                             'menunggu' => 'bg-amber-500',
                             'diproses' => 'bg-emerald-500',
                             'siap' => 'bg-blue-500',
-                            'selesai' => 'bg-slate-500',
+                            'selesai' => 'bg-emerald-500',
                             'dibatalkan' => 'bg-rose-500'
                         ];
                         $labels = [
@@ -126,6 +126,10 @@
                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ str_replace('500', '400', $statusDot[$order->status]) }} opacity-75"></span>
                           <span class="relative inline-flex rounded-full h-4 w-4 {{ $statusDot[$order->status] }}"></span>
                         </span>
+                        @elseif($order->status === 'selesai')
+                        <span class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-sm">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        </span>
                         @endif
                         <span class="bg-clip-text text-transparent bg-gradient-to-r {{ $statusColors[$order->status] }}">{{ $labels[$order->status] }}</span>
                     </h2>
@@ -141,6 +145,8 @@
                             @else
                                 Makanan sudah siap! Silakan menuju kasir restoran <span class="font-extrabold text-[#005ea2]">{{ $order->tenant->name }}</span>.
                             @endif
+                        @elseif($order->status == 'selesai')
+                            Pesanan Anda telah selesai diserahkan oleh restoran <span class="font-extrabold text-[#005ea2]">{{ $order->tenant->name }}</span>. Selamat menikmati hidangan Anda dan terima kasih telah menggunakan FlyDine!
                         @endif
                     </p>
                 @endif
@@ -164,17 +170,18 @@
                 <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-6">Status Pesanan</p>
                 
                 <div class="relative pl-3">
-                    <!-- Vertical Line -->
-                    <div class="absolute left-[15px] top-3 bottom-3 w-0.5 bg-slate-100"></div>
-                    
-                    <!-- Dynamic Height based on status -->
+                    <!-- Dynamic Height based on status (4 steps: 0%, 33%, 66%, 100%) -->
                     @php
                         $height = '0%';
                         if($order->status == 'menunggu') $height = '0%';
-                        if($order->status == 'diproses') $height = '50%';
-                        if($order->status == 'siap' || $order->status == 'selesai') $height = '100%';
+                        if($order->status == 'diproses') $height = '33%';
+                        if($order->status == 'siap') $height = '66%';
+                        if($order->status == 'selesai') $height = '100%';
                     @endphp
-                    <div class="absolute left-[15px] top-3 w-0.5 bg-gradient-to-b from-[#005ea2] to-emerald-500 transition-all duration-1000" style="height: {{ $height }}"></div>
+                    <!-- Vertical Line Track & Progress -->
+                    <div class="absolute left-[15px] top-4 bottom-4 w-0.5 bg-slate-100 overflow-hidden rounded-full">
+                        <div class="w-full bg-gradient-to-b from-[#005ea2] via-[#8dc63f] to-emerald-500 transition-all duration-1000" style="height: {{ $height }}"></div>
+                    </div>
 
                     <div class="space-y-6 relative">
                         <!-- Step 1 (Diterima) -->
@@ -184,38 +191,67 @@
                             </div>
                             <div class="ml-4 mt-1">
                                 <h4 class="text-sm {{ in_array($order->status, ['menunggu', 'diproses', 'siap', 'selesai']) ? 'font-bold text-slate-800' : 'font-medium text-slate-500' }}">Pesanan Diterima</h4>
+                                <p class="text-xs text-slate-400 font-medium mt-0.5">Pesanan berhasil dikonfirmasi dan masuk ke sistem.</p>
                             </div>
                         </div>
                         
                         <!-- Step 2 (Diproses) -->
                         <div class="flex items-start">
-                            <div class="w-8 h-8 rounded-full {{ in_array($order->status, ['diproses', 'siap', 'selesai']) ? 'bg-emerald-500 text-white shadow-emerald-500/30 ring-white' : 'bg-slate-100 border-2 border-slate-200 text-slate-400' }} flex items-center justify-center z-10 shrink-0 shadow-md ring-4">
+                            <div class="w-8 h-8 rounded-full {{ in_array($order->status, ['diproses', 'siap', 'selesai']) ? 'bg-emerald-500 text-white shadow-emerald-500/30 ring-white' : 'bg-slate-100 border-2 border-slate-200 text-slate-400 ring-white' }} flex items-center justify-center z-10 shrink-0 shadow-md ring-4">
                                 @if($order->status == 'diproses')
                                     <span class="w-2.5 h-2.5 bg-white rounded-full animate-pulse"></span>
-                                @else
+                                @elseif(in_array($order->status, ['siap', 'selesai']))
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+                                @else
+                                    <span class="w-2 h-2 bg-slate-300 rounded-full"></span>
                                 @endif
                             </div>
                             <div class="ml-4 mt-1">
                                 <h4 class="text-sm {{ in_array($order->status, ['diproses', 'siap', 'selesai']) ? 'font-extrabold text-emerald-600' : 'font-medium text-slate-400' }}">Sedang Dimasak</h4>
+                                <p class="text-xs text-slate-400 font-medium mt-0.5">Dapur restoran sedang mempersiapkan makanan Anda.</p>
                             </div>
                         </div>
 
                         <!-- Step 3 (Siap) -->
                         <div class="flex items-start">
-                            <div class="w-8 h-8 rounded-full {{ in_array($order->status, ['siap', 'selesai']) ? 'bg-blue-500 text-white shadow-blue-500/30 ring-white' : 'bg-slate-100 border-2 border-slate-200 text-slate-400' }} flex items-center justify-center z-10 shrink-0 ring-4">
+                            <div class="w-8 h-8 rounded-full {{ in_array($order->status, ['siap', 'selesai']) ? ($order->status == 'selesai' ? 'bg-emerald-500 text-white shadow-emerald-500/30 ring-white' : 'bg-blue-500 text-white shadow-blue-500/30 ring-white') : 'bg-slate-100 border-2 border-slate-200 text-slate-400 ring-white' }} flex items-center justify-center z-10 shrink-0 ring-4 shadow-md">
                                 @if($order->status == 'siap')
                                     <span class="w-2.5 h-2.5 bg-white rounded-full animate-pulse"></span>
+                                @elseif($order->status == 'selesai')
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
                                 @else
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                                    <span class="w-2 h-2 bg-slate-300 rounded-full"></span>
                                 @endif
                             </div>
                             <div class="ml-4 mt-1">
-                                <h4 class="text-sm {{ in_array($order->status, ['siap', 'selesai']) ? 'font-bold text-blue-600' : 'font-medium text-slate-400' }}">
-                                    {{ $order->pickup_method === 'diantar' ? 'Sedang Diantar' : 'Siap Diambil' }}
+                                <h4 class="text-sm {{ in_array($order->status, ['siap', 'selesai']) ? ($order->status == 'selesai' ? 'font-bold text-slate-800' : 'font-bold text-blue-600') : 'font-medium text-slate-400' }}">
+                                    {{ $order->pickup_method === 'diantar' ? ($order->status == 'selesai' ? 'Telah Diantar' : 'Sedang Diantar') : ($order->status == 'selesai' ? 'Telah Disiapkan' : 'Siap Diambil') }}
                                 </h4>
-                                <p class="text-xs text-slate-400 font-medium mt-1">
-                                    {{ $order->pickup_method === 'diantar' ? 'Porter sedang menuju ke lokasi Anda.' : 'Silakan ambil di lokasi counter.' }}
+                                <p class="text-xs text-slate-400 font-medium mt-0.5">
+                                    @if($order->status == 'selesai')
+                                        {{ $order->pickup_method === 'diantar' ? 'Makanan telah selesai diantar ke lokasi Anda.' : 'Makanan telah siap dan diserahkan di konter.' }}
+                                    @else
+                                        {{ $order->pickup_method === 'diantar' ? 'Porter sedang menuju ke lokasi Anda.' : 'Silakan ambil di lokasi counter.' }}
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Step 4 (Pesanan Selesai) -->
+                        <div class="flex items-start">
+                            <div class="w-8 h-8 rounded-full {{ $order->status == 'selesai' ? 'bg-emerald-600 text-white shadow-emerald-500/30 ring-white ring-4' : 'bg-slate-100 border-2 border-slate-200 text-slate-400 ring-4 ring-white' }} flex items-center justify-center z-10 shrink-0 shadow-md">
+                                @if($order->status == 'selesai')
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+                                @else
+                                    <span class="w-2 h-2 bg-slate-300 rounded-full"></span>
+                                @endif
+                            </div>
+                            <div class="ml-4 mt-1">
+                                <h4 class="text-sm {{ $order->status == 'selesai' ? 'font-extrabold text-emerald-600' : 'font-medium text-slate-400' }}">
+                                    Pesanan Anda Selesai
+                                </h4>
+                                <p class="text-xs {{ $order->status == 'selesai' ? 'text-emerald-600/80 font-bold' : 'text-slate-400 font-medium' }} mt-0.5">
+                                    {{ $order->status == 'selesai' ? 'Pesanan telah selesai diterima. Selamat menikmati hidangan!' : 'Menunggu pesanan selesai diserahkan.' }}
                                 </p>
                             </div>
                         </div>
@@ -252,6 +288,62 @@
                             <p class="font-extrabold text-slate-800 text-sm leading-snug">{{ $order->tenant->name }} <br><span class="text-[#005ea2] font-semibold">({{ $order->tenant->floor_location }})</span></p>
                         @endif
                     </div>
+                </div>
+            </div>
+
+            <!-- Rincian Pesanan & Billing Card -->
+            <div class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-100 mb-8 transition-all duration-700 delay-300 transform" :class="loaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'">
+                <div class="flex items-center justify-between mb-4">
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Rincian Pesanan</p>
+                    <a href="{{ route('customer.receipt', $order->order_code) }}" class="text-xs font-bold text-[#005ea2] hover:underline flex items-center space-x-1">
+                        <span>Buka Struk Resmi</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                    </a>
+                </div>
+
+                <!-- Items List -->
+                <div class="space-y-3 pb-4 border-b border-dashed border-slate-200">
+                    @forelse($order->orderItems as $item)
+                    <div class="flex justify-between items-start text-xs">
+                        <div class="pr-2 flex-grow">
+                            <p class="font-bold text-slate-800 text-[13px] leading-tight">
+                                {{ $item->product_name_snapshot ?? ($item->product->name ?? 'Menu') }}
+                            </p>
+                            <p class="text-[11px] text-slate-400 font-medium mt-0.5">
+                                {{ $item->quantity }}x @ Rp {{ number_format($item->unit_price, 0, ',', '.') }}
+                            </p>
+                        </div>
+                        <span class="font-mono-num font-bold text-slate-800 text-xs shrink-0">
+                            Rp {{ number_format($item->subtotal, 0, ',', '.') }}
+                        </span>
+                    </div>
+                    @empty
+                    <p class="text-xs text-slate-400 italic">Tidak ada rincian item.</p>
+                    @endforelse
+                </div>
+
+                <!-- Total Summary -->
+                <div class="pt-4 space-y-2 text-xs">
+                    @if($order->delivery_fee && $order->delivery_fee > 0)
+                    <div class="flex justify-between text-slate-500 font-medium">
+                        <span>Biaya Layanan Porter</span>
+                        <span class="font-semibold text-slate-700">Rp {{ number_format($order->delivery_fee, 0, ',', '.') }}</span>
+                    </div>
+                    @endif
+                    <div class="flex justify-between items-baseline pt-1">
+                        <span class="font-extrabold text-slate-700 text-sm">Total Belanja</span>
+                        <span class="font-black text-lg text-[#005ea2]">
+                            Rp {{ number_format($order->total_amount, 0, ',', '.') }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Button Open Receipt -->
+                <div class="mt-5 pt-4 border-t border-slate-100">
+                    <a href="{{ route('customer.receipt', $order->order_code) }}" class="flex items-center justify-center w-full bg-slate-50 hover:bg-[#005ea2] text-slate-700 hover:text-white font-extrabold py-3 rounded-xl text-xs transition-all border border-slate-200 hover:border-[#005ea2] shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        Cetak Struk Digital / Bukti Bayar
+                    </a>
                 </div>
             </div>
 

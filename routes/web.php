@@ -15,6 +15,7 @@ Route::post('/cart/update', [CustomerCatalogController::class, 'updateCart'])->n
 Route::post('/cart/clear', [CustomerCatalogController::class, 'clearCart'])->name('customer.cart.clear');
 Route::post('/checkout', [CustomerCatalogController::class, 'checkout'])->name('customer.checkout');
 Route::get('/tracking', [CustomerCatalogController::class, 'tracking'])->name('customer.tracking');
+Route::get('/receipt/{order}', [CustomerCatalogController::class, 'receipt'])->name('customer.receipt');
 Route::get('/tracking/{order}/status', [CustomerCatalogController::class, 'checkStatus'])->name('customer.tracking.status');
 Route::post('/tracking/pay', [CustomerCatalogController::class, 'simulatePayment'])->name('customer.simulate_payment');
 Route::get('/history', [CustomerCatalogController::class, 'history'])->name('customer.history');
@@ -105,8 +106,11 @@ Route::middleware('auth')
 
         Route::get('/dashboard', [\App\Http\Controllers\TenantOrderController::class, 'dashboard'])->name('dashboard');
         Route::post('/settings/hours', [\App\Http\Controllers\TenantOrderController::class, 'updateHours'])->name('settings.hours');
+        Route::get('/settings/hours', fn() => redirect()->route('tenant.dashboard'));
         Route::post('/settings/delivery', [\App\Http\Controllers\TenantOrderController::class, 'updateDelivery'])->name('settings.delivery');
+        Route::get('/settings/delivery', fn() => redirect()->route('tenant.dashboard'));
         Route::post('/settings/profile', [\App\Http\Controllers\TenantOrderController::class, 'updateProfile'])->name('settings.profile');
+        Route::get('/settings/profile', fn() => redirect()->route('tenant.dashboard'));
 
         Route::get('/orders', [\App\Http\Controllers\TenantOrderController::class, 'index'])->name('orders');
         Route::get('/orders/history', [\App\Http\Controllers\TenantOrderController::class, 'history'])->name('orders.history');

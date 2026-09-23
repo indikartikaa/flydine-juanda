@@ -20,6 +20,10 @@ class Tenant extends Model
         'opening_time',
         'closing_time',
         'phone',
+        'pic_name',
+        'pic_email',
+        'pic_phone',
+        'logo',
         'is_active',
         'delivery_fee',
         'contract_start',
@@ -60,13 +64,18 @@ class Tenant extends Model
     public function isOpen()
     {
         if (!$this->is_active) return false;
-        if (!$this->opening_time || !$this->closing_time) return true;
+        if (empty($this->opening_time) || empty($this->closing_time)) return true;
         
-        $now = now()->format('H:i:s');
-        if ($this->closing_time < $this->opening_time) {
-            // Jam operasional melewati tengah malam
-            return $now >= $this->opening_time || $now <= $this->closing_time;
+        $tz = config('app.timezone', 'Asia/Jakarta');
+        $now = now($tz)->format('H:i:s');
+
+        $open = substr($this->opening_time, 0, 5) . ':00';
+        $close = substr($this->closing_time, 0, 5) . ':59';
+        
+        if ($close < $open) {
+            // Jam operasional melewati tengah malam (misal: 18:00 s.d. 02:00)
+            return $now >= $open || $now <= $close;
         }
-        return $now >= $this->opening_time && $now <= $this->closing_time;
+        return $now >= $open && $now <= $close;
     }
 }

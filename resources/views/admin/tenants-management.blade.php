@@ -89,9 +89,13 @@
                     <tr class="hover:bg-slate-50/80 transition-colors group">
                         <td class="px-6 py-5">
                             <div class="flex items-center">
-                                <div class="h-12 w-12 flex-shrink-0 bg-blue-50 rounded-2xl border border-blue-100 flex items-center justify-center text-[#005ea2] font-extrabold text-base shadow-xs group-hover:scale-105 transition-transform">
-                                    {{ strtoupper(substr($tenant->name, 0, 2)) }}
-                                </div>
+                                @if($tenant->logo)
+                                    <img src="{{ asset($tenant->logo) }}" alt="{{ $tenant->name }}" class="h-12 w-12 flex-shrink-0 rounded-2xl border border-slate-100 object-cover shadow-xs group-hover:scale-105 transition-transform">
+                                @else
+                                    <div class="h-12 w-12 flex-shrink-0 bg-blue-50 rounded-2xl border border-blue-100 flex items-center justify-center text-[#005ea2] font-extrabold text-base shadow-xs group-hover:scale-105 transition-transform">
+                                        {{ strtoupper(substr($tenant->name, 0, 2)) }}
+                                    </div>
+                                @endif
                                 <div class="ml-4">
                                     <div class="font-extrabold text-slate-900 text-sm group-hover:text-[#005ea2] transition-colors">{{ $tenant->name }}</div>
                                     <div class="text-xs text-slate-500 font-semibold mt-0.5">Kode: {{ $tenant->tenant_code }}</div>

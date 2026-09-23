@@ -167,16 +167,23 @@ class TenantOrderController extends Controller
     {
         $tenant = auth()->user()->tenant;
         
-        if ($request->has('delivery_active')) {
-            $request->validate([
-                'delivery_fee' => 'required|numeric|min:0',
-            ]);
-            $tenant->update(['delivery_fee' => $request->delivery_fee]);
-        } else {
-            $tenant->update(['delivery_fee' => null]);
+        if (!$tenant) {
+            return redirect()->back()->with('error', 'Data tenant tidak ditemukan.');
         }
 
-        return redirect()->back()->with('success', 'Pengaturan layanan antar berhasil diperbarui.');
+        if ($request->has('delivery_active')) {
+            $request->validate([
+                'delivery_fee' => 'nullable|numeric|min:0',
+            ]);
+            $fee = $request->filled('delivery_fee') ? (float)$request->delivery_fee : 15000;
+            $tenant->update(['delivery_fee' => $fee]);
+
+            return redirect()->back()->with('success', 'Layanan antar (porter) berhasil diaktifkan (Tarif: Rp ' . number_format($fee, 0, ',', '.') . ').');
+        } else {
+            $tenant->update(['delivery_fee' => null]);
+
+            return redirect()->back()->with('success', 'Layanan antar berhasil dinonaktifkan.');
+        }
     }
 
     /**
@@ -190,7 +197,7 @@ class TenantOrderController extends Controller
             'phone' => 'nullable|string|max:20',
             'pic_name' => 'nullable|string|max:100',
             'pic_phone' => 'nullable|string|max:20',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048' // max 2MB
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:20480' // max 20MB
         ]);
 
         $tenant->phone = $request->phone;
