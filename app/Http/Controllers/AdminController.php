@@ -73,14 +73,24 @@ class AdminController extends Controller
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('tenant_code', 'like', '%' . $request->search . '%');
+                  ->orWhere('tenant_code', 'like', '%' . $request->search . '%')
+                  ->orWhere('company_name', 'like', '%' . $request->search . '%')
+                  ->orWhere('category', 'like', '%' . $request->search . '%');
             });
         }
 
         if ($request->filled('terminal')) {
-            // Asumsikan floor_location menyimpan format seperti "Terminal 1" atau "T1" atau "T2"
-            $query->where('floor_location', 'like', '%Terminal ' . $request->terminal . '%')
-                  ->orWhere('floor_location', 'like', '%T' . $request->terminal . '%');
+            $term = $request->terminal;
+            $termT = str_starts_with(strtoupper($term), 'T') ? strtoupper($term) : 'T' . $term;
+            $termNum = preg_replace('/[^0-9]/', '', $term);
+
+            $query->where(function($q) use ($term, $termT, $termNum) {
+                $q->where('terminal', $term)
+                  ->orWhere('terminal', $termT)
+                  ->orWhere('terminal', $termNum)
+                  ->orWhere('floor_location', 'like', '%Terminal ' . $termNum . '%')
+                  ->orWhere('floor_location', 'like', '%' . $termT . '%');
+            });
         }
 
         $tenants = $query->withCount(['products', 'orders'])->paginate(10)->withQueryString();

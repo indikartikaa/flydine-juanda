@@ -3,16 +3,7 @@
 @section('title', 'Cara Pesan')
 
 @section('page_header')
-    <style>
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-12px); }
-            100% { transform: translateY(0px); }
-        }
-        .animate-float {
-            animation: float 4s ease-in-out infinite;
-        }
-    </style>
+
 
     <div class="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10 w-full max-w-5xl mx-auto">
         <div class="text-center md:text-left md:max-w-xl">

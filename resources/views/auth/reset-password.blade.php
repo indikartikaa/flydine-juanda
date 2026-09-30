@@ -5,36 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reset Kata Sandi - FlyDine</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .airport-bg {
-            background:
-                linear-gradient(90deg, rgba(0,59,102,.96), rgba(0,94,162,.75), rgba(0,94,162,.30)),
-                url("{{ asset('images/juanda.jpg') }}") center/cover no-repeat;
-        }
-
-        .input-flydine {
-            width: 100%;
-            border: 1px solid #d1d5db;
-            border-radius: 12px;
-            padding: 12px 14px;
-            font-size: 14px;
-            outline: none;
-            transition: .2s;
-        }
-
-        .input-flydine:focus {
-            border-color: #005ea2;
-            box-shadow: 0 0 0 3px rgba(0,94,162,.12);
-        }
-    </style>
 </head>
 
 <body class="bg-[#f4f7fa]">
@@ -213,7 +185,7 @@
 </div>
 
 
-<script>
+<script nonce="{{ $cspNonce }}">
 const translations = {
     id: {
         headline: 'Buat Kata Sandi Baru',

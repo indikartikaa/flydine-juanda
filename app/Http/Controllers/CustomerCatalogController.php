@@ -148,10 +148,24 @@ class CustomerCatalogController extends Controller
             $order->status = 'dibatalkan';
             $order->save();
             session()->forget('order_code');
-            return redirect()->back()->with('success', 'Pesanan Anda telah berhasil dibatalkan.');
+
+            // Deteksi Pola Fraud / Spam (jika customer batalkan >= 5 order dalam 30 menit)
+            if ($order->customer_id) {
+                $fraudService = app(\App\Services\FraudDetectionService::class);
+                $isBlocked = $fraudService->checkCancelledOrderPattern($order->customer_id);
+
+                if ($isBlocked) {
+                    return redirect()->route('customer.tracking', ['order' => $order->order_code])
+                        ->with('warning', 'Pesanan telah dibatalkan. PERHATIAN: Akun Anda otomatis diblokir karena terdeteksi membatalkan pesanan sebanyak 5 kali atau lebih dalam 30 menit.');
+                }
+            }
+
+            return redirect()->route('customer.tracking', ['order' => $order->order_code])
+                ->with('success', 'Pesanan Anda telah berhasil dibatalkan.');
         }
 
-        return redirect()->back()->with('error', 'Pesanan ini tidak dapat dibatalkan.');
+        return redirect()->route('customer.tracking', ['order' => $order->order_code])
+            ->with('error', 'Pesanan ini sudah tidak dapat dibatalkan.');
     }
 
     public function checkStatus($orderCode)
@@ -172,11 +186,12 @@ class CustomerCatalogController extends Controller
         $orders = collect();
         $customer = null;
         $searched = false;
+        $cleanPhone = '';
 
         if ($request->filled('phone_number')) {
             $searched = true;
-            $phoneNumber = preg_replace('/[^0-9+]/', '', $request->phone_number);
-            $customer = Customer::where('phone_number', $phoneNumber)->first();
+            $cleanPhone = substr(preg_replace('/[^0-9+]/', '', (string) $request->phone_number), 0, 20);
+            $customer = !empty($cleanPhone) ? Customer::where('phone_number', $cleanPhone)->first() : null;
 
             if ($customer) {
                 $orders = Order::with(['tenant', 'orderItems.product'])
@@ -186,7 +201,7 @@ class CustomerCatalogController extends Controller
             }
         }
 
-        return view('customer.history', compact('orders', 'customer', 'searched'));
+        return view('customer.history', compact('orders', 'customer', 'searched', 'cleanPhone'));
     }
 
     public function simulatePayment(Request $request)

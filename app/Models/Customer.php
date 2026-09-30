@@ -15,12 +15,17 @@ class Customer extends Model
         'first_order_at',
         'last_order_at',
         'total_orders',
+        'is_blocked',
+        'blocked_reason',
+        'blocked_at',
     ];
 
     protected $casts = [
         'first_order_at' => 'datetime',
         'last_order_at' => 'datetime',
         'total_orders' => 'integer',
+        'is_blocked' => 'boolean',
+        'blocked_at' => 'datetime',
     ];
 
     /**

@@ -5,50 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FlyDine Portal - Juanda International Airport</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Poppins', sans-serif;
-        }
 
-        .airport-bg {
-            background:
-                linear-gradient(90deg,
-                    rgba(0,59,102,.96),
-                    rgba(0,94,162,.77),
-                    rgba(0,94,162,.30)
-                ),
-                url("{{ asset('images/juanda.jpg') }}") center/cover no-repeat;
-        }
 
-        /* Gaya Textbox Aslimu */
-        .input-flydine {
-            width: 100%;
-            padding: 12px 14px;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 500;
-            outline: none;
-            transition: .2s;
-            background-color: #ffffff;
-            color: #1e293b;
-        }
-
-        .input-flydine::placeholder {
-            color: #94a3b8;
-            font-weight: 400;
-        }
-
-        /* Focus ring diubah sedikit agar cocok di atas background biru */
-        .input-flydine:focus {
-            border-color: #38bdf8; 
-            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.2);
-        }
-    </style>
 </head>
 
 <body class="bg-[#f8fafc]">
@@ -213,7 +173,7 @@
 
 </div>
 
-<script>
+<script nonce="{{ $cspNonce }}">
 const translations = {
     id: {
         headline: 'Smart Food Ordering untuk Bandara Internasional Juanda',

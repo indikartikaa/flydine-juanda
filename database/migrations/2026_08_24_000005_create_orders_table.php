@@ -33,7 +33,9 @@ return new class extends Migration
             $table->index('ordered_at');
         });
 
-        DB::statement('ALTER TABLE orders ADD CONSTRAINT chk_orders_total_amount CHECK (total_amount >= 0)');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE orders ADD CONSTRAINT chk_orders_total_amount CHECK (total_amount >= 0)');
+        }
     }
 
     public function down(): void

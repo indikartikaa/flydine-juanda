@@ -3,30 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $tenant->name }} - FlyDine</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Alpine.js untuk interaktivitas -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', 'Poppins', sans-serif; background-color: #f8fafc; }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        @supports (padding-bottom: env(safe-area-inset-bottom)) {
-            .pb-safe { padding-bottom: calc(env(safe-area-inset-bottom) + 1rem); }
-        }
-    </style>
-    <script>
-        function changeLanguage(lang) {
-            document.querySelectorAll('[data-id]').forEach(function(element) {
-                element.innerHTML = lang === 'en' ? element.getAttribute('data-en') : element.getAttribute('data-id');
-            });
-        }
-    </script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body class="text-slate-800 flex flex-col min-h-screen selection:bg-[#005ea2] selection:text-white relative" x-data="{ mobileMenuOpen: false }">
@@ -199,12 +178,12 @@
                      class="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 p-5 flex flex-col group relative overflow-hidden">
                     
                     @if($product->image)
-                        <div class="h-40 bg-slate-100 rounded-2xl mb-5 overflow-hidden">
-                            <!-- Image implementation would go here -->
+                        <div class="h-40 bg-slate-100 rounded-2xl mb-5 overflow-hidden relative">
+                            <img src="{{ asset('storage/'.$product->image) }}" alt="{{ $product->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                         </div>
                     @else
                         <!-- No Image Placeholder -->
-                        <div class="h-32 bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl mb-5 flex items-center justify-center border border-slate-100/50">
+                        <div class="h-40 bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl mb-5 flex items-center justify-center border border-slate-100/50">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                         </div>
                     @endif
@@ -290,7 +269,7 @@
         </div>
     </footer>
 
-    <script>
+    <script nonce="{{ $cspNonce }}">
         function addToCart(productId, tenantId, forceReplace = 0) {
             fetch('{{ route('customer.cart.add') }}', {
                 method: 'POST',

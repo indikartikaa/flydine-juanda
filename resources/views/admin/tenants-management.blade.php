@@ -56,8 +56,8 @@
             
             <select name="terminal" onchange="this.form.submit()" class="border border-slate-200 rounded-xl px-4 py-2.5 text-xs bg-slate-50 hover:bg-white focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none transition-colors cursor-pointer text-slate-700 font-bold">
                 <option value="">Filter: Semua Terminal</option>
-                <option value="1" {{ request('terminal') == '1' ? 'selected' : '' }}>Hanya Terminal 1 (T1)</option>
-                <option value="2" {{ request('terminal') == '2' ? 'selected' : '' }}>Hanya Terminal 2 (T2)</option>
+                <option value="1" {{ in_array(request('terminal'), ['1', 'T1']) ? 'selected' : '' }}>Hanya Terminal 1 (T1)</option>
+                <option value="2" {{ in_array(request('terminal'), ['2', 'T2']) ? 'selected' : '' }}>Hanya Terminal 2 (T2)</option>
             </select>
         </form>
         

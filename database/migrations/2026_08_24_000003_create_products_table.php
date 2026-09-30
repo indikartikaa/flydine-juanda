@@ -20,8 +20,9 @@ return new class extends Migration
             $table->index(['tenant_id', 'is_available']);
         });
 
-        // CHECK constraint (Laravel's schema builder has no native check() before 11.x helpers on all drivers)
-        DB::statement('ALTER TABLE products ADD CONSTRAINT chk_products_price CHECK (price >= 0)');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE products ADD CONSTRAINT chk_products_price CHECK (price >= 0)');
+        }
     }
 
     public function down(): void

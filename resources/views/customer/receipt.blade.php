@@ -4,30 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Struk Digital - {{ $order->order_code }} - FlyDine Juanda</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }
-        .font-mono-num { font-family: 'JetBrains Mono', monospace; }
-        
-        /* Print Styles */
-        @media print {
-            body { background: white !important; padding: 0 !important; }
-            .no-print { display: none !important; }
-            .print-receipt {
-                box-shadow: none !important;
-                border: 1px solid #cbd5e1 !important;
-                margin: 0 auto !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                padding: 1.5rem !important;
-            }
-        }
-    </style>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
 </head>
 <body class="text-slate-800 min-h-screen flex justify-center py-0 sm:py-8 selection:bg-[#005ea2] selection:text-white">
 

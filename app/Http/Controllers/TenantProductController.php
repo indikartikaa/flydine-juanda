@@ -40,7 +40,7 @@ class TenantProductController extends Controller
             'category' => 'nullable|string|max:50',
             'description' => 'nullable|string|max:300',
             'price' => 'required|numeric|min:0',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
             'note' => 'nullable|string|max:1000',
             'stock' => 'required|integer|min:0',
         ]);
@@ -67,6 +67,18 @@ class TenantProductController extends Controller
             ->with('success', 'Produk berhasil ditambahkan.');
     }
 
+    public function show(Product $product)
+    {
+        $this->checkTenant($product);
+        return redirect()->route('tenant.products');
+    }
+
+    public function edit(Product $product)
+    {
+        $this->checkTenant($product);
+        return redirect()->route('tenant.products');
+    }
+
     public function update(Request $request, Product $product)
     {
         $this->checkTenant($product);
@@ -76,12 +88,16 @@ class TenantProductController extends Controller
             'category' => 'nullable|string|max:50',
             'description' => 'nullable|string|max:300',
             'price' => 'required|numeric|min:0',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
             'note' => 'nullable|string|max:1000',
             'stock' => 'required|integer|min:0',
         ]);
 
         if ($request->hasFile('image')) {
+            if ($product->image && \Illuminate\Support\Facades\Storage::disk('public')->exists($product->image)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($product->image);
+            }
+
             $data['image'] = $request->file('image')
                 ->store('products', 'public');
         }
@@ -105,6 +121,10 @@ class TenantProductController extends Controller
     public function destroy(Product $product)
     {
         $this->checkTenant($product);
+
+        if ($product->image && \Illuminate\Support\Facades\Storage::disk('public')->exists($product->image)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($product->image);
+        }
 
         $product->delete();
 

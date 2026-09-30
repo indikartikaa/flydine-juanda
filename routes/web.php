@@ -30,6 +30,9 @@ Route::view('/syarat-ketentuan', 'customer.pages.terms')->name('page.terms');
 Route::view('/kebijakan-privasi', 'customer.pages.privacy')->name('page.privacy');
 Route::view('/daftar-tenant', 'customer.pages.daftar-tenant')->name('page.daftar-tenant');
 Route::view('/promosi', 'customer.pages.promosi')->name('page.promosi');
+Route::get('/robots.txt', function () {
+    return response("User-agent: *\nDisallow:\n", 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
+});
 
 /* Preview Reset Password */
 Route::get('/preview/reset-password', function () {

@@ -1,3 +1,131 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+    font-family: 'Plus Jakarta Sans', 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f8fafc;
+}
+
+.font-mono-num {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* Kustomisasi Scrollbar agar rapi */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+.menu-scroll::-webkit-scrollbar { width: 4px; }
+.menu-scroll::-webkit-scrollbar-track { background: transparent; }
+.menu-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+.menu-scroll:hover::-webkit-scrollbar-thumb { background: #94a3b8; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Safe area padding untuk mobile */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .pb-safe { padding-bottom: calc(env(safe-area-inset-bottom) + 1rem); }
+}
+
+/* Smooth Catalog Card Transition */
+@keyframes catalogFadeInUp {
+    0% { opacity: 0; transform: translateY(24px) scale(0.96); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-catalog-card {
+    animation: catalogFadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Top Loading Shimmer Bar Animation */
+@keyframes shimmerGlow {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+}
+.animate-shimmer {
+    animation: shimmerGlow 1.4s ease-in-out infinite;
+}
+
+/* Smooth Entrance Animations */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+    100% { transform: translateY(0px); }
+}
+.animate-float {
+    animation: float 4s ease-in-out infinite;
+}
+
+@keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+    animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+}
+
+/* Button Shine Animation */
+@keyframes shine {
+    100% { left: 125%; }
+}
+.shine-effect {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+    transform: skewX(-20deg);
+    z-index: 1;
+}
+.group:hover .shine-effect {
+    animation: shine 1.5s ease-in-out;
+}
+
+/* Print Styles */
+@media print {
+    body { background: white !important; padding: 0 !important; }
+    .no-print { display: none !important; }
+    .print-receipt {
+        box-shadow: none !important;
+        border: 1px solid #cbd5e1 !important;
+        margin: 0 auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 1.5rem !important;
+    }
+}
+
+/* Auth Pages Background & Inputs */
+.airport-bg {
+    background:
+        linear-gradient(90deg,
+            rgba(0,59,102,.96),
+            rgba(0,94,162,.77),
+            rgba(0,94,162,.30)
+        ),
+        url('/images/juanda.jpg') center/cover no-repeat;
+}
+.input-flydine {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    outline: none;
+    transition: .2s;
+    background-color: #ffffff;
+    color: #1e293b;
+}
+.input-flydine::placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+}
+.input-flydine:focus {
+    border-color: #005ea2;
+    box-shadow: 0 0 0 3px rgba(0,94,162,.15);
+}

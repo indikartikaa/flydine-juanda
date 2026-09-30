@@ -4,64 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FlyDine - Juanda International Airport</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Alpine.js untuk interaktivitas -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', 'Poppins', sans-serif; background-color: #f8fafc; }
-        
-        /* Kustomisasi Scrollbar agar rapi */
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        .menu-scroll::-webkit-scrollbar { width: 4px; }
-        .menu-scroll::-webkit-scrollbar-track { background: transparent; }
-        .menu-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .menu-scroll:hover::-webkit-scrollbar-thumb { background: #94a3b8; }
-        
-        /* Safe area padding untuk mobile */
-        @supports (padding-bottom: env(safe-area-inset-bottom)) {
-            .pb-safe { padding-bottom: calc(env(safe-area-inset-bottom) + 1rem); }
-        }
-
-        /* Smooth Catalog Card Transition */
-        @keyframes catalogFadeInUp {
-            0% {
-                opacity: 0;
-                transform: translateY(24px) scale(0.96);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-        
-        .animate-catalog-card {
-            animation: catalogFadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
-
-        /* Top Loading Shimmer Bar Animation */
-        @keyframes shimmerGlow {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(200%); }
-        }
-        
-        .animate-shimmer {
-            animation: shimmerGlow 1.4s ease-in-out infinite;
-        }
-    </style>
-    <script>
-        function changeLanguage(lang) {
-            document.querySelectorAll('[data-id]').forEach(function(element) {
-                element.innerHTML = lang === 'en' ? element.getAttribute('data-en') : element.getAttribute('data-id');
-            });
-        }
-    </script>
+    <!-- Vite Local Assets (Tailwind CSS, Alpine.js, & Animations) -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body class="text-slate-800 flex flex-col min-h-screen selection:bg-[#005ea2] selection:text-white relative" x-data="{ mobileMenuOpen: false, lang: 'id' }">
@@ -152,6 +96,20 @@
 
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
             
+            @if(session('error'))
+            <div class="mb-6 max-w-2xl mx-auto bg-rose-500/95 backdrop-blur-md border border-rose-400 text-white px-5 py-4 rounded-2xl text-sm font-bold shadow-xl flex items-center space-x-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                <span>{{ session('error') }}</span>
+            </div>
+            @endif
+
+            @if(session('success'))
+            <div class="mb-6 max-w-2xl mx-auto bg-emerald-600/95 backdrop-blur-md border border-emerald-400 text-white px-5 py-4 rounded-2xl text-sm font-bold shadow-xl flex items-center space-x-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>{{ session('success') }}</span>
+            </div>
+            @endif
+
             <!-- Hero Section -->
             <div class="text-center md:text-left mb-8 md:mb-14 text-white">
                 <div class="inline-flex items-center space-x-2 bg-[#8dc63f]/20 border border-[#8dc63f]/30 px-3 py-1.5 rounded-full mb-5 backdrop-blur-sm">
@@ -168,13 +126,19 @@
             <div class="mb-10 sticky top-[72px] sm:top-24 z-40 max-w-4xl mx-auto px-2 sm:px-0">
                 <form id="catalog-form" method="GET" action="{{ route('customer.menu') }}" class="bg-white/95 backdrop-blur-xl p-1.5 sm:p-2 rounded-3xl sm:rounded-full shadow-2xl shadow-blue-900/10 border border-white/50 flex flex-col md:flex-row md:items-center divide-y md:divide-y-0 md:divide-x divide-slate-100 transition-all hover:shadow-blue-900/20">
                     
+                    @php
+                        $safeTerminal = in_array(strtolower(request('terminal')), ['t1', 't2', '1', '2']) ? (in_array(strtolower(request('terminal')), ['t1', '1']) ? 't1' : 't2') : 'semua';
+                        $safeZone = in_array(strtolower(request('zone')), ['airside', 'landside']) ? ucfirst(strtolower(request('zone'))) : 'semua';
+                        $safeCategory = preg_replace('/[^a-z0-9\-]/', '', strtolower((string) request('category', '')));
+                        $safeSearch = preg_replace('/[^a-zA-Z0-9\s\-]/', '', (string) request('search', ''));
+                    @endphp
                     <!-- Real inputs for form submission -->
-                    <input type="hidden" name="terminal" id="hidden_terminal" value="{{ request('terminal', 'semua') }}">
-                    <input type="hidden" name="zone" id="hidden_zone" value="{{ request('zone', 'semua') }}">
-                    <input type="hidden" name="category" id="hidden_category" value="{{ request('category') }}">
+                    <input type="hidden" name="terminal" id="hidden_terminal" value="{{ $safeTerminal }}">
+                    <input type="hidden" name="zone" id="hidden_zone" value="{{ $safeZone }}">
+                    <input type="hidden" name="category" id="hidden_category" value="{{ $safeCategory }}">
 
                     <!-- Terminal Custom Dropdown (Alpine) -->
-                    <div x-data="{ openTerminal: false, terminal: '{{ request('terminal', 'semua') }}' }" @click.away="openTerminal = false" class="flex-1 w-full relative group">
+                    <div x-data="{ openTerminal: false, terminal: '{{ $safeTerminal }}' }" @click.away="openTerminal = false" class="flex-1 w-full relative group">
                         
                         <!-- Trigger Area -->
                         <div @click="openTerminal = !openTerminal" class="px-5 sm:px-6 py-2.5 sm:py-2 w-full h-full flex flex-col justify-center hover:bg-slate-50 rounded-full transition-colors cursor-pointer">
@@ -203,7 +167,7 @@
                     </div>
 
                     <!-- Zone Custom Dropdown (Alpine) -->
-                    <div x-data="{ openZone: false, zone: '{{ request('zone', 'semua') }}' }" @click.away="openZone = false" class="flex-1 w-full relative group">
+                    <div x-data="{ openZone: false, zone: '{{ $safeZone }}' }" @click.away="openZone = false" class="flex-1 w-full relative group">
                         
                         <!-- Trigger Area -->
                         <div @click="openZone = !openZone" class="px-5 sm:px-6 py-2.5 sm:py-2 w-full h-full flex flex-col justify-center hover:bg-slate-50 rounded-full transition-colors cursor-pointer">
@@ -235,7 +199,7 @@
                     <div class="pl-5 sm:pl-6 pr-2 py-2.5 sm:py-1.5 flex-[1.5] w-full flex items-center relative hover:bg-slate-50 rounded-full transition-colors group">
                         <div class="flex-grow">
                             <label for="search_input" class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5 group-hover:text-slate-500 transition-colors" data-id="CARI RESTORAN" data-en="FIND RESTAURANT">CARI RESTORAN</label>
-                            <input id="search_input" name="search" value="{{ request('search') }}" type="text" placeholder="Ketik nama restoran..." class="w-full bg-transparent font-bold text-slate-800 focus:outline-none placeholder:text-slate-300 placeholder:font-medium truncate">
+                            <input id="search_input" name="search" value="{{ $safeSearch }}" type="text" placeholder="Ketik nama restoran..." class="w-full bg-transparent font-bold text-slate-800 focus:outline-none placeholder:text-slate-300 placeholder:font-medium truncate">
                         </div>
                         <button type="submit" class="bg-gradient-to-tr from-[#005ea2] to-blue-500 text-white p-3 sm:p-3.5 rounded-full hover:shadow-lg hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all ml-2 shrink-0 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -522,165 +486,5 @@
             </div>
 
             <x-footer />
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            initPaginationAjax();
-        });
-
-        function initPaginationAjax() {
-            const paginationContainer = document.getElementById('catalog-pagination-container');
-            if (!paginationContainer) return;
-
-            paginationContainer.querySelectorAll('.pagination-link').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const targetUrl = this.getAttribute('href');
-                    if (!targetUrl || targetUrl === '#' || targetUrl.trim() === '') return;
-
-                    loadCatalogPage(targetUrl, true);
-                });
-            });
-        }
-
-        function selectCategory(categorySlug) {
-            const url = new URL(window.location.href);
-            if (!categorySlug || categorySlug.trim() === '') {
-                url.searchParams.delete('category');
-            } else {
-                url.searchParams.set('category', categorySlug);
-            }
-            url.searchParams.delete('page'); // Reset ke page 1 saat ganti kategori
-
-            const hiddenCatInput = document.getElementById('hidden_category');
-            if (hiddenCatInput) {
-                hiddenCatInput.value = categorySlug || '';
-            }
-
-            loadCatalogPage(url.toString(), true);
-        }
-
-        function loadCatalogPage(url, pushState = true) {
-            const grid = document.getElementById('tenant-cards-grid');
-            const paginationContainer = document.getElementById('catalog-pagination-container');
-            const loadingBar = document.getElementById('catalog-loading-bar');
-            const anchor = document.getElementById('catalog-section-anchor');
-
-            if (!grid) return;
-
-            // 1. Tampilkan bar progress shimmer di atas grid
-            if (loadingBar) {
-                loadingBar.classList.remove('opacity-0');
-                loadingBar.classList.add('opacity-100');
-            }
-
-            // 2. Efek keluar halus (fade out + skala sedikit mengecil)
-            grid.classList.add('opacity-25', 'scale-[0.98]', 'pointer-events-none');
-            if (paginationContainer) {
-                paginationContainer.classList.add('opacity-40', 'pointer-events-none');
-            }
-
-            // 3. Smooth scroll kembali ke awal grid restoran
-            if (anchor) {
-                const rect = anchor.getBoundingClientRect();
-                if (rect.top < 0 || rect.top > window.innerHeight * 0.4) {
-                    anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }
-
-            // 4. Ambil halaman baru dengan AJAX Fetch
-            fetch(url, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Gagal mengambil data halaman.');
-                return response.text();
-            })
-            .then(html => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-
-                const newGrid = doc.getElementById('tenant-cards-grid');
-                const newPagination = doc.getElementById('catalog-pagination-container');
-                const newFilterBar = doc.getElementById('catalog-filter-bar');
-                const newCategoriesSection = doc.getElementById('favorite-categories-section');
-                const newHiddenCat = doc.getElementById('hidden_category');
-
-                if (newGrid && grid) {
-                    grid.innerHTML = newGrid.innerHTML;
-
-                    // Berikan efek animasi masuk bertahap (staggered entrance)
-                    const cards = grid.querySelectorAll('.tenant-card');
-                    cards.forEach((card, index) => {
-                        card.classList.remove('animate-catalog-card');
-                        void card.offsetWidth; // Trigger reflow browser
-                        card.classList.add('animate-catalog-card');
-                        card.style.animationDelay = `${index * 60}ms`;
-                    });
-                }
-
-                if (newPagination && paginationContainer) {
-                    paginationContainer.innerHTML = newPagination.innerHTML;
-                }
-
-                // Perbarui bilah filter aktif di atas kartu
-                const currentFilterBar = document.getElementById('catalog-filter-bar');
-                if (newFilterBar && currentFilterBar) {
-                    currentFilterBar.innerHTML = newFilterBar.innerHTML;
-                }
-
-                // Perbarui status aktif pada tombol Kategori Favorit di bawah
-                const currentCategoriesSection = document.getElementById('favorite-categories-section');
-                if (newCategoriesSection && currentCategoriesSection) {
-                    currentCategoriesSection.innerHTML = newCategoriesSection.innerHTML;
-                }
-
-                // Sinkronkan input hidden form
-                const currentHiddenCat = document.getElementById('hidden_category');
-                if (newHiddenCat && currentHiddenCat) {
-                    currentHiddenCat.value = newHiddenCat.value;
-                }
-
-                // 5. Update browser history agar link URL berganti tanpa reload
-                if (pushState) {
-                    window.history.pushState({ path: url }, '', url);
-                }
-
-                // 6. Sinkronisasi bahasa yang dipilih (ID/EN)
-                const langBtn = document.querySelector('[x-data]');
-                const currentLang = (langBtn && langBtn._x_dataStack && langBtn._x_dataStack[0]) 
-                    ? langBtn._x_dataStack[0].lang 
-                    : 'id';
-                if (typeof changeLanguage === 'function') {
-                    changeLanguage(currentLang);
-                }
-
-                // 7. Pasang kembali event listener pada pagination baru
-                initPaginationAjax();
-            })
-            .catch(err => {
-                console.error('Pindah halaman via ajax gagal, fallback ke navigasi standar:', err);
-                window.location.href = url;
-            })
-            .finally(() => {
-                // Sembunyikan loading bar & pulihkan grid
-                if (loadingBar) {
-                    loadingBar.classList.remove('opacity-100');
-                    loadingBar.classList.add('opacity-0');
-                }
-                grid.classList.remove('opacity-25', 'scale-[0.98]', 'pointer-events-none');
-                if (paginationContainer) {
-                    paginationContainer.classList.remove('opacity-40', 'pointer-events-none');
-                }
-            });
-        }
-
-        // Tangani navigasi tombol Back & Forward di browser
-        window.addEventListener('popstate', function() {
-            loadCatalogPage(window.location.href, false);
-        });
-    </script>
 </body>
 </html>

@@ -190,7 +190,7 @@
 </div>
 
     <!-- Script to handle dynamic fetching and updates -->
-    <script>
+    <script nonce="{{ $cspNonce }}">
         document.addEventListener('alpine:init', () => {
             Alpine.data('orderManagement', () => ({
                 activeTab: 'semua',

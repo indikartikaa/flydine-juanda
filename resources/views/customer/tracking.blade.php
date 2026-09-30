@@ -4,20 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pelacakan Pesanan - FlyDine Juanda</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', 'Poppins', sans-serif; background-color: #f8fafc; }
-        @supports (padding-bottom: env(safe-area-inset-bottom)) {
-            .pb-safe { padding-bottom: calc(env(safe-area-inset-bottom) + 1rem); }
-        }
-    </style>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
 </head>
 <body class="text-slate-800 min-h-screen selection:bg-[#005ea2] selection:text-white flex justify-center bg-slate-100">
 
@@ -35,8 +23,22 @@
             
             @if(session('success'))
             <div class="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-2xl text-sm font-bold flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                {{ session('success') }}
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>{{ session('success') }}</span>
+            </div>
+            @endif
+
+            @if(session('warning'))
+            <div class="mb-4 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-2xl text-sm font-bold flex items-center justify-center text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 shrink-0 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                <span>{{ session('warning') }}</span>
+            </div>
+            @endif
+
+            @if(session('error'))
+            <div class="mb-4 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-2xl text-sm font-bold flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 shrink-0 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>{{ session('error') }}</span>
             </div>
             @endif
 
@@ -47,7 +49,7 @@
                 
                 <span class="inline-block bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4">ID Pesanan: {{ $order->order_code }}</span>
                 
-                @if(!$order->is_paid && in_array($order->payment_method, ['qris', 'transfer']))
+                @if(!$order->is_paid && in_array($order->payment_method, ['qris', 'transfer']) && $order->status === 'menunggu')
                     <h2 class="text-3xl font-black text-slate-800 tracking-tight mb-3 flex items-center justify-center gap-2">
                         <span class="relative flex h-4 w-4">
                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
@@ -95,7 +97,7 @@
                     </form>
 
                 @else
-                    <!-- Status Normal (Sudah Bayar atau Cash) -->
+                    <!-- Status Normal (Sudah Bayar atau Cash, atau Dibatalkan) -->
                     @php
                         $statusColors = [
                             'menunggu' => 'from-amber-600 to-[#f59e0b]',
@@ -116,7 +118,7 @@
                             'diproses' => 'Sedang Dimasak',
                             'siap' => $order->pickup_method === 'diantar' ? 'Sedang Diantar' : 'Siap Diambil',
                             'selesai' => 'Pesanan Selesai',
-                            'dibatalkan' => 'Dibatalkan'
+                            'dibatalkan' => 'Pesanan Dibatalkan'
                         ];
                     @endphp
                     
@@ -129,6 +131,10 @@
                         @elseif($order->status === 'selesai')
                         <span class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-sm">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        </span>
+                        @elseif($order->status === 'dibatalkan')
+                        <span class="w-8 h-8 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shadow-sm">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                         </span>
                         @endif
                         <span class="bg-clip-text text-transparent bg-gradient-to-r {{ $statusColors[$order->status] }}">{{ $labels[$order->status] }}</span>
@@ -147,6 +153,8 @@
                             @endif
                         @elseif($order->status == 'selesai')
                             Pesanan Anda telah selesai diserahkan oleh restoran <span class="font-extrabold text-[#005ea2]">{{ $order->tenant->name }}</span>. Selamat menikmati hidangan Anda dan terima kasih telah menggunakan FlyDine!
+                        @elseif($order->status == 'dibatalkan')
+                            Pesanan ini telah dibatalkan.
                         @endif
                     </p>
                 @endif
@@ -154,17 +162,27 @@
 
             <!-- Progress Tracker / Refund Info -->
             @if(in_array($order->status, ['ditolak', 'dibatalkan']))
-            <div class="bg-rose-50 p-6 rounded-[1.5rem] border border-rose-200 mb-6 text-center transition-all duration-700 delay-100 transform" :class="loaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'">
-                <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                @if($order->is_paid)
+                <div class="bg-rose-50 p-6 rounded-[1.5rem] border border-rose-200 mb-6 text-center transition-all duration-700 delay-100 transform" :class="loaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'">
+                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    </div>
+                    <h3 class="font-extrabold text-rose-800 mb-2">Informasi Pengembalian Dana</h3>
+                    <p class="text-sm text-rose-600 mb-5 leading-relaxed">Mohon maaf, pesanan Anda dibatalkan karena kendala operasional (misal: stok habis). Dana Anda akan dikembalikan (Refund) 100%.</p>
+                    <a href="https://wa.me/6281234567890?text=Halo%20Admin%20FlyDine%2C%20saya%20ingin%20mengajukan%20Refund%20untuk%20pesanan%20{{ $order->order_code }}" target="_blank" class="inline-flex items-center justify-center bg-rose-600 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md shadow-rose-500/30 hover:bg-rose-700 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                        Hubungi CS via WhatsApp
+                    </a>
                 </div>
-                <h3 class="font-extrabold text-rose-800 mb-2">Informasi Pengembalian Dana</h3>
-                <p class="text-sm text-rose-600 mb-5 leading-relaxed">Mohon maaf, pesanan Anda dibatalkan karena kendala operasional (misal: stok habis). Dana Anda akan dikembalikan (Refund) 100%.</p>
-                <a href="https://wa.me/6281234567890?text=Halo%20Admin%20FlyDine%2C%20saya%20ingin%20mengajukan%20Refund%20untuk%20pesanan%20{{ $order->order_code }}" target="_blank" class="inline-flex items-center justify-center bg-rose-600 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md shadow-rose-500/30 hover:bg-rose-700 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
-                    Hubungi CS via WhatsApp
-                </a>
-            </div>
+                @else
+                <div class="bg-rose-50 p-6 rounded-[1.5rem] border border-rose-200 mb-6 text-center transition-all duration-700 delay-100 transform" :class="loaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'">
+                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </div>
+                    <h3 class="font-extrabold text-rose-800 mb-2">Pesanan Dibatalkan</h3>
+                    <p class="text-sm text-rose-600 mb-2 leading-relaxed">Pesanan ini telah dibatalkan sebelum pembayaran diproses. Anda tidak dikenakan biaya apapun.</p>
+                </div>
+                @endif
             @elseif($order->is_paid || $order->payment_method == 'cash')
             <div class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-100 mb-6 transition-all duration-700 delay-100 transform" :class="loaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'">
                 <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-6">Status Pesanan</p>
@@ -364,7 +382,7 @@
     </div>
 
     <!-- Auto Refresh Polling Script -->
-    <script>
+    <script nonce="{{ $cspNonce }}">
         document.addEventListener('alpine:init', () => {
             const currentStatus = '{{ $order->status }}';
             const orderCode = '{{ $order->order_code }}';

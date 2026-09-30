@@ -3,16 +3,7 @@
 @section('title', 'Pusat Bantuan (FAQ)')
 
 @section('page_header')
-    <style>
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-12px); }
-            100% { transform: translateY(0px); }
-        }
-        .animate-float {
-            animation: float 4s ease-in-out infinite;
-        }
-    </style>
+
 
     <div class="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10 w-full max-w-5xl mx-auto">
         <div class="text-center md:text-left md:max-w-xl">
@@ -110,7 +101,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-2">ID Pesanan <span class="text-slate-400 font-normal">(Opsional)</span></label>
-                        <input type="text" name="order_code" value="{{ request('order') }}" placeholder="Contoh: ORD-ABCDEF" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all shadow-sm hover:border-blue-300">
+                        <input type="text" name="order_code" value="{{ preg_replace('/[^A-Za-z0-9\-]/', '', (string) request('order', '')) }}" placeholder="Contoh: ORD-ABCDEF" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all shadow-sm hover:border-blue-300">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-2">Kategori Masalah <span class="text-rose-500">*</span></label>

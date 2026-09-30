@@ -4,20 +4,7 @@
 
 @section('content')
 
-{{-- ALERT SUCCESS --}}
-@if(session('success'))
-    <div x-data="{ show: true }" x-show="show" x-transition.duration.500ms class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-700 px-5 py-4 rounded-xl text-sm font-bold flex items-center justify-between shadow-sm">
-        <div class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            {{ session('success') }}
-        </div>
-        <button @click="show = false" class="text-emerald-500 hover:text-emerald-700 focus:outline-none bg-emerald-100/50 hover:bg-emerald-100 p-1.5 rounded-lg transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
-    </div>
-@endif
+
 
 {{-- HEADER SECTION --}}
 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
@@ -98,6 +85,7 @@
                         data-name="{{ $product->name }}" 
                         data-category="{{ $product->category ?? '-' }}" 
                         data-price="{{ number_format($product->price, 0, ',', '.') }}" 
+                        data-stock="{{ $product->stock }}" 
                         data-description="{{ $product->description ?? '-' }}" 
                         data-note="{{ $product->note ?? '-' }}" 
                         data-image="{{ $product->image ? asset('storage/'.$product->image) : '' }}" 
@@ -117,7 +105,9 @@
                             data-description="{{ $product->description ?? '' }}" 
                             data-note="{{ $product->note ?? '' }}" 
                             data-price="{{ $product->price }}" 
-                            data-status="{{ $product->is_available }}" 
+                            data-stock="{{ $product->stock }}" 
+                            data-image="{{ $product->image ? asset('storage/'.$product->image) : '' }}" 
+                            data-status="{{ $product->is_available ? '1' : '0' }}" 
                             class="w-full border border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-600 py-2 rounded-xl text-xs font-bold transition-colors">
                         Edit
                     </button>
@@ -179,6 +169,10 @@
                     <p id="detailCategory" class="font-bold text-gray-700"></p>
                 </div>
                 <div class="flex justify-between items-center border-b border-gray-200 pb-3">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Stok</p>
+                    <p id="detailStock" class="font-bold text-gray-700"></p>
+                </div>
+                <div class="flex justify-between items-center border-b border-gray-200 pb-3">
                     <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Status</p>
                     <p id="detailStatus" class="font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md"></p>
                 </div>
@@ -216,25 +210,31 @@
 
             {{-- Nama --}}
             <div class="mb-4">
-                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Nama Produk</label>
+                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Nama Produk <span class="text-rose-500">*</span></label>
                 <input id="editName" name="name" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition-all">
             </div>
 
-            {{-- Kategori & Harga Grid --}}
+            {{-- Kategori --}}
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Kategori</label>
+                <select id="editCategory" name="category" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition-all appearance-none">
+                    <option value="">Pilih kategori</option>
+                    <option value="Makanan Utama">Makanan Utama</option>
+                    <option value="Snack">Snack</option>
+                    <option value="Minuman">Minuman</option>
+                    <option value="Dessert">Dessert</option>
+                </select>
+            </div>
+
+            {{-- Harga & Stok Grid --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Kategori</label>
-                    <select id="editCategory" name="category" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition-all appearance-none">
-                        <option value="">Pilih kategori</option>
-                        <option value="Makanan Utama">Makanan Utama</option>
-                        <option value="Snack">Snack</option>
-                        <option value="Minuman">Minuman</option>
-                        <option value="Dessert">Dessert</option>
-                    </select>
+                    <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Harga (Rp) <span class="text-rose-500">*</span></label>
+                    <input id="editPrice" type="number" name="price" required min="0" step="any" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition-all">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Harga (Rp)</label>
-                    <input id="editPrice" type="number" name="price" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition-all">
+                    <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Jumlah Stok <span class="text-rose-500">*</span></label>
+                    <input id="editStock" type="number" name="stock" required min="0" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition-all">
                 </div>
             </div>
 
@@ -253,7 +253,19 @@
             {{-- Foto --}}
             <div class="mb-6">
                 <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Perbarui Foto (Opsional)</label>
-                <input type="file" name="image" accept="image/png,image/jpeg,image/webp" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-[#005ea2] hover:file:bg-blue-100 transition-all cursor-pointer">
+                
+                {{-- Preview foto saat ini / baru --}}
+                <div class="flex items-center gap-4 mb-3">
+                    <div id="editCurrentPhotoPreview" class="h-16 w-16 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden shrink-0">
+                        <span class="text-[10px] text-gray-400 font-semibold text-center px-1">Tanpa Foto</span>
+                    </div>
+                    <div class="flex-1">
+                        <p id="editPhotoNote" class="text-xs text-gray-600 font-medium">Pilih file gambar jika ingin memperbarui foto produk.</p>
+                        <p class="text-[11px] text-gray-400 mt-0.5">Mendukung format JPG, PNG, WEBP (maks. 5MB)</p>
+                    </div>
+                </div>
+
+                <input id="editImageInput" type="file" name="image" accept="image/png,image/jpeg,image/jpg,image/webp" onchange="previewEditImage(event)" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-[#005ea2] hover:file:bg-blue-100 transition-all cursor-pointer">
             </div>
 
             {{-- Status --}}
@@ -276,7 +288,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ $cspNonce }}">
 // Logika Pencarian
 const search = document.getElementById('searchProduct');
 search?.addEventListener('input', function () {
@@ -297,6 +309,7 @@ function showDetail(button) {
     document.getElementById('detailName').textContent = button.dataset.name;
     document.getElementById('detailCategory').textContent = button.dataset.category || '-';
     document.getElementById('detailPrice').textContent = 'Rp ' + button.dataset.price;
+    document.getElementById('detailStock').textContent = (button.dataset.stock ?? 0) + ' item';
     document.getElementById('detailDescription').textContent = button.dataset.description || '-';
     document.getElementById('detailNote').textContent = button.dataset.note || '-';
     document.getElementById('detailStatus').textContent = button.dataset.status;
@@ -313,13 +326,52 @@ function showDetail(button) {
     openModal('detailModal', 'detailModalCard');
 }
 
+function previewEditImage(event) {
+    const file = event.target.files[0];
+    const previewContainer = document.getElementById('editCurrentPhotoPreview');
+    const noteEl = document.getElementById('editPhotoNote');
+    if (file) {
+        const url = URL.createObjectURL(file);
+        previewContainer.innerHTML = `<img src="${url}" class="w-full h-full object-cover">`;
+        noteEl.textContent = `Foto terpilih: ${file.name}`;
+    }
+}
+
 function editProduct(button) {
     document.getElementById('editName').value = button.dataset.name;
-    document.getElementById('editCategory').value = button.dataset.category;
-    document.getElementById('editDescription').value = button.dataset.description;
+    
+    // Set kategori (jika belum ada di opsi default, tambahkan opsi baru secara dinamis)
+    const catSelect = document.getElementById('editCategory');
+    const currentCat = button.dataset.category || '';
+    if (currentCat && ![...catSelect.options].some(opt => opt.value === currentCat)) {
+        const newOpt = document.createElement('option');
+        newOpt.value = currentCat;
+        newOpt.textContent = currentCat;
+        catSelect.appendChild(newOpt);
+    }
+    catSelect.value = currentCat;
+
     document.getElementById('editPrice').value = button.dataset.price;
+    document.getElementById('editStock').value = button.dataset.stock ?? 0;
+    document.getElementById('editDescription').value = button.dataset.description;
     document.getElementById('editNote').value = button.dataset.note;
     document.getElementById('editStatus').checked = button.dataset.status === '1';
+
+    // Reset input file
+    const fileInput = document.getElementById('editImageInput');
+    if (fileInput) fileInput.value = '';
+
+    // Tampilkan foto saat ini jika ada
+    const previewContainer = document.getElementById('editCurrentPhotoPreview');
+    const noteEl = document.getElementById('editPhotoNote');
+    if (button.dataset.image) {
+        previewContainer.innerHTML = `<img src="${button.dataset.image}" class="w-full h-full object-cover">`;
+        noteEl.textContent = 'Foto saat ini tersimpan. Pilih file baru jika ingin mengubahnya.';
+    } else {
+        previewContainer.innerHTML = `<span class="text-[10px] text-gray-400 font-semibold text-center px-1">Tanpa Foto</span>`;
+        noteEl.textContent = 'Pilih file gambar jika ingin menambahkan foto produk.';
+    }
+
     document.getElementById('editForm').action = `/tenant/products/${button.dataset.id}`;
 
     openModal('editModal', 'editModalCard');

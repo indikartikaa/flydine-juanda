@@ -295,7 +295,7 @@
                     <input id="image"
                            type="file"
                            name="image"
-                           accept="image/jpeg,image/png"
+                           accept="image/jpeg,image/png,image/webp"
                            class="hidden"
                            onchange="previewImage(event)">
                 </div>
@@ -341,7 +341,7 @@
 </form>
 
 
-<script>
+<script nonce="{{ $cspNonce }}">
 
 let groupIndex = 1;
 
