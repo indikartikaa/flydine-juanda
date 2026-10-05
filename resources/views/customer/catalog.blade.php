@@ -89,12 +89,16 @@
     </header>
 
     <!-- Main Content -->
-    <main class="flex-grow flex flex-col relative">
+    <main class="flex-grow flex flex-col relative isolate">
         
-        <!-- HD Hero Background (Dari Desain Asli) -->
-        <div class="absolute top-0 inset-x-0 h-[340px] md:h-[420px] -z-10 bg-cover bg-center bg-no-repeat" style="background-image: linear-gradient(to bottom, rgba(0,59,102,0.9), rgba(0,94,162,0.6), rgba(248,250,252,1)), url('{{ asset('images/juanda.jpg') }}');"></div>
+        <!-- HD Hero Background (Foto Bandara Juanda + Gradient Biru FlyDine) -->
+        <div class="absolute top-0 inset-x-0 h-[360px] md:h-[430px] overflow-hidden pointer-events-none z-0">
+            <img src="{{ asset('images/juanda.jpg') }}" alt="Bandara Internasional Juanda" class="w-full h-full object-cover object-center">
+            <!-- Overlay Biru Gradien Khas FlyDine -->
+            <div class="absolute inset-0 bg-gradient-to-b from-[#003b66]/90 via-[#005ea2]/60 to-[#f8fafc]"></div>
+        </div>
 
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16 relative z-10">
             
             @if(session('error'))
             <div class="mb-6 max-w-2xl mx-auto bg-rose-500/95 backdrop-blur-md border border-rose-400 text-white px-5 py-4 rounded-2xl text-sm font-bold shadow-xl flex items-center space-x-3">
@@ -112,10 +116,6 @@
 
             <!-- Hero Section -->
             <div class="text-center md:text-left mb-8 md:mb-14 text-white">
-                <div class="inline-flex items-center space-x-2 bg-[#8dc63f]/20 border border-[#8dc63f]/30 px-3 py-1.5 rounded-full mb-5 backdrop-blur-sm">
-                    <span class="w-2 h-2 rounded-full bg-[#8dc63f] animate-pulse shadow-[0_0_8px_#8dc63f]"></span>
-                    <span class="text-[10px] font-extrabold text-[#8dc63f] tracking-wider uppercase drop-shadow-md" data-id="DAPATKAN LOKASI TERBAIK" data-en="GET THE RIGHT LOCATION">Get The Right Location</span>
-                </div>
                 <h2 class="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.1] mb-4 drop-shadow-lg uppercase" data-id="Shopping &<br><span class='text-[#8dc63f]'>Dining</span>" data-en="Shopping &<br><span class='text-[#8dc63f]'>Dining</span>">
                     Shopping &<br><span class="text-[#8dc63f]">Dining</span>
                 </h2>

@@ -1,10 +1,33 @@
 import './bootstrap';
 
-import Alpine from '@alpinejs/csp';
+import Alpine from 'alpinejs';
 import Chart from 'chart.js/auto';
+import QRCode from 'qrcode';
 
 window.Alpine = Alpine;
 window.Chart = Chart;
+window.QRCode = QRCode;
+
+// Global QR Code Renderer
+window.initQRCodes = function() {
+    document.querySelectorAll('[data-qr-code]').forEach(el => {
+        const text = el.getAttribute('data-qr-code');
+        if (!text) return;
+        const size = parseInt(el.getAttribute('data-qr-size') || '200', 10);
+        if (el.tagName.toLowerCase() === 'canvas') {
+            QRCode.toCanvas(el, text, {
+                width: size,
+                margin: 1,
+                color: {
+                    dark: '#0f172a',
+                    light: '#ffffff'
+                }
+            }, function (error) {
+                if (error) console.error('QR code render error:', error);
+            });
+        }
+    });
+};
 
 // Global Language Switcher
 window.changeLanguage = function(lang) {
@@ -153,6 +176,9 @@ window.loadCatalogPage = function(url, pushState = true) {
 
 document.addEventListener('DOMContentLoaded', function() {
     window.initPaginationAjax();
+    if (typeof window.initQRCodes === 'function') {
+        window.initQRCodes();
+    }
 });
 
 window.addEventListener('popstate', function() {

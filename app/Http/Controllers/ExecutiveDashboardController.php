@@ -17,9 +17,22 @@ class ExecutiveDashboardController extends Controller
     {
         abort_unless(auth()->user()->role === 'admin_ops', 403);
 
-        $days = $request->input('days', 30);
-        $startDate = Carbon::now()->subDays($days)->startOfDay();
-        $endDate = Carbon::now()->endOfDay();
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $startDate = Carbon::parse($request->input('start_date'))->startOfDay();
+            $endDate = Carbon::parse($request->input('end_date'))->endOfDay();
+            if ($startDate->gt($endDate)) {
+                $temp = $startDate;
+                $startDate = $endDate->copy()->startOfDay();
+                $endDate = $temp->copy()->endOfDay();
+            }
+            $days = max(1, (int) round($startDate->copy()->startOfDay()->diffInDays($endDate->copy()->startOfDay())) + 1);
+        } else {
+            $days = (int) $request->input('days', 30);
+            $startDate = Carbon::now()->subDays($days)->startOfDay();
+            $endDate = Carbon::now()->endOfDay();
+        }
+        $startDateFormatted = $startDate->format('Y-m-d');
+        $endDateFormatted = $endDate->format('Y-m-d');
 
         $tenantId = $request->input('tenant_id');
 
@@ -98,11 +111,28 @@ class ExecutiveDashboardController extends Controller
                 COUNT(id) as total_customers
             ")->first();
 
+        // 8. Baseline Metrics for Drill-Down & What-If DSS
+        $selectedTenant = $tenantId ? Tenant::find($tenantId) : null;
+        $totalOrdersCount = (clone $orderQuery)->count();
+        $totalRevenue = (clone $orderQuery)->where('is_paid', true)->sum('total_amount');
+        $avgOrderValue = $totalOrdersCount > 0 ? round($totalRevenue / $totalOrdersCount) : 0;
+
+        $slaReadyQuery = (clone $orderQuery)->whereNotNull('ready_at');
+        $slaTotalReadyCount = (clone $slaReadyQuery)->count();
+        $slaCompliantCount = (clone $slaReadyQuery)->whereRaw('TIMESTAMPDIFF(MINUTE, ordered_at, ready_at) <= 15')->count();
+        $slaComplianceRate = $slaTotalReadyCount > 0 ? round(($slaCompliantCount / $slaTotalReadyCount) * 100, 1) : 100;
+        $avgSlaMinutes = round((clone $slaReadyQuery)->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, ordered_at, ready_at)) as avg_m')->value('avg_m') ?? 0, 1);
+
         $tenants = Tenant::where('is_active', true)->get();
 
         return view('admin.executive-dashboard', compact(
             'days',
+            'startDate',
+            'endDate',
+            'startDateFormatted',
+            'endDateFormatted',
             'tenantId',
+            'selectedTenant',
             'tenants',
             'volumePerDay',
             'statusDistribution',
@@ -111,7 +141,12 @@ class ExecutiveDashboardController extends Controller
             'slaPerformance',
             'openComplaints',
             'resolvedComplaints',
-            'customerSegmentation'
+            'customerSegmentation',
+            'totalRevenue',
+            'avgOrderValue',
+            'slaComplianceRate',
+            'avgSlaMinutes',
+            'totalOrdersCount'
         ));
     }
 
@@ -119,9 +154,20 @@ class ExecutiveDashboardController extends Controller
     {
         abort_unless(auth()->user()->role === 'admin_ops', 403);
 
-        $days = $request->input('days', 30);
-        $startDate = Carbon::now()->subDays($days)->startOfDay();
-        $endDate = Carbon::now()->endOfDay();
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $startDate = Carbon::parse($request->input('start_date'))->startOfDay();
+            $endDate = Carbon::parse($request->input('end_date'))->endOfDay();
+            if ($startDate->gt($endDate)) {
+                $temp = $startDate;
+                $startDate = $endDate->copy()->startOfDay();
+                $endDate = $temp->copy()->endOfDay();
+            }
+            $days = max(1, (int) round($startDate->copy()->startOfDay()->diffInDays($endDate->copy()->startOfDay())) + 1);
+        } else {
+            $days = (int) $request->input('days', 30);
+            $startDate = Carbon::now()->subDays($days)->startOfDay();
+            $endDate = Carbon::now()->endOfDay();
+        }
         $tenantId = $request->input('tenant_id');
 
         $tenant = $tenantId ? Tenant::find($tenantId) : null;
@@ -222,8 +268,132 @@ class ExecutiveDashboardController extends Controller
             'logoFlydine', 'logoAngkasaPura'
         ))->setPaper('a4', 'portrait');
 
-        $filename = 'laporan-eksekutif-' . ($tenant ? \Illuminate\Support\Str::slug($tenant->name) . '-' : '') . $days . '-hari.pdf';
+        $periodLabel = ($request->filled('start_date') && $request->filled('end_date'))
+            ? $startDate->format('Ymd') . '-sd-' . $endDate->format('Ymd')
+            : $days . '-hari';
+        $filename = 'laporan-eksekutif-' . ($tenant ? \Illuminate\Support\Str::slug($tenant->name) . '-' : '') . $periodLabel . '.pdf';
 
         return $pdf->download($filename);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        abort_unless(auth()->user()->role === 'admin_ops', 403);
+
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $startDate = Carbon::parse($request->input('start_date'))->startOfDay();
+            $endDate = Carbon::parse($request->input('end_date'))->endOfDay();
+            if ($startDate->gt($endDate)) {
+                $temp = $startDate;
+                $startDate = $endDate->copy()->startOfDay();
+                $endDate = $temp->copy()->endOfDay();
+            }
+            $days = max(1, (int) round($startDate->copy()->startOfDay()->diffInDays($endDate->copy()->startOfDay())) + 1);
+        } else {
+            $days = (int) $request->input('days', 30);
+            $startDate = Carbon::now()->subDays($days)->startOfDay();
+            $endDate = Carbon::now()->endOfDay();
+        }
+        $tenantId = $request->input('tenant_id');
+
+        $tenant = $tenantId ? Tenant::find($tenantId) : null;
+
+        // Base Query
+        $orderQuery = Order::whereBetween('ordered_at', [$startDate, $endDate]);
+        if ($tenantId) {
+            $orderQuery->where('tenant_id', $tenantId);
+        }
+
+        // 1. Total Pendapatan & Volume
+        $totalRevenue = (clone $orderQuery)->where('is_paid', true)->sum('total_amount');
+        $totalOrders = (clone $orderQuery)->count();
+
+        // 2. Volume per hari
+        $volumePerDay = (clone $orderQuery)
+            ->select(DB::raw('DATE(ordered_at) as date'), DB::raw('count(*) as total'))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        // 3. Distribusi Status
+        $statusDistribution = (clone $orderQuery)
+            ->select('status', DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->get();
+
+        // 4. Kinerja SLA
+        $slaQuery = Order::join('tenants', 'orders.tenant_id', '=', 'tenants.id')
+            ->whereBetween('ordered_at', [$startDate, $endDate])
+            ->whereNotNull('ready_at');
+        if ($tenantId) {
+            $slaQuery->where('orders.tenant_id', $tenantId);
+        }
+        $slaPerformance = $slaQuery->select(
+                'tenants.name',
+                DB::raw('count(orders.id) as total_completed'),
+                DB::raw('AVG(TIMESTAMPDIFF(MINUTE, ordered_at, ready_at)) as avg_minutes')
+            )
+            ->groupBy('tenants.id', 'tenants.name')
+            ->orderBy('avg_minutes')
+            ->get();
+
+        // 5. Performa Tenant
+        $tenantPerformance = (clone $orderQuery)
+            ->join('tenants', 'orders.tenant_id', '=', 'tenants.id')
+            ->select('tenants.name', DB::raw('count(orders.id) as total_orders'), DB::raw('sum(orders.total_amount) as total_omset'))
+            ->groupBy('tenants.id', 'tenants.name')
+            ->orderByDesc('total_orders')
+            ->get();
+
+        // 6. Produk Terlaris
+        $orderItemQuery = OrderItem::whereHas('order', function($q) use ($startDate, $endDate, $tenantId) {
+            $q->whereBetween('ordered_at', [$startDate, $endDate]);
+            if ($tenantId) {
+                $q->where('tenant_id', $tenantId);
+            }
+        });
+        $topProducts = $orderItemQuery
+            ->select('product_name_snapshot', DB::raw('SUM(quantity) as total_qty'), DB::raw('SUM(subtotal) as total_sales'))
+            ->groupBy('product_name_snapshot')
+            ->orderByDesc('total_qty')
+            ->take(15)
+            ->get();
+
+        // 7. Komplain
+        $complaintQuery = Complaint::whereBetween('created_at', [$startDate, $endDate]);
+        if ($tenantId) {
+            $complaintQuery->whereHas('order', function($q) use ($tenantId) {
+                $q->where('tenant_id', $tenantId);
+            });
+        }
+        $openComplaints = (clone $complaintQuery)->whereIn('status', ['open', 'in_progress'])->count();
+        $resolvedComplaints = (clone $complaintQuery)->whereIn('status', ['resolved', 'closed'])->count();
+
+        // 8. CRM Segmentasi
+        $customerSegmentation = DB::table('customers')
+            ->selectRaw("
+                SUM(CASE WHEN total_orders = 1 THEN 1 ELSE 0 END) as new_customers,
+                SUM(CASE WHEN total_orders BETWEEN 2 AND 5 THEN 1 ELSE 0 END) as regular_customers,
+                SUM(CASE WHEN total_orders > 5 THEN 1 ELSE 0 END) as frequent_customers,
+                COUNT(id) as total_customers
+            ")->first();
+
+        $periodLabel = ($request->filled('start_date') && $request->filled('end_date'))
+            ? $startDate->format('Ymd') . '-sd-' . $endDate->format('Ymd')
+            : $days . '-hari';
+        $filename = 'laporan-eksekutif-' . ($tenant ? \Illuminate\Support\Str::slug($tenant->name) . '-' : '') . $periodLabel . '.xls';
+
+        $content = view('admin.exports.executive-dashboard-excel', compact(
+            'days', 'startDate', 'endDate', 'tenant', 'totalRevenue', 'totalOrders', 'volumePerDay',
+            'statusDistribution', 'slaPerformance', 'tenantPerformance', 'topProducts',
+            'openComplaints', 'resolvedComplaints', 'customerSegmentation'
+        ))->render();
+
+        return response($content, 200, [
+            'Content-Type' => 'application/vnd.ms-excel; charset=utf-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
+        ]);
     }
 }

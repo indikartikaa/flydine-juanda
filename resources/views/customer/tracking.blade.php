@@ -19,57 +19,85 @@
         </header>
 
         <!-- Main Scrollable Content -->
-        <main class="flex-grow px-4 sm:px-6 py-8 pb-32" x-data="{ loaded: false, showComplaintModal: false }" x-init="setTimeout(() => loaded = true, 100)">
+        <main class="flex-grow px-4 sm:px-6 py-8 pb-32" x-data="{ showComplaintModal: false }">
             
             @if(session('success'))
-            <div class="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-2xl text-sm font-bold flex items-center justify-center">
+            <div class="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-2xl text-sm font-bold flex items-center justify-center animate-fade-in">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 <span>{{ session('success') }}</span>
             </div>
             @endif
 
             @if(session('warning'))
-            <div class="mb-4 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-2xl text-sm font-bold flex items-center justify-center text-center">
+            <div class="mb-4 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-2xl text-sm font-bold flex items-center justify-center text-center animate-fade-in">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 shrink-0 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                 <span>{{ session('warning') }}</span>
             </div>
             @endif
 
             @if(session('error'))
-            <div class="mb-4 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-2xl text-sm font-bold flex items-center justify-center">
+            <div class="mb-4 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-2xl text-sm font-bold flex items-center justify-center animate-fade-in">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 shrink-0 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 <span>{{ session('error') }}</span>
             </div>
             @endif
 
             <!-- Header Status (Modern Card with Pulse) -->
-            <div class="text-center mb-8 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 relative overflow-hidden transition-all duration-700 transform" :class="loaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'">
+            <div class="text-center mb-8 bg-white p-6 sm:p-8 rounded-[2rem] shadow-sm border border-slate-100 relative overflow-hidden transition-all duration-300">
                 <!-- Top Accent Line -->
                 <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#005ea2] to-[#8dc63f]"></div>
                 
-                <span class="inline-block bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4">ID Pesanan: {{ $order->order_code }}</span>
+                <span class="inline-block bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4">ID Pesanan: {{ $order->order_code }}</span>
                 
                 @if(!$order->is_paid && in_array($order->payment_method, ['qris', 'transfer']) && $order->status === 'menunggu')
-                    <h2 class="text-3xl font-black text-slate-800 tracking-tight mb-3 flex items-center justify-center gap-2">
-                        <span class="relative flex h-4 w-4">
+                    <h2 class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight mb-2 flex items-center justify-center gap-2">
+                        <span class="relative flex h-3.5 w-3.5">
                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                          <span class="relative inline-flex rounded-full h-4 w-4 bg-amber-500"></span>
+                          <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-amber-500"></span>
                         </span>
                         <span class="bg-clip-text text-transparent bg-gradient-to-r from-amber-600 to-[#f59e0b]">Menunggu Pembayaran</span>
                     </h2>
-                    <p class="text-sm text-slate-500 font-medium leading-relaxed px-2 mb-6">
+                    <p class="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed px-2 mb-6">
                         Silakan selesaikan pembayaran agar pesanan segera diproses oleh <span class="font-extrabold text-[#005ea2]">{{ $order->tenant->name }}</span>.
                     </p>
 
                     @if($order->payment_method == 'qris')
-                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 inline-block w-full max-w-xs mx-auto mb-6">
-                            <p class="font-bold text-slate-700 text-sm mb-4">Scan QRIS dengan e-wallet/m-banking Anda:</p>
-                            <!-- Dummy QR Code -->
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ $order->order_code }}" alt="QRIS Dummy" class="mx-auto rounded-lg shadow-sm w-48 h-48 mix-blend-multiply">
-                            <p class="text-[10px] text-slate-400 mt-4">*Ini adalah QR simulasi untuk pengujian (MVP)</p>
+                        <!-- Authentic Indonesian QRIS Standard Card -->
+                        <div class="bg-white p-5 rounded-2xl border-2 border-slate-200 inline-block w-full max-w-xs mx-auto mb-6 shadow-md text-center">
+                            <!-- Official QRIS Header -->
+                            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                                <div class="flex items-center space-x-1.5">
+                                    <span class="text-lg font-black tracking-tighter text-rose-600">QRIS</span>
+                                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Indonesian Standard</span>
+                                </div>
+                                <span class="text-[10px] font-extrabold px-2 py-0.5 bg-rose-50 text-rose-600 rounded border border-rose-200">GPN</span>
+                            </div>
+
+                            <p class="text-xs font-bold text-slate-700 leading-tight mb-1">{{ strtoupper($order->tenant->name) }}</p>
+                            <p class="text-[10px] text-slate-400 font-mono mb-4">NMID: ID1024398109283 - Juanda Airport</p>
+
+                            <!-- QR Code Container: Local High-Res Canvas + Fallback Image -->
+                            <div class="relative mx-auto w-52 h-52 flex items-center justify-center bg-white p-2 rounded-xl border border-slate-200 shadow-inner">
+                                <canvas id="qris-canvas" data-qr-code="{{ $order->order_code }}" data-qr-size="200" class="rounded-lg w-full h-full block"></canvas>
+                                <img id="qris-fallback-img" 
+                                     src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ $order->order_code }}" 
+                                     alt="QRIS {{ $order->order_code }}" 
+                                     class="hidden rounded-lg w-48 h-48 mix-blend-multiply mx-auto">
+                            </div>
+
+                            <!-- Total Amount Badge -->
+                            <div class="mt-4 pt-3 border-t border-dashed border-slate-200">
+                                <p class="text-[11px] text-slate-400 font-semibold mb-0.5">Total Tagihan:</p>
+                                <p class="text-xl font-black text-[#005ea2]">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</p>
+                            </div>
+
+                            <p class="text-[10px] text-slate-400 mt-3 flex items-center justify-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                                <span>Bisa di-scan via GoPay, OVO, Dana, BCA, dll</span>
+                            </p>
                         </div>
                     @else
-                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 inline-block w-full max-w-xs mx-auto mb-6 text-left">
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 inline-block w-full max-w-xs mx-auto mb-6 text-left shadow-sm">
                             <p class="font-bold text-slate-700 text-sm mb-2">Transfer ke Rekening Berikut:</p>
                             <p class="text-xs text-slate-500 mb-1">Bank BCA - FlyDine Juanda</p>
                             <div class="flex items-center justify-between bg-white px-4 py-3 rounded-xl border border-slate-200 mb-4 shadow-sm">
@@ -83,15 +111,16 @@
                     <form action="{{ route('customer.simulate_payment') }}" method="POST" class="mb-3">
                         @csrf
                         <input type="hidden" name="order_code" value="{{ $order->order_code }}">
-                        <button type="submit" class="w-full bg-[#005ea2] hover:bg-blue-700 text-white font-extrabold py-3.5 rounded-xl text-sm uppercase tracking-widest transition-all shadow-md shadow-blue-500/30">
-                            Simulasi: Saya Sudah Bayar
+                        <button type="submit" class="w-full bg-[#005ea2] hover:bg-blue-700 text-white font-extrabold py-3.5 rounded-xl text-sm uppercase tracking-widest transition-all shadow-md shadow-blue-500/30 flex items-center justify-center gap-2 active:scale-[0.99]">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>
+                            <span>Simulasi: Saya Sudah Bayar</span>
                         </button>
                     </form>
 
                     <!-- Tombol Batalkan Pesanan oleh Pelanggan -->
                     <form action="{{ route('customer.tracking.cancel', $order->order_code) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini?');">
                         @csrf
-                        <button type="submit" class="w-full bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 font-extrabold py-3.5 rounded-xl text-sm uppercase tracking-widest transition-all shadow-sm">
+                        <button type="submit" class="w-full bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 font-extrabold py-3.5 rounded-xl text-sm uppercase tracking-widest transition-all shadow-sm active:scale-[0.99]">
                             Batalkan Pesanan
                         </button>
                     </form>
@@ -163,7 +192,7 @@
             <!-- Progress Tracker / Refund Info -->
             @if(in_array($order->status, ['ditolak', 'dibatalkan']))
                 @if($order->is_paid)
-                <div class="bg-rose-50 p-6 rounded-[1.5rem] border border-rose-200 mb-6 text-center transition-all duration-700 delay-100 transform" :class="loaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'">
+                <div class="bg-rose-50 p-6 rounded-[1.5rem] border border-rose-200 mb-6 text-center transition-all duration-300">
                     <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                     </div>
@@ -175,7 +204,7 @@
                     </a>
                 </div>
                 @else
-                <div class="bg-rose-50 p-6 rounded-[1.5rem] border border-rose-200 mb-6 text-center transition-all duration-700 delay-100 transform" :class="loaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'">
+                <div class="bg-rose-50 p-6 rounded-[1.5rem] border border-rose-200 mb-6 text-center transition-all duration-300">
                     <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                     </div>
@@ -184,7 +213,7 @@
                 </div>
                 @endif
             @elseif($order->is_paid || $order->payment_method == 'cash')
-            <div class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-100 mb-6 transition-all duration-700 delay-100 transform" :class="loaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'">
+            <div class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-100 mb-6 transition-all duration-300">
                 <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-6">Status Pesanan</p>
                 
                 <div class="relative pl-3">
@@ -279,7 +308,7 @@
             @endif
 
             <!-- Info Card Detail Pengambilan -->
-            <div class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-100 space-y-5 mb-8 transition-all duration-700 delay-200 transform" :class="loaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'">
+            <div class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-100 space-y-5 mb-8 transition-all duration-300">
                 <div class="flex items-start space-x-4">
                     <div class="bg-blue-50 p-3.5 rounded-2xl text-[#005ea2] shrink-0 border border-blue-100/50 shadow-inner">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -310,7 +339,7 @@
             </div>
 
             <!-- Rincian Pesanan & Billing Card -->
-            <div class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-100 mb-8 transition-all duration-700 delay-300 transform" :class="loaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'">
+            <div class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-100 mb-8 transition-all duration-300">
                 <div class="flex items-center justify-between mb-4">
                     <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Rincian Pesanan</p>
                     <a href="{{ route('customer.receipt', $order->order_code) }}" class="text-xs font-bold text-[#005ea2] hover:underline flex items-center space-x-1">
@@ -381,9 +410,33 @@
 
     </div>
 
-    <!-- Auto Refresh Polling Script -->
+    <!-- Auto Refresh Polling Script & QR Renderer Fallback -->
     <script nonce="{{ $cspNonce }}">
-        document.addEventListener('alpine:init', () => {
+        document.addEventListener('DOMContentLoaded', () => {
+            // Render QR Code immediately
+            if (typeof window.initQRCodes === 'function') {
+                window.initQRCodes();
+            }
+
+            // Fallback for QR code: if canvas is blank or fails, show image
+            const qrisCanvas = document.getElementById('qris-canvas');
+            const qrisImg = document.getElementById('qris-fallback-img');
+            if (qrisCanvas && qrisImg) {
+                setTimeout(() => {
+                    try {
+                        const ctx = qrisCanvas.getContext('2d');
+                        const pixel = ctx.getImageData(10, 10, 1, 1).data;
+                        if (pixel[3] === 0) {
+                            qrisCanvas.classList.add('hidden');
+                            qrisImg.classList.remove('hidden');
+                        }
+                    } catch (e) {
+                        qrisCanvas.classList.add('hidden');
+                        qrisImg.classList.remove('hidden');
+                    }
+                }, 400);
+            }
+
             const currentStatus = '{{ $order->status }}';
             const orderCode = '{{ $order->order_code }}';
             

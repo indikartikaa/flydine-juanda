@@ -296,7 +296,7 @@
     <table class="meta-bar">
         <tr>
             <td width="30%">
-                <strong>Periode:</strong> {{ $startDate->format('d M Y') }} - {{ $endDate->format('d M Y') }} ({{ $days }} Hari)
+                <strong>Periode:</strong> {{ $startDate->format('d M Y') }} - {{ $endDate->format('d M Y') }} ({{ (int)$days }} Hari)
             </td>
             <td width="28%">
                 <strong>Filter Tenant:</strong> 

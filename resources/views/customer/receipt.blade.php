@@ -201,7 +201,10 @@
             <!-- Barcode & QR Code Footer -->
             <div class="py-6 text-center">
                 <div class="inline-block bg-white p-2.5 rounded-2xl border border-slate-200 shadow-sm mb-3">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data={{ $order->order_code }}" alt="QR Code Pesanan" class="w-24 h-24 mx-auto">
+                    <canvas data-qr-code="{{ $order->order_code }}" data-qr-size="110" class="w-24 h-24 mx-auto block"></canvas>
+                    <noscript>
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data={{ $order->order_code }}" alt="QR Code Pesanan" class="w-24 h-24 mx-auto">
+                    </noscript>
                 </div>
                 <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">KODE TRANSAKSI RESMI</p>
                 <p class="font-mono-num text-xs font-bold text-slate-700 mt-0.5">{{ $order->order_code }}</p>

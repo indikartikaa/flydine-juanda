@@ -35,11 +35,11 @@
                     </div>
                     
                     <a href="{{ route('customer.cart') }}" class="flex items-center space-x-2 text-sm font-bold text-slate-600 hover:text-[#005ea2] transition-colors group">
-                        <div class="relative">
-                            @if(session('cart') && count(session('cart')) > 0)
-                                <span class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ count(session('cart')) }}</span>
-                            @endif
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                        <div class="relative" id="cart-icon-container">
+                            <span id="cart-badge" class="{{ (session('cart') && count(session('cart')) > 0) ? 'flex' : 'hidden' }} absolute -top-1.5 -right-1.5 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full items-center justify-center transition-all duration-300">
+                                {{ session('cart') ? count(session('cart')) : 0 }}
+                            </span>
+                            <svg id="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                         </div>
                         <span data-id="PESANAN" data-en="CART">PESANAN</span>
                     </a>
@@ -78,7 +78,12 @@
                     </div>
                     
                     <a href="{{ route('customer.cart') }}" class="flex items-center justify-center space-x-2 text-sm font-bold text-slate-700 bg-slate-50 py-3 rounded-xl hover:bg-slate-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                        <div class="relative">
+                            <span id="mobile-cart-badge" class="{{ (session('cart') && count(session('cart')) > 0) ? 'flex' : 'hidden' }} absolute -top-1.5 -right-1.5 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full items-center justify-center transition-all duration-300">
+                                {{ session('cart') ? count(session('cart')) : 0 }}
+                            </span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                        </div>
                         <span data-id="PESANAN SAYA" data-en="MY CART">PESANAN SAYA</span>
                     </a>
                     
@@ -198,8 +203,8 @@
 
                     <div class="flex items-center justify-between mt-auto">
                         <div class="font-black text-xl text-slate-800 tracking-tight">Rp {{ number_format($product->price, 0, ',', '.') }}</div>
-                        <button onclick="addToCart({{ $product->id }}, {{ $tenant->id }})" class="bg-[#f8fafc] hover:bg-[#005ea2] text-[#005ea2] hover:text-white border border-slate-200 hover:border-transparent rounded-full h-10 w-10 flex items-center justify-center transition-all shadow-sm group/btn">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover/btn:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" /></svg>
+                        <button type="button" onclick="addToCart({{ $product->id }}, {{ $tenant->id }}, this)" aria-label="Tambah {{ $product->name }}" class="add-to-cart-btn bg-[#f8fafc] hover:bg-[#005ea2] text-[#005ea2] hover:text-white border border-slate-200 hover:border-transparent rounded-full h-10 w-10 flex items-center justify-center transition-all duration-300 shadow-sm active:scale-75 group/btn cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover/btn:scale-110 transition-transform pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" /></svg>
                         </button>
                     </div>
                 </div>
@@ -269,8 +274,36 @@
         </div>
     </footer>
 
+    <!-- Toast Notification (Pesanan Ditambahkan) -->
+    <div id="cart-toast" class="fixed bottom-6 right-6 z-50 transform translate-y-28 opacity-0 transition-all duration-500 ease-out pointer-events-none max-w-sm w-full px-4 sm:px-0">
+        <div class="bg-slate-900/95 backdrop-blur-md text-white p-4 rounded-2xl shadow-2xl border border-slate-700/60 flex items-center justify-between pointer-events-auto">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-white">Menu Berhasil Ditambahkan!</p>
+                    <p id="toast-message" class="text-[11px] text-slate-300 truncate max-w-[180px]">Item masuk ke pesanan</p>
+                </div>
+            </div>
+            <a href="{{ route('customer.cart') }}" class="ml-3 bg-gradient-to-r from-[#005ea2] to-blue-600 hover:from-blue-700 hover:to-[#005ea2] text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-md transition-all flex items-center space-x-1 shrink-0 group">
+                <span>Pesanan</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" /></svg>
+            </a>
+        </div>
+    </div>
+
     <script nonce="{{ $cspNonce }}">
-        function addToCart(productId, tenantId, forceReplace = 0) {
+        let toastTimeout;
+
+        function addToCart(productId, tenantId, btnElement = null, forceReplace = 0) {
+            let originalContent = '';
+            if (btnElement) {
+                originalContent = btnElement.innerHTML;
+                btnElement.disabled = true;
+                btnElement.classList.add('scale-75');
+            }
+
             fetch('{{ route('customer.cart.add') }}', {
                 method: 'POST',
                 headers: {
@@ -285,19 +318,103 @@
             })
             .then(response => response.json())
             .then(data => {
+                if (btnElement) {
+                    btnElement.disabled = false;
+                    btnElement.classList.remove('scale-75');
+                }
+
                 if (data.error === 'conflict') {
                     if (confirm(data.message)) {
-                        addToCart(productId, tenantId, 1);
+                        addToCart(productId, tenantId, btnElement, 1);
                     }
                 } else if (data.success) {
-                    // Show a toast or simple alert
-                    alert(data.message);
+                    // 1. Button Success Animation (Morph to green checkmark)
+                    if (btnElement) {
+                        btnElement.classList.remove('bg-[#f8fafc]', 'text-[#005ea2]', 'border-slate-200');
+                        btnElement.classList.add('bg-emerald-500', 'text-white', 'border-emerald-500', 'scale-110');
+                        btnElement.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>`;
+
+                        setTimeout(() => {
+                            btnElement.classList.remove('bg-emerald-500', 'text-white', 'border-emerald-500', 'scale-110');
+                            btnElement.classList.add('bg-[#f8fafc]', 'text-[#005ea2]', 'border-slate-200');
+                            btnElement.innerHTML = originalContent;
+                        }, 1200);
+                    }
+
+                    // 2. Update Cart Badge Count in Header
+                    updateCartBadge(data.cart_count);
+
+                    // 3. Header Cart Icon Bounce Animation
+                    animateCartIcon();
+
+                    // 4. Show Floating Toast Notification
+                    showCartToast(data.message || 'Menu ditambahkan ke pesanan');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Terjadi kesalahan pada sistem.');
+                if (btnElement) {
+                    btnElement.disabled = false;
+                    btnElement.classList.remove('scale-75');
+                    btnElement.innerHTML = originalContent;
+                }
+                alert('Terjadi kesalahan pada sistem. Silakan coba lagi.');
             });
+        }
+
+        function updateCartBadge(count) {
+            const desktopBadge = document.getElementById('cart-badge');
+            const mobileBadge = document.getElementById('mobile-cart-badge');
+
+            [desktopBadge, mobileBadge].forEach(badge => {
+                if (badge) {
+                    badge.textContent = count;
+                    if (count > 0) {
+                        badge.classList.remove('hidden');
+                        badge.classList.add('flex');
+                    } else {
+                        badge.classList.add('hidden');
+                        badge.classList.remove('flex');
+                    }
+                }
+            });
+        }
+
+        function animateCartIcon() {
+            const iconSvg = document.getElementById('cart-icon-svg');
+            const badge = document.getElementById('cart-badge');
+
+            if (iconSvg) {
+                iconSvg.classList.add('scale-125', 'text-[#005ea2]');
+                setTimeout(() => {
+                    iconSvg.classList.remove('scale-125', 'text-[#005ea2]');
+                }, 350);
+            }
+            if (badge) {
+                badge.classList.add('scale-150');
+                setTimeout(() => {
+                    badge.classList.remove('scale-150');
+                }, 350);
+            }
+        }
+
+        function showCartToast(message) {
+            const toast = document.getElementById('cart-toast');
+            const toastMessage = document.getElementById('toast-message');
+            if (!toast) return;
+
+            if (toastMessage && message) {
+                toastMessage.textContent = message;
+            }
+
+            clearTimeout(toastTimeout);
+            toast.classList.remove('translate-y-28', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-28', 'opacity-0');
+            }, 3000);
         }
     </script>
 </body>

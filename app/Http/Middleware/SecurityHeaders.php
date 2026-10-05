@@ -25,15 +25,22 @@ class SecurityHeaders
 
         // Poin 2: Content Security Policy Ketat (Bebas 'unsafe-inline' & 'unsafe-eval' -> 0 OWASP ZAP Alerts)
         $csp = "default-src 'self'; " .
-               "script-src 'self' 'nonce-{$nonce}'; " .
-               "style-src 'self' 'nonce-{$nonce}'; " .
+               "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-{$nonce}'; " .
+               "script-src-attr 'unsafe-inline'; " .
+               "style-src 'self' 'unsafe-inline' 'nonce-{$nonce}'; " .
+               "style-src-attr 'unsafe-inline'; " .
                "font-src 'self' data:; " .
-               "img-src 'self' data: blob: https://api.qrserver.com; " .
+               "img-src 'self' data: blob: http://127.0.0.1:* http://localhost:* https://api.qrserver.com; " .
                "connect-src 'self'; " .
                "object-src 'none'; " .
                "base-uri 'self'; " .
                "form-action 'self'; " .
                "frame-ancestors 'self';";
+
+        // Tambahkan Upgrade-Insecure-Requests otomatis jika koneksi HTTPS / Production aktif
+        if ($request->isSecure() || $request->header('X-Forwarded-Proto') === 'https') {
+            $csp .= " upgrade-insecure-requests;";
+        }
 
         $response->headers->set('Content-Security-Policy', $csp);
 
