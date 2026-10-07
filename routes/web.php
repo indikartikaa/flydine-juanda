@@ -59,6 +59,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/executive-dashboard', [\App\Http\Controllers\ExecutiveDashboardController::class, 'index'])->name('admin.executive-dashboard');
     Route::get('/executive-dashboard/export', [\App\Http\Controllers\ExecutiveDashboardController::class, 'export'])->name('admin.executive-dashboard.export');
     Route::get('/executive-dashboard/export-excel', [\App\Http\Controllers\ExecutiveDashboardController::class, 'exportExcel'])->name('admin.executive-dashboard.export-excel');
+    Route::get('/executive-dashboard/export-simulation-pdf', [\App\Http\Controllers\ExecutiveDashboardController::class, 'exportSimulationPdf'])->name('admin.executive-dashboard.export-simulation-pdf');
 
     Route::get('/tenants-management', [\App\Http\Controllers\AdminController::class, 'tenantsManagement'])->name('admin.tenants.index');
     Route::post('/tenants-management', [\App\Http\Controllers\AdminController::class, 'storeTenant'])->name('admin.tenants.store');

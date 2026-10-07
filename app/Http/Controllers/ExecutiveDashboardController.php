@@ -125,6 +125,37 @@ class ExecutiveDashboardController extends Controller
 
         $tenants = Tenant::where('is_active', true)->get();
 
+        // 9. Real Weekly & Monthly Metrics for Target Planning & Predictive Simulator
+        $weekAgo = Carbon::now()->subDays(7)->startOfDay();
+        $weeklyOrderQuery = Order::where('ordered_at', '>=', $weekAgo);
+        if ($tenantId) {
+            $weeklyOrderQuery->where('tenant_id', $tenantId);
+        }
+        $weeklyTotalRevenue = (float) (clone $weeklyOrderQuery)->where('is_paid', true)->sum('total_amount');
+        $weeklyOrdersCount = (int) (clone $weeklyOrderQuery)->count();
+        $weeklyAov = $weeklyOrdersCount > 0 ? round($weeklyTotalRevenue / $weeklyOrdersCount) : ($avgOrderValue > 0 ? round($avgOrderValue) : 30000);
+        $weeklyVisitors = (int) (clone $weeklyOrderQuery)->distinct('customer_id')->count('customer_id');
+        if ($weeklyVisitors === 0) {
+            $weeklyVisitors = max(1, (int) round($weeklyOrdersCount * 1.5));
+        }
+        $weeklySlaQuery = (clone $weeklyOrderQuery)->whereNotNull('ready_at');
+        $weeklyAvgSla = round((clone $weeklySlaQuery)->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, ordered_at, ready_at)) as avg_m')->value('avg_m') ?? ($avgSlaMinutes > 0 ? $avgSlaMinutes : 11.5), 1);
+
+        $monthAgo = Carbon::now()->subDays(30)->startOfDay();
+        $monthlyOrderQuery = Order::where('ordered_at', '>=', $monthAgo);
+        if ($tenantId) {
+            $monthlyOrderQuery->where('tenant_id', $tenantId);
+        }
+        $monthlyTotalRevenue = (float) (clone $monthlyOrderQuery)->where('is_paid', true)->sum('total_amount');
+        $monthlyOrdersCount = (int) (clone $monthlyOrderQuery)->count();
+        $monthlyAov = $monthlyOrdersCount > 0 ? round($monthlyTotalRevenue / $monthlyOrdersCount) : ($avgOrderValue > 0 ? round($avgOrderValue) : 30000);
+        $monthlyVisitors = (int) (clone $monthlyOrderQuery)->distinct('customer_id')->count('customer_id');
+        if ($monthlyVisitors === 0) {
+            $monthlyVisitors = max(1, (int) round($monthlyOrdersCount * 1.5));
+        }
+        $monthlySlaQuery = (clone $monthlyOrderQuery)->whereNotNull('ready_at');
+        $monthlyAvgSla = round((clone $monthlySlaQuery)->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, ordered_at, ready_at)) as avg_m')->value('avg_m') ?? ($avgSlaMinutes > 0 ? $avgSlaMinutes : 11.5), 1);
+
         return view('admin.executive-dashboard', compact(
             'days',
             'startDate',
@@ -146,7 +177,17 @@ class ExecutiveDashboardController extends Controller
             'avgOrderValue',
             'slaComplianceRate',
             'avgSlaMinutes',
-            'totalOrdersCount'
+            'totalOrdersCount',
+            'weeklyTotalRevenue',
+            'weeklyOrdersCount',
+            'weeklyAov',
+            'weeklyVisitors',
+            'weeklyAvgSla',
+            'monthlyTotalRevenue',
+            'monthlyOrdersCount',
+            'monthlyAov',
+            'monthlyVisitors',
+            'monthlyAvgSla'
         ));
     }
 
@@ -395,5 +436,100 @@ class ExecutiveDashboardController extends Controller
             'Pragma' => 'no-cache',
             'Expires' => '0',
         ]);
+    }
+
+    public function exportSimulationPdf(Request $request)
+    {
+        abort_unless(auth()->user()->role === 'admin_ops', 403);
+
+        $horizon = $request->input('horizon', 'weekly');
+        $tenantId = $request->input('tenant_id');
+        $tenant = $tenantId ? Tenant::find($tenantId) : null;
+
+        // Baseline Metrics
+        $weekAgo = Carbon::now()->subDays(7)->startOfDay();
+        $weeklyOrderQuery = Order::where('ordered_at', '>=', $weekAgo);
+        if ($tenantId) {
+            $weeklyOrderQuery->where('tenant_id', $tenantId);
+        }
+        $weeklyTotalRevenue = (float) (clone $weeklyOrderQuery)->where('is_paid', true)->sum('total_amount');
+        $weeklyOrdersCount = (int) (clone $weeklyOrderQuery)->count();
+        $weeklyAov = $weeklyOrdersCount > 0 ? round($weeklyTotalRevenue / $weeklyOrdersCount) : 35000;
+        $weeklyVisitors = (int) (clone $weeklyOrderQuery)->distinct('customer_id')->count('customer_id');
+        if ($weeklyVisitors === 0) {
+            $weeklyVisitors = max(1, (int) round($weeklyOrdersCount * 1.5));
+        }
+        $weeklySlaQuery = (clone $weeklyOrderQuery)->whereNotNull('ready_at');
+        $weeklyAvgSla = round((clone $weeklySlaQuery)->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, ordered_at, ready_at)) as avg_m')->value('avg_m') ?? 11.5, 1);
+
+        $monthAgo = Carbon::now()->subDays(30)->startOfDay();
+        $monthlyOrderQuery = Order::where('ordered_at', '>=', $monthAgo);
+        if ($tenantId) {
+            $monthlyOrderQuery->where('tenant_id', $tenantId);
+        }
+        $monthlyTotalRevenue = (float) (clone $monthlyOrderQuery)->where('is_paid', true)->sum('total_amount');
+        $monthlyOrdersCount = (int) (clone $monthlyOrderQuery)->count();
+        $monthlyAov = $monthlyOrdersCount > 0 ? round($monthlyTotalRevenue / $monthlyOrdersCount) : 35000;
+        $monthlyVisitors = (int) (clone $monthlyOrderQuery)->distinct('customer_id')->count('customer_id');
+        if ($monthlyVisitors === 0) {
+            $monthlyVisitors = max(1, (int) round($monthlyOrdersCount * 1.5));
+        }
+        $monthlySlaQuery = (clone $monthlyOrderQuery)->whereNotNull('ready_at');
+        $monthlyAvgSla = round((clone $monthlySlaQuery)->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, ordered_at, ready_at)) as avg_m')->value('avg_m') ?? 11.5, 1);
+
+        // Parameters for this simulation
+        $baseRevenue = (float) $request->input('revenue', ($horizon === 'weekly' ? ($weeklyTotalRevenue > 0 ? $weeklyTotalRevenue : 15000000) : ($monthlyTotalRevenue > 0 ? $monthlyTotalRevenue : 60000000)));
+        $baseVisitors = (int) $request->input('visitors', ($horizon === 'weekly' ? ($weeklyVisitors > 0 ? $weeklyVisitors : 450) : ($monthlyVisitors > 0 ? $monthlyVisitors : 1800)));
+        $baseSla = (float) $request->input('sla', ($horizon === 'weekly' ? ($weeklyAvgSla > 0 ? $weeklyAvgSla : 12.0) : ($monthlyAvgSla > 0 ? $monthlyAvgSla : 12.0)));
+        $goodGrowthPct = (int) $request->input('good_growth', 20);
+        $badDropPct = (int) $request->input('bad_drop', 20);
+
+        // Calculations
+        $estBuyers = max(1, (int) round($baseVisitors * 0.5));
+        $aov = max(1, (int) round($baseRevenue / $estBuyers));
+
+        // Skenario Baik
+        $goodRevenue = round($baseRevenue * (1 + ($goodGrowthPct / 100)));
+        $goodRevenueDelta = $goodRevenue - $baseRevenue;
+        $goodVisitors = round($baseVisitors * (1 + ($goodGrowthPct * 0.75 / 100)));
+        $goodVisitorsDelta = $goodVisitors - $baseVisitors;
+        $goodOrders = round($goodVisitors * 0.55);
+        $goodSla = max(6.0, min(9.5, round($baseSla - 2.5, 1)));
+        $goodCancelRate = 0.8;
+        $goodSavedRevenue = round($goodRevenue * 0.08);
+
+        // Skenario Buruk
+        $badRevenue = round($baseRevenue * (1 - ($badDropPct / 100)));
+        $badRevenueDelta = $baseRevenue - $badRevenue;
+        $badVisitors = round($baseVisitors * (1 - ($badDropPct * 0.6 / 100)));
+        $badVisitorsDelta = $baseVisitors - $badVisitors;
+        $badOrders = round($badVisitors * 0.40);
+        $badSla = min(22.0, max(16.0, round($baseSla + 4.5, 1)));
+        $badCancelRate = 14.5;
+        $badCompliance = max(30, round(85 - max(0, $badSla - 15) * 12, 1));
+        $badLostRevenue = round($baseRevenue * ($badCancelRate / 100));
+        $badComplaints = max(3, round($baseVisitors * 0.02));
+
+        // Logos
+        $hasGd = extension_loaded('gd');
+        $logoFlydine = ($hasGd && file_exists(public_path('images/logo-flydine.png'))) 
+            ? 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('images/logo-flydine.png'))) 
+            : null;
+        $logoAngkasaPura = ($hasGd && file_exists(public_path('images/angkasa-pura.png'))) 
+            ? 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('images/angkasa-pura.png'))) 
+            : null;
+
+        $pdf = Pdf::loadView('admin.exports.simulation-guide-pdf', compact(
+            'horizon', 'tenant', 'baseRevenue', 'baseVisitors', 'baseSla', 'estBuyers', 'aov',
+            'goodGrowthPct', 'badDropPct',
+            'goodRevenue', 'goodRevenueDelta', 'goodVisitors', 'goodVisitorsDelta', 'goodOrders', 'goodSla', 'goodCancelRate', 'goodSavedRevenue',
+            'badRevenue', 'badRevenueDelta', 'badVisitors', 'badVisitorsDelta', 'badOrders', 'badSla', 'badCancelRate', 'badCompliance', 'badLostRevenue', 'badComplaints',
+            'weeklyTotalRevenue', 'weeklyOrdersCount', 'weeklyAvgSla', 'monthlyTotalRevenue', 'monthlyOrdersCount', 'monthlyAvgSla',
+            'logoFlydine', 'logoAngkasaPura'
+        ))->setPaper('a4', 'portrait');
+
+        $filename = 'panduan-dan-simulasi-target-juanda-' . Carbon::now()->format('Ymd-His') . '.pdf';
+
+        return $pdf->download($filename);
     }
 }
