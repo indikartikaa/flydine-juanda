@@ -169,96 +169,132 @@
     </div>
     @endif
 
-    <!-- 3. Key Operational KPI Cards (High Contrast, Bold, Clear) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <!-- 3. Key Operational KPI Cards (6 Matriks Utama Termasuk Okupansi & Jam Puncak) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         
-        <!-- Card 1: Total Volume -->
+        <!-- Card 1: Total Volume Pesanan Harian -->
         @php
             $sumVolume = $volumePerDay->sum('total');
             $dailyAvg = $days > 0 ? round($sumVolume / $days, 1) : 0;
         @endphp
-        <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200 hover:border-blue-400 transition-all duration-200">
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Volume Pesanan</span>
-                <span class="p-2 rounded-xl bg-blue-100 text-[#005ea2]">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+        <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-slate-200 hover:border-blue-400 transition-all duration-200">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider">Volume Pesanan</span>
+                <span class="p-1.5 rounded-lg bg-blue-100 text-[#005ea2]">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                 </span>
             </div>
-            <div class="flex items-baseline gap-2">
-                <span class="text-3xl font-black text-slate-900">{{ number_format($sumVolume) }}</span>
-                <span class="text-sm font-bold text-slate-600">Pesanan Masuk</span>
+            <div class="flex items-baseline gap-1.5">
+                <span class="text-2xl font-black text-slate-900">{{ number_format($sumVolume) }}</span>
+                <span class="text-xs font-bold text-slate-500">Order</span>
             </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
                 <span class="text-slate-500 font-semibold">Rata-rata:</span>
-                <span class="font-extrabold text-[#005ea2] bg-blue-50 px-2.5 py-1 rounded-md">{{ $dailyAvg }} order/hari</span>
+                <span class="font-black text-[#005ea2] bg-blue-50 px-2 py-0.5 rounded">{{ $dailyAvg }}/hari</span>
             </div>
         </div>
 
-        <!-- Card 2: Cancel Rate -->
+        <!-- Card 2: Volume Transaksi Puncak (Peak Hours) -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-slate-200 hover:border-amber-400 transition-all duration-200">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider">Transaksi Puncak</span>
+                <span class="p-1.5 rounded-lg bg-amber-100 text-amber-700">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                </span>
+            </div>
+            <div class="flex items-baseline gap-1.5">
+                <span class="text-2xl font-black text-amber-600">{{ number_format($peakHourVolume) }}</span>
+                <span class="text-xs font-bold text-slate-500">Order/Jam</span>
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                <span class="text-slate-500 font-semibold">Jam Puncak:</span>
+                <span class="font-black text-amber-800 bg-amber-50 px-2 py-0.5 rounded" title="Volume puncak jam sibuk penerbangan">{{ $peakHourRange }}</span>
+            </div>
+        </div>
+
+        <!-- Card 3: Rasio Okupansi Tenant -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-slate-200 hover:border-indigo-400 transition-all duration-200">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider">Okupansi Tenant</span>
+                <span class="p-1.5 rounded-lg bg-indigo-100 text-indigo-700">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                </span>
+            </div>
+            <div class="flex items-baseline gap-1.5">
+                <span class="text-2xl font-black text-indigo-700">{{ $tenantOccupancyRate }}%</span>
+                <span class="text-xs font-bold text-slate-500">Aktif</span>
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                <span class="text-slate-500 font-semibold">Gerai Buka:</span>
+                <span class="font-black text-indigo-800 bg-indigo-50 px-2 py-0.5 rounded">{{ $activeTenantCount }}/{{ $totalTenantCount }} Mitra</span>
+            </div>
+        </div>
+
+        <!-- Card 4: Waktu Saji SLA -->
+        @php
+            $avgMinutes = $slaPerformance->avg('avg_minutes') ?? 0;
+            $isOverSla = $avgMinutes > 15;
+        @endphp
+        <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-slate-200 hover:border-emerald-400 transition-all duration-200">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider">Rata-rata SLA</span>
+                <span class="p-1.5 rounded-lg {{ $isOverSla ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600' }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </span>
+            </div>
+            <div class="flex items-baseline gap-1.5">
+                <span class="text-2xl font-black {{ $isOverSla ? 'text-rose-600' : 'text-emerald-700' }}">{{ round($avgMinutes, 1) }}</span>
+                <span class="text-xs font-bold text-slate-500">Menit</span>
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                <span class="text-slate-500 font-semibold">SOP Maks:</span>
+                <span class="font-black px-2 py-0.5 rounded {{ $isOverSla ? 'text-rose-700 bg-rose-100' : 'text-emerald-700 bg-emerald-100' }}">
+                    {{ $isOverSla ? '⚠️ > 15m' : '✅ ≤ 15m' }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Card 5: Tingkat Pembatalan (Cancel Rate) -->
         @php
             $totalOrders = $statusDistribution->sum('total');
             $canceled = $statusDistribution->where('status', 'dibatalkan')->first()->total ?? 0;
             $cancelRate = $totalOrders > 0 ? round(($canceled / $totalOrders) * 100, 1) : 0;
             $isHighCancel = $cancelRate > 10;
         @endphp
-        <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200 hover:border-rose-400 transition-all duration-200">
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Tingkat Pembatalan</span>
-                <span class="p-2 rounded-xl {{ $isHighCancel ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600' }}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-slate-200 hover:border-rose-400 transition-all duration-200">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider">Cancel Rate</span>
+                <span class="p-1.5 rounded-lg {{ $isHighCancel ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600' }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </span>
             </div>
-            <div class="flex items-baseline gap-2">
-                <span class="text-3xl font-black {{ $isHighCancel ? 'text-rose-600' : 'text-slate-900' }}">{{ $cancelRate }}%</span>
-                <span class="text-sm font-bold text-slate-600">Cancel Rate</span>
+            <div class="flex items-baseline gap-1.5">
+                <span class="text-2xl font-black {{ $isHighCancel ? 'text-rose-600' : 'text-slate-900' }}">{{ $cancelRate }}%</span>
+                <span class="text-xs font-bold text-slate-500">Batal</span>
             </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span class="text-slate-500 font-semibold">{{ $canceled }} dari {{ $totalOrders }} order</span>
-                <span class="font-extrabold px-2.5 py-1 rounded-md {{ $isHighCancel ? 'text-rose-700 bg-rose-100' : 'text-emerald-700 bg-emerald-100' }}">
-                    {{ $isHighCancel ? '⚠️ Perlu Perhatian' : '✅ Terkendali' }}
-                </span>
-            </div>
-        </div>
-
-        <!-- Card 3: Waktu Saji SLA -->
-        @php
-            $avgMinutes = $slaPerformance->avg('avg_minutes') ?? 0;
-            $isOverSla = $avgMinutes > 15;
-        @endphp
-        <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200 hover:border-emerald-400 transition-all duration-200">
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Waktu Saji Rata-rata</span>
-                <span class="p-2 rounded-xl {{ $isOverSla ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600' }}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </span>
-            </div>
-            <div class="flex items-baseline gap-2">
-                <span class="text-3xl font-black {{ $isOverSla ? 'text-rose-600' : 'text-emerald-700' }}">{{ round($avgMinutes, 1) }}</span>
-                <span class="text-sm font-bold text-slate-600">Menit (SLA)</span>
-            </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span class="text-slate-500 font-semibold">Target Standar: ≤ 15m</span>
-                <span class="font-extrabold px-2.5 py-1 rounded-md {{ $isOverSla ? 'text-rose-700 bg-rose-100' : 'text-emerald-700 bg-emerald-100' }}">
-                    {{ $isOverSla ? '⚠️ Melewati SLA' : '✅ Sangat Cepat' }}
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                <span class="text-slate-500 font-semibold">{{ $canceled }} order</span>
+                <span class="font-black px-2 py-0.5 rounded {{ $isHighCancel ? 'text-rose-700 bg-rose-100' : 'text-emerald-700 bg-emerald-100' }}">
+                    {{ $isHighCancel ? '⚠️ Waspada' : '✅ Terkendali' }}
                 </span>
             </div>
         </div>
 
-        <!-- Card 4: Open Complaints -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200 hover:border-amber-400 transition-all duration-200">
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Komplain Terbuka</span>
-                <span class="p-2 rounded-xl {{ $openComplaints > 0 ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-500' }}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        <!-- Card 6: Komplain Terbuka -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-slate-200 hover:border-amber-400 transition-all duration-200">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider">Komplain Kasus</span>
+                <span class="p-1.5 rounded-lg {{ $openComplaints > 0 ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-500' }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 </span>
             </div>
-            <div class="flex items-baseline gap-2">
-                <span class="text-3xl font-black {{ $openComplaints > 0 ? 'text-amber-600' : 'text-slate-900' }}">{{ $openComplaints }}</span>
-                <span class="text-sm font-bold text-slate-600">Kasus Aktif</span>
+            <div class="flex items-baseline gap-1.5">
+                <span class="text-2xl font-black {{ $openComplaints > 0 ? 'text-amber-600' : 'text-slate-900' }}">{{ $openComplaints }}</span>
+                <span class="text-xs font-bold text-slate-500">Kasus Aktif</span>
             </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
                 <span class="text-slate-500 font-semibold">Terselesaikan:</span>
-                <span class="font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md">{{ $resolvedComplaints }} selesai</span>
+                <span class="font-black text-slate-800 bg-slate-100 px-2 py-0.5 rounded">{{ $resolvedComplaints }} closed</span>
             </div>
         </div>
 
@@ -333,20 +369,299 @@
 
     </div>
 
-    <!-- 6. Top 10 Best Selling Products -->
-    <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200">
-        <div class="flex items-center justify-between mb-4">
-            <div>
-                <h2 class="text-base font-black text-slate-900 uppercase tracking-wide">10 Menu Makanan & Minuman Terlaris</h2>
-                <p class="text-xs text-slate-500 font-semibold mt-0.5">Peringkat menu favorit penumpang bandara</p>
+    <!-- 6. Row 3: Top Products & Hourly Peak Transaction Distribution (Peak Hours) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Col 1: Top 10 Best Selling Products -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-base font-black text-slate-900 uppercase tracking-wide">10 Menu Makanan & Minuman Terlaris</h2>
+                    <p class="text-xs text-slate-500 font-semibold mt-0.5">Peringkat menu favorit penumpang bandara</p>
+                </div>
+                <span class="px-3 py-1 rounded-lg bg-purple-100 text-purple-800 text-xs font-black">
+                    ⭐ Menu Terlaris
+                </span>
             </div>
-            <span class="px-3 py-1 rounded-lg bg-purple-100 text-purple-800 text-xs font-black">
-                ⭐ Menu Terlaris
-            </span>
+            <div class="relative h-72">
+                <canvas id="productsChart"></canvas>
+            </div>
         </div>
-        <div class="relative h-72">
-            <canvas id="productsChart"></canvas>
+
+        <!-- Col 2: Hourly Peak Transaction Distribution -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-base font-black text-slate-900 uppercase tracking-wide">Distribusi Transaksi per Jam (Peak Hours)</h2>
+                    <p class="text-xs text-slate-500 font-semibold mt-0.5">Pola volume jam sibuk penerbangan (00:00 - 23:00 WIB)</p>
+                </div>
+                <span class="px-3 py-1 rounded-lg bg-amber-100 text-amber-900 text-xs font-black flex items-center gap-1.5" title="Jam dengan volume pesanan tertinggi">
+                    <span>🔥 Puncak:</span>
+                    <strong class="text-amber-800">{{ $peakHourRange }}</strong>
+                </span>
+            </div>
+            <div class="relative h-72">
+                <canvas id="hourlyChart"></canvas>
+            </div>
         </div>
+
+    </div>
+
+    <!-- 7. Analisis Multidimensi: Pembongkaran Data Agregat ke Detail Kueri & Pencarian Multi-Kriteria -->
+    <div class="bg-white rounded-2xl p-6 sm:p-7 shadow-sm border-2 border-slate-200" 
+         x-data="drillDownInspector()">
+        
+        <!-- Header Section -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 mb-5 border-b border-slate-200">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-blue-50 text-[#005ea2] border border-blue-200 mb-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <span>Analisis Multidimensi & Pembongkaran Data Kueri (Drill-Down)</span>
+                </div>
+                <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                    Pembongkaran Data Agregat ke Rincian Pesanan
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-500 font-semibold mt-0.5">
+                    Telusuri baris data transaksi individual di balik grafik visual secara dinamis, dilengkapi fitur <strong>pencarian multi-kriteria</strong> (ID, penumpang, flight, tenant, & menu).
+                </p>
+            </div>
+
+            <!-- Stats & Quick Actions -->
+            <div class="flex items-center flex-wrap gap-2.5">
+                <div class="px-3.5 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-extrabold text-slate-700 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>Menampilkan: <strong class="text-slate-900" x-text="filteredOrders.length"></strong> dari {{ count($drillDownOrders) }} Transaksi Sampel</span>
+                </div>
+                <button type="button" 
+                        @click="resetFilters()" 
+                        class="px-3.5 py-2 rounded-xl text-xs font-black bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 hover:border-rose-200 transition cursor-pointer flex items-center gap-1.5"
+                        title="Reset semua kriteria pencarian">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span>Reset Kriteria</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter & Search Controls (Multi-Criteria Bar) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3 mb-5 p-4 rounded-xl bg-slate-50 border border-slate-200">
+            
+            <!-- Pencarian Teks Multi-Kriteria (Order ID, Penumpang, Flight, Gate, Tenant, Menu) -->
+            <div class="xl:col-span-2">
+                <label class="block text-[11px] font-black text-slate-700 uppercase tracking-wider mb-1 flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5 text-[#005ea2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <span>Pencarian Bebas Multi-Kriteria</span>
+                </label>
+                <div class="relative">
+                    <input type="text" 
+                           x-model="searchQuery" 
+                           @input="currentPage = 1"
+                           placeholder="Ketik ID order, nama, flight, gate, tenant, atau menu..." 
+                           class="w-full pl-3.5 pr-8 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#005ea2] focus:ring-1 focus:ring-[#005ea2] transition shadow-2xs">
+                    <button x-show="searchQuery" 
+                            @click="searchQuery = ''; currentPage = 1" 
+                            type="button" 
+                            class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600">
+                        &times;
+                    </button>
+                </div>
+            </div>
+
+            <!-- Kriteria 1: Status Pesanan -->
+            <div>
+                <label class="block text-[11px] font-black text-slate-700 uppercase tracking-wider mb-1">
+                    Status Pesanan
+                </label>
+                <select x-model="statusFilter" 
+                        @change="currentPage = 1" 
+                        class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:border-[#005ea2] focus:ring-1 focus:ring-[#005ea2] transition shadow-2xs cursor-pointer">
+                    <option value="semua">Semua Status</option>
+                    <option value="menunggu">Menunggu</option>
+                    <option value="diproses">Diproses</option>
+                    <option value="siap">Siap</option>
+                    <option value="selesai">Selesai</option>
+                    <option value="dibatalkan">Dibatalkan</option>
+                </select>
+            </div>
+
+            <!-- Kriteria 2: Kepatuhan Standar Waktu Saji (SLA) -->
+            <div>
+                <label class="block text-[11px] font-black text-slate-700 uppercase tracking-wider mb-1">
+                    Kepatuhan SLA (15 Menit)
+                </label>
+                <select x-model="slaFilter" 
+                        @change="currentPage = 1" 
+                        class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:border-[#005ea2] focus:ring-1 focus:ring-[#005ea2] transition shadow-2xs cursor-pointer">
+                    <option value="semua">Semua Kepatuhan SLA</option>
+                    <option value="compliant">✅ Sesuai SOP (≤ 15 Menit)</option>
+                    <option value="breached">⚠️ Melewati Batas (> 15 Menit)</option>
+                </select>
+            </div>
+
+            <!-- Kriteria 3: Filter Tenant Terpilih -->
+            <div>
+                <label class="block text-[11px] font-black text-slate-700 uppercase tracking-wider mb-1">
+                    Filter Mitra Gerai
+                </label>
+                <select x-model="tenantFilter" 
+                        @change="currentPage = 1" 
+                        class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:border-[#005ea2] focus:ring-1 focus:ring-[#005ea2] transition shadow-2xs cursor-pointer truncate">
+                    <option value="semua">🏢 Semua Tenant</option>
+                    @foreach($tenants as $t)
+                        <option value="{{ $t->id }}">🏢 {{ $t->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+        </div>
+
+        <!-- Tabel Hasil Pembongkaran Data Kueri (Interactive Drill-Down Table) -->
+        <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-2xs mb-4">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-100 border-b border-slate-200 text-slate-600 font-black uppercase text-[10px] tracking-wider">
+                    <tr>
+                        <th class="py-3 px-3.5">Waktu Order</th>
+                        <th class="py-3 px-3.5">ID Pesanan</th>
+                        <th class="py-3 px-3.5">Mitra Tenant</th>
+                        <th class="py-3 px-3.5">Penumpang & Flight</th>
+                        <th class="py-3 px-3.5">Rincian Menu</th>
+                        <th class="py-3 px-3.5 text-center">Waktu Saji (SLA)</th>
+                        <th class="py-3 px-3.5 text-right">Total Transaksi</th>
+                        <th class="py-3 px-3.5 text-center">Status</th>
+                        <th class="py-3 px-3.5 text-center">Aksi Drill-Down</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-semibold text-slate-700 bg-white">
+                    <template x-for="order in paginatedOrders" :key="order.id">
+                        <tr class="hover:bg-blue-50/40 transition">
+                            <!-- Waktu Order -->
+                            <td class="py-3 px-3.5 whitespace-nowrap">
+                                <span class="font-black text-slate-800 block text-xs" x-text="order.time_formatted"></span>
+                                <span class="text-[10px] text-slate-400 font-semibold" x-text="order.ordered_at_formatted"></span>
+                            </td>
+
+                            <!-- ID Pesanan -->
+                            <td class="py-3 px-3.5 whitespace-nowrap">
+                                <span class="font-mono font-black text-xs px-2 py-0.5 rounded bg-blue-50 text-[#005ea2] border border-blue-200" x-text="order.order_code"></span>
+                            </td>
+
+                            <!-- Mitra Tenant & Lokasi -->
+                            <td class="py-3 px-3.5">
+                                <span class="font-extrabold text-slate-900 block" x-text="order.tenant_name"></span>
+                                <span class="text-[10px] text-slate-500 font-medium" x-text="order.tenant_location + ' (' + order.tenant_zone + ')'"></span>
+                            </td>
+
+                            <!-- Penumpang & Flight / Gate -->
+                            <td class="py-3 px-3.5">
+                                <span class="font-bold text-slate-800 block" x-text="order.customer_name"></span>
+                                <div class="flex items-center gap-1.5 mt-0.5">
+                                    <span class="text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-slate-100 text-slate-700" x-text="'✈️ ' + order.flight_number"></span>
+                                    <span class="text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-slate-100 text-slate-700" x-text="'Gate ' + order.gate"></span>
+                                </div>
+                            </td>
+
+                            <!-- Rincian Menu -->
+                            <td class="py-3 px-3.5 max-w-xs">
+                                <p class="text-[11px] text-slate-600 truncate font-medium" :title="order.items_summary" x-text="order.items_summary"></p>
+                            </td>
+
+                            <!-- Durasi SLA -->
+                            <td class="py-3 px-3.5 text-center whitespace-nowrap">
+                                <template x-if="order.sla_minutes !== null">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black"
+                                          :class="order.sla_compliant ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'">
+                                        <span x-text="order.sla_compliant ? '✅ ' + order.sla_minutes + ' mnt' : '⚠️ ' + order.sla_minutes + ' mnt'"></span>
+                                    </span>
+                                </template>
+                                <template x-if="order.sla_minutes === null">
+                                    <span class="text-[11px] text-slate-400 font-bold">-</span>
+                                </template>
+                            </td>
+
+                            <!-- Total Transaksi -->
+                            <td class="py-3 px-3.5 text-right whitespace-nowrap">
+                                <span class="font-black text-slate-900" x-text="order.total_amount_formatted"></span>
+                            </td>
+
+                            <!-- Status Pesanan -->
+                            <td class="py-3 px-3.5 text-center whitespace-nowrap">
+                                <span class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider"
+                                      :class="{
+                                          'bg-amber-100 text-amber-800': order.status === 'menunggu',
+                                          'bg-blue-100 text-blue-800': order.status === 'diproses',
+                                          'bg-purple-100 text-purple-800': order.status === 'siap',
+                                          'bg-emerald-100 text-emerald-800': order.status === 'selesai',
+                                          'bg-rose-100 text-rose-800': order.status === 'dibatalkan'
+                                      }"
+                                      x-text="order.status">
+                                </span>
+                            </td>
+
+                            <!-- Aksi Drill-Down -->
+                            <td class="py-3 px-3.5 text-center whitespace-nowrap">
+                                <button type="button" 
+                                        @click="drillDownToTenant(order.tenant_id)"
+                                        class="px-2.5 py-1 rounded-lg text-[10px] font-black bg-[#005ea2] hover:bg-blue-800 active:bg-blue-900 text-white transition shadow-2xs flex items-center justify-center gap-1 mx-auto cursor-pointer"
+                                        title="Isolasi dasbor ke tenant ini">
+                                    <span>🎯 Drill-Down</span>
+                                </button>
+                            </td>
+                        </tr>
+                    </template>
+
+                    <!-- Empty State -->
+                    <tr x-show="filteredOrders.length === 0">
+                        <td colspan="9" class="py-8 px-4 text-center">
+                            <div class="max-w-xs mx-auto text-slate-400">
+                                <span class="text-3xl block mb-2">🔍</span>
+                                <p class="text-xs font-bold text-slate-700">Tidak ada transaksi yang cocok dengan kriteria pencarian.</p>
+                                <p class="text-[11px] text-slate-500 mt-0.5">Coba ubah kata kunci atau hapus filter status.</p>
+                                <button type="button" @click="resetFilters()" class="mt-3 px-3 py-1.5 rounded-lg text-xs font-black bg-blue-50 text-[#005ea2] hover:bg-blue-100 transition cursor-pointer">
+                                    Reset Semua Filter
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination & Page Size Toolbar -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-bold text-slate-600">
+            <div class="flex items-center gap-2">
+                <span>Tampilkan:</span>
+                <select x-model.number="pageSize" @change="currentPage = 1" class="px-2 py-1 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none">
+                    <option :value="10">10 data</option>
+                    <option :value="25">25 data</option>
+                    <option :value="50">50 data</option>
+                </select>
+                <span class="text-slate-400">•</span>
+                <span>Halaman <strong class="text-slate-900" x-text="currentPage"></strong> dari <strong class="text-slate-900" x-text="totalPages"></strong></span>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+                <button type="button" 
+                        @click="if(currentPage > 1) currentPage--" 
+                        :disabled="currentPage <= 1"
+                        :class="currentPage <= 1 ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400' : 'bg-white hover:bg-slate-100 text-slate-800 cursor-pointer'"
+                        class="px-3 py-1.5 rounded-lg border border-slate-200 transition font-black">
+                    &larr; Sebelumnya
+                </button>
+                <button type="button" 
+                        @click="if(currentPage < totalPages) currentPage++" 
+                        :disabled="currentPage >= totalPages"
+                        :class="currentPage >= totalPages ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400' : 'bg-white hover:bg-slate-100 text-slate-800 cursor-pointer'"
+                        class="px-3 py-1.5 rounded-lg border border-slate-200 transition font-black">
+                    Berikutnya &rarr;
+                </button>
+            </div>
+        </div>
+
     </div>
 
     <!-- 7. Executive Target Planning & Predictive Simulator: Skenario Baik vs Buruk -->
@@ -1279,6 +1594,73 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // 6. Hourly Peak Transaction Distribution (Bar Chart - Peak Hours)
+    const hourlyCanvas = document.getElementById('hourlyChart');
+    if (hourlyCanvas) {
+        const hourlyCtx = hourlyCanvas.getContext('2d');
+        const hourlyData = @json($hourlyDistribution);
+        
+        // Buat label jam 00:00 s/d 23:00 WIB
+        const fullHours = Array.from({length: 24}, (_, i) => i);
+        const hourlyMap = {};
+        hourlyData.forEach(item => {
+            hourlyMap[item.hour] = item.total;
+        });
+
+        const hourLabels = fullHours.map(h => String(h).padStart(2, '0') + ':00');
+        const hourValues = fullHours.map(h => hourlyMap[h] || 0);
+        const maxVal = Math.max(...hourValues, 1);
+        const hourColors = hourValues.map(v => (v === maxVal && v > 0) ? '#ea580c' : (v > 0 ? '#3b82f6' : '#e2e8f0'));
+
+        new Chart(hourlyCtx, {
+            type: 'bar',
+            data: {
+                labels: hourLabels,
+                datasets: [{
+                    label: 'Volume Transaksi (Order)',
+                    data: hourValues,
+                    backgroundColor: hourColors,
+                    borderRadius: 4,
+                    maxBarThickness: 18
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#0f172a',
+                        padding: 10,
+                        cornerRadius: 10,
+                        titleFont: { weight: 'bold' },
+                        callbacks: {
+                            afterLabel: function(context) {
+                                return context.raw === maxVal && maxVal > 0 ? '🔥 Jam Puncak Tersibuk (Peak Hour Bandara)' : '';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#e2e8f0', borderDash: [4, 4] },
+                        ticks: { precision: 0, font: { weight: 'bold' } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            font: { size: 10, weight: 'bold' },
+                            maxRotation: 0,
+                            autoSkip: true,
+                            maxTicksLimit: 12
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     // Calendar Range Picker UX Helpers
     const startInput = document.getElementById('startDateInput');
     const endInput = document.getElementById('endDateInput');
@@ -1330,6 +1712,82 @@ window.setQuickDateRange = function(type) {
         endEl.value = formatYMD(today);
         document.getElementById('filterForm').submit();
     }
+};
+
+// Alpine.js Component: Drill-Down Query Inspector & Multi-Criteria Search
+window.drillDownInspector = function() {
+    return {
+        searchQuery: '',
+        statusFilter: 'semua',
+        slaFilter: 'semua',
+        tenantFilter: '{{ $tenantId ? (string)$tenantId : "semua" }}',
+        pageSize: 10,
+        currentPage: 1,
+        allOrders: @json($drillDownOrders),
+
+        get filteredOrders() {
+            let list = this.allOrders;
+
+            // 1. Filter Tenant
+            if (this.tenantFilter !== 'semua' && this.tenantFilter !== '') {
+                const tId = Number(this.tenantFilter);
+                list = list.filter(o => o.tenant_id === tId);
+            }
+
+            // 2. Filter Status
+            if (this.statusFilter !== 'semua') {
+                list = list.filter(o => o.status === this.statusFilter);
+            }
+
+            // 3. Filter SLA Kepatuhan
+            if (this.slaFilter === 'compliant') {
+                list = list.filter(o => o.sla_compliant === true);
+            } else if (this.slaFilter === 'breached') {
+                list = list.filter(o => o.sla_compliant === false);
+            }
+
+            // 4. Pencarian Bebas Multi-Kriteria (Case-insensitive across multiple fields)
+            if (this.searchQuery && this.searchQuery.trim() !== '') {
+                const q = this.searchQuery.toLowerCase().trim();
+                list = list.filter(o => {
+                    return (o.order_code && o.order_code.toLowerCase().includes(q)) ||
+                           (o.customer_name && o.customer_name.toLowerCase().includes(q)) ||
+                           (o.tenant_name && o.tenant_name.toLowerCase().includes(q)) ||
+                           (o.flight_number && o.flight_number.toLowerCase().includes(q)) ||
+                           (o.gate && o.gate.toLowerCase().includes(q)) ||
+                           (o.tenant_location && o.tenant_location.toLowerCase().includes(q)) ||
+                           (o.items_summary && o.items_summary.toLowerCase().includes(q));
+                });
+            }
+
+            return list;
+        },
+
+        get totalPages() {
+            return Math.ceil(this.filteredOrders.length / this.pageSize) || 1;
+        },
+
+        get paginatedOrders() {
+            const start = (this.currentPage - 1) * this.pageSize;
+            return this.filteredOrders.slice(start, start + this.pageSize);
+        },
+
+        resetFilters() {
+            this.searchQuery = '';
+            this.statusFilter = 'semua';
+            this.slaFilter = 'semua';
+            this.tenantFilter = 'semua';
+            this.currentPage = 1;
+        },
+
+        drillDownToTenant(tenantId) {
+            const selectEl = document.querySelector('select[name="tenant_id"]');
+            if (selectEl) {
+                selectEl.value = tenantId;
+                document.getElementById('filterForm').submit();
+            }
+        }
+    };
 };
 
 // Alpine.js Component: Executive Target Planning & Predictive Simulator

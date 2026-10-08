@@ -124,8 +124,60 @@ class ExecutiveDashboardController extends Controller
         $avgSlaMinutes = round((clone $slaReadyQuery)->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, ordered_at, ready_at)) as avg_m')->value('avg_m') ?? 0, 1);
 
         $tenants = Tenant::where('is_active', true)->get();
+        $totalTenantCount = Tenant::count();
+        $activeTenantCount = Tenant::where('is_active', true)->count();
+        $tenantOccupancyRate = $totalTenantCount > 0 ? round(($activeTenantCount / $totalTenantCount) * 100, 1) : 100;
 
-        // 9. Real Weekly & Monthly Metrics for Target Planning & Predictive Simulator
+        // 9. Volume Transaksi Puncak (Peak Hours Analytics)
+        $hourlyDistribution = (clone $orderQuery)
+            ->select(DB::raw('HOUR(ordered_at) as hour'), DB::raw('count(*) as total'))
+            ->groupBy('hour')
+            ->orderBy('hour')
+            ->get();
+
+        $peakHourRecord = $hourlyDistribution->sortByDesc('total')->first();
+        $peakHourRange = $peakHourRecord 
+            ? sprintf('%02d:00 - %02d:00 WIB', $peakHourRecord->hour, ($peakHourRecord->hour + 1) % 24)
+            : '11:00 - 12:00 WIB';
+        $peakHourVolume = $peakHourRecord ? $peakHourRecord->total : 0;
+        $peakHourPercentage = $totalOrdersCount > 0 ? round(($peakHourVolume / $totalOrdersCount) * 100, 1) : 0;
+
+        // 10. Dataset Pembongkaran Data Agregat ke Detail Kueri (Drill-Down Inspection Table & Multi-Criteria Search)
+        $drillDownOrders = (clone $orderQuery)
+            ->with(['tenant:id,name,floor_location,zone', 'orderItems:id,order_id,product_name_snapshot,quantity,subtotal', 'deliveryLocation:id,name,terminal'])
+            ->latest('ordered_at')
+            ->take(150)
+            ->get()
+            ->map(function($o) {
+                $slaMinutes = ($o->ready_at && $o->ordered_at) 
+                    ? round(Carbon::parse($o->ordered_at)->diffInMinutes(Carbon::parse($o->ready_at)), 1) 
+                    : null;
+                return [
+                    'id' => $o->id,
+                    'order_code' => $o->order_code,
+                    'tenant_id' => $o->tenant_id,
+                    'tenant_name' => $o->tenant->name ?? 'N/A',
+                    'tenant_location' => $o->tenant->floor_location ?? '-',
+                    'tenant_zone' => $o->tenant->zone ?? '-',
+                    'customer_name' => $o->customer_name ?? 'Penumpang Juanda',
+                    'flight_number' => $o->flight_number ?? '-',
+                    'gate' => $o->gate ?? '-',
+                    'pickup_method' => $o->pickup_method ?? 'ambil_sendiri',
+                    'delivery_target' => $o->deliveryLocation ? $o->deliveryLocation->name : ($o->tenant->floor_location ?? '-'),
+                    'ordered_at_formatted' => Carbon::parse($o->ordered_at)->format('d M Y, H:i') . ' WIB',
+                    'time_formatted' => Carbon::parse($o->ordered_at)->format('H:i') . ' WIB',
+                    'ordered_hour' => (int) Carbon::parse($o->ordered_at)->format('H'),
+                    'status' => $o->status,
+                    'is_paid' => (bool)$o->is_paid,
+                    'total_amount' => (float)$o->total_amount,
+                    'total_amount_formatted' => 'Rp ' . number_format($o->total_amount, 0, ',', '.'),
+                    'sla_minutes' => $slaMinutes,
+                    'sla_compliant' => $slaMinutes !== null ? ($slaMinutes <= 15) : null,
+                    'items_summary' => $o->orderItems->map(fn($item) => $item->quantity . 'x ' . $item->product_name_snapshot)->implode(', ')
+                ];
+            });
+
+        // 11. Real Weekly & Monthly Metrics for Target Planning & Predictive Simulator
         $weekAgo = Carbon::now()->subDays(7)->startOfDay();
         $weeklyOrderQuery = Order::where('ordered_at', '>=', $weekAgo);
         if ($tenantId) {
@@ -165,6 +217,9 @@ class ExecutiveDashboardController extends Controller
             'tenantId',
             'selectedTenant',
             'tenants',
+            'totalTenantCount',
+            'activeTenantCount',
+            'tenantOccupancyRate',
             'volumePerDay',
             'statusDistribution',
             'tenantPerformance',
@@ -178,6 +233,11 @@ class ExecutiveDashboardController extends Controller
             'slaComplianceRate',
             'avgSlaMinutes',
             'totalOrdersCount',
+            'hourlyDistribution',
+            'peakHourRange',
+            'peakHourVolume',
+            'peakHourPercentage',
+            'drillDownOrders',
             'weeklyTotalRevenue',
             'weeklyOrdersCount',
             'weeklyAov',
