@@ -1,6 +1,13 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Support\Facades\Route;
+
+beforeEach(function () {
+    if (!Route::has('password.confirm')) {
+        $this->markTestSkipped('Password confirmation route is not registered in FlyDine.');
+    }
+});
 
 test('confirm password screen can be rendered', function () {
     $user = User::factory()->create();

@@ -61,6 +61,19 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/executive-dashboard/export-excel', [\App\Http\Controllers\ExecutiveDashboardController::class, 'exportExcel'])->name('admin.executive-dashboard.export-excel');
     Route::get('/executive-dashboard/export-simulation-pdf', [\App\Http\Controllers\ExecutiveDashboardController::class, 'exportSimulationPdf'])->name('admin.executive-dashboard.export-simulation-pdf');
 
+    /* Analitik Operasional Subpages */
+    Route::prefix('analytics')->name('admin.analytics.')->group(function () {
+        Route::get('/drilldown', [\App\Http\Controllers\AnalyticsController::class, 'drilldown'])->name('drilldown');
+        Route::get('/drilldown/orders', [\App\Http\Controllers\AnalyticsController::class, 'drilldownOrders'])->name('drilldown.orders');
+        Route::get('/drilldown/charts', [\App\Http\Controllers\AnalyticsController::class, 'drilldownCharts'])->name('drilldown.charts');
+        Route::get('/drilldown/orders/{order}', [\App\Http\Controllers\AnalyticsController::class, 'drilldownOrderDetail'])->name('drilldown.order-detail');
+        Route::get('/whatif', [\App\Http\Controllers\AnalyticsController::class, 'whatif'])->name('whatif');
+        Route::post('/whatif/calculate', [\App\Http\Controllers\AnalyticsController::class, 'calculateWhatIf'])
+            ->middleware('throttle:60,1')
+            ->name('whatif.calculate');
+        Route::get('/customers', [\App\Http\Controllers\AnalyticsController::class, 'customers'])->name('customers');
+    });
+
     Route::get('/tenants-management', [\App\Http\Controllers\AdminController::class, 'tenantsManagement'])->name('admin.tenants.index');
     Route::post('/tenants-management', [\App\Http\Controllers\AdminController::class, 'storeTenant'])->name('admin.tenants.store');
     Route::put('/tenants-management/{tenant}', [\App\Http\Controllers\AdminController::class, 'updateTenant'])->name('admin.tenants.update');

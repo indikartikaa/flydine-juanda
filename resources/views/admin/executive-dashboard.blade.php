@@ -5,11 +5,19 @@
 @section('content')
 <div class="space-y-6 pb-12">
 
-    <!-- 1. Executive Control Panel & Filter Bar -->
+    <!-- 1. Header Section: Title, Breadcrumb, Operational Status & Export Buttons -->
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-        <!-- Top Section: Title, Operational Status & Export Buttons -->
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-5 border-b border-slate-200">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div>
+                <!-- Breadcrumb -->
+                <nav class="flex items-center gap-2 text-xs font-bold text-slate-400 mb-2">
+                    <span>Analitik Operasional</span>
+                    <svg class="w-3.5 h-3.5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                    <span class="text-[#005ea2] font-extrabold">Ringkasan Eksekutif</span>
+                </nav>
+
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-extrabold uppercase tracking-wider bg-blue-50 border border-blue-200 text-[#005ea2] mb-2">
                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span>Monitoring Operasional • Bandara Internasional Juanda</span>
@@ -29,11 +37,11 @@
             </div>
 
             <!-- Export Action Buttons -->
-            <div class="shrink-0">
+            <div class="shrink-0 w-full sm:w-auto">
                 <label class="block text-xs font-extrabold text-slate-600 uppercase tracking-wider mb-1.5">Unduh Laporan Resmi</label>
-                <div class="flex items-center gap-2.5">
+                <div class="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-2.5">
                     <a href="{{ route('admin.executive-dashboard.export', ['start_date' => $startDateFormatted, 'end_date' => $endDateFormatted, 'tenant_id' => $tenantId]) }}" 
-                       class="inline-flex items-center px-4 py-2.5 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white rounded-xl text-sm font-bold shadow-sm hover:shadow transition duration-150 gap-2 cursor-pointer" 
+                       class="inline-flex items-center justify-center px-4 py-2.5 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white rounded-xl text-sm font-bold shadow-sm hover:shadow transition duration-150 gap-2 cursor-pointer" 
                        title="Unduh Dokumen Laporan Eksekutif Format PDF">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -41,7 +49,7 @@
                         <span>Export PDF</span>
                     </a>
                     <a href="{{ route('admin.executive-dashboard.export-excel', ['start_date' => $startDateFormatted, 'end_date' => $endDateFormatted, 'tenant_id' => $tenantId]) }}" 
-                       class="inline-flex items-center px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl text-sm font-bold shadow-sm shadow-emerald-600/20 hover:shadow transition duration-150 gap-2 cursor-pointer" 
+                       class="inline-flex items-center justify-center px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl text-sm font-bold shadow-sm shadow-emerald-600/20 hover:shadow transition duration-150 gap-2 cursor-pointer" 
                        title="Unduh Data Eksekutif Format Spreadsheet Excel (.xls)">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 4h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -51,95 +59,16 @@
                 </div>
             </div>
         </div>
-
-        <!-- Bottom Section: Calendar Date Range Picker & Filter Form -->
-        <div class="mt-5">
-            <form method="GET" action="{{ route('admin.executive-dashboard') }}" id="filterForm" class="flex flex-col xl:flex-row xl:items-end justify-between gap-4">
-                <!-- Dual Calendar Pickers + Apply Button + Tenant Filter -->
-                <div class="flex flex-wrap items-end gap-3 sm:gap-4">
-                    <!-- Dari Tanggal (Start Date) -->
-                    <div>
-                        <label for="startDateInput" class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                            <svg class="w-4 h-4 text-[#005ea2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <span>Dari Tanggal</span>
-                        </label>
-                        <div class="relative">
-                            <input type="date" 
-                                   id="startDateInput" 
-                                   name="start_date" 
-                                   value="{{ $startDateFormatted }}" 
-                                   class="w-44 px-3.5 py-2.5 bg-slate-50 hover:bg-white border-2 border-slate-300 focus:border-[#005ea2] focus:bg-white rounded-xl text-sm font-extrabold text-slate-900 focus:ring-2 focus:ring-blue-100 transition shadow-xs cursor-pointer">
-                        </div>
-                    </div>
-
-                    <!-- Sampai Tanggal (End Date) -->
-                    <div>
-                        <label for="endDateInput" class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                            <svg class="w-4 h-4 text-[#005ea2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <span>Sampai Tanggal</span>
-                        </label>
-                        <div class="relative">
-                            <input type="date" 
-                                   id="endDateInput" 
-                                   name="end_date" 
-                                   value="{{ $endDateFormatted }}" 
-                                   class="w-44 px-3.5 py-2.5 bg-slate-50 hover:bg-white border-2 border-slate-300 focus:border-[#005ea2] focus:bg-white rounded-xl text-sm font-extrabold text-slate-900 focus:ring-2 focus:ring-blue-100 transition shadow-xs cursor-pointer">
-                        </div>
-                    </div>
-
-                    <!-- Tombol Terapkan Rentang -->
-                    <div>
-                        <button type="submit" 
-                                class="px-5 py-2.5 bg-[#005ea2] hover:bg-[#004b82] active:bg-[#003860] text-white rounded-xl text-sm font-extrabold shadow-sm hover:shadow transition duration-150 flex items-center gap-2 cursor-pointer h-[44px]">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                            </svg>
-                            <span>Terapkan Rentang</span>
-                        </button>
-                    </div>
-
-                    <!-- Filter Mitra Tenant Dropdown -->
-                    <div>
-                        <label for="tenantSelect" class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                            <span>🏢 Filter Mitra Tenant</span>
-                        </label>
-                        <div class="relative">
-                            <select id="tenantSelect" 
-                                    name="tenant_id" 
-                                    class="pl-3.5 pr-9 py-2.5 bg-slate-50 hover:bg-white border-2 border-slate-300 focus:border-[#005ea2] focus:bg-white rounded-xl text-sm font-extrabold text-slate-900 focus:ring-2 focus:ring-[#005ea2] transition cursor-pointer shadow-xs min-w-[210px] max-w-[280px] truncate h-[44px]" 
-                                    onchange="document.getElementById('filterForm').submit()">
-                                <option value="">🏢 Semua Tenant (Konsolidasi)</option>
-                                @foreach($tenants as $t)
-                                    <option value="{{ $t->id }}" {{ $tenantId == $t->id ? 'selected' : '' }}>🏢 {{ $t->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Shortcut Chips -->
-                <div class="flex items-center flex-wrap gap-2 text-xs pt-1">
-                    <span class="text-xs font-black text-slate-500 uppercase tracking-wider mr-1">Preset Cepat:</span>
-                    <button type="button" onclick="setQuickDateRange(7)" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-blue-100 hover:text-[#005ea2] text-slate-800 font-extrabold border border-slate-200 transition cursor-pointer">
-                        7 Hari
-                    </button>
-                    <button type="button" onclick="setQuickDateRange(30)" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-blue-100 hover:text-[#005ea2] text-slate-800 font-extrabold border border-slate-200 transition cursor-pointer">
-                        30 Hari
-                    </button>
-                    <button type="button" onclick="setQuickDateRange('month')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-blue-100 hover:text-[#005ea2] text-slate-800 font-extrabold border border-slate-200 transition cursor-pointer">
-                        Bulan Ini
-                    </button>
-                    <button type="button" onclick="setQuickDateRange(90)" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-blue-100 hover:text-[#005ea2] text-slate-800 font-extrabold border border-slate-200 transition cursor-pointer">
-                        90 Hari
-                    </button>
-                </div>
-            </form>
-        </div>
     </div>
+
+    <!-- Filter Bar Component -->
+    <x-analytics.filter-bar 
+        :action="route('admin.executive-dashboard')" 
+        :startDateFormatted="$startDateFormatted" 
+        :endDateFormatted="$endDateFormatted" 
+        :tenantId="$tenantId" 
+        :tenants="$tenants" 
+    />
 
     <!-- 2. Drill-Down Active State Banner -->
     @if($selectedTenant)
@@ -407,881 +336,81 @@
 
     </div>
 
-    <!-- 7. Analisis Multidimensi: Pembongkaran Data Agregat ke Detail Kueri & Pencarian Multi-Kriteria -->
-    <div class="bg-white rounded-2xl p-6 sm:p-7 shadow-sm border-2 border-slate-200" 
-         x-data="drillDownInspector()">
-        
-        <!-- Header Section -->
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 mb-5 border-b border-slate-200">
+    <!-- 7. Kartu Tautan ke Fitur Analitik Lanjutan (Drill-Down, What-If, Segmentasi Pelanggan) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+        <!-- Card 1: Rincian Pesanan (Drill-Down) -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200 hover:border-[#005ea2] transition-all duration-200 flex flex-col justify-between group">
             <div>
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-blue-50 text-[#005ea2] border border-blue-200 mb-1.5">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <span>Analisis Multidimensi & Pembongkaran Data Kueri (Drill-Down)</span>
+                <div class="w-12 h-12 rounded-xl bg-blue-50 text-[#005ea2] flex items-center justify-center font-black text-xl mb-4 group-hover:scale-105 transition-transform shadow-xs">
+                    🔍
                 </div>
-                <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                    Pembongkaran Data Agregat ke Rincian Pesanan
-                </h2>
-                <p class="text-xs sm:text-sm text-slate-500 font-semibold mt-0.5">
-                    Telusuri baris data transaksi individual di balik grafik visual secara dinamis, dilengkapi fitur <strong>pencarian multi-kriteria</strong> (ID, penumpang, flight, tenant, & menu).
+                <h3 class="text-lg font-black text-slate-900 tracking-tight group-hover:text-[#005ea2] transition-colors">
+                    Rincian Pesanan
+                </h3>
+                <p class="text-xs font-semibold text-slate-500 mt-2 leading-relaxed">
+                    Telusuri data individual per transaksi secara mendalam dan inspeksi kepatuhan SLA setiap gerai.
                 </p>
             </div>
-
-            <!-- Stats & Quick Actions -->
-            <div class="flex items-center flex-wrap gap-2.5">
-                <div class="px-3.5 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-extrabold text-slate-700 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <span>Menampilkan: <strong class="text-slate-900" x-text="filteredOrders.length"></strong> dari {{ count($drillDownOrders) }} Transaksi Sampel</span>
-                </div>
-                <button type="button" 
-                        @click="resetFilters()" 
-                        class="px-3.5 py-2 rounded-xl text-xs font-black bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 hover:border-rose-200 transition cursor-pointer flex items-center gap-1.5"
-                        title="Reset semua kriteria pencarian">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            <div class="mt-5 pt-4 border-t border-slate-100">
+                <a href="{{ route('admin.analytics.drilldown', request()->only(['start_date', 'end_date', 'tenant_id'])) }}" 
+                   class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#005ea2] hover:bg-[#004b82] text-white rounded-xl text-xs font-black shadow-xs transition cursor-pointer">
+                    <span>Buka Rincian Pesanan</span>
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
-                    <span>Reset Kriteria</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- Filter & Search Controls (Multi-Criteria Bar) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3 mb-5 p-4 rounded-xl bg-slate-50 border border-slate-200">
-            
-            <!-- Pencarian Teks Multi-Kriteria (Order ID, Penumpang, Flight, Gate, Tenant, Menu) -->
-            <div class="xl:col-span-2">
-                <label class="block text-[11px] font-black text-slate-700 uppercase tracking-wider mb-1 flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5 text-[#005ea2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <span>Pencarian Bebas Multi-Kriteria</span>
-                </label>
-                <div class="relative">
-                    <input type="text" 
-                           x-model="searchQuery" 
-                           @input="currentPage = 1"
-                           placeholder="Ketik ID order, nama, flight, gate, tenant, atau menu..." 
-                           class="w-full pl-3.5 pr-8 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#005ea2] focus:ring-1 focus:ring-[#005ea2] transition shadow-2xs">
-                    <button x-show="searchQuery" 
-                            @click="searchQuery = ''; currentPage = 1" 
-                            type="button" 
-                            class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600">
-                        &times;
-                    </button>
-                </div>
-            </div>
-
-            <!-- Kriteria 1: Status Pesanan -->
-            <div>
-                <label class="block text-[11px] font-black text-slate-700 uppercase tracking-wider mb-1">
-                    Status Pesanan
-                </label>
-                <select x-model="statusFilter" 
-                        @change="currentPage = 1" 
-                        class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:border-[#005ea2] focus:ring-1 focus:ring-[#005ea2] transition shadow-2xs cursor-pointer">
-                    <option value="semua">Semua Status</option>
-                    <option value="menunggu">Menunggu</option>
-                    <option value="diproses">Diproses</option>
-                    <option value="siap">Siap</option>
-                    <option value="selesai">Selesai</option>
-                    <option value="dibatalkan">Dibatalkan</option>
-                </select>
-            </div>
-
-            <!-- Kriteria 2: Kepatuhan Standar Waktu Saji (SLA) -->
-            <div>
-                <label class="block text-[11px] font-black text-slate-700 uppercase tracking-wider mb-1">
-                    Kepatuhan SLA (15 Menit)
-                </label>
-                <select x-model="slaFilter" 
-                        @change="currentPage = 1" 
-                        class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:border-[#005ea2] focus:ring-1 focus:ring-[#005ea2] transition shadow-2xs cursor-pointer">
-                    <option value="semua">Semua Kepatuhan SLA</option>
-                    <option value="compliant">✅ Sesuai SOP (≤ 15 Menit)</option>
-                    <option value="breached">⚠️ Melewati Batas (> 15 Menit)</option>
-                </select>
-            </div>
-
-            <!-- Kriteria 3: Filter Tenant Terpilih -->
-            <div>
-                <label class="block text-[11px] font-black text-slate-700 uppercase tracking-wider mb-1">
-                    Filter Mitra Gerai
-                </label>
-                <select x-model="tenantFilter" 
-                        @change="currentPage = 1" 
-                        class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:border-[#005ea2] focus:ring-1 focus:ring-[#005ea2] transition shadow-2xs cursor-pointer truncate">
-                    <option value="semua">🏢 Semua Tenant</option>
-                    @foreach($tenants as $t)
-                        <option value="{{ $t->id }}">🏢 {{ $t->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-        </div>
-
-        <!-- Tabel Hasil Pembongkaran Data Kueri (Interactive Drill-Down Table) -->
-        <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-2xs mb-4">
-            <table class="w-full text-left text-xs">
-                <thead class="bg-slate-100 border-b border-slate-200 text-slate-600 font-black uppercase text-[10px] tracking-wider">
-                    <tr>
-                        <th class="py-3 px-3.5">Waktu Order</th>
-                        <th class="py-3 px-3.5">ID Pesanan</th>
-                        <th class="py-3 px-3.5">Mitra Tenant</th>
-                        <th class="py-3 px-3.5">Penumpang & Flight</th>
-                        <th class="py-3 px-3.5">Rincian Menu</th>
-                        <th class="py-3 px-3.5 text-center">Waktu Saji (SLA)</th>
-                        <th class="py-3 px-3.5 text-right">Total Transaksi</th>
-                        <th class="py-3 px-3.5 text-center">Status</th>
-                        <th class="py-3 px-3.5 text-center">Aksi Drill-Down</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 font-semibold text-slate-700 bg-white">
-                    <template x-for="order in paginatedOrders" :key="order.id">
-                        <tr class="hover:bg-blue-50/40 transition">
-                            <!-- Waktu Order -->
-                            <td class="py-3 px-3.5 whitespace-nowrap">
-                                <span class="font-black text-slate-800 block text-xs" x-text="order.time_formatted"></span>
-                                <span class="text-[10px] text-slate-400 font-semibold" x-text="order.ordered_at_formatted"></span>
-                            </td>
-
-                            <!-- ID Pesanan -->
-                            <td class="py-3 px-3.5 whitespace-nowrap">
-                                <span class="font-mono font-black text-xs px-2 py-0.5 rounded bg-blue-50 text-[#005ea2] border border-blue-200" x-text="order.order_code"></span>
-                            </td>
-
-                            <!-- Mitra Tenant & Lokasi -->
-                            <td class="py-3 px-3.5">
-                                <span class="font-extrabold text-slate-900 block" x-text="order.tenant_name"></span>
-                                <span class="text-[10px] text-slate-500 font-medium" x-text="order.tenant_location + ' (' + order.tenant_zone + ')'"></span>
-                            </td>
-
-                            <!-- Penumpang & Flight / Gate -->
-                            <td class="py-3 px-3.5">
-                                <span class="font-bold text-slate-800 block" x-text="order.customer_name"></span>
-                                <div class="flex items-center gap-1.5 mt-0.5">
-                                    <span class="text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-slate-100 text-slate-700" x-text="'✈️ ' + order.flight_number"></span>
-                                    <span class="text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-slate-100 text-slate-700" x-text="'Gate ' + order.gate"></span>
-                                </div>
-                            </td>
-
-                            <!-- Rincian Menu -->
-                            <td class="py-3 px-3.5 max-w-xs">
-                                <p class="text-[11px] text-slate-600 truncate font-medium" :title="order.items_summary" x-text="order.items_summary"></p>
-                            </td>
-
-                            <!-- Durasi SLA -->
-                            <td class="py-3 px-3.5 text-center whitespace-nowrap">
-                                <template x-if="order.sla_minutes !== null">
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black"
-                                          :class="order.sla_compliant ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'">
-                                        <span x-text="order.sla_compliant ? '✅ ' + order.sla_minutes + ' mnt' : '⚠️ ' + order.sla_minutes + ' mnt'"></span>
-                                    </span>
-                                </template>
-                                <template x-if="order.sla_minutes === null">
-                                    <span class="text-[11px] text-slate-400 font-bold">-</span>
-                                </template>
-                            </td>
-
-                            <!-- Total Transaksi -->
-                            <td class="py-3 px-3.5 text-right whitespace-nowrap">
-                                <span class="font-black text-slate-900" x-text="order.total_amount_formatted"></span>
-                            </td>
-
-                            <!-- Status Pesanan -->
-                            <td class="py-3 px-3.5 text-center whitespace-nowrap">
-                                <span class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider"
-                                      :class="{
-                                          'bg-amber-100 text-amber-800': order.status === 'menunggu',
-                                          'bg-blue-100 text-blue-800': order.status === 'diproses',
-                                          'bg-purple-100 text-purple-800': order.status === 'siap',
-                                          'bg-emerald-100 text-emerald-800': order.status === 'selesai',
-                                          'bg-rose-100 text-rose-800': order.status === 'dibatalkan'
-                                      }"
-                                      x-text="order.status">
-                                </span>
-                            </td>
-
-                            <!-- Aksi Drill-Down -->
-                            <td class="py-3 px-3.5 text-center whitespace-nowrap">
-                                <button type="button" 
-                                        @click="drillDownToTenant(order.tenant_id)"
-                                        class="px-2.5 py-1 rounded-lg text-[10px] font-black bg-[#005ea2] hover:bg-blue-800 active:bg-blue-900 text-white transition shadow-2xs flex items-center justify-center gap-1 mx-auto cursor-pointer"
-                                        title="Isolasi dasbor ke tenant ini">
-                                    <span>🎯 Drill-Down</span>
-                                </button>
-                            </td>
-                        </tr>
-                    </template>
-
-                    <!-- Empty State -->
-                    <tr x-show="filteredOrders.length === 0">
-                        <td colspan="9" class="py-8 px-4 text-center">
-                            <div class="max-w-xs mx-auto text-slate-400">
-                                <span class="text-3xl block mb-2">🔍</span>
-                                <p class="text-xs font-bold text-slate-700">Tidak ada transaksi yang cocok dengan kriteria pencarian.</p>
-                                <p class="text-[11px] text-slate-500 mt-0.5">Coba ubah kata kunci atau hapus filter status.</p>
-                                <button type="button" @click="resetFilters()" class="mt-3 px-3 py-1.5 rounded-lg text-xs font-black bg-blue-50 text-[#005ea2] hover:bg-blue-100 transition cursor-pointer">
-                                    Reset Semua Filter
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Pagination & Page Size Toolbar -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-bold text-slate-600">
-            <div class="flex items-center gap-2">
-                <span>Tampilkan:</span>
-                <select x-model.number="pageSize" @change="currentPage = 1" class="px-2 py-1 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none">
-                    <option :value="10">10 data</option>
-                    <option :value="25">25 data</option>
-                    <option :value="50">50 data</option>
-                </select>
-                <span class="text-slate-400">•</span>
-                <span>Halaman <strong class="text-slate-900" x-text="currentPage"></strong> dari <strong class="text-slate-900" x-text="totalPages"></strong></span>
-            </div>
-
-            <div class="flex items-center gap-1.5">
-                <button type="button" 
-                        @click="if(currentPage > 1) currentPage--" 
-                        :disabled="currentPage <= 1"
-                        :class="currentPage <= 1 ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400' : 'bg-white hover:bg-slate-100 text-slate-800 cursor-pointer'"
-                        class="px-3 py-1.5 rounded-lg border border-slate-200 transition font-black">
-                    &larr; Sebelumnya
-                </button>
-                <button type="button" 
-                        @click="if(currentPage < totalPages) currentPage++" 
-                        :disabled="currentPage >= totalPages"
-                        :class="currentPage >= totalPages ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400' : 'bg-white hover:bg-slate-100 text-slate-800 cursor-pointer'"
-                        class="px-3 py-1.5 rounded-lg border border-slate-200 transition font-black">
-                    Berikutnya &rarr;
-                </button>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- 7. Executive Target Planning & Predictive Simulator: Skenario Baik vs Buruk -->
-    <div class="bg-white rounded-2xl p-6 sm:p-7 shadow-sm border-2 border-indigo-200" 
-         x-data="targetPlanningSimulator()">
-        
-        <!-- Header: Identitas & Toolbar Kontrol -->
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
-            <div>
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200 mb-1.5">
-                    <span>🎯 Target Planning & Forecasting • Bandara Juanda</span>
-                </div>
-                <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                    Kalkulator Target Omset, Pengunjung & Waktu Saji
-                </h2>
-                <p class="text-xs sm:text-sm text-slate-500 font-semibold mt-0.5 max-w-2xl">
-                    Input data omset & estimasi pengunjung saat ini, sistem otomatis memproyeksikan <strong>skenario baik (target prima)</strong> vs <strong>skenario buruk (risiko waspada)</strong> untuk periode berikutnya.
-                </p>
-            </div>
-
-            <!-- Toolbar Kanan: Panduan Terpadu, Download PDF, dan Tombol Salin -->
-            <div class="flex items-center flex-wrap gap-2">
-                <!-- Tombol 1: Panduan & Rumus Terpadu -->
-                <button type="button" @click="showGuide = !showGuide" 
-                        class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border transition shadow-2xs cursor-pointer"
-                        :class="showGuide ? 'bg-indigo-600 text-white border-indigo-600 shadow-indigo-600/20' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'"
-                        title="Buka panduan lengkap logika bisnis bandara dan rumus matematika">
-                    <span>📘</span>
-                    <span x-text="showGuide ? 'Tutup Panduan' : 'Panduan & Rumus Simulasi'"></span>
-                </button>
-
-                <!-- Tombol 2: Unduh Dokumen PDF Resmi -->
-                <a :href="'{{ route('admin.executive-dashboard.export-simulation-pdf') }}?horizon=' + horizon + '&revenue=' + inputRevenue + '&visitors=' + inputVisitors + '&sla=' + inputSlaMinutes + '&good_growth=' + goodGrowthPct + '&bad_drop=' + badDropPct + '{{ $tenantId ? '&tenant_id=' . $tenantId : '' }}'" 
-                   class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white shadow-2xs shadow-rose-600/20 transition cursor-pointer"
-                   title="Unduh Panduan & Matriks Simulasi Target dalam Format Dokumen PDF Resmi">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <span>Download PDF</span>
-                </a>
-
-                <!-- Tombol 3: Salin Ringkasan ke Clipboard -->
-                <button type="button" @click="copyPlanSummary()" 
-                        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black bg-slate-900 hover:bg-slate-800 active:bg-black text-white shadow-2xs transition cursor-pointer"
-                        title="Salin ringkasan proyeksi ke clipboard untuk laporan WhatsApp / Memo">
-                    <svg x-show="!copied" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-                    <svg x-show="copied" class="w-3.5 h-3.5 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                    <span x-text="copied ? 'Tersalin!' : 'Salin Ringkasan'"></span>
-                </button>
-            </div>
-        </div>
-
-        <!-- CARD TERPADU: PANDUAN LENGKAP & METODOLOGI SIMULASI TARGET (Collapsible) -->
-        <div x-show="showGuide" 
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 -translate-y-2"
-             x-transition:enter-end="opacity-100 translate-y-0"
-             class="mb-6 p-5 sm:p-6 bg-gradient-to-br from-indigo-50/90 via-sky-50/40 to-white rounded-2xl border-2 border-indigo-200 shadow-xs">
-            
-            <!-- Header Card Panduan Terpadu -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 mb-4 border-b border-indigo-200/80">
-                <div class="flex items-center gap-2.5">
-                    <span class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm shadow-xs font-black">
-                        📘
-                    </span>
-                    <div>
-                        <h3 class="text-sm sm:text-base font-black text-indigo-950 uppercase tracking-wide">
-                            Panduan & Metodologi Lengkap Simulasi Target
-                        </h3>
-                        <p class="text-xs text-slate-500 font-semibold">
-                            Standar Operasional F&B Bandara Internasional Juanda & Transparansi Rumus Matematika
-                        </p>
-                    </div>
-                </div>
-                
-                <!-- Quick Download PDF Button inside Guide Card -->
-                <a :href="'{{ route('admin.executive-dashboard.export-simulation-pdf') }}?horizon=' + horizon + '&revenue=' + inputRevenue + '&visitors=' + inputVisitors + '&sla=' + inputSlaMinutes + '&good_growth=' + goodGrowthPct + '&bad_drop=' + badDropPct + '{{ $tenantId ? '&tenant_id=' . $tenantId : '' }}'" 
-                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition cursor-pointer shrink-0 self-start sm:self-auto">
-                    <span>📄 Unduh Format PDF Resmi</span>
                 </a>
             </div>
-
-            <!-- Bagian 1: Logika Bisnis F&B Bandara Juanda (Skenario Baik vs Buruk) -->
-            <div class="mb-4">
-                <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <span>🎯</span>
-                    <span>1. Logika Bisnis & Pengaruh Waktu Saji (SLA) Terhadap Omset Bandara</span>
-                </h4>
-                <p class="text-xs text-slate-600 leading-relaxed mb-3">
-                    Di lingkungan bandara, waktu adalah segalanya karena penumpang terikat oleh <strong>panggilan boarding pesawat (boarding call)</strong>. Model simulasi ini memetakan hubungan langsung antara <strong>Omset</strong>, <strong>Trafik Penumpang</strong>, dan <strong>Kecepatan Dapur (SLA)</strong>:
-                </p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                    <div class="bg-white p-3.5 rounded-xl border border-emerald-200 shadow-2xs">
-                        <strong class="text-emerald-800 flex items-center gap-1.5 mb-1 font-black">
-                            <span>🟢</span> Skenario Baik (Target Prima / Best Case):
-                        </strong>
-                        <p class="text-slate-600 font-semibold leading-relaxed">
-                            Jika waktu saji cepat (<strong>&le; 9.5 menit/pesanan</strong>), penumpang merasa sangat aman untuk memesan makanan sebelum boarding. Tidak ada pesanan batal (&lt; 1%), konversi pembeli meningkat ke <strong>~55%</strong>, dan omset mencapai target optimal.
-                        </p>
-                    </div>
-                    <div class="bg-white p-3.5 rounded-xl border border-rose-200 shadow-2xs">
-                        <strong class="text-rose-800 flex items-center gap-1.5 mb-1 font-black">
-                            <span>🔴</span> Skenario Buruk (Risiko Bottleneck / Worst Case):
-                        </strong>
-                        <p class="text-slate-600 font-semibold leading-relaxed">
-                            Jika waktu saji molor melewati batas SOP (<strong>&gt; 15 menit/pesanan</strong>), penumpang yang mendengar panggilan pesawat akan panik dan membatalkan pesanan di kasir. Memicu omset hangus (lost revenue), rating buruk, dan komplain keterlambatan.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Bagian 2: Transparansi Rumus Matematika Proyeksi -->
-            <div class="pt-3 border-t border-indigo-200/80">
-                <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
-                    <span>📐</span>
-                    <span>2. Transparansi Rumus Matematika Model Proyeksi</span>
-                </h4>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-slate-600 font-semibold text-xs">
-                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
-                        <strong class="text-slate-900 block mb-1">A. Rumus Proyeksi Omset:</strong>
-                        <p class="font-mono bg-slate-50 p-1.5 rounded text-[11px] text-slate-800 mb-1 border border-slate-100">
-                            Omset Baik = Omset Awal × (1 + Pertumbuhan%)<br>
-                            Omset Buruk = Omset Awal × (1 - Penurunan%)
-                        </p>
-                        <p class="text-[11px]">Menghitung potensi batas atas dan bawah omset berdasarkan penyesuaian volume transaksi.</p>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
-                        <strong class="text-slate-900 block mb-1">B. Target Pengunjung & Transaksi:</strong>
-                        <p class="font-mono bg-slate-50 p-1.5 rounded text-[11px] text-slate-800 mb-1 border border-slate-100">
-                            Pengunjung = Pengunjung Awal × (1 &plusmn; Rasio%)<br>
-                            Transaksi = Pengunjung × Konversi (40% - 55%)
-                        </p>
-                        <p class="text-[11px]">Rata-rata ~50% penumpang transit yang singgah melakukan transaksi F&B di terminal.</p>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
-                        <strong class="text-slate-900 block mb-1">C. Standar Waktu Saji (SLA):</strong>
-                        <p class="font-mono bg-slate-50 p-1.5 rounded text-[11px] text-slate-800 mb-1 border border-slate-100">
-                            SLA Baik = Min(9.5, SLA Awal - 2.5 mnt)<br>
-                            SLA Buruk = Max(16.0, SLA Awal + 4.5 mnt)
-                        </p>
-                        <p class="text-[11px]">Batas maksimal SOP Bandara Juanda adalah 15 menit. Waktu saji di atas 15 menit memicu pembatalan fatal.</p>
-                    </div>
-                </div>
-            </div>
-
         </div>
 
-        <!-- Bagian Input Form: Horizon Switcher & 3 Kolom Input Utama -->
-        <div class="bg-slate-50/80 p-5 rounded-2xl border-2 border-slate-200 mb-6">
-            
-            <!-- Baris 1: Horizon Tabs & Tombol Ambil Data Riil -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-200">
-                <div class="flex items-center gap-1.5 p-1 bg-white rounded-xl border border-slate-200 shadow-2xs">
-                    <button type="button" @click="setHorizon('weekly')" 
-                            class="px-3 py-1.5 rounded-lg text-xs font-black transition cursor-pointer flex items-center gap-1.5"
-                            :class="horizon === 'weekly' ? 'bg-[#005ea2] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'">
-                        <span>📅 Mode Mingguan</span>
-                        <span class="text-[10px] font-bold opacity-80">(Minggu Ini &rarr; Minggu Depan)</span>
-                    </button>
-                    <button type="button" @click="setHorizon('monthly')" 
-                            class="px-3 py-1.5 rounded-lg text-xs font-black transition cursor-pointer flex items-center gap-1.5"
-                            :class="horizon === 'monthly' ? 'bg-[#005ea2] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'">
-                        <span>🗓️ Mode Bulanan</span>
-                        <span class="text-[10px] font-bold opacity-80">(Bulan Ini &rarr; Bulan Depan)</span>
-                    </button>
-                </div>
-
-                <!-- Tombol 1-Klik Isi Otomatis dari Data Riil Sistem -->
-                <button type="button" @click="loadRealData()" 
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-2xs transition cursor-pointer self-start sm:self-auto"
-                        title="Klik untuk mengisi input secara instan dari data riil transaksi database saat ini">
-                    <span>⚡ Isi Otomatis dari Data Riil Sistem</span>
-                    <span class="text-[10px] bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded font-extrabold"
-                          x-text="horizon === 'weekly' ? formatRupiah(realWeeklyRevenue) : formatRupiah(realMonthlyRevenue)">
-                    </span>
-                </button>
-            </div>
-
-            <!-- Baris 2: 3 Input Form (Omset, Pengunjung, dan Waktu Saji Saat Ini) -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                
-                <!-- Input 1: Omset Saat Ini -->
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 transition">
-                    <label class="block text-xs font-black text-slate-700 uppercase tracking-wide mb-1 flex items-center justify-between">
-                        <span class="flex items-center gap-1.5">
-                            <span>💰</span>
-                            <span x-text="horizon === 'weekly' ? 'Omset Minggu Ini (Rp)' : 'Omset Bulan Ini (Rp)'"></span>
-                        </span>
-                        <span class="text-[10px] text-slate-400 font-bold">Ketik Bebas</span>
-                    </label>
-                    <div class="relative mt-1">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 font-extrabold text-sm">Rp</span>
-                        <input type="text" 
-                               inputmode="numeric" 
-                               x-model="rawRevenue" 
-                               @input="handleRevenueInput($event.target.value)" 
-                               @blur="formatRevenueField()" 
-                               placeholder="Contoh: 90.000 atau 15.000.000"
-                               class="w-full pl-10 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-black text-base focus:bg-white focus:outline-none transition">
-                    </div>
-                    <div class="mt-1.5 flex items-center justify-between text-[11px] font-semibold text-slate-500">
-                        <span>Nominal Terbaca:</span>
-                        <strong class="text-indigo-700 font-extrabold" x-text="formatRupiah(inputRevenue)"></strong>
-                    </div>
-                    <!-- Tombol Cepat Pilihan Omset -->
-                    <div class="mt-2 pt-2 border-t border-slate-100 flex items-center gap-1.5 flex-wrap">
-                        <span class="text-[10px] font-bold text-slate-400">Pilihan Cepat:</span>
-                        <button type="button" @click="setRevenue(90000)" class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-600 transition cursor-pointer">90 Rb</button>
-                        <button type="button" @click="setRevenue(500000)" class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-600 transition cursor-pointer">500 Rb</button>
-                        <button type="button" @click="setRevenue(5000000)" class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-600 transition cursor-pointer">5 Jt</button>
-                        <button type="button" @click="setRevenue(15000000)" class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-600 transition cursor-pointer">15 Jt</button>
-                        <button type="button" @click="setRevenue(50000000)" class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-600 transition cursor-pointer">50 Jt</button>
-                    </div>
-                </div>
-
-                <!-- Input 2: Jumlah Pengunjung / Pelanggan -->
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 transition">
-                    <label class="block text-xs font-black text-slate-700 uppercase tracking-wide mb-1 flex items-center justify-between">
-                        <span class="flex items-center gap-1.5">
-                            <span>👥</span>
-                            <span x-text="horizon === 'weekly' ? 'Pengunjung Minggu Ini' : 'Pengunjung Bulan Ini'"></span>
-                        </span>
-                        <span class="text-[10px] text-slate-400 font-bold">Estimasi Pax</span>
-                    </label>
-                    <div class="relative mt-1">
-                        <input type="text" 
-                               inputmode="numeric" 
-                               x-model="rawVisitors" 
-                               @input="handleVisitorsInput($event.target.value)" 
-                               @blur="formatVisitorsField()" 
-                               placeholder="Contoh: 450 atau 1.500"
-                               class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-black text-base focus:bg-white focus:outline-none transition">
-                        <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 font-bold text-xs">Orang</span>
-                    </div>
-                    <div class="mt-1.5 flex items-center justify-between text-[11px] font-semibold text-slate-500">
-                        <span>Estimasi Belanja (AOV):</span>
-                        <strong class="text-slate-800 font-extrabold" x-text="formatRupiah(currentAov) + '/order'"></strong>
-                    </div>
-                    <!-- Tombol Cepat Pilihan Pengunjung -->
-                    <div class="mt-2 pt-2 border-t border-slate-100 flex items-center gap-1.5 flex-wrap">
-                        <span class="text-[10px] font-bold text-slate-400">Pilihan:</span>
-                        <button type="button" @click="setVisitors(50)" class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-600 transition cursor-pointer">50 Pax</button>
-                        <button type="button" @click="setVisitors(250)" class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-600 transition cursor-pointer">250 Pax</button>
-                        <button type="button" @click="setVisitors(500)" class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-600 transition cursor-pointer">500 Pax</button>
-                        <button type="button" @click="setVisitors(1500)" class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-600 transition cursor-pointer">1.500 Pax</button>
-                    </div>
-                </div>
-
-                <!-- Input 3: Rata-Rata Waktu Saji Saat Ini -->
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 transition">
-                    <label class="block text-xs font-black text-slate-700 uppercase tracking-wide mb-1 flex items-center justify-between">
-                        <span class="flex items-center gap-1.5">
-                            <span>⏱️</span>
-                            <span>Rata-rata Waktu Saji Saat Ini</span>
-                        </span>
-                        <span class="text-[10px] text-slate-400 font-bold">SLA Dapur</span>
-                    </label>
-                    <div class="relative mt-1">
-                        <input type="number" min="1" max="60" step="0.5" x-model.number="inputSlaMinutes" 
-                               class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-black text-base focus:bg-white focus:outline-none transition">
-                        <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 font-bold text-xs">Menit/Order</span>
-                    </div>
-                    <div class="mt-1.5 flex items-center justify-between text-[11px] font-semibold text-slate-500">
-                        <span>Standar Bandara Juanda:</span>
-                        <span class="font-extrabold px-1.5 py-0.2 rounded text-[10px]"
-                              :class="inputSlaMinutes <= 15 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
-                              x-text="inputSlaMinutes <= 15 ? '≤ 15 Menit (Sesuai SOP)' : '> 15 Menit (Perlu Diperbaiki)'"></span>
-                    </div>
-                    <!-- Tombol Cepat Pilihan SLA -->
-                    <div class="mt-2 pt-2 border-t border-slate-100 flex items-center gap-1.5 flex-wrap">
-                        <span class="text-[10px] font-bold text-slate-400">Pilihan:</span>
-                        <button type="button" @click="inputSlaMinutes = 7.0" class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-600 transition cursor-pointer">7 mnt (Kilat)</button>
-                        <button type="button" @click="inputSlaMinutes = 11.5" class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-600 transition cursor-pointer">11.5 mnt (Normal)</button>
-                        <button type="button" @click="inputSlaMinutes = 18.0" class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-rose-50 hover:bg-rose-100 hover:text-rose-800 text-rose-700 transition cursor-pointer">18 mnt (Lambat)</button>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Penyesuaian Sensitivitas Persentase Target (Sliders Kecil) -->
-            <div class="mt-4 pt-3 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs font-bold text-slate-600">
-                <div class="flex items-center gap-3">
-                    <span>🎯 Sensitivitas Target Skenario:</span>
-                    <div class="flex items-center gap-2">
-                        <span class="text-emerald-700 font-black">Target Baik:</span>
-                        <input type="range" min="10" max="40" step="5" x-model.number="goodGrowthPct" class="w-20 accent-emerald-600">
-                        <span class="text-emerald-800 font-black" x-text="'+' + goodGrowthPct + '%'"></span>
-                    </div>
-                    <span class="text-slate-300">•</span>
-                    <div class="flex items-center gap-2">
-                        <span class="text-rose-700 font-black">Risiko Buruk:</span>
-                        <input type="range" min="10" max="40" step="5" x-model.number="badDropPct" class="w-20 accent-rose-600">
-                        <span class="text-rose-800 font-black" x-text="'-' + badDropPct + '%'"></span>
-                    </div>
-                </div>
-                <div class="text-[11px] text-slate-500 font-semibold">
-                    Target Proyeksi: <strong class="text-slate-800" x-text="horizon === 'weekly' ? 'Minggu Depan' : 'Bulan Depan'"></strong>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- HASIL UTAMA: 2 Skenario Berdampingan (🟢 Skenario Baik vs 🔴 Skenario Buruk) -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            
-            <!-- 🟢 Skenario Baik / Target Prima (Best Case) -->
-            <div class="bg-gradient-to-br from-emerald-50/70 via-white to-slate-50 p-6 rounded-2xl border-2 border-emerald-300 shadow-sm relative overflow-hidden">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-2">
-                        <span class="h-8 w-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black text-sm shadow-2xs">
-                            🟢
-                        </span>
-                        <div>
-                            <span class="text-[11px] font-black uppercase tracking-wider text-emerald-800 block">
-                                Skenario Baik (Target Prima)
-                            </span>
-                            <h3 class="text-base font-black text-slate-900" 
-                                x-text="horizon === 'weekly' ? 'Target Performa Minggu Depan' : 'Target Performa Bulan Depan'"></h3>
-                        </div>
-                    </div>
-                    <span class="px-2.5 py-1 rounded-xl text-xs font-black bg-emerald-100 text-emerald-900 border border-emerald-200"
-                          x-text="'+' + goodGrowthPct + '% Pertumbuhan'">
-                    </span>
-                </div>
-
-                <!-- 1. Omset yang Baik -->
-                <div class="bg-white p-4 rounded-xl border border-emerald-200 mb-3 shadow-2xs">
-                    <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block">💰 Omset yang Baik Itu Berapa?</span>
-                    <div class="flex items-baseline justify-between mt-1 flex-wrap gap-2">
-                        <div class="text-3xl font-black text-emerald-700" x-text="formatRupiah(goodRevenue)"></div>
-                        <span class="text-xs font-black px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800"
-                              x-text="'+' + formatRupiah(goodRevenueDelta) + ' (' + '+' + goodGrowthPct + '%)'"></span>
-                    </div>
-                    <div class="text-[11px] text-slate-500 font-semibold mt-1">
-                        Kenaikan omset berhasil diraih melalui percepatan saji dan konversi pengunjung prima.
-                    </div>
-                </div>
-
-                <!-- 2. Jumlah Pengunjung yang Dibutuhkan -->
-                <div class="grid grid-cols-2 gap-3 mb-3">
-                    <div class="bg-white p-3.5 rounded-xl border border-emerald-100 shadow-2xs">
-                        <span class="text-[11px] font-bold text-slate-500 block">👥 Target Pengunjung:</span>
-                        <div class="text-xl font-black text-slate-900 mt-0.5" x-text="goodVisitors.toLocaleString('id-ID') + ' Orang'"></div>
-                        <span class="text-[11px] text-emerald-700 font-bold" x-text="'+' + goodVisitorsDelta + ' orang pax'"></span>
-                    </div>
-                    <div class="bg-white p-3.5 rounded-xl border border-emerald-100 shadow-2xs">
-                        <span class="text-[11px] font-bold text-slate-500 block">📦 Estimasi Transaksi:</span>
-                        <div class="text-xl font-black text-slate-900 mt-0.5" x-text="goodEstimatedOrders.toLocaleString('id-ID') + ' Order'"></div>
-                        <span class="text-[11px] text-emerald-700 font-bold">Konversi Belanja ~55%</span>
-                    </div>
-                </div>
-
-                <!-- 3. Rata-Rata Waktu Saji yang Harus Dijaga -->
-                <div class="bg-white p-4 rounded-xl border border-emerald-200 mb-3 shadow-2xs">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">⏱️ Waktu Saji Melayani Pesanan:</span>
-                        <span class="text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800">
-                            100% Tepat Waktu Boarding
-                        </span>
-                    </div>
-                    <div class="flex items-baseline gap-2 mt-0.5">
-                        <div class="text-2xl font-black text-emerald-700" x-text="goodSla + ' Menit / Pesanan'"></div>
-                        <span class="text-xs text-slate-500 font-bold" x-text="'(Target percepatan -' + (Number(inputSlaMinutes) - goodSla).toFixed(1) + ' mnt)'"></span>
-                    </div>
-                    <div class="mt-2 text-xs text-slate-700 font-semibold flex items-center gap-1.5">
-                        <span>🎯</span>
-                        <span class="leading-relaxed">
-                            <strong>Alasan Target <span x-text="goodSla + ' Menit'"></span>:</strong> 
-                            Makanan tersaji kilat sebelum boarding &rarr; Pembatalan pesanan ditekan hingga <strong class="text-emerald-700">&lt; 1%</strong> &amp; bebas komplain!
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Rekomendasi Tindakan Skenario Baik (Dinamis Berdasarkan Angka Input) -->
-                <div class="bg-emerald-100/60 p-3.5 rounded-xl border border-emerald-200 text-xs text-emerald-950 font-semibold">
-                    <div class="flex items-center justify-between mb-1.5 pb-1 border-b border-emerald-200/60">
-                        <span class="font-black text-emerald-900 flex items-center gap-1.5">
-                            <span>✅</span>
-                            <span>Langkah Kerja untuk Meraih Target Baik:</span>
-                        </span>
-                        <span class="text-[10px] font-extrabold bg-emerald-200 text-emerald-900 px-1.5 py-0.5 rounded">Rekomendasi Operasional</span>
-                    </div>
-                    <ul class="space-y-1.5 text-[11px]">
-                        <template x-for="(step, idx) in goodActionSteps" :key="idx">
-                            <li class="flex items-start gap-1.5">
-                                <span class="text-emerald-700 font-bold shrink-0">•</span>
-                                <span class="leading-relaxed" x-html="step"></span>
-                            </li>
-                        </template>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- 🔴 Skenario Buruk / Perlu Waspada (Worst Case) -->
-            <div class="bg-gradient-to-br from-rose-50/70 via-white to-slate-50 p-6 rounded-2xl border-2 border-rose-300 shadow-sm relative overflow-hidden">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-2">
-                        <span class="h-8 w-8 rounded-xl bg-rose-600 text-white flex items-center justify-center font-black text-sm shadow-2xs">
-                            🔴
-                        </span>
-                        <div>
-                            <span class="text-[11px] font-black uppercase tracking-wider text-rose-800 block">
-                                Skenario Buruk (Perlu Waspada)
-                            </span>
-                            <h3 class="text-base font-black text-slate-900" 
-                                x-text="horizon === 'weekly' ? 'Risiko Performa Minggu Depan' : 'Risiko Performa Bulan Depan'"></h3>
-                        </div>
-                    </div>
-                    <span class="px-2.5 py-1 rounded-xl text-xs font-black bg-rose-100 text-rose-900 border border-rose-200"
-                          x-text="'-' + badDropPct + '% Penurunan'">
-                    </span>
-                </div>
-
-                <!-- 1. Omset yang Buruk -->
-                <div class="bg-white p-4 rounded-xl border border-rose-200 mb-3 shadow-2xs">
-                    <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block">⚠️ Omset yang Buruk Itu Berapa?</span>
-                    <div class="flex items-baseline justify-between mt-1 flex-wrap gap-2">
-                        <div class="text-3xl font-black text-rose-700" x-text="formatRupiah(badRevenue)"></div>
-                        <span class="text-xs font-black px-2 py-0.5 rounded-md bg-rose-100 text-rose-800"
-                              x-text="'-' + formatRupiah(badRevenueDelta) + ' (' + '-' + badDropPct + '%)'"></span>
-                    </div>
-                    <div class="text-[11px] text-slate-500 font-semibold mt-1">
-                        Terjadi penurunan omset akibat antrean panjang dan lonjakan pesanan yang dibatalkan.
-                    </div>
-                </div>
-
-                <!-- 2. Pengunjung & Pembatalan yang Membengkak -->
-                <div class="grid grid-cols-2 gap-3 mb-3">
-                    <div class="bg-white p-3.5 rounded-xl border border-rose-100 shadow-2xs">
-                        <span class="text-[11px] font-bold text-slate-500 block">👥 Trafik Pengunjung:</span>
-                        <div class="text-xl font-black text-slate-900 mt-0.5" x-text="badVisitors.toLocaleString('id-ID') + ' Orang'"></div>
-                        <span class="text-[11px] text-rose-700 font-bold" x-text="'-' + badVisitorsDelta + ' orang berkurang'"></span>
-                    </div>
-                    <div class="bg-white p-3.5 rounded-xl border border-rose-100 shadow-2xs">
-                        <span class="text-[11px] font-bold text-slate-500 block">🚫 Pesanan Batal:</span>
-                        <div class="text-xl font-black text-rose-700 mt-0.5" x-text="badCancelRate + '% Batal'"></div>
-                        <span class="text-[11px] text-rose-800 font-bold" x-text="'Hangus ' + formatRupiah(badLostRevenue)"></span>
-                    </div>
-                </div>
-
-                <!-- 3. Rata-Rata Waktu Saji yang Menyebabkan Masalah -->
-                <div class="bg-white p-4 rounded-xl border border-rose-200 mb-3 shadow-2xs">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">⏱️ Waktu Saji yang Menyebabkan Masalah:</span>
-                        <span class="text-[10px] font-black px-2 py-0.5 rounded-md bg-rose-100 text-rose-800">
-                            Melebihi SOP Maks. 15 Mnt
-                        </span>
-                    </div>
-                    <div class="flex items-baseline gap-2 mt-0.5">
-                        <div class="text-2xl font-black text-rose-700" x-text="badSla + ' Menit / Pesanan'"></div>
-                        <span class="text-xs text-rose-600 font-bold">(Terlalu lambat & antrean menumpuk)</span>
-                    </div>
-                    <div class="mt-2 text-xs text-slate-700 font-semibold flex items-center gap-1.5">
-                        <span>🚨</span>
-                        <span class="leading-relaxed">
-                            <strong>Dampak Keterlambatan:</strong> Penumpang mendengar <em>last call boarding</em> &rarr; Pesanan ditinggal/batal &rarr; Est. komplain naik ke <strong class="text-rose-700" x-text="badComplaints + ' kasus'"></strong>!
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Peringatan & Mitigasi Skenario Buruk (Dinamis Berdasarkan Angka Input) -->
-                <div class="bg-rose-100/60 p-3.5 rounded-xl border border-rose-200 text-xs text-rose-950 font-semibold">
-                    <div class="flex items-center justify-between mb-1.5 pb-1 border-b border-rose-200/60">
-                        <span class="font-black text-rose-900 flex items-center gap-1.5">
-                            <span>⚠️</span>
-                            <span>Langkah Mitigasi untuk Mencegah Skenario Buruk:</span>
-                        </span>
-                        <span class="text-[10px] font-extrabold bg-rose-200 text-rose-900 px-1.5 py-0.5 rounded">Langkah Pencegahan</span>
-                    </div>
-                    <ul class="space-y-1.5 text-[11px]">
-                        <template x-for="(step, idx) in badMitigationSteps" :key="idx">
-                            <li class="flex items-start gap-1.5">
-                                <span class="text-rose-700 font-bold shrink-0">•</span>
-                                <span class="leading-relaxed" x-html="step"></span>
-                            </li>
-                        </template>
-                    </ul>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Tabel Perbandingan Komparasi Eksekutif (Head-to-Head Table) -->
-        <div class="overflow-x-auto rounded-2xl border-2 border-slate-200 mb-6 shadow-2xs">
-            <table class="w-full text-left text-xs">
-                <thead class="bg-slate-100 border-b border-slate-200 text-slate-700 uppercase font-black text-[11px]">
-                    <tr>
-                        <th class="p-3.5">Indikator Kunci</th>
-                        <th class="p-3.5 bg-slate-200/60">Kondisi Input Saat Ini</th>
-                        <th class="p-3.5 bg-emerald-100/70 text-emerald-950">🟢 Skenario Baik (Target Prima)</th>
-                        <th class="p-3.5 bg-rose-100/70 text-rose-950">🔴 Skenario Buruk (Perlu Waspada)</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-200 font-semibold text-slate-800">
-                    <tr class="hover:bg-slate-50/80">
-                        <td class="p-3.5 font-black text-slate-900">💰 Proyeksi Omset Total</td>
-                        <td class="p-3.5 bg-slate-50 font-bold" x-text="formatRupiah(inputRevenue)"></td>
-                        <td class="p-3.5 bg-emerald-50/50 font-black text-emerald-700" x-text="formatRupiah(goodRevenue) + ' (+' + goodGrowthPct + '%)'"></td>
-                        <td class="p-3.5 bg-rose-50/50 font-black text-rose-700" x-text="formatRupiah(badRevenue) + ' (-' + badDropPct + '%)'"></td>
-                    </tr>
-                    <tr class="hover:bg-slate-50/80">
-                        <td class="p-3.5 font-black text-slate-900">👥 Jumlah Pengunjung / Pax</td>
-                        <td class="p-3.5 bg-slate-50" x-text="Number(inputVisitors).toLocaleString('id-ID') + ' orang'"></td>
-                        <td class="p-3.5 bg-emerald-50/50 font-bold text-emerald-800" x-text="goodVisitors.toLocaleString('id-ID') + ' orang (+' + goodVisitorsDelta + ')'"></td>
-                        <td class="p-3.5 bg-rose-50/50 font-bold text-rose-800" x-text="badVisitors.toLocaleString('id-ID') + ' orang (-' + badVisitorsDelta + ')'"></td>
-                    </tr>
-                    <tr class="hover:bg-slate-50/80">
-                        <td class="p-3.5 font-black text-slate-900">⏱️ Waktu Saji Rata-Rata (SLA)</td>
-                        <td class="p-3.5 bg-slate-50" x-text="Number(inputSlaMinutes).toFixed(1) + ' Menit/Pesanan'"></td>
-                        <td class="p-3.5 bg-emerald-50/50 font-black text-emerald-700" x-text="goodSla + ' Menit (Kilat & Aman)'"></td>
-                        <td class="p-3.5 bg-rose-50/50 font-black text-rose-700" x-text="badSla + ' Menit (Terlambat & Delay)'"></td>
-                    </tr>
-                    <tr class="hover:bg-slate-50/80">
-                        <td class="p-3.5 font-black text-slate-900">🚫 Rasio Pesanan Dibatalkan</td>
-                        <td class="p-3.5 bg-slate-50">~5.0% (Standar)</td>
-                        <td class="p-3.5 bg-emerald-50/50 text-emerald-800 font-extrabold">&lt; 1.0% (0 Komplain Boarding)</td>
-                        <td class="p-3.5 bg-rose-50/50 text-rose-800 font-extrabold" x-text="badCancelRate + '% (Banyak Batal Mendadak)'"></td>
-                    </tr>
-                    <tr class="hover:bg-slate-50/80">
-                        <td class="p-3.5 font-black text-slate-900">🎯 Kepatuhan Standar Juanda (&le; 15m)</td>
-                        <td class="p-3.5 bg-slate-50" x-text="inputSlaMinutes <= 15 ? '100% Memenuhi' : 'Melanggar Batas'"></td>
-                        <td class="p-3.5 bg-emerald-50/50 font-bold text-emerald-700">100% Siap Sebelum Boarding</td>
-                        <td class="p-3.5 bg-rose-50/50 font-bold text-rose-700" x-text="badCompliance + '% (Sebagian Penumpang Telat)'"></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-
-    </div>
-
-    <!-- 8. Enterprise CRM - Customer Segmentation -->
-    <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200">
-        <div class="flex items-center justify-between mb-5">
+        <!-- Card 2: Simulasi What-If -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200 hover:border-indigo-500 transition-all duration-200 flex flex-col justify-between group">
             <div>
-                <div class="inline-flex items-center gap-2 text-xs font-black text-indigo-700 uppercase tracking-wider mb-1">
-                    <span>👑 Customer Loyalty Intel</span>
+                <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-black text-xl mb-4 group-hover:scale-105 transition-transform shadow-xs">
+                    🎯
                 </div>
-                <h2 class="text-lg font-black text-slate-900 tracking-tight">Enterprise CRM - Segmentasi Pelanggan</h2>
-                <p class="text-xs text-slate-500 font-semibold mt-0.5">Distribusi loyalitas frekuensi belanja penumpang bandara</p>
+                <h3 class="text-lg font-black text-slate-900 tracking-tight group-hover:text-indigo-700 transition-colors">
+                    Simulasi What-If
+                </h3>
+                <p class="text-xs font-semibold text-slate-500 mt-2 leading-relaxed">
+                    Hitung proyeksi target omset, kebutuhan trafik pengunjung, dan mitigasi risiko operasional gerai.
+                </p>
+            </div>
+            <div class="mt-5 pt-4 border-t border-slate-100">
+                <a href="{{ route('admin.analytics.whatif', request()->only(['start_date', 'end_date', 'tenant_id'])) }}" 
+                   class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black shadow-xs transition cursor-pointer">
+                    <span>Mulai Simulasi What-If</span>
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </a>
             </div>
         </div>
 
-        @php
-            $newCust = $customerSegmentation->new_customers ?? 0;
-            $regCust = $customerSegmentation->regular_customers ?? 0;
-            $freqCust = $customerSegmentation->frequent_customers ?? 0;
-            $totalCust = $customerSegmentation->total_customers ?? 0;
-            
-            $newPct = $totalCust > 0 ? round(($newCust / $totalCust) * 100) : 0;
-            $regPct = $totalCust > 0 ? round(($regCust / $totalCust) * 100) : 0;
-            $freqPct = $totalCust > 0 ? round(($freqCust / $totalCust) * 100) : 0;
-        @endphp
-
-        <!-- Segmen Bar -->
-        <div class="mb-6">
-            <div class="flex items-center justify-between mb-2 text-xs font-bold text-slate-700">
-                <span>Distribusi Segmen Pengguna</span>
-                <span>Total: {{ number_format($totalCust) }} Pelanggan</span>
+        <!-- Card 3: Segmentasi Pelanggan -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200 hover:border-emerald-500 transition-all duration-200 flex flex-col justify-between group">
+            <div>
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-black text-xl mb-4 group-hover:scale-105 transition-transform shadow-xs">
+                    👥
+                </div>
+                <h3 class="text-lg font-black text-slate-900 tracking-tight group-hover:text-emerald-700 transition-colors">
+                    Segmentasi Pelanggan
+                </h3>
+                <p class="text-xs font-semibold text-slate-500 mt-2 leading-relaxed">
+                    Analisis loyalitas penumpang dan distribusi frekuensi belanja untuk strategi retensi bandara.
+                </p>
             </div>
-            <div class="w-full flex h-6 rounded-xl overflow-hidden bg-slate-100 p-1 gap-1">
-                <div class="bg-sky-400 rounded-lg flex items-center justify-center text-[10px] font-black text-white transition-all duration-1000 shadow-xs" style="width: {{ max(4, $newPct) }}%" title="Pelanggan Baru ({{ $newPct }}%)">
-                    @if($newPct > 5) {{ $newPct }}% @endif
-                </div>
-                <div class="bg-amber-400 rounded-lg flex items-center justify-center text-[10px] font-black text-white transition-all duration-1000 shadow-xs" style="width: {{ max(4, $regPct) }}%" title="Pelanggan Reguler ({{ $regPct }}%)">
-                    @if($regPct > 5) {{ $regPct }}% @endif
-                </div>
-                <div class="bg-emerald-500 rounded-lg flex items-center justify-center text-[10px] font-black text-white transition-all duration-1000 shadow-xs" style="width: {{ max(4, $freqPct) }}%" title="Pelanggan Setia ({{ $freqPct }}%)">
-                    @if($freqPct > 5) {{ $freqPct }}% @endif
-                </div>
-            </div>
-            <div class="flex items-center justify-between mt-3 text-xs font-bold text-slate-600">
-                <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-sky-400 mr-2 shadow-xs"></span> Baru (1x pesan)</div>
-                <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-amber-400 mr-2 shadow-xs"></span> Reguler (2-5x pesan)</div>
-                <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-emerald-500 mr-2 shadow-xs"></span> Setia (>5x pesan)</div>
-            </div>
-        </div>
-
-        <!-- Kartu Rincian 3 Segmen -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div class="bg-slate-50 p-5 rounded-2xl border-2 border-slate-200 flex items-center justify-between">
-                <div>
-                    <span class="text-xs font-black uppercase tracking-wider text-sky-700 block">Pelanggan Baru</span>
-                    <span class="text-2xl font-black text-slate-900 mt-1 block">{{ number_format($newCust) }}</span>
-                    <span class="text-xs text-slate-500 font-semibold">1 Kali Pemesanan</span>
-                </div>
-                <div class="h-12 w-12 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center font-black text-sm">
-                    1x
-                </div>
-            </div>
-
-            <div class="bg-slate-50 p-5 rounded-2xl border-2 border-slate-200 flex items-center justify-between">
-                <div>
-                    <span class="text-xs font-black uppercase tracking-wider text-amber-700 block">Pelanggan Reguler</span>
-                    <span class="text-2xl font-black text-slate-900 mt-1 block">{{ number_format($regCust) }}</span>
-                    <span class="text-xs text-slate-500 font-semibold">2 - 5 Kali Pemesanan</span>
-                </div>
-                <div class="h-12 w-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-black text-sm">
-                    2-5x
-                </div>
-            </div>
-
-            <div class="bg-emerald-50 p-5 rounded-2xl border-2 border-emerald-300 flex items-center justify-between">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs font-black uppercase tracking-wider text-emerald-800">Pelanggan Setia</span>
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-600 text-white uppercase">VIP</span>
-                    </div>
-                    <span class="text-2xl font-black text-slate-900 mt-1 block">{{ number_format($freqCust) }}</span>
-                    <span class="text-xs text-emerald-800 font-semibold">> 5 Kali Pemesanan</span>
-                </div>
-                <div class="h-12 w-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black shadow-sm text-sm">
-                    VIP
-                </div>
+            <div class="mt-5 pt-4 border-t border-slate-100">
+                <a href="{{ route('admin.analytics.customers', request()->only(['start_date', 'end_date', 'tenant_id'])) }}" 
+                   class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-xs transition cursor-pointer">
+                    <span>Lihat Segmentasi Pelanggan</span>
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </a>
             </div>
         </div>
     </div>
-
 </div>
-
 <!-- 9. Modern Chart.js Configs with Max Bar Thickness, Gradients, and Custom Tooltips -->
 <script nonce="{{ $cspNonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function() {
@@ -1712,351 +841,6 @@ window.setQuickDateRange = function(type) {
         endEl.value = formatYMD(today);
         document.getElementById('filterForm').submit();
     }
-};
-
-// Alpine.js Component: Drill-Down Query Inspector & Multi-Criteria Search
-window.drillDownInspector = function() {
-    return {
-        searchQuery: '',
-        statusFilter: 'semua',
-        slaFilter: 'semua',
-        tenantFilter: '{{ $tenantId ? (string)$tenantId : "semua" }}',
-        pageSize: 10,
-        currentPage: 1,
-        allOrders: @json($drillDownOrders),
-
-        get filteredOrders() {
-            let list = this.allOrders;
-
-            // 1. Filter Tenant
-            if (this.tenantFilter !== 'semua' && this.tenantFilter !== '') {
-                const tId = Number(this.tenantFilter);
-                list = list.filter(o => o.tenant_id === tId);
-            }
-
-            // 2. Filter Status
-            if (this.statusFilter !== 'semua') {
-                list = list.filter(o => o.status === this.statusFilter);
-            }
-
-            // 3. Filter SLA Kepatuhan
-            if (this.slaFilter === 'compliant') {
-                list = list.filter(o => o.sla_compliant === true);
-            } else if (this.slaFilter === 'breached') {
-                list = list.filter(o => o.sla_compliant === false);
-            }
-
-            // 4. Pencarian Bebas Multi-Kriteria (Case-insensitive across multiple fields)
-            if (this.searchQuery && this.searchQuery.trim() !== '') {
-                const q = this.searchQuery.toLowerCase().trim();
-                list = list.filter(o => {
-                    return (o.order_code && o.order_code.toLowerCase().includes(q)) ||
-                           (o.customer_name && o.customer_name.toLowerCase().includes(q)) ||
-                           (o.tenant_name && o.tenant_name.toLowerCase().includes(q)) ||
-                           (o.flight_number && o.flight_number.toLowerCase().includes(q)) ||
-                           (o.gate && o.gate.toLowerCase().includes(q)) ||
-                           (o.tenant_location && o.tenant_location.toLowerCase().includes(q)) ||
-                           (o.items_summary && o.items_summary.toLowerCase().includes(q));
-                });
-            }
-
-            return list;
-        },
-
-        get totalPages() {
-            return Math.ceil(this.filteredOrders.length / this.pageSize) || 1;
-        },
-
-        get paginatedOrders() {
-            const start = (this.currentPage - 1) * this.pageSize;
-            return this.filteredOrders.slice(start, start + this.pageSize);
-        },
-
-        resetFilters() {
-            this.searchQuery = '';
-            this.statusFilter = 'semua';
-            this.slaFilter = 'semua';
-            this.tenantFilter = 'semua';
-            this.currentPage = 1;
-        },
-
-        drillDownToTenant(tenantId) {
-            const selectEl = document.querySelector('select[name="tenant_id"]');
-            if (selectEl) {
-                selectEl.value = tenantId;
-                document.getElementById('filterForm').submit();
-            }
-        }
-    };
-};
-
-// Alpine.js Component: Executive Target Planning & Predictive Simulator
-window.targetPlanningSimulator = function() {
-    return {
-        // 1. Pilihan Horizon Waktu Proyeksi
-        horizon: 'weekly',
-
-        // 2. Data Riil Aktual dari Database Sistem
-        realWeeklyRevenue: {{ (float)$weeklyTotalRevenue }},
-        realWeeklyOrders: {{ (int)$weeklyOrdersCount }},
-        realWeeklyVisitors: {{ (int)$weeklyVisitors }},
-        realWeeklySla: {{ (float)$weeklyAvgSla }},
-        realWeeklyAov: {{ (float)$weeklyAov }},
-
-        realMonthlyRevenue: {{ (float)$monthlyTotalRevenue }},
-        realMonthlyOrders: {{ (int)$monthlyOrdersCount }},
-        realMonthlyVisitors: {{ (int)$monthlyVisitors }},
-        realMonthlySla: {{ (float)$monthlyAvgSla }},
-        realMonthlyAov: {{ (float)$monthlyAov }},
-
-        // 3. Form Input Aktif (Dapat diedit bebas oleh Admin atau diisi otomatis)
-        inputRevenue: {{ (float)($weeklyTotalRevenue > 0 ? $weeklyTotalRevenue : ($totalRevenue > 0 ? $totalRevenue : 15000000)) }},
-        rawRevenue: '',
-        inputVisitors: {{ (int)($weeklyVisitors > 0 ? $weeklyVisitors : 450) }},
-        rawVisitors: '',
-        inputSlaMinutes: {{ (float)($weeklyAvgSla > 0 ? $weeklyAvgSla : 12.0) }},
-
-        // 4. Parameter Penyesuaian Persentase
-        goodGrowthPct: 20,
-        badDropPct: 20,
-
-        // 5. UI Toggles
-        showGuide: false,
-        showFormula: false,
-        copied: false,
-
-        init() {
-            this.rawRevenue = Number(this.inputRevenue).toLocaleString('id-ID');
-            this.rawVisitors = Number(this.inputVisitors).toLocaleString('id-ID');
-        },
-
-        // 6. Methods Kontrol & Input Sanitizer (Mencegah bug 90.000 terbaca 90)
-        handleRevenueInput(val) {
-            const clean = String(val || '').replace(/[^0-9]/g, '');
-            this.inputRevenue = parseInt(clean, 10) || 0;
-            this.rawRevenue = val;
-        },
-
-        formatRevenueField() {
-            this.rawRevenue = this.inputRevenue > 0 ? Number(this.inputRevenue).toLocaleString('id-ID') : '0';
-        },
-
-        setRevenue(amount) {
-            this.inputRevenue = Number(amount) || 0;
-            this.rawRevenue = this.inputRevenue > 0 ? Number(this.inputRevenue).toLocaleString('id-ID') : '0';
-        },
-
-        handleVisitorsInput(val) {
-            const clean = String(val || '').replace(/[^0-9]/g, '');
-            this.inputVisitors = parseInt(clean, 10) || 0;
-            this.rawVisitors = val;
-        },
-
-        formatVisitorsField() {
-            this.rawVisitors = this.inputVisitors > 0 ? Number(this.inputVisitors).toLocaleString('id-ID') : '0';
-        },
-
-        setVisitors(amount) {
-            this.inputVisitors = Number(amount) || 0;
-            this.rawVisitors = this.inputVisitors > 0 ? Number(this.inputVisitors).toLocaleString('id-ID') : '0';
-        },
-
-        setHorizon(type) {
-            this.horizon = type;
-            if (type === 'weekly') {
-                this.inputRevenue = this.realWeeklyRevenue > 0 ? this.realWeeklyRevenue : 15000000;
-                this.inputVisitors = this.realWeeklyVisitors > 0 ? this.realWeeklyVisitors : 450;
-                this.inputSlaMinutes = this.realWeeklySla > 0 ? this.realWeeklySla : 12.0;
-            } else {
-                this.inputRevenue = this.realMonthlyRevenue > 0 ? this.realMonthlyRevenue : 60000000;
-                this.inputVisitors = this.realMonthlyVisitors > 0 ? this.realMonthlyVisitors : 1800;
-                this.inputSlaMinutes = this.realMonthlySla > 0 ? this.realMonthlySla : 12.0;
-            }
-            this.rawRevenue = this.inputRevenue.toLocaleString('id-ID');
-            this.rawVisitors = this.inputVisitors.toLocaleString('id-ID');
-        },
-
-        loadRealData() {
-            if (this.horizon === 'weekly') {
-                this.inputRevenue = this.realWeeklyRevenue > 0 ? this.realWeeklyRevenue : 15000000;
-                this.inputVisitors = this.realWeeklyVisitors > 0 ? this.realWeeklyVisitors : 450;
-                this.inputSlaMinutes = this.realWeeklySla > 0 ? this.realWeeklySla : 12.0;
-            } else {
-                this.inputRevenue = this.realMonthlyRevenue > 0 ? this.realMonthlyRevenue : 60000000;
-                this.inputVisitors = this.realMonthlyVisitors > 0 ? this.realMonthlyVisitors : 1800;
-                this.inputSlaMinutes = this.realMonthlySla > 0 ? this.realMonthlySla : 12.0;
-            }
-            this.rawRevenue = this.inputRevenue.toLocaleString('id-ID');
-            this.rawVisitors = this.inputVisitors.toLocaleString('id-ID');
-        },
-
-        // 7. Getters & Kalkulasi Logis Skenario Baik vs Buruk
-        get currentAov() {
-            const visitors = Math.max(1, Number(this.inputVisitors) || 1);
-            const rev = Math.max(0, Number(this.inputRevenue) || 0);
-            const estBuyers = Math.max(1, Math.round(visitors * 0.5));
-            return Math.round(rev / estBuyers);
-        },
-
-        // 🟢 SKENARIO BAIK / TARGET PRIMA (Best Case)
-        get goodRevenue() {
-            const base = Number(this.inputRevenue) || 0;
-            return Math.round(base * (1 + (Number(this.goodGrowthPct) / 100)));
-        },
-        get goodRevenueDelta() {
-            return this.goodRevenue - (Number(this.inputRevenue) || 0);
-        },
-        get goodVisitors() {
-            const base = Number(this.inputVisitors) || 0;
-            return Math.round(base * (1 + (Number(this.goodGrowthPct) * 0.75 / 100)));
-        },
-        get goodVisitorsDelta() {
-            return this.goodVisitors - (Number(this.inputVisitors) || 0);
-        },
-        get goodEstimatedOrders() {
-            return Math.round(this.goodVisitors * 0.55);
-        },
-        get goodSla() {
-            const fast = Number(this.inputSlaMinutes) - 2.5;
-            return Math.max(6.0, Math.min(9.5, +fast.toFixed(1)));
-        },
-        get goodCancelRate() {
-            return 0.8;
-        },
-        get goodCompliance() {
-            return 100;
-        },
-        get goodSavedRevenue() {
-            return Math.round(this.goodRevenue * 0.08);
-        },
-
-        // Langkah Kerja Dinamis Skenario Baik
-        get goodActionSteps() {
-            const steps = [];
-            const sla = Number(this.inputSlaMinutes) || 12;
-            const aov = this.currentAov;
-            const visitors = Number(this.inputVisitors) || 0;
-            const period = this.horizon === 'weekly' ? 'minggu depan' : 'bulan depan';
-
-            if (sla > 15) {
-                steps.push('<strong>Pangkas SLA Kritis:</strong> Waktu saji saat ini (' + sla.toFixed(1) + ' mnt) melanggar batas maksimal SOP Bandara Juanda (15 mnt). Wajib pangkas waktu masak ke <strong>' + this.goodSla + ' menit</strong> dengan sistem pra-bumbu agar pesanan tidak batal saat panggilan boarding.');
-            } else if (sla > 10) {
-                steps.push('<strong>Akselerasi Fast-Prep:</strong> Pangkas waktu saji dari ' + sla.toFixed(1) + ' menit menjadi <strong>' + this.goodSla + ' menit/pesanan</strong>. Siapkan bahan baku siap saji sebelum jam sibuk penerbangan agar penumpang merasa tenang memesan makanan.');
-            } else {
-                steps.push('<strong>Promosikan Layanan Kilat:</strong> SLA saat ini sangat cepat (' + sla.toFixed(1) + ' mnt). Pasang jaminan promosi <em>Pasti Siap dalam ' + this.goodSla + ' Menit</em> untuk menarik penumpang transit yang terburu-buru menuju boarding gate.');
-            }
-
-            if (aov < 25000) {
-                steps.push('<strong>Upselling & Bundling:</strong> Rata-rata belanja saat ini relatif hemat (' + this.formatRupiah(aov) + '/order). Tawarkan paket kombo makanan + minuman untuk meningkatkan nilai belanja dan mencapai target <strong>' + this.formatRupiah(this.goodRevenue) + '</strong>.');
-            } else if (aov >= 25000 && aov < 65000) {
-                steps.push('<strong>Optimalkan Menu Terlaris:</strong> Nilai transaksi sudah stabil (' + this.formatRupiah(aov) + '/order). Siapkan stok ekstra untuk 3 menu terlaris agar tidak terjadi kehabisan stok saat jam penerbangan padat.');
-            } else {
-                steps.push('<strong>Layanan Pesanan Premium:</strong> Nilai transaksi tinggi (' + this.formatRupiah(aov) + '/order). Gunakan kemasan takeaway eksklusif ramah kabin pesawat untuk menjaga kepuasan penumpang eksekutif.');
-            }
-
-            if (visitors >= 600 || (this.horizon === 'weekly' && visitors >= 250)) {
-                steps.push('<strong>Manajemen Antrean Padat:</strong> Menghadapi target <strong>' + this.goodVisitors.toLocaleString('id-ID') + ' pengunjung</strong>, operasikan jalur antrean takeaway khusus dan siagakan staf runner gate.');
-            } else {
-                steps.push('<strong>Tingkatkan Daya Tarik Toko:</strong> Dari proyeksi <strong>' + this.goodVisitors.toLocaleString('id-ID') + ' pengunjung</strong>, pasang display banner promo di lorong terminal untuk menaikkan konversi belanja.');
-            }
-
-            steps.push('<strong>Realisasi Target Omset:</strong> Amankan tambahan omset <strong>+' + this.formatRupiah(this.goodRevenueDelta) + '</strong> (+' + this.goodGrowthPct + '%) ' + period + ' dengan mengejar sekitar <strong>' + Math.max(1, Math.round(this.goodVisitorsDelta * 0.55)) + ' transaksi baru</strong>.');
-
-            return steps;
-        },
-
-        // 🔴 SKENARIO BURUK / PERLU WASPADA (Worst Case)
-        get badRevenue() {
-            const base = Number(this.inputRevenue) || 0;
-            return Math.round(base * (1 - (Number(this.badDropPct) / 100)));
-        },
-        get badRevenueDelta() {
-            return (Number(this.inputRevenue) || 0) - this.badRevenue;
-        },
-        get badVisitors() {
-            const base = Number(this.inputVisitors) || 0;
-            return Math.round(base * (1 - (Number(this.badDropPct) * 0.6 / 100)));
-        },
-        get badVisitorsDelta() {
-            return (Number(this.inputVisitors) || 0) - this.badVisitors;
-        },
-        get badEstimatedOrders() {
-            return Math.round(this.badVisitors * 0.40);
-        },
-        get badSla() {
-            const slow = Math.max(16.0, Number(this.inputSlaMinutes) + 4.5);
-            return Math.min(22.0, +slow.toFixed(1));
-        },
-        get badCancelRate() {
-            return 14.5;
-        },
-        get badCompliance() {
-            const over = this.badSla - 15;
-            return Math.max(30, +(85 - over * 12).toFixed(1));
-        },
-        get badLostRevenue() {
-            return Math.round(Number(this.inputRevenue) * (this.badCancelRate / 100));
-        },
-        get badComplaints() {
-            return Math.max(3, Math.round(Number(this.inputVisitors) * 0.02));
-        },
-
-        // Langkah Mitigasi Dinamis Skenario Buruk
-        get badMitigationSteps() {
-            const steps = [];
-            const sla = Number(this.inputSlaMinutes) || 12;
-
-            if (sla > 15) {
-                steps.push('<strong>Krisis Antrean Fatal:</strong> SLA awal (' + sla.toFixed(1) + ' mnt) sudah melanggar SOP dan berisiko melonjak tembus <strong>' + this.badSla + ' menit</strong>. Penumpang yang terdesak jam boarding dipastikan membatalkan pesanan secara massal.');
-            } else {
-                steps.push('<strong>Cegah Lonjakan Waktu Saji:</strong> Jangan biarkan waktu masak melorot ke <strong>' + this.badSla + ' menit/pesanan</strong>. Batasi menu masak lama (> 12 mnt) saat jam puncak keberangkatan pesawat.');
-            }
-
-            steps.push('<strong>Selamatkan Omset Hangus:</strong> Skenario buruk berisiko menghilangkan omset sebesar <strong>' + this.formatRupiah(this.badRevenueDelta) + '</strong>, termasuk potensi pembatalan langsung <strong>' + this.formatRupiah(this.badLostRevenue) + '</strong>. Sediakan menu grab-and-go instan.');
-
-            steps.push('<strong>Antisipasi ' + this.badComplaints + ' Kasus Komplain:</strong> Pasang estimasi waktu tunggu transparan di kasir sebelum transaksi agar penumpang yang waktu boardingnya mepet tidak membatalkan di tengah proses masak.');
-
-            steps.push('<strong>Kontrol Efisiensi Bahan Baku:</strong> Jika omset turun ke <strong>' + this.formatRupiah(this.badRevenue) + '</strong>, kurangi pemesanan bahan baku mudah basi harian agar tidak timbul pembengkakan biaya waste.');
-
-            return steps;
-        },
-
-        formatRupiah(val) {
-            return 'Rp ' + Number(val || 0).toLocaleString('id-ID');
-        },
-
-        copyPlanSummary() {
-            const periodLabel = this.horizon === 'weekly' ? 'Minggu Depan' : 'Bulan Depan';
-            const currentLabel = this.horizon === 'weekly' ? 'Minggu Ini' : 'Bulan Ini';
-
-            const goodStepsText = this.goodActionSteps.map((s, i) => '  ' + (i + 1) + '. ' + s.replace(/<[^>]*>/g, '')).join('\n');
-            const badStepsText = this.badMitigationSteps.map((s, i) => '  ' + (i + 1) + '. ' + s.replace(/<[^>]*>/g, '')).join('\n');
-
-            const text = 'FlyDine Juanda - Rencana Target & Proyeksi Eksekutif (' + periodLabel + '):\n\n' +
-                '📊 KONDISI ACUAN (' + currentLabel + '):\n' +
-                '• Omset Saat Ini: ' + this.formatRupiah(this.inputRevenue) + '\n' +
-                '• Estimasi Pengunjung: ' + Number(this.inputVisitors).toLocaleString('id-ID') + ' orang\n' +
-                '• Rata-rata Waktu Saji: ' + Number(this.inputSlaMinutes).toFixed(1) + ' menit/pesanan\n' +
-                '• Rata-rata Belanja (AOV): ' + this.formatRupiah(this.currentAov) + '/order\n\n' +
-                '🟢 SKENARIO BAIK (TARGET PRIMA):\n' +
-                '• Proyeksi Omset Baik: ' + this.formatRupiah(this.goodRevenue) + ' (+' + this.goodGrowthPct + '%)\n' +
-                '• Target Pengunjung: ' + this.goodVisitors.toLocaleString('id-ID') + ' orang (+' + this.goodVisitorsDelta + ' orang)\n' +
-                '• Wajib Waktu Saji Kilat: ' + this.goodSla + ' menit/pesanan (SOP Juanda maks 15m)\n' +
-                '• Tingkat Batal: < 1.0% (Terkendali aman sebelum boarding)\n' +
-                'Langkah Kerja Meraih Target:\n' + goodStepsText + '\n\n' +
-                '🔴 SKENARIO BURUK (PERLU WASPADA):\n' +
-                '• Risiko Omset Melorot: ' + this.formatRupiah(this.badRevenue) + ' (-' + this.badDropPct + '%)\n' +
-                '• Trafik Terlayani: ' + this.badVisitors.toLocaleString('id-ID') + ' orang\n' +
-                '• Waktu Saji Bottleneck: ' + this.badSla + ' menit/pesanan (MELEWATI BATAS 15 MENIT!)\n' +
-                '• Tingkat Batal Membengkak: ' + this.badCancelRate + '% (Risiko omset hangus: ' + this.formatRupiah(this.badLostRevenue) + ')\n' +
-                'Langkah Mitigasi Risiko:\n' + badStepsText;
-
-            navigator.clipboard.writeText(text).then(() => {
-                this.copied = true;
-                setTimeout(() => this.copied = false, 2500);
-            });
-        }
-    };
 };
 </script>
 @endsection

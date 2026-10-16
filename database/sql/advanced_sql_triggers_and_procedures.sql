@@ -18,7 +18,10 @@ AFTER INSERT ON order_items
 FOR EACH ROW
 BEGIN
     UPDATE products
-    SET stock = GREATEST(0, stock - NEW.quantity)
+    SET stock = CASE 
+        WHEN stock >= NEW.quantity THEN stock - NEW.quantity 
+        ELSE 0 
+    END
     WHERE id = NEW.product_id;
 END$$
 
@@ -35,11 +38,11 @@ CREATE TRIGGER trg_before_order_update_sla_guard
 BEFORE UPDATE ON orders
 FOR EACH ROW
 BEGIN
-    IF NEW.status = 'siap' AND (NEW.ready_at IS NULL OR NEW.ready_at = '0000-00-00 00:00:00') THEN
+    IF NEW.status = 'siap' AND NEW.ready_at IS NULL THEN
         SET NEW.ready_at = NOW();
     END IF;
 
-    IF NEW.status = 'selesai' AND (NEW.completed_at IS NULL OR NEW.completed_at = '0000-00-00 00:00:00') THEN
+    IF NEW.status = 'selesai' AND NEW.completed_at IS NULL THEN
         SET NEW.completed_at = NOW();
     END IF;
 END$$

@@ -1,0 +1,51 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+/**
+ * USULAN MIGRATION INDEX GABUNGAN (TIDAK DIJALANKAN SESUAI PERMINTAAN USER)
+ * 
+ * Nama Usulan: 2026_10_16_000001_add_composite_indexes_to_orders_table.php
+ * 
+ * ALASAN TEKNIS & ANALISIS PERFORMA:
+ * 
+ * 1. Index ['tenant_id', 'ordered_at'] (idx_orders_tenant_ordered):
+ *    - Tabel orders saat ini hanya memiliki index ['tenant_id', 'status', 'ordered_at'].
+ *    - Ketika pengguna melakukan penelusuran (drill-down) ke tenant tertentu TANPA memfilter
+ *      status (menampilkan semua status untuk tenant tsb) dan mengurutkan berdasarkan 'ordered_at DESC',
+ *      kolom 'status' yang berada di tengah index gabungan lama menghalangi pemanfaatan B-Tree
+ *      index untuk pengurutan range 'ordered_at' (aturan Leftmost Prefix).
+ *    - Akibatnya MySQL terpaksa melakukan 'Using filesort' di disk/memory.
+ *    - Dengan index ['tenant_id', 'ordered_at'], MySQL dapat langsung membaca index secara berurutan
+ *      (Index Range Scan) sekaligus menyelesaikan filtering tenant_id dan ORDER BY ordered_at DESC
+ *      tanpa temporary filesort.
+ * 
+ * 2. Index ['status', 'ordered_at'] (idx_orders_status_ordered):
+ *    - Pada dashboard analitik konsolidasi (semua tenant), pengguna sering memfilter status
+ *      (misalnya klik status 'siap', 'selesai', atau 'dibatalkan' pada grafik donat) yang
+ *      diurutkan berdasarkan 'ordered_at DESC'.
+ *    - Index lama ['tenant_id', 'status', 'ordered_at'] TIDAK BISA digunakan karena 'tenant_id'
+ *      adalah kolom paling kiri (leading column).
+ *    - Index baru ['status', 'ordered_at'] memungkinkan MySQL langsung melompat ke bucket status yang dicari
+ *      dan langsung mengambil baris pesanan terurut dari yang terbaru, menghindari Full Table Scan.
+ */
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('orders', function (Blueprint $table) {
+            $table->index(['tenant_id', 'ordered_at'], 'idx_orders_tenant_ordered');
+            $table->index(['status', 'ordered_at'], 'idx_orders_status_ordered');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('orders', function (Blueprint $table) {
+            $table->dropIndex('idx_orders_tenant_ordered');
+            $table->dropIndex('idx_orders_status_ordered');
+        });
+    }
+};

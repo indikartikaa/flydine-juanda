@@ -27,6 +27,7 @@ class CancelExpiredOrders extends Command
     public function handle()
     {
         $expiredOrders = Order::where('status', 'menunggu')
+            ->where('is_paid', false)
             ->where('auto_cancel_at', '<=', now())
             ->get();
 

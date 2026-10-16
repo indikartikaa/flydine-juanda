@@ -59,6 +59,14 @@ class Tenant extends Model
     }
 
     /**
+     * Relasi: Satu Tenant memiliki banyak ringkasan harian (ETL).
+     */
+    public function dailySummaries()
+    {
+        return $this->hasMany(DailyTenantSummary::class);
+    }
+
+    /**
      * Helper: Cek apakah tenant sedang buka (berdasarkan waktu saat ini)
      */
     public function isOpen()

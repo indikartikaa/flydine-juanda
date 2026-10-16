@@ -21,6 +21,7 @@
     "dependencies": {
         "@alpinejs/csp": "^3.17.4",
         "chart.js": "^4.5.1",
+        "lucide": "^1.58.0",
         "qrcode": "^1.5.4"
     }
 }

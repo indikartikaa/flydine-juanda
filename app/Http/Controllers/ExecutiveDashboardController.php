@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Tenant;
 use App\Models\Complaint;
+use App\Models\DailyTenantSummary;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -36,15 +37,30 @@ class ExecutiveDashboardController extends Controller
 
         $tenantId = $request->input('tenant_id');
 
+        $isSqlite = DB::getDriverName() === 'sqlite';
+        $diffMinutesSql = $isSqlite
+            ? '((strftime(\'%s\', ready_at) - strftime(\'%s\', ordered_at)) / 60)'
+            : 'TIMESTAMPDIFF(MINUTE, ordered_at, ready_at)';
+        $hourSql = $isSqlite
+            ? 'CAST(strftime(\'%H\', ordered_at) AS INTEGER)'
+            : 'HOUR(ordered_at)';
+
         $orderQuery = Order::whereBetween('ordered_at', [$startDate, $endDate]);
         if ($tenantId) {
             $orderQuery->where('tenant_id', $tenantId);
         }
 
-        // 1. Volume Pesanan per Hari (Line Chart)
-        $volumePerDay = (clone $orderQuery)
-            ->select(DB::raw('DATE(ordered_at) as date'), DB::raw('count(*) as total'))
-            ->groupBy('date')
+        // Query tabel ringkasan ETL harian (daily_tenant_summaries)
+        $summaryQuery = DailyTenantSummary::where('summary_date', '>=', $startDateFormatted)
+            ->where('summary_date', '<=', $endDateFormatted . ' 23:59:59');
+        if ($tenantId) {
+            $summaryQuery->where('tenant_id', $tenantId);
+        }
+
+        // 1. Tren Volume Pesanan Harian (Line Chart) - Membaca dari daily_tenant_summaries
+        $volumePerDay = (clone $summaryQuery)
+            ->select(DB::raw('DATE(summary_date) as date'), DB::raw('SUM(total_orders) as total'))
+            ->groupBy(DB::raw('DATE(summary_date)'))
             ->orderBy('date')
             ->get();
 
@@ -54,10 +70,10 @@ class ExecutiveDashboardController extends Controller
             ->groupBy('status')
             ->get();
 
-        // 3. Performa Tenant (Volume)
-        $tenantPerformance = (clone $orderQuery)
-            ->join('tenants', 'orders.tenant_id', '=', 'tenants.id')
-            ->select('tenants.id', 'tenants.name', DB::raw('count(orders.id) as total'))
+        // 3. Performa Tenant (Volume) - Membaca dari daily_tenant_summaries
+        $tenantPerformance = (clone $summaryQuery)
+            ->join('tenants', 'daily_tenant_summaries.tenant_id', '=', 'tenants.id')
+            ->select('tenants.id', 'tenants.name', DB::raw('SUM(daily_tenant_summaries.total_orders) as total'))
             ->groupBy('tenants.id', 'tenants.name')
             ->orderByDesc('total')
             ->take(20)
@@ -85,7 +101,7 @@ class ExecutiveDashboardController extends Controller
             ->select(
                 'tenants.id',
                 'tenants.name',
-                DB::raw('AVG(TIMESTAMPDIFF(MINUTE, ordered_at, ready_at)) as avg_minutes')
+                DB::raw("AVG({$diffMinutesSql}) as avg_minutes")
             )
             ->groupBy('tenants.id', 'tenants.name')
             ->orderByDesc('avg_minutes')
@@ -102,35 +118,26 @@ class ExecutiveDashboardController extends Controller
         $openComplaints = (clone $complaintQuery)->whereIn('status', ['open', 'in_progress'])->count();
         $resolvedComplaints = (clone $complaintQuery)->whereIn('status', ['resolved', 'closed'])->count();
 
-        // 7. Customer Segmentation (CRM)
-        $customerSegmentation = DB::table('customers')
-            ->selectRaw("
-                SUM(CASE WHEN total_orders = 1 THEN 1 ELSE 0 END) as new_customers,
-                SUM(CASE WHEN total_orders BETWEEN 2 AND 5 THEN 1 ELSE 0 END) as regular_customers,
-                SUM(CASE WHEN total_orders > 5 THEN 1 ELSE 0 END) as frequent_customers,
-                COUNT(id) as total_customers
-            ")->first();
-
-        // 8. Baseline Metrics for Drill-Down & What-If DSS
+        // 7. Baseline Metrics for Executive KPI Cards (Membaca daily_tenant_summaries)
         $selectedTenant = $tenantId ? Tenant::find($tenantId) : null;
-        $totalOrdersCount = (clone $orderQuery)->count();
-        $totalRevenue = (clone $orderQuery)->where('is_paid', true)->sum('total_amount');
+        $totalOrdersCount = (int) (clone $summaryQuery)->sum('total_orders');
+        $totalRevenue = (float) (clone $summaryQuery)->sum('total_revenue');
         $avgOrderValue = $totalOrdersCount > 0 ? round($totalRevenue / $totalOrdersCount) : 0;
 
         $slaReadyQuery = (clone $orderQuery)->whereNotNull('ready_at');
         $slaTotalReadyCount = (clone $slaReadyQuery)->count();
-        $slaCompliantCount = (clone $slaReadyQuery)->whereRaw('TIMESTAMPDIFF(MINUTE, ordered_at, ready_at) <= 15')->count();
+        $slaCompliantCount = (clone $slaReadyQuery)->whereRaw("{$diffMinutesSql} <= 15")->count();
         $slaComplianceRate = $slaTotalReadyCount > 0 ? round(($slaCompliantCount / $slaTotalReadyCount) * 100, 1) : 100;
-        $avgSlaMinutes = round((clone $slaReadyQuery)->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, ordered_at, ready_at)) as avg_m')->value('avg_m') ?? 0, 1);
+        $avgSlaMinutes = round((clone $slaReadyQuery)->selectRaw("AVG({$diffMinutesSql}) as avg_m")->value('avg_m') ?? 0, 1);
 
-        $tenants = Tenant::where('is_active', true)->get();
+        $tenants = Tenant::where('is_active', true)->orderBy('name')->get();
         $totalTenantCount = Tenant::count();
         $activeTenantCount = Tenant::where('is_active', true)->count();
         $tenantOccupancyRate = $totalTenantCount > 0 ? round(($activeTenantCount / $totalTenantCount) * 100, 1) : 100;
 
-        // 9. Volume Transaksi Puncak (Peak Hours Analytics)
+        // 8. Volume Transaksi Puncak (Peak Hours Analytics)
         $hourlyDistribution = (clone $orderQuery)
-            ->select(DB::raw('HOUR(ordered_at) as hour'), DB::raw('count(*) as total'))
+            ->select(DB::raw("{$hourSql} as hour"), DB::raw('count(*) as total'))
             ->groupBy('hour')
             ->orderBy('hour')
             ->get();
@@ -141,72 +148,6 @@ class ExecutiveDashboardController extends Controller
             : '11:00 - 12:00 WIB';
         $peakHourVolume = $peakHourRecord ? $peakHourRecord->total : 0;
         $peakHourPercentage = $totalOrdersCount > 0 ? round(($peakHourVolume / $totalOrdersCount) * 100, 1) : 0;
-
-        // 10. Dataset Pembongkaran Data Agregat ke Detail Kueri (Drill-Down Inspection Table & Multi-Criteria Search)
-        $drillDownOrders = (clone $orderQuery)
-            ->with(['tenant:id,name,floor_location,zone', 'orderItems:id,order_id,product_name_snapshot,quantity,subtotal', 'deliveryLocation:id,name,terminal'])
-            ->latest('ordered_at')
-            ->take(150)
-            ->get()
-            ->map(function($o) {
-                $slaMinutes = ($o->ready_at && $o->ordered_at) 
-                    ? round(Carbon::parse($o->ordered_at)->diffInMinutes(Carbon::parse($o->ready_at)), 1) 
-                    : null;
-                return [
-                    'id' => $o->id,
-                    'order_code' => $o->order_code,
-                    'tenant_id' => $o->tenant_id,
-                    'tenant_name' => $o->tenant->name ?? 'N/A',
-                    'tenant_location' => $o->tenant->floor_location ?? '-',
-                    'tenant_zone' => $o->tenant->zone ?? '-',
-                    'customer_name' => $o->customer_name ?? 'Penumpang Juanda',
-                    'flight_number' => $o->flight_number ?? '-',
-                    'gate' => $o->gate ?? '-',
-                    'pickup_method' => $o->pickup_method ?? 'ambil_sendiri',
-                    'delivery_target' => $o->deliveryLocation ? $o->deliveryLocation->name : ($o->tenant->floor_location ?? '-'),
-                    'ordered_at_formatted' => Carbon::parse($o->ordered_at)->format('d M Y, H:i') . ' WIB',
-                    'time_formatted' => Carbon::parse($o->ordered_at)->format('H:i') . ' WIB',
-                    'ordered_hour' => (int) Carbon::parse($o->ordered_at)->format('H'),
-                    'status' => $o->status,
-                    'is_paid' => (bool)$o->is_paid,
-                    'total_amount' => (float)$o->total_amount,
-                    'total_amount_formatted' => 'Rp ' . number_format($o->total_amount, 0, ',', '.'),
-                    'sla_minutes' => $slaMinutes,
-                    'sla_compliant' => $slaMinutes !== null ? ($slaMinutes <= 15) : null,
-                    'items_summary' => $o->orderItems->map(fn($item) => $item->quantity . 'x ' . $item->product_name_snapshot)->implode(', ')
-                ];
-            });
-
-        // 11. Real Weekly & Monthly Metrics for Target Planning & Predictive Simulator
-        $weekAgo = Carbon::now()->subDays(7)->startOfDay();
-        $weeklyOrderQuery = Order::where('ordered_at', '>=', $weekAgo);
-        if ($tenantId) {
-            $weeklyOrderQuery->where('tenant_id', $tenantId);
-        }
-        $weeklyTotalRevenue = (float) (clone $weeklyOrderQuery)->where('is_paid', true)->sum('total_amount');
-        $weeklyOrdersCount = (int) (clone $weeklyOrderQuery)->count();
-        $weeklyAov = $weeklyOrdersCount > 0 ? round($weeklyTotalRevenue / $weeklyOrdersCount) : ($avgOrderValue > 0 ? round($avgOrderValue) : 30000);
-        $weeklyVisitors = (int) (clone $weeklyOrderQuery)->distinct('customer_id')->count('customer_id');
-        if ($weeklyVisitors === 0) {
-            $weeklyVisitors = max(1, (int) round($weeklyOrdersCount * 1.5));
-        }
-        $weeklySlaQuery = (clone $weeklyOrderQuery)->whereNotNull('ready_at');
-        $weeklyAvgSla = round((clone $weeklySlaQuery)->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, ordered_at, ready_at)) as avg_m')->value('avg_m') ?? ($avgSlaMinutes > 0 ? $avgSlaMinutes : 11.5), 1);
-
-        $monthAgo = Carbon::now()->subDays(30)->startOfDay();
-        $monthlyOrderQuery = Order::where('ordered_at', '>=', $monthAgo);
-        if ($tenantId) {
-            $monthlyOrderQuery->where('tenant_id', $tenantId);
-        }
-        $monthlyTotalRevenue = (float) (clone $monthlyOrderQuery)->where('is_paid', true)->sum('total_amount');
-        $monthlyOrdersCount = (int) (clone $monthlyOrderQuery)->count();
-        $monthlyAov = $monthlyOrdersCount > 0 ? round($monthlyTotalRevenue / $monthlyOrdersCount) : ($avgOrderValue > 0 ? round($avgOrderValue) : 30000);
-        $monthlyVisitors = (int) (clone $monthlyOrderQuery)->distinct('customer_id')->count('customer_id');
-        if ($monthlyVisitors === 0) {
-            $monthlyVisitors = max(1, (int) round($monthlyOrdersCount * 1.5));
-        }
-        $monthlySlaQuery = (clone $monthlyOrderQuery)->whereNotNull('ready_at');
-        $monthlyAvgSla = round((clone $monthlySlaQuery)->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, ordered_at, ready_at)) as avg_m')->value('avg_m') ?? ($avgSlaMinutes > 0 ? $avgSlaMinutes : 11.5), 1);
 
         return view('admin.executive-dashboard', compact(
             'days',
@@ -227,7 +168,6 @@ class ExecutiveDashboardController extends Controller
             'slaPerformance',
             'openComplaints',
             'resolvedComplaints',
-            'customerSegmentation',
             'totalRevenue',
             'avgOrderValue',
             'slaComplianceRate',
@@ -236,18 +176,7 @@ class ExecutiveDashboardController extends Controller
             'hourlyDistribution',
             'peakHourRange',
             'peakHourVolume',
-            'peakHourPercentage',
-            'drillDownOrders',
-            'weeklyTotalRevenue',
-            'weeklyOrdersCount',
-            'weeklyAov',
-            'weeklyVisitors',
-            'weeklyAvgSla',
-            'monthlyTotalRevenue',
-            'monthlyOrdersCount',
-            'monthlyAov',
-            'monthlyVisitors',
-            'monthlyAvgSla'
+            'peakHourPercentage'
         ));
     }
 
@@ -295,6 +224,11 @@ class ExecutiveDashboardController extends Controller
             ->groupBy('status')
             ->get();
 
+        $isSqlite = DB::getDriverName() === 'sqlite';
+        $diffMinutesSql = $isSqlite
+            ? '((strftime(\'%s\', ready_at) - strftime(\'%s\', ordered_at)) / 60)'
+            : 'TIMESTAMPDIFF(MINUTE, ordered_at, ready_at)';
+
         // 4. Kinerja SLA
         $slaQuery = Order::join('tenants', 'orders.tenant_id', '=', 'tenants.id')
             ->whereBetween('ordered_at', [$startDate, $endDate])
@@ -305,7 +239,7 @@ class ExecutiveDashboardController extends Controller
         $slaPerformance = $slaQuery->select(
                 'tenants.name',
                 DB::raw('count(orders.id) as total_completed'),
-                DB::raw('AVG(TIMESTAMPDIFF(MINUTE, ordered_at, ready_at)) as avg_minutes')
+                DB::raw("AVG({$diffMinutesSql}) as avg_minutes")
             )
             ->groupBy('tenants.id', 'tenants.name')
             ->orderBy('avg_minutes')
@@ -422,6 +356,11 @@ class ExecutiveDashboardController extends Controller
             ->groupBy('status')
             ->get();
 
+        $isSqlite = DB::getDriverName() === 'sqlite';
+        $diffMinutesSql = $isSqlite
+            ? '((strftime(\'%s\', ready_at) - strftime(\'%s\', ordered_at)) / 60)'
+            : 'TIMESTAMPDIFF(MINUTE, ordered_at, ready_at)';
+
         // 4. Kinerja SLA
         $slaQuery = Order::join('tenants', 'orders.tenant_id', '=', 'tenants.id')
             ->whereBetween('ordered_at', [$startDate, $endDate])
@@ -432,7 +371,7 @@ class ExecutiveDashboardController extends Controller
         $slaPerformance = $slaQuery->select(
                 'tenants.name',
                 DB::raw('count(orders.id) as total_completed'),
-                DB::raw('AVG(TIMESTAMPDIFF(MINUTE, ordered_at, ready_at)) as avg_minutes')
+                DB::raw("AVG({$diffMinutesSql}) as avg_minutes")
             )
             ->groupBy('tenants.id', 'tenants.name')
             ->orderBy('avg_minutes')
@@ -519,8 +458,13 @@ class ExecutiveDashboardController extends Controller
         if ($weeklyVisitors === 0) {
             $weeklyVisitors = max(1, (int) round($weeklyOrdersCount * 1.5));
         }
+        $isSqlite = DB::getDriverName() === 'sqlite';
+        $diffMinutesSql = $isSqlite
+            ? '((strftime(\'%s\', ready_at) - strftime(\'%s\', ordered_at)) / 60)'
+            : 'TIMESTAMPDIFF(MINUTE, ordered_at, ready_at)';
+
         $weeklySlaQuery = (clone $weeklyOrderQuery)->whereNotNull('ready_at');
-        $weeklyAvgSla = round((clone $weeklySlaQuery)->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, ordered_at, ready_at)) as avg_m')->value('avg_m') ?? 11.5, 1);
+        $weeklyAvgSla = round((clone $weeklySlaQuery)->selectRaw("AVG({$diffMinutesSql}) as avg_m")->value('avg_m') ?? 11.5, 1);
 
         $monthAgo = Carbon::now()->subDays(30)->startOfDay();
         $monthlyOrderQuery = Order::where('ordered_at', '>=', $monthAgo);
@@ -535,7 +479,7 @@ class ExecutiveDashboardController extends Controller
             $monthlyVisitors = max(1, (int) round($monthlyOrdersCount * 1.5));
         }
         $monthlySlaQuery = (clone $monthlyOrderQuery)->whereNotNull('ready_at');
-        $monthlyAvgSla = round((clone $monthlySlaQuery)->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, ordered_at, ready_at)) as avg_m')->value('avg_m') ?? 11.5, 1);
+        $monthlyAvgSla = round((clone $monthlySlaQuery)->selectRaw("AVG({$diffMinutesSql}) as avg_m")->value('avg_m') ?? 11.5, 1);
 
         // Parameters for this simulation
         $baseRevenue = (float) $request->input('revenue', ($horizon === 'weekly' ? ($weeklyTotalRevenue > 0 ? $weeklyTotalRevenue : 15000000) : ($monthlyTotalRevenue > 0 ? $monthlyTotalRevenue : 60000000)));

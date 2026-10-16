@@ -32,7 +32,10 @@ return new class extends Migration
                 FOR EACH ROW
                 BEGIN
                     UPDATE products
-                    SET stock = GREATEST(0, stock - NEW.quantity)
+                    SET stock = CASE 
+                        WHEN stock >= NEW.quantity THEN stock - NEW.quantity 
+                        ELSE 0 
+                    END
                     WHERE id = NEW.product_id;
                 END;
             ");
@@ -50,12 +53,12 @@ return new class extends Migration
                 FOR EACH ROW
                 BEGIN
                     -- Otomatis isi ready_at jika status diubah menjadi siap
-                    IF NEW.status = 'siap' AND (NEW.ready_at IS NULL OR NEW.ready_at = '0000-00-00 00:00:00') THEN
+                    IF NEW.status = 'siap' AND NEW.ready_at IS NULL THEN
                         SET NEW.ready_at = NOW();
                     END IF;
 
                     -- Otomatis isi completed_at jika status diubah menjadi selesai
-                    IF NEW.status = 'selesai' AND (NEW.completed_at IS NULL OR NEW.completed_at = '0000-00-00 00:00:00') THEN
+                    IF NEW.status = 'selesai' AND NEW.completed_at IS NULL THEN
                         SET NEW.completed_at = NOW();
                     END IF;
                 END;

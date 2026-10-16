@@ -32,6 +32,7 @@ class Order extends Model
     ];
 
     protected $casts = [
+        'is_paid' => 'boolean',
         'boarding_time' => 'datetime',
         'heading_to_tenant_at' => 'datetime',
         'ready_at' => 'datetime',

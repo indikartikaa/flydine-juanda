@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Customer;
 use App\Models\DeliveryLocation;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class CustomerCatalogController extends Controller
@@ -229,7 +230,10 @@ class CustomerCatalogController extends Controller
                 if ($request->has('force_replace') && $request->force_replace == '1') {
                     $cart = []; // clear cart to replace
                 } else {
-                    return response()->json(['error' => 'conflict', 'message' => 'Anda memiliki pesanan dari restoran lain. Ingin mengganti restoran?'], 409);
+                    if ($request->wantsJson() || $request->ajax()) {
+                        return response()->json(['error' => 'conflict', 'message' => 'Anda memiliki pesanan dari restoran lain. Ingin mengganti restoran?'], 409);
+                    }
+                    return redirect()->back()->with('error', 'Anda memiliki pesanan dari restoran lain.');
                 }
             }
         }
@@ -238,7 +242,10 @@ class CustomerCatalogController extends Controller
         $tenant = Tenant::find($request->tenant_id);
 
         if (!$tenant->isOpen()) {
-            return response()->json(['error' => 'closed', 'message' => 'Restoran sedang tutup.'], 400);
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['error' => 'closed', 'message' => 'Restoran sedang tutup.'], 400);
+            }
+            return redirect()->back()->with('error', 'Restoran sedang tutup.');
         }
 
         $productId = $product->id;
@@ -257,7 +264,24 @@ class CustomerCatalogController extends Controller
 
         session()->put('cart', $cart);
 
-        return response()->json(['success' => true, 'message' => 'Produk ditambahkan ke keranjang', 'cart_count' => count($cart)]);
+        $total = array_reduce($cart, function($carry, $item) {
+            return $carry + ($item['price'] * $item['quantity']);
+        }, 0);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Produk ditambahkan ke keranjang',
+                'cart_count' => count($cart),
+                'item' => $cart[$productId],
+                'jumlah' => $cart[$productId]['quantity'],
+                'subtotal' => $cart[$productId]['price'] * $cart[$productId]['quantity'],
+                'total' => $total,
+                'cart' => $cart,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Produk ditambahkan ke keranjang');
     }
 
     public function updateCart(Request $request)
@@ -269,6 +293,10 @@ class CustomerCatalogController extends Controller
 
         $cart = session()->get('cart', []);
         $productId = $request->product_id;
+
+        $targetItem = null;
+        $jumlah = 0;
+        $subtotal = 0;
 
         if (isset($cart[$productId])) {
             if ($request->action == 'increase') {
@@ -282,6 +310,29 @@ class CustomerCatalogController extends Controller
                 unset($cart[$productId]);
             }
             session()->put('cart', $cart);
+
+            if (isset($cart[$productId])) {
+                $targetItem = $cart[$productId];
+                $jumlah = $cart[$productId]['quantity'];
+                $subtotal = $cart[$productId]['price'] * $cart[$productId]['quantity'];
+            }
+        }
+
+        $total = array_reduce($cart, function($carry, $item) {
+            return $carry + ($item['price'] * $item['quantity']);
+        }, 0);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'item' => $targetItem,
+                'jumlah' => $jumlah,
+                'subtotal' => $subtotal,
+                'total' => $total,
+                'cart_count' => count($cart),
+                'cart' => $cart,
+                'message' => 'Keranjang berhasil diperbarui',
+            ]);
         }
 
         return redirect()->route('customer.cart');
@@ -290,8 +341,17 @@ class CustomerCatalogController extends Controller
     public function clearCart(Request $request)
     {
         session()->forget('cart');
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true]);
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'item' => null,
+                'jumlah' => 0,
+                'subtotal' => 0,
+                'total' => 0,
+                'cart_count' => 0,
+                'cart' => [],
+                'message' => 'Keranjang berhasil dikosongkan',
+            ]);
         }
         return redirect()->back();
     }
@@ -388,35 +448,39 @@ class CustomerCatalogController extends Controller
             }
         }
         
-        $order = Order::create([
-            'order_code' => 'ORD-' . strtoupper(Str::random(6)),
-            'tenant_id' => $tenantId,
-            'customer_id' => $customerId,
-            'customer_name' => $request->customer_name,
-            'flight_number' => $request->customer_type === 'penumpang' ? strtoupper($request->flight_number) : null,
-            'gate' => null, // Gate manual dihapus dari form, gunakan delivery_location_id jika diantar
-            'boarding_time' => $fullBoardingTime,
-            'pickup_method' => $request->pickup_method,
-            'delivery_location_id' => $request->pickup_method === 'diantar' ? $request->delivery_location_id : null,
-            'delivery_fee' => $request->pickup_method === 'diantar' ? $deliveryFee : null,
-            'status' => 'menunggu',
-            'payment_method' => $request->payment_method,
-            'is_paid' => false,
-            'auto_cancel_at' => $autoCancelAt,
-            'total_amount' => $totalAmount,
-            'ordered_at' => now(),
-        ]);
-
-        foreach ($cart as $item) {
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $item['id'],
-                'product_name_snapshot' => $item['name'],
-                'quantity' => $item['quantity'],
-                'unit_price' => $item['price'],
-                'subtotal' => $item['price'] * $item['quantity'],
+        $order = DB::transaction(function () use ($tenantId, $customerId, $request, $fullBoardingTime, $deliveryFee, $autoCancelAt, $totalAmount, $cart) {
+            $newOrder = Order::create([
+                'order_code' => 'ORD-' . strtoupper(Str::random(6)),
+                'tenant_id' => $tenantId,
+                'customer_id' => $customerId,
+                'customer_name' => $request->customer_name,
+                'flight_number' => $request->customer_type === 'penumpang' ? strtoupper($request->flight_number) : null,
+                'gate' => null, // Gate manual dihapus dari form, gunakan delivery_location_id jika diantar
+                'boarding_time' => $fullBoardingTime,
+                'pickup_method' => $request->pickup_method,
+                'delivery_location_id' => $request->pickup_method === 'diantar' ? $request->delivery_location_id : null,
+                'delivery_fee' => $request->pickup_method === 'diantar' ? $deliveryFee : null,
+                'status' => 'menunggu',
+                'payment_method' => $request->payment_method,
+                'is_paid' => false,
+                'auto_cancel_at' => $autoCancelAt,
+                'total_amount' => $totalAmount,
+                'ordered_at' => now(),
             ]);
-        }
+
+            foreach ($cart as $item) {
+                OrderItem::create([
+                    'order_id' => $newOrder->id,
+                    'product_id' => $item['id'],
+                    'product_name_snapshot' => $item['name'],
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['price'],
+                    'subtotal' => $item['price'] * $item['quantity'],
+                ]);
+            }
+
+            return $newOrder;
+        });
 
         session()->forget('cart');
         session()->put('order_code', $order->order_code); // Simpan permanen di session agar tidak hilang saat direfresh

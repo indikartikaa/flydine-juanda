@@ -214,6 +214,7 @@ class ProductSeeder extends Seeder
                         'tenant_id' => $tenant->id,
                         'name' => $menuData['name'],
                         'price' => $menuData['price'],
+                        'stock' => 50,
                         'is_available' => true,
                         'created_at' => now(),
                         'updated_at' => now(),

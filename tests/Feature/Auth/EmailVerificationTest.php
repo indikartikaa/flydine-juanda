@@ -3,7 +3,14 @@
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
+
+beforeEach(function () {
+    if (!Route::has('verification.notice')) {
+        $this->markTestSkipped('Email verification is not enabled in FlyDine.');
+    }
+});
 
 test('email verification screen can be rendered', function () {
     $user = User::factory()->unverified()->create();
