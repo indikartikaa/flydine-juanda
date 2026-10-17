@@ -538,8 +538,8 @@ class Terminal2Seeder extends Seeder
                 );
                 $totalTenants++;
 
-                // 2. Buat Akun Login Tenant Staff jika belum ada (Fitur 13)
-                $email = strtolower(str_replace(['-', ' '], ['_', ''], $item['tenant_code'])) . '@flydine.com';
+                $slug = \Illuminate\Support\Str::slug($item['name'] . '-' . $item['tenant_code']);
+                $email = 'staff.' . $slug . '@flydine.test';
                 User::updateOrCreate(
                     ['email' => $email],
                     [

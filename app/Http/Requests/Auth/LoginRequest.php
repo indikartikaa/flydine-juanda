@@ -28,7 +28,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'email' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
     }
@@ -42,15 +42,41 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+        $loginInput = trim($this->input('email'));
+        $password = $this->input('password');
+        $remember = $this->boolean('remember');
 
-            throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
-            ]);
+        // 1. Coba login langsung dengan email yang diinput
+        if (Auth::attempt(['email' => $loginInput, 'password' => $password], $remember)) {
+            RateLimiter::clear($this->throttleKey());
+            return;
         }
 
-        RateLimiter::clear($this->throttleKey());
+        // 2. Coba login berdasarkan Kode Tenant (misal: "FB-T1-02-01", "fb-t1-02-01", "fb_t1_02_01", "FB-T2-02-01")
+        $normalizedCode = strtoupper(str_replace('_', '-', $loginInput));
+        $tenant = \App\Models\Tenant::where('tenant_code', $normalizedCode)->first();
+        if ($tenant) {
+            $user = \App\Models\User::where('tenant_id', $tenant->id)->first();
+            if ($user && Auth::attempt(['email' => $user->email, 'password' => $password], $remember)) {
+                RateLimiter::clear($this->throttleKey());
+                return;
+            }
+        }
+
+        // 3. Coba login jika user hanya mengetik slug staff tanpa domain (misal: "staff.killiney-fb-t1-02-01")
+        if (!str_contains($loginInput, '@')) {
+            $user = \App\Models\User::where('email', $loginInput . '@flydine.test')->first();
+            if ($user && Auth::attempt(['email' => $user->email, 'password' => $password], $remember)) {
+                RateLimiter::clear($this->throttleKey());
+                return;
+            }
+        }
+
+        RateLimiter::hit($this->throttleKey());
+
+        throw ValidationException::withMessages([
+            'email' => trans('auth.failed'),
+        ]);
     }
 
     /**

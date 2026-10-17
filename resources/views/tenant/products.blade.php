@@ -38,8 +38,37 @@
 
         {{-- FOTO --}}
         <div class="h-44 w-full bg-gray-50 relative overflow-hidden shrink-0 border-b border-gray-50">
-            @if($product->image)
-                <img src="{{ asset('storage/'.$product->image) }}" alt="{{ $product->name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+            @php
+                $hasTenantProdImage = false;
+                $tenantProdImageUrl = null;
+                if (!empty($product->image)) {
+                    if (\Illuminate\Support\Str::startsWith($product->image, ['http://', 'https://'])) {
+                        $hasTenantProdImage = true;
+                        $tenantProdImageUrl = $product->image;
+                    } elseif (\Illuminate\Support\Str::startsWith($product->image, 'images/')) {
+                        if (file_exists(public_path($product->image))) {
+                            $hasTenantProdImage = true;
+                            $tenantProdImageUrl = asset($product->image);
+                        }
+                    } else {
+                        if (file_exists(public_path('storage/' . $product->image)) || file_exists(storage_path('app/public/' . $product->image))) {
+                            $hasTenantProdImage = true;
+                            $tenantProdImageUrl = asset('storage/' . $product->image);
+                        }
+                    }
+                }
+            @endphp
+            @if($hasTenantProdImage)
+                <img src="{{ $tenantProdImageUrl }}" 
+                     alt="{{ $product->name }}" 
+                     loading="lazy" 
+                     onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.classList.remove('hidden');" 
+                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                <div class="hidden w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100 group-hover:scale-110 transition-transform duration-700">
+                    <span class="text-6xl font-black text-blue-200 select-none">
+                        {{ strtoupper(substr($product->name, 0, 1)) }}
+                    </span>
+                </div>
             @else
                 <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100 group-hover:scale-110 transition-transform duration-700">
                     <span class="text-6xl font-black text-blue-200 select-none">

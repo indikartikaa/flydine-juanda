@@ -33,8 +33,6 @@ class Terminal1Seeder extends Seeder
                         'stock'            => 0,
                         'is_available'     => true,
                         'preparation_time' => 15,
-                        'description'      => 'test',
-                        'image'            => 'products/IVfgihiz7NFfe3Z3oN1cBNXcFgs5pI7HZdl3ezRI.jpg',
                     ],
                     [
                         'name'             => 'NEW! Curry Aroma Chicken, Rice, Chic Soup, Chic Chunks, RB & FREE! AWniversary Mug',

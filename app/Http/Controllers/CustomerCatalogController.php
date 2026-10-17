@@ -52,13 +52,28 @@ class CustomerCatalogController extends Controller
             }
         }
 
-        // Filter by Kategori Favorit Makanan
+        // Filter by Kategori Favorit Makanan (Disinkronkan 100% dengan 4 Kategori Database: Indonesian Traditional, Fast Food & Restaurant, Bakery & Pastry, Beverages & Coffee)
         if ($request->filled('category') && $request->category !== 'semua') {
             $catMap = [
-                'makanan-berat' => ['Indonesian Traditional', 'Makanan Berat'],
-                'cepat-saji' => ['Fast Food & Restaurant', 'Cepat Saji'],
-                'roti-kue' => ['Bakery & Pastry', 'Roti & Kue'],
-                'minuman' => ['Beverages & Coffee', 'Minuman'],
+                'makanan-berat' => ['Indonesian Traditional', 'Makanan Berat', 'Makanan Tradisional'],
+                'makanan berat' => ['Indonesian Traditional', 'Makanan Berat', 'Makanan Tradisional'],
+                'indonesian traditional' => ['Indonesian Traditional', 'Makanan Berat'],
+                'indonesian-traditional' => ['Indonesian Traditional', 'Makanan Berat'],
+
+                'cepat-saji' => ['Fast Food & Restaurant', 'Cepat Saji', 'Fast Food'],
+                'cepat saji' => ['Fast Food & Restaurant', 'Cepat Saji', 'Fast Food'],
+                'fast food & restaurant' => ['Fast Food & Restaurant', 'Cepat Saji'],
+                'fast-food' => ['Fast Food & Restaurant', 'Cepat Saji'],
+                'fast food' => ['Fast Food & Restaurant', 'Cepat Saji'],
+
+                'roti-kue' => ['Bakery & Pastry', 'Roti & Kue', 'Bakery', 'Pastry'],
+                'roti & kue' => ['Bakery & Pastry', 'Roti & Kue', 'Bakery', 'Pastry'],
+                'bakery & pastry' => ['Bakery & Pastry', 'Roti & Kue'],
+                'bakery-pastry' => ['Bakery & Pastry', 'Roti & Kue'],
+
+                'minuman' => ['Beverages & Coffee', 'Minuman', 'Coffee', 'Beverages'],
+                'beverages & coffee' => ['Beverages & Coffee', 'Minuman'],
+                'beverages-coffee' => ['Beverages & Coffee', 'Minuman'],
             ];
             $catKey = strtolower(trim($request->category));
             $mapped = $catMap[$catKey] ?? [$request->category];

@@ -228,12 +228,19 @@
                         <span class="w-2.5 h-2.5 rounded-full bg-[#005ea2] animate-pulse"></span>
                         <span class="text-xs font-bold text-slate-500" data-id="Kategori Aktif:" data-en="Active Category:">Kategori Aktif:</span>
                         <span class="text-xs font-black text-[#005ea2] bg-white px-3.5 py-1.5 rounded-full shadow-sm border border-blue-200/80 flex items-center gap-1.5">
-                            @if(stripos(request('category'), 'makanan') !== false) 🍲 
-                            @elseif(stripos(request('category'), 'cepat') !== false) 🍔
-                            @elseif(stripos(request('category'), 'roti') !== false) 🥐
-                            @elseif(stripos(request('category'), 'minum') !== false) ☕
+                            @if(stripos(request('category'), 'makanan') !== false || stripos(request('category'), 'indonesian') !== false) 🍲 
+                            @elseif(stripos(request('category'), 'cepat') !== false || stripos(request('category'), 'fast') !== false) 🍔
+                            @elseif(stripos(request('category'), 'roti') !== false || stripos(request('category'), 'bakery') !== false) 🥐
+                            @elseif(stripos(request('category'), 'minum') !== false || stripos(request('category'), 'beverage') !== false) ☕
                             @endif
-                            <span>{{ request('category') == 'makanan-berat' ? 'Makanan Berat' : (request('category') == 'cepat-saji' ? 'Cepat Saji' : (request('category') == 'roti-kue' ? 'Roti & Kue' : (request('category') == 'minuman' ? 'Minuman' : request('category')))) }}</span>
+                            <span>
+                                @if(stripos(request('category'), 'makanan') !== false || stripos(request('category'), 'indonesian') !== false) Makanan Berat (Indonesian Traditional)
+                                @elseif(stripos(request('category'), 'cepat') !== false || stripos(request('category'), 'fast') !== false) Cepat Saji (Fast Food &amp; Restaurant)
+                                @elseif(stripos(request('category'), 'roti') !== false || stripos(request('category'), 'bakery') !== false) Roti &amp; Kue (Bakery &amp; Pastry)
+                                @elseif(stripos(request('category'), 'minum') !== false || stripos(request('category'), 'beverage') !== false) Minuman (Beverages &amp; Coffee)
+                                @else {{ request('category') }}
+                                @endif
+                            </span>
                         </span>
                         <span class="text-xs font-semibold text-slate-400">({{ $tenants->total() }} restoran ditemukan)</span>
                     </div>
@@ -357,22 +364,26 @@
                 
                 @php
                     $activeCategory = strtolower(request('category', ''));
-                    $isMakananBerat = ($activeCategory === 'makanan berat' || $activeCategory === 'makanan-berat');
-                    $isCepatSaji = ($activeCategory === 'cepat saji' || $activeCategory === 'cepat-saji');
-                    $isRotiKue = ($activeCategory === 'roti & kue' || $activeCategory === 'roti-kue');
-                    $isMinuman = ($activeCategory === 'minuman');
+                    $isMakananBerat = in_array($activeCategory, ['makanan berat', 'makanan-berat', 'indonesian traditional', 'indonesian-traditional']);
+                    $isCepatSaji = in_array($activeCategory, ['cepat saji', 'cepat-saji', 'fast food & restaurant', 'fast food', 'fast-food']);
+                    $isRotiKue = in_array($activeCategory, ['roti & kue', 'roti-kue', 'bakery & pastry', 'bakery-pastry']);
+                    $isMinuman = in_array($activeCategory, ['minuman', 'beverages & coffee', 'beverages-coffee']);
                 @endphp
 
-                <div class="flex overflow-x-auto scrollbar-hide space-x-4 sm:space-x-6 md:justify-center pb-4 px-4 -mx-4 snap-x snap-mandatory">
+                <div class="flex overflow-x-auto scrollbar-hide space-x-4 sm:space-x-6 md:justify-center pt-4 pb-6 px-4 -mx-4 snap-x snap-mandatory">
                     
-                    <!-- Makanan Berat -->
-                    <button type="button" onclick="selectCategory('{{ $isMakananBerat ? '' : 'makanan-berat' }}')" class="flex flex-col items-center flex-shrink-0 group w-24 sm:w-28 outline-none focus:outline-none snap-start cursor-pointer" style="-webkit-tap-highlight-color: transparent;">
+                    <!-- Makanan Berat / Indonesian Traditional -->
+                    <button type="button" 
+                            onclick="selectCategory('{{ $isMakananBerat ? '' : 'makanan-berat' }}')" 
+                            title="Indonesian Traditional (27 Restoran)"
+                            class="flex flex-col items-center flex-shrink-0 group w-24 sm:w-28 outline-none focus:outline-none snap-start cursor-pointer py-1" 
+                            style="-webkit-tap-highlight-color: transparent;">
                         <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 aspect-square rounded-full p-[3px] transition-all duration-300 relative {{ $isMakananBerat ? 'bg-gradient-to-tr from-[#005ea2] to-[#8dc63f] ring-4 ring-[#005ea2]/30 scale-105 shadow-xl shadow-blue-500/25' : 'bg-slate-100 group-hover:bg-gradient-to-tr group-hover:from-[#005ea2] group-hover:to-blue-400 group-active:scale-95 shadow-sm group-hover:shadow-xl group-hover:shadow-blue-500/30 group-hover:-translate-y-1.5' }}">
-                            <div class="w-full h-full bg-white rounded-full p-1.5 relative overflow-hidden">
-                                <img src="{{ asset('images/makanan_berat.jpg') }}" alt="Makanan Berat" class="w-full h-full object-cover rounded-full transition-transform duration-700 group-hover:scale-110">
+                            <div class="w-full h-full bg-white rounded-full p-1 relative overflow-hidden flex items-center justify-center">
+                                <img src="{{ asset('images/makanan_berat.jpg') }}" alt="Makanan Berat (Indonesian Traditional)" class="w-full h-full object-cover object-center rounded-full transition-transform duration-700 group-hover:scale-110">
                             </div>
                             @if($isMakananBerat)
-                            <div class="absolute -top-1 -right-1 bg-[#005ea2] text-white rounded-full p-1 shadow-md border-2 border-white">
+                            <div class="absolute -top-0.5 -right-0.5 bg-[#005ea2] text-white rounded-full p-1 shadow-md border-2 border-white">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                             </div>
                             @endif
@@ -382,14 +393,18 @@
                         </span>
                     </button>
 
-                    <!-- Cepat Saji -->
-                    <button type="button" onclick="selectCategory('{{ $isCepatSaji ? '' : 'cepat-saji' }}')" class="flex flex-col items-center flex-shrink-0 group w-24 sm:w-28 outline-none focus:outline-none snap-start cursor-pointer" style="-webkit-tap-highlight-color: transparent;">
+                    <!-- Cepat Saji / Fast Food & Restaurant -->
+                    <button type="button" 
+                            onclick="selectCategory('{{ $isCepatSaji ? '' : 'cepat-saji' }}')" 
+                            title="Fast Food & Restaurant (9 Restoran)"
+                            class="flex flex-col items-center flex-shrink-0 group w-24 sm:w-28 outline-none focus:outline-none snap-start cursor-pointer py-1" 
+                            style="-webkit-tap-highlight-color: transparent;">
                         <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 aspect-square rounded-full p-[3px] transition-all duration-300 relative {{ $isCepatSaji ? 'bg-gradient-to-tr from-[#005ea2] to-[#8dc63f] ring-4 ring-[#005ea2]/30 scale-105 shadow-xl shadow-blue-500/25' : 'bg-slate-100 group-hover:bg-gradient-to-tr group-hover:from-[#005ea2] group-hover:to-blue-400 group-active:scale-95 shadow-sm group-hover:shadow-xl group-hover:shadow-blue-500/30 group-hover:-translate-y-1.5' }}">
-                            <div class="w-full h-full bg-white rounded-full p-1.5 relative overflow-hidden">
-                                <img src="{{ asset('images/cepat_saji.jpg') }}" alt="Cepat Saji" class="w-full h-full object-cover rounded-full transition-transform duration-700 group-hover:scale-110">
+                            <div class="w-full h-full bg-white rounded-full p-1 relative overflow-hidden flex items-center justify-center">
+                                <img src="{{ asset('images/cepat_saji.jpg') }}" alt="Cepat Saji (Fast Food & Restaurant)" class="w-full h-full object-cover object-center rounded-full transition-transform duration-700 group-hover:scale-110">
                             </div>
                             @if($isCepatSaji)
-                            <div class="absolute -top-1 -right-1 bg-[#005ea2] text-white rounded-full p-1 shadow-md border-2 border-white">
+                            <div class="absolute -top-0.5 -right-0.5 bg-[#005ea2] text-white rounded-full p-1 shadow-md border-2 border-white">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                             </div>
                             @endif
@@ -399,14 +414,18 @@
                         </span>
                     </button>
 
-                    <!-- Roti & Kue -->
-                    <button type="button" onclick="selectCategory('{{ $isRotiKue ? '' : 'roti-kue' }}')" class="flex flex-col items-center flex-shrink-0 group w-24 sm:w-28 outline-none focus:outline-none snap-start cursor-pointer" style="-webkit-tap-highlight-color: transparent;">
+                    <!-- Roti & Kue / Bakery & Pastry -->
+                    <button type="button" 
+                            onclick="selectCategory('{{ $isRotiKue ? '' : 'roti-kue' }}')" 
+                            title="Bakery & Pastry (17 Restoran)"
+                            class="flex flex-col items-center flex-shrink-0 group w-24 sm:w-28 outline-none focus:outline-none snap-start cursor-pointer py-1" 
+                            style="-webkit-tap-highlight-color: transparent;">
                         <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 aspect-square rounded-full p-[3px] transition-all duration-300 relative {{ $isRotiKue ? 'bg-gradient-to-tr from-[#005ea2] to-[#8dc63f] ring-4 ring-[#005ea2]/30 scale-105 shadow-xl shadow-blue-500/25' : 'bg-slate-100 group-hover:bg-gradient-to-tr group-hover:from-[#005ea2] group-hover:to-blue-400 group-active:scale-95 shadow-sm group-hover:shadow-xl group-hover:shadow-blue-500/30 group-hover:-translate-y-1.5' }}">
-                            <div class="w-full h-full bg-white rounded-full p-1.5 relative overflow-hidden">
-                                <img src="{{ asset('images/roti_kue.jpg') }}" alt="Roti & Kue" class="w-full h-full object-cover rounded-full transition-transform duration-700 group-hover:scale-110">
+                            <div class="w-full h-full bg-white rounded-full p-1 relative overflow-hidden flex items-center justify-center">
+                                <img src="{{ asset('images/roti_kue.jpg') }}" alt="Roti & Kue (Bakery & Pastry)" class="w-full h-full object-cover object-center rounded-full transition-transform duration-700 group-hover:scale-110">
                             </div>
                             @if($isRotiKue)
-                            <div class="absolute -top-1 -right-1 bg-[#005ea2] text-white rounded-full p-1 shadow-md border-2 border-white">
+                            <div class="absolute -top-0.5 -right-0.5 bg-[#005ea2] text-white rounded-full p-1 shadow-md border-2 border-white">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                             </div>
                             @endif
@@ -416,14 +435,18 @@
                         </span>
                     </button>
 
-                    <!-- Minuman -->
-                    <button type="button" onclick="selectCategory('{{ $isMinuman ? '' : 'minuman' }}')" class="flex flex-col items-center flex-shrink-0 group w-24 sm:w-28 outline-none focus:outline-none snap-start cursor-pointer" style="-webkit-tap-highlight-color: transparent;">
+                    <!-- Minuman / Beverages & Coffee -->
+                    <button type="button" 
+                            onclick="selectCategory('{{ $isMinuman ? '' : 'minuman' }}')" 
+                            title="Beverages & Coffee (23 Restoran)"
+                            class="flex flex-col items-center flex-shrink-0 group w-24 sm:w-28 outline-none focus:outline-none snap-start cursor-pointer py-1" 
+                            style="-webkit-tap-highlight-color: transparent;">
                         <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 aspect-square rounded-full p-[3px] transition-all duration-300 relative {{ $isMinuman ? 'bg-gradient-to-tr from-[#005ea2] to-[#8dc63f] ring-4 ring-[#005ea2]/30 scale-105 shadow-xl shadow-blue-500/25' : 'bg-slate-100 group-hover:bg-gradient-to-tr group-hover:from-[#005ea2] group-hover:to-blue-400 group-active:scale-95 shadow-sm group-hover:shadow-xl group-hover:shadow-blue-500/30 group-hover:-translate-y-1.5' }}">
-                            <div class="w-full h-full bg-white rounded-full p-1.5 relative overflow-hidden">
-                                <img src="{{ asset('images/minuman.jpg') }}" alt="Minuman" class="w-full h-full object-cover rounded-full transition-transform duration-700 group-hover:scale-110">
+                            <div class="w-full h-full bg-white rounded-full p-1 relative overflow-hidden flex items-center justify-center">
+                                <img src="{{ asset('images/minuman.jpg') }}" alt="Minuman (Beverages & Coffee)" class="w-full h-full object-cover object-center rounded-full transition-transform duration-700 group-hover:scale-110">
                             </div>
                             @if($isMinuman)
-                            <div class="absolute -top-1 -right-1 bg-[#005ea2] text-white rounded-full p-1 shadow-md border-2 border-white">
+                            <div class="absolute -top-0.5 -right-0.5 bg-[#005ea2] text-white rounded-full p-1 shadow-md border-2 border-white">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                             </div>
                             @endif

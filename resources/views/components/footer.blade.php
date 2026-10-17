@@ -84,7 +84,7 @@
            <!-- Bottom Copyright Bar -->
             <div class="pb-safe py-6 border-t border-slate-200 text-center">
                 <p class="text-xs font-medium text-slate-500">
-                    Copyright &copy; {{ date('Y') }} FlyDine Juanda. All rights reserved 
+                    Copyright &copy; 2026 FlyDine Juanda. All rights reserved
                 </p>
             </div>
             

@@ -113,10 +113,10 @@
 
                     <div>
                         <label for="email" class="block text-sm font-bold text-blue-50 mb-2">
-                            Email
+                            Email / Kode Tenant
                         </label>
-                        <input id="email" type="email" name="email" value="{{ old('email') }}" 
-                               placeholder="Contoh: staff.killiney@flydine.test" required autofocus autocomplete="username"
+                        <input id="email" type="text" name="email" value="{{ old('email') }}" 
+                               placeholder="Email atau Kode Tenant (Contoh: FB-T1-02-01)" required autofocus autocomplete="username"
                                class="input-flydine shadow-inner">
                         <x-input-error :messages="$errors->get('email')" class="mt-2 text-xs text-red-300" />
                     </div>
@@ -154,7 +154,7 @@
                     </div>
 
                     <!-- Tombol Login (Putih, teks Biru) -->
-                    <button type="submit" class="mt-6 w-full bg-white hover:bg-slate-50 text-[#005ea2] font-black py-4 rounded-xl transition-all flex items-center justify-center group shadow-md hover:-translate-y-0.5">
+                    <button type="submit" class="mt-6 w-full bg-white hover:bg-slate-50 text-[#005ea2] font-black py-4 rounded-xl transition-all flex items-center justify-center group shadow-md hover:-translate-y-0.5 cursor-pointer">
                         <span data-i18n="login" class="tracking-wide uppercase text-sm">Login</span>
                         <svg class="h-4 w-4 ml-2 opacity-80 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                     </button>
