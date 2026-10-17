@@ -1,0 +1,195 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1560" width="1440" height="1560" style="background:#F8FAFC; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+
+  <!-- ========================================================================= -->
+  <!-- WIREFRAME PERSIS: KEBIJAKAN PRIVASI (/kebijakan-privasi)                  -->
+  <!-- Murni Kotak-Kotak Struktur (Skeleton Wireframe - Tanpa Browser Frame)     -->
+  <!-- Mengikuti: resources/views/customer/pages/privacy.blade.php & layout      -->
+  <!-- ========================================================================= -->
+
+  <!-- 1. TOP NAVBAR -->
+  <g id="Top-Navbar">
+    <rect x="0" y="0" width="1440" height="80" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+    <g transform="translate(80, 18)">
+      <rect width="140" height="44" rx="8" fill="#FFFFFF" stroke="#27272A" stroke-width="1.8" />
+      <line x1="0" y1="0" x2="140" y2="44" stroke="#71717A" stroke-width="1" />
+      <line x1="140" y1="0" x2="0" y2="44" stroke="#71717A" stroke-width="1" />
+    </g>
+    <g transform="translate(1080, 26)">
+      <g transform="translate(0, 0)">
+        <rect x="0" y="4" width="20" height="20" rx="4" fill="#FFFFFF" stroke="#27272A" stroke-width="1.8" />
+        <path d="M4 4 V2 C4 0 16 0 16 2 V4" fill="none" stroke="#27272A" stroke-width="1.5" />
+        <line x1="28" y1="14" x2="100" y2="14" stroke="#27272A" stroke-width="5" stroke-linecap="round" />
+      </g>
+      <line x1="130" y1="2" x2="130" y2="26" stroke="#E4E4E7" stroke-width="1.5" />
+      <g transform="translate(150, 0)">
+        <rect x="0" y="4" width="20" height="20" rx="4" fill="#FFFFFF" stroke="#27272A" stroke-width="1.8" />
+        <line x1="28" y1="14" x2="130" y2="14" stroke="#27272A" stroke-width="5" stroke-linecap="round" />
+      </g>
+    </g>
+  </g>
+
+  <!-- 2. HEADER TOP BANNER -->
+  <g id="Header-Banner" transform="translate(0, 80)">
+    <rect x="0" y="0" width="1440" height="290" fill="#F4F4F5" stroke="#27272A" stroke-width="2" />
+
+    <g transform="translate(240, 36)">
+      <!-- Tombol Kembali ke Beranda -->
+      <g transform="translate(0, 0)">
+        <rect width="180" height="36" rx="18" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+        <path d="M26 18 L18 18 M22 14 L18 18 L22 22" stroke="#27272A" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+        <line x1="36" y1="18" x2="156" y2="18" stroke="#27272A" stroke-width="4.5" stroke-linecap="round" />
+      </g>
+
+      <!-- Badge "Keamanan Data" -->
+      <g transform="translate(0, 56)">
+        <rect width="150" height="28" rx="14" fill="#FFFFFF" stroke="#27272A" stroke-width="1.2" />
+        <circle cx="16" cy="14" r="4" fill="#8DC63F" />
+        <line x1="28" y1="14" x2="134" y2="14" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
+      </g>
+
+      <!-- Judul "Kebijakan Privasi" -->
+      <line x1="0" y1="120" x2="360" y2="120" stroke="#18181B" stroke-width="12" stroke-linecap="round" />
+
+      <!-- Subtitle Deskripsi -->
+      <line x1="0" y1="154" x2="560" y2="154" stroke="#71717A" stroke-width="4.5" stroke-linecap="round" />
+      <line x1="0" y1="172" x2="460" y2="172" stroke="#71717A" stroke-width="4.5" stroke-linecap="round" />
+
+      <!-- Floating Icon Card Kanan: Shield / Gembok [X] -->
+      <g transform="translate(800, 30)">
+        <rect width="130" height="130" rx="28" fill="#FFFFFF" stroke="#27272A" stroke-width="2.5" />
+        <circle cx="65" cy="65" r="28" fill="none" stroke="#27272A" stroke-width="2.5" />
+        <line x1="0" y1="0" x2="130" y2="130" stroke="#71717A" stroke-width="1.5" />
+        <line x1="130" y1="0" x2="0" y2="130" stroke="#71717A" stroke-width="1.5" />
+        <!-- Floating badge kecil -->
+        <rect x="106" y="-12" width="36" height="36" rx="12" fill="#005EA2" stroke="#27272A" stroke-width="1.8" />
+        <circle cx="124" cy="6" r="6" fill="#FFFFFF" />
+      </g>
+    </g>
+  </g>
+
+  <!-- 3. KONTEN UTAMA: DOKUMEN KEBIJAKAN PRIVASI (x=240, width=960) -->
+  <g id="Main-Content" transform="translate(240, 330)">
+    <rect width="960" height="1000" rx="32" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+
+    <g transform="translate(48, 48)">
+      <!-- Paragraf Pembuka: Data Minimization -->
+      <line x1="0" y1="0" x2="864" y2="0" stroke="#52525B" stroke-width="4.5" stroke-linecap="round" />
+      <line x1="0" y1="18" x2="700" y2="18" stroke="#52525B" stroke-width="4.5" stroke-linecap="round" />
+
+      <!-- SECTION 1: Informasi yang Kami Kumpulkan -->
+      <g transform="translate(0, 56)">
+        <!-- Section Title with Icon -->
+        <circle cx="20" cy="12" r="14" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5" />
+        <line x1="44" y1="12" x2="320" y2="12" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
+
+        <!-- Grid 3 Kartu Informasi -->
+        <g transform="translate(0, 36)">
+          <!-- Card 1: WhatsApp & Identitas Kontak -->
+          <g transform="translate(0, 0)">
+            <rect width="274" height="140" rx="16" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1.2" />
+            <circle cx="28" cy="28" r="12" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1.2" />
+            <line x1="50" y1="28" x2="180" y2="28" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
+            <line x1="20" y1="62" x2="250" y2="62" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+            <line x1="20" y1="80" x2="230" y2="80" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+            <line x1="20" y1="98" x2="160" y2="98" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+          </g>
+
+          <!-- Card 2: Detail Pesanan Makanan -->
+          <g transform="translate(295, 0)">
+            <rect width="274" height="140" rx="16" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1.2" />
+            <circle cx="28" cy="28" r="12" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.2" />
+            <line x1="50" y1="28" x2="190" y2="28" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
+            <line x1="20" y1="62" x2="250" y2="62" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+            <line x1="20" y1="80" x2="240" y2="80" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+            <line x1="20" y1="98" x2="180" y2="98" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+          </g>
+
+          <!-- Card 3: Lokasi Antar / Boarding Gate -->
+          <g transform="translate(590, 0)">
+            <rect width="274" height="140" rx="16" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1.2" />
+            <circle cx="28" cy="28" r="12" fill="#FEF3C7" stroke="#FDE68A" stroke-width="1.2" />
+            <line x1="50" y1="28" x2="170" y2="28" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
+            <line x1="20" y1="62" x2="250" y2="62" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+            <line x1="20" y1="80" x2="220" y2="80" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+            <line x1="20" y1="98" x2="150" y2="98" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+          </g>
+        </g>
+      </g>
+
+      <!-- SECTION 2: Tujuan Penggunaan Data -->
+      <g transform="translate(0, 260)">
+        <circle cx="20" cy="12" r="14" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5" />
+        <line x1="44" y1="12" x2="280" y2="12" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
+
+        <!-- 3 List Items -->
+        <g transform="translate(10, 36)">
+          <circle cx="10" cy="10" r="4" fill="#005EA2" />
+          <line x1="28" y1="10" x2="800" y2="10" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
+          <line x1="28" y1="24" x2="650" y2="24" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+
+          <circle cx="10" cy="50" r="4" fill="#005EA2" />
+          <line x1="28" y1="50" x2="780" y2="50" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
+          <line x1="28" y1="64" x2="600" y2="64" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+
+          <circle cx="10" cy="90" r="4" fill="#005EA2" />
+          <line x1="28" y1="90" x2="820" y2="90" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
+          <line x1="28" y1="104" x2="550" y2="104" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+        </g>
+      </g>
+
+      <!-- SECTION 3: Banner Enkripsi & Keamanan Data -->
+      <g transform="translate(0, 420)">
+        <rect width="864" height="150" rx="20" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1.5" />
+        <circle cx="48" cy="48" r="24" fill="#DCFCE7" stroke="#86EFAC" stroke-width="1.5" />
+        <circle cx="48" cy="48" r="10" fill="#16A34A" />
+        <line x1="90" y1="38" x2="340" y2="38" stroke="#15803D" stroke-width="6" stroke-linecap="round" />
+        <line x1="90" y1="62" x2="820" y2="62" stroke="#166534" stroke-width="4" stroke-linecap="round" />
+        <line x1="90" y1="80" x2="800" y2="80" stroke="#166534" stroke-width="4" stroke-linecap="round" />
+        <line x1="90" y1="98" x2="680" y2="98" stroke="#166534" stroke-width="4" stroke-linecap="round" />
+      </g>
+
+      <!-- SECTION 4: Hak Pengguna & Retensi Data -->
+      <g transform="translate(0, 600)">
+        <circle cx="20" cy="12" r="14" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5" />
+        <line x1="44" y1="12" x2="300" y2="12" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
+
+        <g transform="translate(0, 36)">
+          <line x1="0" y1="10" x2="864" y2="10" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
+          <line x1="0" y1="28" x2="830" y2="28" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+          <line x1="0" y1="46" x2="720" y2="46" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+        </g>
+      </g>
+
+      <!-- Note Kontak DPO / Bantuan -->
+      <g transform="translate(0, 720)">
+        <rect width="864" height="80" rx="16" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1.2" />
+        <line x1="24" y1="30" x2="280" y2="30" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
+        <line x1="24" y1="50" x2="560" y2="50" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+      </g>
+    </g>
+  </g>
+
+  <!-- 4. FOOTER RESMI FLYDINE (y=1380) -->
+  <g id="Footer" transform="translate(0, 1380)">
+    <rect width="1440" height="180" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+    <g transform="translate(140, 40)">
+      <rect width="130" height="40" rx="8" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
+      <line x1="0" y1="0" x2="130" y2="40" stroke="#71717A" stroke-width="1" />
+      <line x1="130" y1="0" x2="0" y2="40" stroke="#71717A" stroke-width="1" />
+      <line x1="0" y1="60" x2="320" y2="60" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+      <line x1="0" y1="78" x2="240" y2="78" stroke="#A1A1AA" stroke-width="3.5" stroke-linecap="round" />
+    </g>
+
+    <g transform="translate(860, 40)">
+      <line x1="0" y1="10" x2="80" y2="10" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
+      <line x1="0" y1="34" x2="110" y2="34" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+      <line x1="0" y1="54" x2="120" y2="54" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+    </g>
+    <g transform="translate(1080, 40)">
+      <line x1="0" y1="10" x2="80" y2="10" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
+      <line x1="0" y1="34" x2="110" y2="34" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+      <line x1="0" y1="54" x2="130" y2="54" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+    </g>
+  </g>
+
+</svg>

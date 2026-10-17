@@ -18,6 +18,11 @@ class UserSeeder extends Seeder
         $tenants = DB::table('tenants')->get();
 
         foreach ($tenants as $tenant) {
+            $existingUser = DB::table('users')->where('tenant_id', $tenant->id)->first();
+            if ($existingUser) {
+                continue;
+            }
+
             $slug = Str::slug($tenant->name . '-' . $tenant->tenant_code);
             DB::table('users')->insert([
                 'name' => 'Staff ' . $tenant->name . ' (' . $tenant->tenant_code . ')',
@@ -31,15 +36,17 @@ class UserSeeder extends Seeder
             ]);
         }
 
-        DB::table('users')->insert([
-            'name' => 'Admin Ops Komersial',
-            'email' => 'admin.ops@flydine.test',
-            'password' => Hash::make('password'),
-            'role' => 'admin_ops',
-            'tenant_id' => null,
-            'is_active' => true,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        DB::table('users')->updateOrInsert(
+            ['email' => 'admin.ops@flydine.test'],
+            [
+                'name' => 'Admin Ops Komersial',
+                'password' => Hash::make('password'),
+                'role' => 'admin_ops',
+                'tenant_id' => null,
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
     }
 }

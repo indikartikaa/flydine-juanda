@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galeri Wireframe Low-Fidelity FlyDine Juanda (Lengkap 100%)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #f1f5f9;
+      color: #0f172a;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    header {
+      width: 100%;
+      max-width: 1440px;
+      margin-bottom: 20px;
+      background: #ffffff;
+      padding: 20px 24px;
+      border-radius: 12px;
+      border: 2px solid #18181b;
+      box-shadow: 4px 4px 0px #18181b;
+    }
+    .header-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    h1 { font-size: 18px; font-weight: 800; color: #18181b; }
+    .instructions {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    .folder-path {
+      background: #f4f4f5;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 11px;
+      color: #27272a;
+      border: 1px solid #d4d4d8;
+    }
+    .category-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #71717a;
+      margin: 14px 0 8px;
+    }
+    .nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .tab-btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1.5px solid #18181b;
+      background: #f4f4f5;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      color: #18181b;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tab-btn:hover {
+      background: #e4e4e7;
+    }
+    .tab-btn.active {
+      background: #18181b;
+      color: #ffffff;
+      box-shadow: 2px 2px 0px #71717a;
+    }
+    .tab-btn.auth-tab {
+      border-color: #059669;
+    }
+    .tab-btn.auth-tab.active {
+      background: #059669;
+      color: #ffffff;
+      box-shadow: 2px 2px 0px #047857;
+    }
+    .tab-btn.admin-tab {
+      border-color: #4f46e5;
+    }
+    .tab-btn.admin-tab.active {
+      background: #4f46e5;
+      color: #ffffff;
+      box-shadow: 2px 2px 0px #312e81;
+    }
+    .tab-btn.tenant-tab {
+      border-color: #0284c7;
+    }
+    .tab-btn.tenant-tab.active {
+      background: #0284c7;
+      color: #ffffff;
+      box-shadow: 2px 2px 0px #0369a1;
+    }
+    .wireframe-wrapper {
+      width: 100%;
+      max-width: 1440px;
+      display: flex;
+      justify-content: center;
+    }
+    .wireframe-container {
+      background: #ffffff;
+      border: 2px solid #18181b;
+      box-shadow: 6px 6px 0px #18181b;
+      margin-bottom: 40px;
+      transition: max-width 0.2s ease;
+      width: 100%;
+    }
+    .wireframe-container.mobile-mode {
+      max-width: 540px;
+    }
+    .wireframe-container.desktop-mode {
+      max-width: 1440px;
+    }
+    img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-top">
+      <div>
+        <h1>FlyDine Juanda — Kumpulan Wireframe Low-Fidelity (100% Seluruh Halaman)</h1>
+        <p class="instructions">
+          🎨 <strong>Siap untuk Figma:</strong> Tarik &amp; lepas (drag &amp; drop) file <code>.svg</code> dari folder: <span class="folder-path">C:\Users\Dhidan\Downloads\wireframe fly-dine\</span>
+        </p>
+      </div>
+      <div>
+        <span style="font-size: 12px; font-weight: 800; color: #065f46; background: #d1fae5; padding: 6px 14px; border-radius: 20px; border: 1px solid #a7f3d0;">Total: 27 Halaman Lengkap (100%)</span>
+      </div>
+    </div>
+
+    <!-- Group 1: Autentikasi & Akun -->
+    <div class="category-title" style="color: #059669;">🔑 1. Autentikasi &amp; Pengaturan Profil Akun</div>
+    <div class="nav-tabs">
+      <button class="tab-btn auth-tab active" onclick="switchView('22-auth-login.svg', this, 'desktop')">🔐 22. Halaman Login Portal (/login)</button>
+      <button class="tab-btn auth-tab" onclick="switchView('23-auth-forgot-password.svg', this, 'desktop')">🔑 23. Lupa Kata Sandi (/forgot-password)</button>
+      <button class="tab-btn auth-tab" onclick="switchView('24-auth-reset-password.svg', this, 'desktop')">🔄 24. Reset Kata Sandi Baru (/reset-password)</button>
+      <button class="tab-btn auth-tab" onclick="switchView('27-profile-settings.svg', this, 'desktop')">👤 27. Pengaturan Akun &amp; Profil Pengguna (/profile)</button>
+    </div>
+
+    <!-- Group 2: Portal Admin Operasional Bandara -->
+    <div class="category-title" style="color: #4f46e5;">🛡️ 2. Portal Admin Operasional Bandara (Admin Side)</div>
+    <div class="nav-tabs">
+      <button class="tab-btn admin-tab" onclick="switchView('17-admin-dashboard.svg', this, 'desktop')">📊 17. Ringkasan Sistem Admin (/admin/dashboard)</button>
+      <button class="tab-btn admin-tab" onclick="switchView('18-admin-executive-dashboard.svg', this, 'desktop')">📈 18. Executive Dashboard &amp; Analitik (/admin/executive-dashboard)</button>
+      <button class="tab-btn admin-tab" onclick="switchView('19-admin-tenants-management.svg', this, 'desktop')">🏢 19. Manajemen Mitra Tenant (/admin/tenants-management)</button>
+      <button class="tab-btn admin-tab" onclick="switchView('20-admin-complaints.svg', this, 'desktop')">⚠️ 20. Manajemen Komplain Pelanggan (/admin/complaints)</button>
+      <button class="tab-btn admin-tab" onclick="switchView('21-admin-fraud-monitoring.svg', this, 'desktop')">🔒 21. Pemantauan Fraud &amp; Spam (/admin/fraud-monitoring)</button>
+    </div>
+
+    <!-- Group 3: Portal Restoran / Mitra Tenant -->
+    <div class="category-title" style="color: #0284c7;">🏪 3. Portal Restoran / Mitra Tenant (Kitchen &amp; Operational)</div>
+    <div class="nav-tabs">
+      <button class="tab-btn tenant-tab" onclick="switchView('12-tenant-dashboard.svg', this, 'desktop')">📊 12. Dashboard Operasional Tenant (/tenant/dashboard)</button>
+      <button class="tab-btn tenant-tab" onclick="switchView('13-tenant-orders.svg', this, 'desktop')">🍳 13. Manajemen Pesanan &amp; Dapur (/tenant/orders)</button>
+      <button class="tab-btn tenant-tab" onclick="switchView('14-tenant-products.svg', this, 'desktop')">🍱 14. Katalog Produk Menu (/tenant/products)</button>
+      <button class="tab-btn tenant-tab" onclick="switchView('15-tenant-create-product.svg', this, 'desktop')">➕ 15. Form Tambah Menu Baru (/tenant/products/create)</button>
+      <button class="tab-btn tenant-tab" onclick="switchView('16-tenant-history.svg', this, 'desktop')">📜 16. Riwayat Pesanan Tenant (/tenant/orders/history)</button>
+    </div>
+
+    <!-- Group 4: Transaksi Customer -->
+    <div class="category-title">4. Alur Transaksi &amp; Pemesanan Pelanggan (Customer Journey)</div>
+    <div class="nav-tabs">
+      <button class="tab-btn" onclick="switchView('02-customer-catalog-full.svg', this, 'desktop')">🏪 02. Beranda &amp; Katalog Menu (/)</button>
+      <button class="tab-btn" onclick="switchView('03-customer-tenant-menu.svg', this, 'desktop')">🍽️ 03. Detail Tenant &amp; Menu (/menu/{tenant})</button>
+      <button class="tab-btn" onclick="switchView('04-customer-cart.svg', this, 'mobile')">🛒 04. Keranjang &amp; Checkout (/cart)</button>
+      <button class="tab-btn" onclick="switchView('05-customer-tracking.svg', this, 'mobile')">🛵 05. Pelacakan &amp; QRIS (/tracking)</button>
+      <button class="tab-btn" onclick="switchView('06-customer-receipt.svg', this, 'mobile')">🧾 06. Struk Digital Resmi (/receipt/{order})</button>
+      <button class="tab-btn" onclick="switchView('07-customer-history.svg', this, 'mobile')">📱 07. Riwayat Pesanan (/history)</button>
+    </div>
+
+    <!-- Group 5: Informasi, Bantuan & Legalitas Customer -->
+    <div class="category-title">5. Informasi, Bantuan &amp; Legalitas Layanan Pelanggan</div>
+    <div class="nav-tabs">
+      <button class="tab-btn" onclick="switchView('08-customer-promosi.svg', this, 'desktop')">🎁 08. Promosi Kolaborasi (/promosi)</button>
+      <button class="tab-btn" onclick="switchView('09-customer-cara-pesan.svg', this, 'desktop')">📖 09. Panduan Cara Pesan (/cara-pesan)</button>
+      <button class="tab-btn" onclick="switchView('10-customer-faq.svg', this, 'desktop')">❓ 10. Pusat Bantuan &amp; FAQ (/faq)</button>
+      <button class="tab-btn" onclick="switchView('11-customer-daftar-tenant.svg', this, 'desktop')">🤝 11. Daftar Menjadi Tenant (/daftar-tenant)</button>
+      <button class="tab-btn" onclick="switchView('25-customer-terms.svg', this, 'desktop')">📜 25. Syarat &amp; Ketentuan Layanan (/syarat-ketentuan)</button>
+      <button class="tab-btn" onclick="switchView('26-customer-privacy.svg', this, 'desktop')">🛡️ 26. Kebijakan Privasi Data (/kebijakan-privasi)</button>
+    </div>
+  </header>
+
+  <div class="wireframe-wrapper">
+    <div id="container-box" class="wireframe-container desktop-mode">
+      <img id="wireframe-img" src="22-auth-login.svg" alt="Wireframe FlyDine Juanda">
+    </div>
+  </div>
+
+  <script>
+    function switchView(src, btn, mode) {
+      document.getElementById('wireframe-img').src = src;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const container = document.getElementById('container-box');
+      if (mode === 'mobile') {
+        container.classList.remove('desktop-mode');
+        container.classList.add('mobile-mode');
+      } else {
+        container.classList.remove('mobile-mode');
+        container.classList.add('desktop-mode');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
