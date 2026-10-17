@@ -148,7 +148,7 @@ class DummyOrderSeeder extends Seeder
         shuffle($historicalPool);
 
         $flights = ['GA-312', 'GA-320', 'JT-690', 'JT-714', 'QG-445', 'QG-882', 'ID-721', 'SJ-182', 'QZ-804', 'IU-512'];
-        $gates = ['Gate 1', 'Gate 2', 'Gate 3', 'Gate 4', 'Gate 5', 'Gate 6', 'Gate 7', 'Gate 8', 'Gate 9', 'Gate 11', 'Gate 12'];
+        $gates = ['Gate 1', 'Gate 2', 'Gate 3', 'Gate 4', 'Gate 5', 'Gate 6', 'Gate 7', 'Gate 8', 'Gate 9', 'Gate 10', 'Gate 11', 'Gate 12'];
 
         foreach ($dateList as $dateStr) {
             $dayOrderCount = $ordersPerDate[$dateStr] ?? 6;

@@ -564,9 +564,9 @@ class AnalyticsDrillDownTest extends TestCase
      */
     public function test_filter_category_without_orders_returns_empty_state(): void
     {
-        // Kategori "Lounge" valid namun tidak memiliki pesanan
+        // Kategori "Bakery & Pastry" valid namun tidak memiliki pesanan pada fixture test ini
         $res = $this->actingAs($this->adminOps)->getJson(route('admin.analytics.drilldown.orders', [
-            'category' => 'Lounge',
+            'category' => 'Bakery & Pastry',
         ]));
 
         $res->assertOk();
@@ -577,7 +577,7 @@ class AnalyticsDrillDownTest extends TestCase
 
         // Di charts juga mengembalikan kategori kosong
         $resCharts = $this->actingAs($this->adminOps)->getJson(route('admin.analytics.drilldown.charts', [
-            'category' => 'Lounge',
+            'category' => 'Bakery & Pastry',
         ]));
 
         $resCharts->assertOk();

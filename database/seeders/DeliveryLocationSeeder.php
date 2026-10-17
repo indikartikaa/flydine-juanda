@@ -29,6 +29,7 @@ class DeliveryLocationSeeder extends Seeder
             'Boarding Lounge Lantai 2 (Gate 7) T1',
             'Boarding Lounge Lantai 2 (Gate 8) T1',
             'Boarding Lounge Lantai 2 (Gate 9) T1',
+            'Boarding Lounge Lantai 2 (Gate 10) T1',
             'Boarding Lounge Lantai 2 (Gate 11) T1',
             'Boarding Lounge Lantai 2 (Gate 12) T1',
             'Boarding Lounge Lantai 2 (Gate 12-13) T1',
@@ -46,11 +47,19 @@ class DeliveryLocationSeeder extends Seeder
         $terminal2Locations = [
             'Public T2',
             'Central Lobby T2',
+            'Lobby Lantai 1 T2',
             'Departure Domestik T2',
             'Departure International T2',
+            'Keberangkatan Internasional T2',
+            'Keberangkatan Umrah T2',
             'Arrival Domestik T2',
             'Arrival International T2',
             'Koridor Keberangkatan T2',
+            'Boarding Lounge Lantai 2 (Gate 1) T2',
+            'Boarding Lounge Lantai 2 (Gate 2) T2',
+            'Boarding Lounge Lantai 2 (Gate 3) T2',
+            'Boarding Lounge Lantai 2 (Gate 4) T2',
+            'Boarding Lounge Lantai 2 (Gate 5) T2',
             'Boarding Lounge Lantai 2 T2',
         ];
 

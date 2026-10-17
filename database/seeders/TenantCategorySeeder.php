@@ -10,13 +10,16 @@ class TenantCategorySeeder extends Seeder
     public function run(): void
     {
         $categoryMappings = [
-            'Cepat Saji' => [
+            'Fast Food & Restaurant' => [
                 'A&W',
                 'SUBWAY',
                 'SHIHLIN',
                 'HONEY POK',
+                'YOSINOYA',
+                'MARUGAME UDON',
+                'WINGMAN',
             ],
-            'Roti & Kue' => [
+            'Bakery & Pastry' => [
                 'ROTI\'O',
                 'ROTI O',
                 'ROTI BOY',
@@ -28,7 +31,7 @@ class TenantCategorySeeder extends Seeder
                 'DONUT KINGS',
                 'DUNKIN\' DONUTS',
             ],
-            'Minuman' => [
+            'Beverages & Coffee' => [
                 'EXPAT',
                 'SKY BEANS',
                 'COFFEE BY ROTI\'O',
@@ -50,7 +53,7 @@ class TenantCategorySeeder extends Seeder
                 'OLD TOWN',
                 'OLDTOWN WHITE COFFEE',
             ],
-            'Makanan Berat' => [
+            'Indonesian Traditional' => [
                 'SARI BUNDO',
                 'PAK QOMAR',
                 'BEBEK PAK QOMAR & RAWON',
@@ -58,7 +61,6 @@ class TenantCategorySeeder extends Seeder
                 'SOLARIA',
                 'BAKMI GOCIT',
                 'BAKSO PAK DJO',
-                'YOSINOYA',
                 'SAMBELAN JUARA',
                 'AYAM GORENG TRETES SRIRASA',
                 'MIE KLUNTUNG & NASI GORENG JAWA PAK MITRO',
@@ -72,9 +74,7 @@ class TenantCategorySeeder extends Seeder
                 'AROMA PADANG',
                 'KULINER SANDANG PANGAN',
                 'KULINERI SANDANG PANGAN',
-                'MARUGAME UDON',
                 'PADANG MERDEKA',
-                'WINGMAN',
             ],
         ];
 
@@ -87,10 +87,10 @@ class TenantCategorySeeder extends Seeder
             }
         }
 
-        // Pastikan tidak ada yang tersisa kosong: defaultkan ke Makanan Berat jika ada tenant baru
+        // Pastikan tidak ada yang tersisa kosong: defaultkan ke Indonesian Traditional jika ada tenant baru
         DB::table('tenants')
             ->whereNull('category')
             ->orWhere('category', '')
-            ->update(['category' => 'Makanan Berat']);
+            ->update(['category' => 'Indonesian Traditional']);
     }
 }

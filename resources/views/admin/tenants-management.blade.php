@@ -261,9 +261,7 @@
                             <option value="Beverages & Coffee" {{ old('category') == 'Beverages & Coffee' ? 'selected' : '' }}>Beverages & Coffee</option>
                             <option value="Fast Food & Restaurant" {{ old('category') == 'Fast Food & Restaurant' ? 'selected' : '' }}>Fast Food & Restaurant</option>
                             <option value="Bakery & Pastry" {{ old('category') == 'Bakery & Pastry' ? 'selected' : '' }}>Bakery & Pastry</option>
-                            <option value="Snacks & Convenience" {{ old('category') == 'Snacks & Convenience' ? 'selected' : '' }}>Snacks & Convenience</option>
                             <option value="Indonesian Traditional" {{ old('category') == 'Indonesian Traditional' ? 'selected' : '' }}>Indonesian Traditional</option>
-                            <option value="Lounge" {{ old('category') == 'Lounge' ? 'selected' : '' }}>Lounge</option>
                         </select>
                     </div>
                 </div>
@@ -383,9 +381,7 @@
                             <option value="Beverages & Coffee">Beverages & Coffee</option>
                             <option value="Fast Food & Restaurant">Fast Food & Restaurant</option>
                             <option value="Bakery & Pastry">Bakery & Pastry</option>
-                            <option value="Snacks & Convenience">Snacks & Convenience</option>
                             <option value="Indonesian Traditional">Indonesian Traditional</option>
-                            <option value="Lounge">Lounge</option>
                         </select>
                     </div>
                 </div>

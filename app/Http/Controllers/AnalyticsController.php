@@ -158,9 +158,7 @@ class AnalyticsController extends Controller
             'Beverages & Coffee',
             'Fast Food & Restaurant',
             'Bakery & Pastry',
-            'Snacks & Convenience',
             'Indonesian Traditional',
-            'Lounge',
         ];
         $dbCategories = Tenant::whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category')->toArray();
         $categories = array_values(array_unique(array_merge($availableCategories, $dbCategories)));
@@ -221,7 +219,7 @@ class AnalyticsController extends Controller
             'end_date' => 'nullable|date',
             'date' => 'nullable|date',
             'tenant_id' => 'nullable|exists:tenants,id',
-            'category' => 'nullable|string|in:Beverages & Coffee,Fast Food & Restaurant,Bakery & Pastry,Snacks & Convenience,Indonesian Traditional,Lounge',
+            'category' => 'nullable|string|in:Beverages & Coffee,Fast Food & Restaurant,Bakery & Pastry,Indonesian Traditional',
             'status' => 'nullable|in:menunggu,diproses,siap,selesai,dibatalkan',
             'sla' => 'nullable|in:compliant,breached',
             'hour' => 'nullable|integer|min:0|max:23',
@@ -366,7 +364,7 @@ class AnalyticsController extends Controller
             'end_date' => 'nullable|date',
             'date' => 'nullable|date',
             'tenant_id' => 'nullable|exists:tenants,id',
-            'category' => 'nullable|string|in:Beverages & Coffee,Fast Food & Restaurant,Bakery & Pastry,Snacks & Convenience,Indonesian Traditional,Lounge',
+            'category' => 'nullable|string|in:Beverages & Coffee,Fast Food & Restaurant,Bakery & Pastry,Indonesian Traditional',
             'status' => 'nullable|in:menunggu,diproses,siap,selesai,dibatalkan',
             'sla' => 'nullable|in:compliant,breached',
             'hour' => 'nullable|integer|min:0|max:23',

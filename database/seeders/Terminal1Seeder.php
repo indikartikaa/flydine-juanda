@@ -25,7 +25,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Kedatangan 1A',
-                'category'       => 'Cepat Saji',
+                'category'       => 'Fast Food & Restaurant',
                 'menus'          => [
                     [
                         'name'             => 'NEW! 2 Curry Aroma Chicken, Rice, RB & FREE! AWniversary Mug',
@@ -93,7 +93,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Keberangkatan 1A',
-                'category'       => 'Minuman',
+                'category'       => 'Beverages & Coffee',
                 'menus'          => [
                     [
                         'name'             => 'Toast and Spread',
@@ -173,7 +173,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Keberangkatan 1A',
-                'category'       => 'Roti & Kue',
+                'category'       => 'Bakery & Pastry',
                 'menus'          => [
                     [
                         'name'             => 'Roti\'O Original Coffee Bun',
@@ -288,7 +288,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Keberangkatan 1B',
-                'category'       => 'Roti & Kue',
+                'category'       => 'Bakery & Pastry',
                 'menus'          => [
                     [
                         'name'             => 'Pain Au Chocolat',
@@ -403,7 +403,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Keberangkatan 1B',
-                'category'       => 'Minuman',
+                'category'       => 'Beverages & Coffee',
                 'menus'          => [
                     [
                         'name'             => 'SkyBeans Coffee',
@@ -490,7 +490,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Keberangkatan 1C',
-                'category'       => 'Makanan Berat',
+                'category'       => 'Indonesian Traditional',
                 'menus'          => [
                     [
                         'name'             => 'Paket Rendang',
@@ -556,7 +556,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Keberangkatan 1C',
-                'category'       => 'Makanan Berat',
+                'category'       => 'Indonesian Traditional',
                 'menus'          => [
                     [
                         'name'             => 'Paket Dada Bebek',
@@ -671,7 +671,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Keberangkatan 1C',
-                'category'       => 'Makanan Berat',
+                'category'       => 'Indonesian Traditional',
                 'menus'          => [
                 ],
             ],
@@ -681,7 +681,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Keberangkatan 1C',
-                'category'       => 'Roti & Kue',
+                'category'       => 'Bakery & Pastry',
                 'menus'          => [
                     [
                         'name'             => 'Cheese Cream Puff',
@@ -740,7 +740,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Keberangkatan 1C',
-                'category'       => 'Minuman',
+                'category'       => 'Beverages & Coffee',
                 'menus'          => [
                     [
                         'name'             => 'Roti\'O Original Coffee Bun',
@@ -855,7 +855,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Anjungan',
-                'category'       => 'Cepat Saji',
+                'category'       => 'Fast Food & Restaurant',
                 'menus'          => [
                     [
                         'name'             => 'NEW! 2 Curry Aroma Chicken, Rice, RB & FREE! AWniversary Mug',
@@ -921,7 +921,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Anjungan',
-                'category'       => 'Minuman',
+                'category'       => 'Beverages & Coffee',
                 'menus'          => [
                     [
                         'name'             => 'Paket Siomay A',
@@ -1050,7 +1050,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Anjungan',
-                'category'       => 'Minuman',
+                'category'       => 'Beverages & Coffee',
                 'menus'          => [
                     [
                         'name'             => 'Coffee of the Day',
@@ -1137,7 +1137,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Anjungan',
-                'category'       => 'Makanan Berat',
+                'category'       => 'Indonesian Traditional',
                 'menus'          => [
                     [
                         'name'             => 'Nasi + Ayam Goreng Mentega',
@@ -1252,7 +1252,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Anjungan',
-                'category'       => 'Minuman',
+                'category'       => 'Beverages & Coffee',
                 'menus'          => [
                     [
                         'name'             => 'Beef Yakiniku Rice Bowl',
@@ -1367,7 +1367,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Kedatangan 1B',
-                'category'       => 'Roti & Kue',
+                'category'       => 'Bakery & Pastry',
                 'menus'          => [
                     [
                         'name'             => 'Rotiboy',
@@ -1440,7 +1440,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Kedatangan 1B',
-                'category'       => 'Roti & Kue',
+                'category'       => 'Bakery & Pastry',
                 'menus'          => [
                     [
                         'name'             => 'Roti\'O Original Coffee Bun',
@@ -1555,7 +1555,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Kedatangan 1B',
-                'category'       => 'Roti & Kue',
+                'category'       => 'Bakery & Pastry',
                 'menus'          => [
                     [
                         'name'             => 'Cheese Cream Puff',
@@ -1614,7 +1614,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Kedatangan 1B',
-                'category'       => 'Roti & Kue',
+                'category'       => 'Bakery & Pastry',
                 'menus'          => [
                     [
                         'name'             => 'Roti\'O Original Coffee Bun',
@@ -1729,7 +1729,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Kedatangan 1B',
-                'category'       => 'Minuman',
+                'category'       => 'Beverages & Coffee',
                 'menus'          => [
                     [
                         'name'             => 'Rawon Empal',
@@ -1837,7 +1837,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Kedatangan 1B',
-                'category'       => 'Makanan Berat',
+                'category'       => 'Indonesian Traditional',
                 'menus'          => [
                     [
                         'name'             => 'Bakmi Rempah Spesial',
@@ -1952,7 +1952,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Kedatangan 1B',
-                'category'       => 'Cepat Saji',
+                'category'       => 'Fast Food & Restaurant',
                 'menus'          => [
                     [
                         'name'             => 'NEW! 2 Curry Aroma Chicken, Rice, RB & FREE! AWniversary Mug',
@@ -2018,7 +2018,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Landside',
                 'floor_location' => 'Lantai 1 - Kedatangan 1B',
-                'category'       => 'Cepat Saji',
+                'category'       => 'Fast Food & Restaurant',
                 'menus'          => [
                     [
                         'name'             => 'XXL Crispy Chicken Original',
@@ -2133,7 +2133,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 1',
-                'category'       => 'Minuman',
+                'category'       => 'Beverages & Coffee',
                 'menus'          => [
                     [
                         'name'             => 'Nasi Lemak With Chicken Katsu',
@@ -2248,7 +2248,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 4',
-                'category'       => 'Minuman',
+                'category'       => 'Beverages & Coffee',
                 'menus'          => [
                     [
                         'name'             => 'Nasi Ayam Geprek Sambel Bawang',
@@ -2363,7 +2363,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 4',
-                'category'       => 'Makanan Berat',
+                'category'       => 'Indonesian Traditional',
                 'menus'          => [
                     [
                         'name'             => 'Bakmi Rempah Spesial',
@@ -2450,7 +2450,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 5',
-                'category'       => 'Minuman',
+                'category'       => 'Beverages & Coffee',
                 'menus'          => [
                     [
                         'name'             => 'Kopi Susu Keluarga (R)',
@@ -2558,7 +2558,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 5',
-                'category'       => 'Roti & Kue',
+                'category'       => 'Bakery & Pastry',
                 'menus'          => [
                     [
                         'name'             => 'Cheese Cream Puff',
@@ -2617,7 +2617,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Check Point Boarding',
-                'category'       => 'Minuman',
+                'category'       => 'Beverages & Coffee',
                 'menus'          => [
                     [
                         'name'             => 'Signature Grass Jelly (L)',
@@ -2725,7 +2725,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 6',
-                'category'       => 'Roti & Kue',
+                'category'       => 'Bakery & Pastry',
                 'menus'          => [
                     [
                         'name'             => 'The OG',
@@ -2833,7 +2833,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 7',
-                'category'       => 'Minuman',
+                'category'       => 'Beverages & Coffee',
                 'menus'          => [
                     [
                         'name'             => 'Summer Strawberry',
@@ -2920,7 +2920,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 8',
-                'category'       => 'Roti & Kue',
+                'category'       => 'Bakery & Pastry',
                 'menus'          => [
                     [
                         'name'             => 'Iced Earl Grey Matcha',
@@ -3035,7 +3035,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 8 (Food Court)',
-                'category'       => 'Makanan Berat',
+                'category'       => 'Indonesian Traditional',
                 'menus'          => [
                     [
                         'name'             => 'Bakso Campur Pak Djo',
@@ -3059,7 +3059,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 8 (Food Court)',
-                'category'       => 'Cepat Saji',
+                'category'       => 'Fast Food & Restaurant',
                 'menus'          => [
                     [
                         'name'             => 'Chicken Crispy Bumbu Tabur',
@@ -3153,7 +3153,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 8 (Food Court)',
-                'category'       => 'Makanan Berat',
+                'category'       => 'Indonesian Traditional',
                 'menus'          => [
                     [
                         'name'             => 'Egg Mayo Beef Bowl',
@@ -3226,7 +3226,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 8 (Food Court)',
-                'category'       => 'Makanan Berat',
+                'category'       => 'Indonesian Traditional',
                 'menus'          => [
                     [
                         'name'             => 'Bakmi Rempah Spesial',
@@ -3341,7 +3341,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 8 (Food Court)',
-                'category'       => 'Minuman',
+                'category'       => 'Beverages & Coffee',
                 'menus'          => [
                     [
                         'name'             => 'Es Campur Kenangan',
@@ -3421,7 +3421,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 8 (Food Court)',
-                'category'       => 'Makanan Berat',
+                'category'       => 'Indonesian Traditional',
                 'menus'          => [
                     [
                         'name'             => 'Sambelan Empal Goreng',
@@ -3480,7 +3480,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 8 (Food Court)',
-                'category'       => 'Makanan Berat',
+                'category'       => 'Indonesian Traditional',
                 'menus'          => [
                 ],
             ],
@@ -3490,7 +3490,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 8 (Food Court)',
-                'category'       => 'Makanan Berat',
+                'category'       => 'Indonesian Traditional',
                 'menus'          => [
                     [
                         'name'             => 'Nasi Goreng Telur Ambyar',
@@ -3556,7 +3556,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 8 (Food Court)',
-                'category'       => 'Makanan Berat',
+                'category'       => 'Indonesian Traditional',
                 'menus'          => [
                     [
                         'name'             => 'Pempek Kapal Selam Premium',
@@ -3685,7 +3685,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 8 (Food Court)',
-                'category'       => 'Makanan Berat',
+                'category'       => 'Indonesian Traditional',
                 'menus'          => [
                     [
                         'name'             => '1/2 Ekor Kremes',
@@ -3772,7 +3772,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 8 (Food Court)',
-                'category'       => 'Makanan Berat',
+                'category'       => 'Indonesian Traditional',
                 'menus'          => [
                     [
                         'name'             => 'Sop Buntut',
@@ -3824,7 +3824,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 8 (Food Court)',
-                'category'       => 'Makanan Berat',
+                'category'       => 'Indonesian Traditional',
                 'menus'          => [
                 ],
             ],
@@ -3834,7 +3834,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 8 (Food Court)',
-                'category'       => 'Makanan Berat',
+                'category'       => 'Indonesian Traditional',
                 'menus'          => [
                     [
                         'name'             => 'Rujak Cingur Spesial',
@@ -3879,7 +3879,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 8 (Food Court)',
-                'category'       => 'Makanan Berat',
+                'category'       => 'Indonesian Traditional',
                 'menus'          => [
                     [
                         'name'             => 'Soto Campur Istimewa',
@@ -3945,7 +3945,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 8 (Food Court)',
-                'category'       => 'Minuman',
+                'category'       => 'Beverages & Coffee',
                 'menus'          => [
                     [
                         'name'             => 'Caramel Latte',
@@ -4060,7 +4060,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 8 (Food Court)',
-                'category'       => 'Makanan Berat',
+                'category'       => 'Indonesian Traditional',
                 'menus'          => [
                     [
                         'name'             => 'Baso Kuah',
@@ -4168,7 +4168,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 8 (Food Court)',
-                'category'       => 'Roti & Kue',
+                'category'       => 'Bakery & Pastry',
                 'menus'          => [
                     [
                         'name'             => 'Cheese Cream Puff',
@@ -4227,7 +4227,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 8 (Food Court)',
-                'category'       => 'Roti & Kue',
+                'category'       => 'Bakery & Pastry',
                 'menus'          => [
                     [
                         'name'             => 'Roti\'O Original Coffee Bun',
@@ -4342,7 +4342,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 8 (Food Court)',
-                'category'       => 'Makanan Berat',
+                'category'       => 'Indonesian Traditional',
                 'menus'          => [
                     [
                         'name'             => 'Nasi Campur Rendang',
@@ -4450,7 +4450,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 10',
-                'category'       => 'Minuman',
+                'category'       => 'Beverages & Coffee',
                 'menus'          => [
                     [
                         'name'             => 'Rawon Empal',
@@ -4558,7 +4558,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 11',
-                'category'       => 'Roti & Kue',
+                'category'       => 'Bakery & Pastry',
                 'menus'          => [
                     [
                         'name'             => 'Roti\'O Original Coffee Bun',
@@ -4673,7 +4673,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 11',
-                'category'       => 'Makanan Berat',
+                'category'       => 'Indonesian Traditional',
                 'menus'          => [
                     [
                         'name'             => 'Bakso Campur Pak Djo',
@@ -4697,7 +4697,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 12',
-                'category'       => 'Roti & Kue',
+                'category'       => 'Bakery & Pastry',
                 'menus'          => [
                     [
                         'name'             => 'Ice Coffee Latte',
@@ -4805,7 +4805,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 12',
-                'category'       => 'Cepat Saji',
+                'category'       => 'Fast Food & Restaurant',
                 'menus'          => [
                     [
                         'name'             => 'Italian B.M.T',
@@ -4920,7 +4920,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 12',
-                'category'       => 'Cepat Saji',
+                'category'       => 'Fast Food & Restaurant',
                 'menus'          => [
                     [
                         'name'             => 'NEW! 2 Curry Aroma Chicken, Rice, RB & FREE! AWniversary Mug',
@@ -4986,7 +4986,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 12',
-                'category'       => 'Makanan Berat',
+                'category'       => 'Indonesian Traditional',
                 'menus'          => [
                     [
                         'name'             => 'Bakmi Rempah Spesial',
@@ -5101,7 +5101,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 12',
-                'category'       => 'Minuman',
+                'category'       => 'Beverages & Coffee',
                 'menus'          => [
                     [
                         'name'             => 'Caramel Macchiato',
@@ -5216,7 +5216,7 @@ class Terminal1Seeder extends Seeder
                 'terminal'       => 'T1',
                 'zone'           => 'Airside',
                 'floor_location' => 'Lantai 2 - Gate 12',
-                'category'       => 'Minuman',
+                'category'       => 'Beverages & Coffee',
                 'menus'          => [
                     [
                         'name'             => 'Nasi Ayam Geprek Sambel Bawang',

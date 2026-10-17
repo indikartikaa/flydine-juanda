@@ -55,17 +55,24 @@ class CustomerCatalogController extends Controller
         // Filter by Kategori Favorit Makanan
         if ($request->filled('category') && $request->category !== 'semua') {
             $catMap = [
-                'makanan-berat' => 'Makanan Berat',
-                'cepat-saji' => 'Cepat Saji',
-                'roti-kue' => 'Roti & Kue',
-                'minuman' => 'Minuman',
+                'makanan-berat' => ['Indonesian Traditional', 'Makanan Berat'],
+                'cepat-saji' => ['Fast Food & Restaurant', 'Cepat Saji'],
+                'roti-kue' => ['Bakery & Pastry', 'Roti & Kue'],
+                'minuman' => ['Beverages & Coffee', 'Minuman'],
             ];
             $catKey = strtolower(trim($request->category));
-            $selectedCategory = $catMap[$catKey] ?? $request->category;
+            $mapped = $catMap[$catKey] ?? [$request->category];
 
-            $query->where(function($q) use ($selectedCategory) {
-                $q->where('category', $selectedCategory)
-                  ->orWhere('category', 'like', '%' . $selectedCategory . '%');
+            $query->where(function($q) use ($mapped) {
+                foreach ($mapped as $idx => $cat) {
+                    if ($idx === 0) {
+                        $q->where('category', $cat)
+                          ->orWhere('category', 'like', '%' . $cat . '%');
+                    } else {
+                        $q->orWhere('category', $cat)
+                          ->orWhere('category', 'like', '%' . $cat . '%');
+                    }
+                }
             });
         }
 
