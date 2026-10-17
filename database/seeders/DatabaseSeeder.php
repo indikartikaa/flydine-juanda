@@ -14,11 +14,11 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            TenantSeeder::class,     // data NYATA dari mitra usaha (F&B), lihat catatan di file ini
-            DeliveryLocationSeeder::class,
+            Terminal1Seeder::class,  // 60 Tenant & 672 Menu Resmi Terminal 1 (T1)
             Terminal2Seeder::class,  // 16 Tenant & 239 Menu Resmi Terminal 2 (T2)
+            DeliveryLocationSeeder::class,
             TenantCategorySeeder::class,
-            UserSeeder::class,       // dummy
+            UserSeeder::class,       // Akun Admin Ops & Staff cadangan
             ProductSeeder::class,    // dummy
             CustomerSeeder::class,   // dummy
             // OrderSeeder::class,      // dummy (order_items dibuat sekaligus di sini)
