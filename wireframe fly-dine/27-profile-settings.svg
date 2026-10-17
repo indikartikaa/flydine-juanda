@@ -1,0 +1,223 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1150" width="1440" height="1150" style="background:#F8FAFC; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+
+  <!-- ========================================================================= -->
+  <!-- WIREFRAME PERSIS: PENGATURAN PROFIL & AKUN (/profile)                     -->
+  <!-- Murni Kotak-Kotak Struktur (Skeleton Wireframe - Tanpa Browser Frame)     -->
+  <!-- Mengikuti: resources/views/profile/edit.blade.php & partials              -->
+  <!-- ========================================================================= -->
+
+  <!-- 1. TOP NAVBAR HEADER (edit.blade.php baris 13-47) -->
+  <g id="Top-Navbar">
+    <rect x="0" y="0" width="1440" height="68" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+
+    <g transform="translate(140, 14)">
+      <!-- Tombol Kembali ke Dashboard (Kiri) -->
+      <g transform="translate(0, 0)">
+        <circle cx="20" cy="20" r="18" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+        <path d="M23 13 L16 20 L23 27" fill="none" stroke="#27272A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </g>
+
+      <!-- Profil & Identitas User (Kanan) -->
+      <g transform="translate(980, 0)">
+        <!-- Teks Nama & Role (Rata Kanan) -->
+        <g transform="translate(-160, 4)">
+          <line x1="20" y1="12" x2="140" y2="12" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
+          <line x1="50" y1="26" x2="140" y2="26" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+        </g>
+        <!-- Avatar Circle dengan Online Dot -->
+        <circle cx="20" cy="20" r="20" fill="#005EA2" stroke="#27272A" stroke-width="1.5" />
+        <line x1="12" y1="20" x2="28" y2="20" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" />
+        <circle cx="34" cy="34" r="5" fill="#10B981" stroke="#FFFFFF" stroke-width="2" />
+      </g>
+    </g>
+  </g>
+
+  <!-- 2. PAGE TITLE & BREADCRUMB (baris 49-80) -->
+  <g id="Page-Title-Section" transform="translate(140, 96)">
+    <!-- Breadcrumb: Dashboard / Pengaturan Akun -->
+    <line x1="0" y1="0" x2="60" y2="0" stroke="#A1A1AA" stroke-width="3.5" stroke-linecap="round" />
+    <line x1="72" y1="0" x2="80" y2="0" stroke="#CBD5E1" stroke-width="3" stroke-linecap="round" />
+    <line x1="92" y1="0" x2="190" y2="0" stroke="#52525B" stroke-width="3.5" stroke-linecap="round" />
+
+    <!-- Big Heading: Profil Saya -->
+    <line x1="0" y1="36" x2="220" y2="36" stroke="#18181B" stroke-width="10" stroke-linecap="round" />
+    <!-- Subtitle -->
+    <line x1="0" y1="62" x2="540" y2="62" stroke="#71717A" stroke-width="4.5" stroke-linecap="round" />
+  </g>
+
+  <!-- 3. MAIN CONTENT GRID 2 KOLOM (x=140, total width 1160px) -->
+  <g id="Main-Content" transform="translate(140, 200)">
+
+    <!-- ==========================================
+         KOLOM KIRI: INFORMASI PROFIL & MITRA (7 Cols ~ 670px)
+         ========================================== -->
+    <g id="Left-Column" transform="translate(0, 0)">
+      <rect width="670" height="880" rx="20" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+
+      <g transform="translate(36, 36)">
+        <!-- Header Card: Judul & Status Buka -->
+        <g transform="translate(0, 0)">
+          <line x1="0" y1="10" x2="260" y2="10" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
+          <line x1="0" y1="28" x2="420" y2="28" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+
+          <!-- Status Badge Gerai Buka (Kanan) -->
+          <g transform="translate(470, 0)">
+            <rect width="130" height="30" rx="15" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1.2" />
+            <circle cx="16" cy="15" r="4" fill="#10B981" />
+            <line x1="28" y1="15" x2="114" y2="15" stroke="#059669" stroke-width="4" stroke-linecap="round" />
+          </g>
+          <line x1="0" y1="48" x2="598" y2="48" stroke="#F4F4F5" stroke-width="1.5" />
+        </g>
+
+        <!-- Bagian Foto Gerai / Logo Restoran -->
+        <g transform="translate(0, 68)">
+          <rect width="598" height="150" rx="16" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1.2" />
+          <line x1="24" y1="22" x2="220" y2="22" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
+
+          <g transform="translate(24, 38)">
+            <!-- Photo Preview Box [X] -->
+            <rect width="90" height="90" rx="14" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+            <line x1="0" y1="0" x2="90" y2="90" stroke="#71717A" stroke-width="1.2" />
+            <line x1="90" y1="0" x2="0" y2="90" stroke="#71717A" stroke-width="1.2" />
+
+            <!-- Tombol Upload Foto -->
+            <g transform="translate(110, 26)">
+              <rect width="160" height="38" rx="10" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+              <line x1="20" y1="19" x2="140" y2="19" stroke="#27272A" stroke-width="4" stroke-linecap="round" />
+              <line x1="0" y1="46" x2="220" y2="46" stroke="#A1A1AA" stroke-width="3" stroke-linecap="round" />
+            </g>
+          </g>
+        </g>
+
+        <!-- Form Input Fields -->
+        <g transform="translate(0, 240)">
+
+          <!-- FIELD 1: NAMA LENGKAP PENANGGUNG JAWAB -->
+          <g transform="translate(0, 0)">
+            <line x1="0" y1="0" x2="180" y2="0" stroke="#27272A" stroke-width="4" stroke-linecap="round" />
+            <rect y="10" width="598" height="44" rx="10" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+            <line x1="16" y1="32" x2="260" y2="32" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
+          </g>
+
+          <!-- FIELD 2: EMAIL AKUN -->
+          <g transform="translate(0, 74)">
+            <line x1="0" y1="0" x2="140" y2="0" stroke="#27272A" stroke-width="4" stroke-linecap="round" />
+            <rect y="10" width="598" height="44" rx="10" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+            <line x1="16" y1="32" x2="280" y2="32" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
+          </g>
+
+          <!-- FIELD 3: NOMOR TELEPON PENANGGUNG JAWAB -->
+          <g transform="translate(0, 148)">
+            <line x1="0" y1="0" x2="220" y2="0" stroke="#27272A" stroke-width="4" stroke-linecap="round" />
+            <rect y="10" width="598" height="44" rx="10" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+            <line x1="16" y1="32" x2="200" y2="32" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
+          </g>
+
+          <!-- FIELD 4: DESKRIPSI SINGKAT GERAI -->
+          <g transform="translate(0, 222)">
+            <line x1="0" y1="0" x2="190" y2="0" stroke="#27272A" stroke-width="4" stroke-linecap="round" />
+            <rect y="10" width="598" height="90" rx="10" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+            <line x1="16" y1="30" x2="520" y2="30" stroke="#52525B" stroke-width="3.5" stroke-linecap="round" />
+            <line x1="16" y1="48" x2="480" y2="48" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+          </g>
+
+          <!-- FIELD 5: KATEGORI & ZONA RUANG (2 Kolom) -->
+          <g transform="translate(0, 340)">
+            <g transform="translate(0, 0)">
+              <line x1="0" y1="0" x2="120" y2="0" stroke="#27272A" stroke-width="4" stroke-linecap="round" />
+              <rect y="10" width="288" height="44" rx="10" fill="#F4F4F5" stroke="#E4E4E7" stroke-width="1.5" />
+              <line x1="16" y1="32" x2="180" y2="32" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+            </g>
+            <g transform="translate(310, 0)">
+              <line x1="0" y1="0" x2="140" y2="0" stroke="#27272A" stroke-width="4" stroke-linecap="round" />
+              <rect y="10" width="288" height="44" rx="10" fill="#F4F4F5" stroke="#E4E4E7" stroke-width="1.5" />
+              <line x1="16" y1="32" x2="190" y2="32" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+            </g>
+          </g>
+
+          <!-- PRIMARY SUBMIT BUTTON: SIMPAN PERUBAHAN -->
+          <g transform="translate(0, 426)">
+            <rect width="210" height="48" rx="12" fill="#27272A" stroke="#18181B" stroke-width="1.5" />
+            <line x1="36" y1="24" x2="174" y2="24" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" />
+          </g>
+
+        </g>
+      </g>
+    </g>
+
+    <!-- ==========================================
+         KOLOM KANAN: KEAMANAN & HAPUS AKUN (5 Cols ~ 460px)
+         ========================================== -->
+    <g id="Right-Column" transform="translate(700, 0)">
+
+      <!-- CARD 1: PERBARUI KATA SANDI (height 430px) -->
+      <g transform="translate(0, 0)">
+        <rect width="460" height="430" rx="20" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+
+        <g transform="translate(32, 32)">
+          <!-- Header Card -->
+          <line x1="0" y1="0" x2="200" y2="0" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
+          <line x1="0" y1="18" x2="360" y2="18" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+          <line x1="0" y1="34" x2="396" y2="34" stroke="#F4F4F5" stroke-width="1.5" />
+
+          <!-- Form Fields Password -->
+          <g transform="translate(0, 50)">
+            <!-- Kata Sandi Saat Ini -->
+            <g transform="translate(0, 0)">
+              <line x1="0" y1="0" x2="160" y2="0" stroke="#27272A" stroke-width="4" stroke-linecap="round" />
+              <rect y="10" width="396" height="42" rx="10" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+              <line x1="16" y1="31" x2="140" y2="31" stroke="#A1A1AA" stroke-width="4" stroke-linecap="round" />
+            </g>
+
+            <!-- Kata Sandi Baru -->
+            <g transform="translate(0, 72)">
+              <line x1="0" y1="0" x2="140" y2="0" stroke="#27272A" stroke-width="4" stroke-linecap="round" />
+              <rect y="10" width="396" height="42" rx="10" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+              <line x1="16" y1="31" x2="160" y2="31" stroke="#A1A1AA" stroke-width="4" stroke-linecap="round" />
+            </g>
+
+            <!-- Konfirmasi Kata Sandi -->
+            <g transform="translate(0, 144)">
+              <line x1="0" y1="0" x2="190" y2="0" stroke="#27272A" stroke-width="4" stroke-linecap="round" />
+              <rect y="10" width="396" height="42" rx="10" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+              <line x1="16" y1="31" x2="180" y2="31" stroke="#A1A1AA" stroke-width="4" stroke-linecap="round" />
+            </g>
+
+            <!-- Submit Button Password -->
+            <g transform="translate(0, 220)">
+              <rect width="190" height="44" rx="12" fill="#27272A" stroke="#18181B" stroke-width="1.5" />
+              <line x1="30" y1="22" x2="160" y2="22" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" />
+            </g>
+          </g>
+        </g>
+      </g>
+
+      <!-- CARD 2: HAPUS AKUN (DANGER ZONE) (y=460, height 260px) -->
+      <g transform="translate(0, 460)">
+        <rect width="460" height="260" rx="20" fill="#FFFFFF" stroke="#EF4444" stroke-width="2" />
+        <!-- Red top accent strip -->
+        <rect x="0" y="0" width="460" height="6" rx="3" fill="#EF4444" />
+
+        <g transform="translate(32, 28)">
+          <!-- Title with Rose Dot -->
+          <circle cx="6" cy="6" r="4" fill="#EF4444" />
+          <line x1="18" y1="6" x2="130" y2="6" stroke="#991B1B" stroke-width="6" stroke-linecap="round" />
+
+          <!-- Warning text -->
+          <line x1="0" y1="34" x2="396" y2="34" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+          <line x1="0" y1="52" x2="360" y2="52" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+          <line x1="0" y1="70" x2="300" y2="70" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+
+          <!-- Danger Button: Hapus Akun -->
+          <g transform="translate(0, 110)">
+            <rect width="170" height="44" rx="12" fill="#FFF1F2" stroke="#EF4444" stroke-width="1.5" />
+            <line x1="26" y1="22" x2="144" y2="22" stroke="#DC2626" stroke-width="4.5" stroke-linecap="round" />
+          </g>
+        </g>
+      </g>
+
+    </g>
+
+  </g>
+
+</svg>

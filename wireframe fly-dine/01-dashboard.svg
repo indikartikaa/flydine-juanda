@@ -1,0 +1,344 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1060" width="1440" height="1060" style="background:#FFFFFF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+
+  <!-- ========================================================================= -->
+  <!-- WIREFRAME PERSIS TAMPILAN 127.0.0.1:8000 (CUSTOMER CATALOG / SHOPPING & DINING) -->
+  <!-- Murni Kotak-Kotak Struktur (Skeleton Wireframe - Tanpa Browser Frame)       -->
+  <!-- ========================================================================= -->
+
+  <!-- 1. TOP NAVBAR (Sticky Top di catalog.blade.php baris 14-68) -->
+  <g id="Top-Navbar">
+    <rect x="0" y="0" width="1440" height="76" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+
+    <!-- A. Logo FlyDine di Kiri (Ikon Pesawat + Teks Logo) -->
+    <g transform="translate(60, 18)">
+      <rect width="160" height="40" rx="6" fill="#F4F4F5" stroke="#27272A" stroke-width="1.8" />
+      <line x1="0" y1="0" x2="160" y2="40" stroke="#71717A" stroke-width="1.5" />
+      <line x1="160" y1="0" x2="0" y2="40" stroke="#71717A" stroke-width="1.5" />
+    </g>
+
+    <!-- B. Navigasi Kanan (ID/EN, Pesanan, Riwayat, Portal Login) -->
+    <g transform="translate(930, 20)">
+      
+      <!-- Switch Bahasa: [ ID | EN ] (baris 24-27) -->
+      <rect x="0" y="0" width="90" height="36" rx="18" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
+      <rect x="3" y="3" width="42" height="30" rx="15" fill="#27272A" />
+      <line x1="14" y1="18" x2="34" y2="18" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" />
+      <line x1="56" y1="18" x2="76" y2="18" stroke="#71717A" stroke-width="3" stroke-linecap="round" />
+
+      <!-- Link: PESANAN (Tas Belanja + Teks) (baris 29-37) -->
+      <g transform="translate(110, 0)">
+        <rect x="0" y="8" width="18" height="18" rx="3" fill="#FFFFFF" stroke="#27272A" stroke-width="1.8" />
+        <path d="M4 8 V5 C4 2 14 2 14 5 V8" fill="none" stroke="#27272A" stroke-width="1.5" />
+        <line x1="26" y1="18" x2="88" y2="18" stroke="#27272A" stroke-width="5" stroke-linecap="round" />
+      </g>
+
+      <!-- Link: RIWAYAT (Ikon Dokumen/Klip + Teks) (baris 39-42) -->
+      <g transform="translate(225, 0)">
+        <rect x="0" y="8" width="18" height="18" rx="3" fill="#FFFFFF" stroke="#27272A" stroke-width="1.8" />
+        <line x1="4" y1="14" x2="14" y2="14" stroke="#27272A" stroke-width="1.5" />
+        <line x1="4" y1="18" x2="14" y2="18" stroke="#27272A" stroke-width="1.5" />
+        <line x1="26" y1="18" x2="88" y2="18" stroke="#27272A" stroke-width="5" stroke-linecap="round" />
+      </g>
+
+      <!-- Divider Vertikal Halus -->
+      <line x1="335" y1="6" x2="335" y2="30" stroke="#E4E4E7" stroke-width="1.5" />
+
+      <!-- Link: PORTAL LOGIN (Ikon Pintu/Keluar + Teks) (baris 56-59) -->
+      <g transform="translate(355, 0)">
+        <rect x="0" y="8" width="18" height="18" rx="3" fill="#FFFFFF" stroke="#27272A" stroke-width="1.8" />
+        <path d="M12 17 L17 17 M14 14 L17 17 L14 20" stroke="#27272A" stroke-width="1.5" fill="none" />
+        <line x1="26" y1="18" x2="120" y2="18" stroke="#27272A" stroke-width="5" stroke-linecap="round" />
+      </g>
+    </g>
+  </g>
+
+  <!-- 2. HERO SECTION DENGAN BACKGROUND FOTO JUANDA (catalog.blade.php baris 95-123) -->
+  <g id="Hero-Section" transform="translate(0, 76)">
+    <!-- Kontainer Background Foto Bandara dengan Cross [X] Besar -->
+    <rect x="0" y="0" width="1440" height="350" fill="#F4F4F5" stroke="#27272A" stroke-width="2" />
+    <line x1="0" y1="0" x2="1440" y2="350" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="6 6" />
+    <line x1="1440" y1="0" x2="0" y2="350" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="6 6" />
+
+    <!-- Teks Hero di Kiri (Persis: SHOPPING & DINING BANDAR UDARA JUANDA) -->
+    <g transform="translate(80, 56)">
+      <!-- Line 1: "SHOPPING &" -->
+      <line x1="0" y1="20" x2="380" y2="20" stroke="#18181B" stroke-width="18" stroke-linecap="round" />
+
+      <!-- Line 2: "DINING" (Warna beda / berarsir tebal) -->
+      <line x1="0" y1="56" x2="260" y2="56" stroke="#52525B" stroke-width="18" stroke-linecap="round" />
+
+      <!-- Line 3: "BANDAR UDARA INTERNASIONAL JUANDA" (Watermark Besar di Background) -->
+      <line x1="0" y1="92" x2="540" y2="92" stroke="#71717A" stroke-width="10" stroke-linecap="round" />
+
+      <!-- Line 4: "Temukan hidangan favorit Anda sebelum penerbangan." -->
+      <line x1="0" y1="120" x2="420" y2="120" stroke="#71717A" stroke-width="5" stroke-linecap="round" />
+    </g>
+
+    <!-- FLOATING SEARCH & FILTER CAPSULE (Persis baris 125-212 di tengah bawah hero) -->
+    <g id="Floating-Filter-Bar" transform="translate(240, 290)">
+      <!-- Kapsul Putih Besar Melayang rounded-full -->
+      <rect width="960" height="74" rx="37" fill="#FFFFFF" stroke="#27272A" stroke-width="2.5" />
+
+      <!-- Segment 1: LOKASI (Semua Terminal v) (baris 141-167) -->
+      <g transform="translate(36, 18)">
+        <line x1="0" y1="8" x2="55" y2="8" stroke="#A1A1AA" stroke-width="4" stroke-linecap="round" />
+        <line x1="0" y1="24" x2="140" y2="24" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
+        <!-- Panah Dropdown v -->
+        <path d="M160 21 L166 27 L172 21" stroke="#27272A" stroke-width="2" fill="none" stroke-linecap="round" />
+      </g>
+
+      <!-- Garis Pemisah Vertikal 1 -->
+      <line x1="260" y1="16" x2="260" y2="58" stroke="#E4E4E7" stroke-width="1.8" />
+
+      <!-- Segment 2: AREA (Semua Area v) (baris 170-196) -->
+      <g transform="translate(290, 18)">
+        <line x1="0" y1="8" x2="45" y2="8" stroke="#A1A1AA" stroke-width="4" stroke-linecap="round" />
+        <line x1="0" y1="24" x2="120" y2="24" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
+        <!-- Panah Dropdown v -->
+        <path d="M140 21 L146 27 L152 21" stroke="#27272A" stroke-width="2" fill="none" stroke-linecap="round" />
+      </g>
+
+      <!-- Garis Pemisah Vertikal 2 -->
+      <line x1="500" y1="16" x2="500" y2="58" stroke="#E4E4E7" stroke-width="1.8" />
+
+      <!-- Segment 3: CARI RESTORAN + Tombol Search Biru Bulat (baris 199-209) -->
+      <g transform="translate(530, 18)">
+        <line x1="0" y1="8" x2="110" y2="8" stroke="#A1A1AA" stroke-width="4" stroke-linecap="round" />
+        <line x1="0" y1="24" x2="260" y2="24" stroke="#71717A" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 3" />
+
+        <!-- Tombol Cari Bulat di Ujung Kanan (Search Button) -->
+        <g transform="translate(365, -4)">
+          <circle cx="23" cy="23" r="23" fill="#27272A" stroke="#27272A" stroke-width="2" />
+          <circle cx="21" cy="21" r="7" fill="none" stroke="#FFFFFF" stroke-width="2" />
+          <line x1="26" y1="26" x2="31" y2="31" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- 3. GRID KARTU TENANT (Persis grid-cols-3 di catalog.blade.php baris 249-341) -->
+  <g id="Tenant-Grid" transform="translate(80, 480)">
+
+    <!-- ======================================================== -->
+    <!-- KARTU TENANT 1: (Persis Kartu Pak Mitro di Screenshot)    -->
+    <!-- ======================================================== -->
+    <g id="Tenant-Card-1" transform="translate(0, 0)">
+      <!-- Kontainer Kartu Utama (rounded-[2rem]) -->
+      <rect width="405" height="420" rx="28" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+
+      <!-- A. Area Cover Image Atas (h-44 / 176px) -->
+      <g>
+        <path d="M0 28 Q0 0 28 0 L377 0 Q405 0 405 28 L405 176 L0 176 Z" fill="#F4F4F5" stroke="#27272A" stroke-width="2" />
+        <!-- Diagonal Cross [X] Cover Gambar -->
+        <line x1="0" y1="0" x2="405" y2="176" stroke="#71717A" stroke-width="1.5" />
+        <line x1="405" y1="0" x2="0" y2="176" stroke="#71717A" stroke-width="1.5" />
+
+        <!-- Status Badge di Kanan Atas: [ ● OPEN ] -->
+        <g transform="translate(305, 16)">
+          <rect width="84" height="24" rx="12" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+          <circle cx="14" cy="12" r="3.5" fill="#18181B" />
+          <line x1="24" y1="12" x2="72" y2="12" stroke="#18181B" stroke-width="3.5" stroke-linecap="round" />
+        </g>
+
+        <!-- Lokasi Badge di Kiri Bawah: [ 📍 T1 - Lantai 1 - Kedatangan 1A ] -->
+        <g transform="translate(16, 136)">
+          <rect width="210" height="24" rx="12" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+          <circle cx="14" cy="12" r="3" fill="#27272A" />
+          <line x1="24" y1="12" x2="195" y2="12" stroke="#52525B" stroke-width="3" stroke-linecap="round" />
+        </g>
+      </g>
+
+      <!-- B. Card Body Bawah (baris 293-332) -->
+      <g transform="translate(24, 196)">
+        <!-- Kategori Pill [ Cepat Saji ] & Jumlah [ 8 Menu ] -->
+        <rect width="80" height="20" rx="10" fill="#E4E4E7" stroke="#27272A" stroke-width="1" />
+        <line x1="12" y1="10" x2="68" y2="10" stroke="#27272A" stroke-width="3" stroke-linecap="round" />
+        <line x1="310" y1="10" x2="355" y2="10" stroke="#71717A" stroke-width="3" stroke-linecap="round" />
+
+        <!-- Judul Nama Restoran (Bold Bar) -->
+        <line x1="0" y1="42" x2="260" y2="42" stroke="#18181B" stroke-width="8" stroke-linecap="round" />
+
+        <!-- 3 Baris Preview Menu (Nama di Kiri, Harga di Kanan) -->
+        <g transform="translate(0, 68)">
+          <!-- Item 1 -->
+          <line x1="0" y1="10" x2="170" y2="10" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
+          <line x1="280" y1="10" x2="355" y2="10" stroke="#18181B" stroke-width="4" stroke-linecap="round" />
+
+          <!-- Item 2 -->
+          <line x1="0" y1="32" x2="140" y2="32" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
+          <line x1="280" y1="32" x2="355" y2="32" stroke="#18181B" stroke-width="4" stroke-linecap="round" />
+
+          <!-- Item 3 -->
+          <line x1="0" y1="54" x2="190" y2="54" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
+          <line x1="280" y1="54" x2="355" y2="54" stroke="#18181B" stroke-width="4" stroke-linecap="round" />
+        </g>
+
+        <!-- Tombol CTA Bawah: [ Pilih Menu > ] -->
+        <g transform="translate(0, 160)">
+          <rect width="357" height="42" rx="12" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+          <line x1="125" y1="21" x2="220" y2="21" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
+          <path d="M232 17 L237 21 L232 25" stroke="#18181B" stroke-width="2" fill="none" stroke-linecap="round" />
+        </g>
+      </g>
+    </g>
+
+    <!-- ======================================================== -->
+    <!-- KARTU TENANT 2: (Persis Kartu "EX" / EXPAT di Screenshot) -->
+    <!-- ======================================================== -->
+    <g id="Tenant-Card-2" transform="translate(437, 0)">
+      <rect width="405" height="420" rx="28" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+
+      <!-- Area Cover Image dengan Logo Bulat "EX" di Tengah (baris 261-267) -->
+      <g>
+        <path d="M0 28 Q0 0 28 0 L377 0 Q405 0 405 28 L405 176 L0 176 Z" fill="#F4F4F5" stroke="#27272A" stroke-width="2" />
+        
+        <!-- Logo Bulat Tengah "EX" -->
+        <circle cx="202" cy="88" r="36" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+        <line x1="178" y1="88" x2="226" y2="88" stroke="#18181B" stroke-width="8" stroke-linecap="round" />
+
+        <!-- Status Badge: [ ● OPEN ] -->
+        <g transform="translate(305, 16)">
+          <rect width="84" height="24" rx="12" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+          <circle cx="14" cy="12" r="3.5" fill="#18181B" />
+          <line x1="24" y1="12" x2="72" y2="12" stroke="#18181B" stroke-width="3.5" stroke-linecap="round" />
+        </g>
+
+        <!-- Lokasi Badge: [ 📍 T1 - Lantai 1 - Keberangkatan 1A ] -->
+        <g transform="translate(16, 136)">
+          <rect width="220" height="24" rx="12" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+          <circle cx="14" cy="12" r="3" fill="#27272A" />
+          <line x1="24" y1="12" x2="205" y2="12" stroke="#52525B" stroke-width="3" stroke-linecap="round" />
+        </g>
+      </g>
+
+      <!-- Card Body -->
+      <g transform="translate(24, 196)">
+        <rect width="70" height="20" rx="10" fill="#E4E4E7" stroke="#27272A" stroke-width="1" />
+        <line x1="12" y1="10" x2="58" y2="10" stroke="#27272A" stroke-width="3" stroke-linecap="round" />
+        <line x1="305" y1="10" x2="355" y2="10" stroke="#71717A" stroke-width="3" stroke-linecap="round" />
+
+        <line x1="0" y1="42" x2="200" y2="42" stroke="#18181B" stroke-width="8" stroke-linecap="round" />
+
+        <g transform="translate(0, 68)">
+          <line x1="0" y1="10" x2="160" y2="10" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
+          <line x1="280" y1="10" x2="355" y2="10" stroke="#18181B" stroke-width="4" stroke-linecap="round" />
+
+          <line x1="0" y1="32" x2="150" y2="32" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
+          <line x1="280" y1="32" x2="355" y2="32" stroke="#18181B" stroke-width="4" stroke-linecap="round" />
+
+          <line x1="0" y1="54" x2="130" y2="54" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
+          <line x1="280" y1="54" x2="355" y2="54" stroke="#18181B" stroke-width="4" stroke-linecap="round" />
+        </g>
+
+        <g transform="translate(0, 160)">
+          <rect width="357" height="42" rx="12" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+          <line x1="125" y1="21" x2="220" y2="21" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
+          <path d="M232 17 L237 21 L232 25" stroke="#18181B" stroke-width="2" fill="none" stroke-linecap="round" />
+        </g>
+      </g>
+    </g>
+
+    <!-- ======================================================== -->
+    <!-- KARTU TENANT 3: (Persis Kartu "RO" / ROTI'O di Screenshot) -->
+    <!-- ======================================================== -->
+    <g id="Tenant-Card-3" transform="translate(874, 0)">
+      <rect width="405" height="420" rx="28" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+
+      <!-- Cover Image dengan Logo Bulat "RO" -->
+      <g>
+        <path d="M0 28 Q0 0 28 0 L377 0 Q405 0 405 28 L405 176 L0 176 Z" fill="#F4F4F5" stroke="#27272A" stroke-width="2" />
+        
+        <!-- Logo Bulat Tengah "RO" -->
+        <circle cx="202" cy="88" r="36" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+        <line x1="178" y1="88" x2="226" y2="88" stroke="#18181B" stroke-width="8" stroke-linecap="round" />
+
+        <g transform="translate(305, 16)">
+          <rect width="84" height="24" rx="12" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+          <circle cx="14" cy="12" r="3.5" fill="#18181B" />
+          <line x1="24" y1="12" x2="72" y2="12" stroke="#18181B" stroke-width="3.5" stroke-linecap="round" />
+        </g>
+
+        <g transform="translate(16, 136)">
+          <rect width="220" height="24" rx="12" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+          <circle cx="14" cy="12" r="3" fill="#27272A" />
+          <line x1="24" y1="12" x2="205" y2="12" stroke="#52525B" stroke-width="3" stroke-linecap="round" />
+        </g>
+      </g>
+
+      <!-- Card Body -->
+      <g transform="translate(24, 196)">
+        <rect width="75" height="20" rx="10" fill="#E4E4E7" stroke="#27272A" stroke-width="1" />
+        <line x1="12" y1="10" x2="63" y2="10" stroke="#27272A" stroke-width="3" stroke-linecap="round" />
+        <line x1="305" y1="10" x2="355" y2="10" stroke="#71717A" stroke-width="3" stroke-linecap="round" />
+
+        <line x1="0" y1="42" x2="180" y2="42" stroke="#18181B" stroke-width="8" stroke-linecap="round" />
+
+        <g transform="translate(0, 68)">
+          <line x1="0" y1="10" x2="165" y2="10" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
+          <line x1="280" y1="10" x2="355" y2="10" stroke="#18181B" stroke-width="4" stroke-linecap="round" />
+
+          <line x1="0" y1="32" x2="145" y2="32" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
+          <line x1="280" y1="32" x2="355" y2="32" stroke="#18181B" stroke-width="4" stroke-linecap="round" />
+
+          <line x1="0" y1="54" x2="175" y2="54" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
+          <line x1="280" y1="54" x2="355" y2="54" stroke="#18181B" stroke-width="4" stroke-linecap="round" />
+        </g>
+
+        <g transform="translate(0, 160)">
+          <rect width="357" height="42" rx="12" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+          <line x1="125" y1="21" x2="220" y2="21" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
+          <path d="M232 17 L237 21 L232 25" stroke="#18181B" stroke-width="2" fill="none" stroke-linecap="round" />
+        </g>
+      </g>
+    </g>
+
+  </g>
+
+  <!-- 4. SECTION KATEGORI FAVORIT DI BAWAH (Persis catalog.blade.php baris 350-380) -->
+  <g id="Favorite-Categories" transform="translate(420, 930)">
+    <!-- Subtitle & Judul: Kategori Favorit -->
+    <line x1="240" y1="0" x2="360" y2="0" stroke="#A1A1AA" stroke-width="3" stroke-linecap="round" />
+    <line x1="200" y1="18" x2="400" y2="18" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
+    <line x1="275" y1="32" x2="325" y2="32" stroke="#27272A" stroke-width="3" stroke-linecap="round" />
+
+    <!-- 4 Lingkaran Kategori Favorit (Bulat dengan Garis Label di Bawahnya) -->
+    <g transform="translate(70, 48)">
+      <!-- Lingkaran 1 (Makanan Berat) -->
+      <g transform="translate(0, 0)">
+        <circle cx="45" cy="45" r="40" fill="#F4F4F5" stroke="#27272A" stroke-width="2" />
+        <line x1="15" y1="15" x2="75" y2="75" stroke="#71717A" stroke-width="1.2" />
+        <line x1="75" y1="15" x2="15" y2="75" stroke="#71717A" stroke-width="1.2" />
+        <rect x="5" y="96" width="80" height="18" rx="9" fill="#E4E4E7" stroke="#27272A" stroke-width="1" />
+        <line x1="18" y1="105" x2="72" y2="105" stroke="#18181B" stroke-width="3" stroke-linecap="round" />
+      </g>
+
+      <!-- Lingkaran 2 (Cepat Saji) -->
+      <g transform="translate(120, 0)">
+        <circle cx="45" cy="45" r="40" fill="#F4F4F5" stroke="#27272A" stroke-width="2" />
+        <line x1="15" y1="15" x2="75" y2="75" stroke="#71717A" stroke-width="1.2" />
+        <line x1="75" y1="15" x2="15" y2="75" stroke="#71717A" stroke-width="1.2" />
+        <rect x="5" y="96" width="80" height="18" rx="9" fill="#FFFFFF" stroke="#27272A" stroke-width="1" />
+        <line x1="20" y1="105" x2="70" y2="105" stroke="#71717A" stroke-width="3" stroke-linecap="round" />
+      </g>
+
+      <!-- Lingkaran 3 (Roti & Kue) -->
+      <g transform="translate(240, 0)">
+        <circle cx="45" cy="45" r="40" fill="#F4F4F5" stroke="#27272A" stroke-width="2" />
+        <line x1="15" y1="15" x2="75" y2="75" stroke="#71717A" stroke-width="1.2" />
+        <line x1="75" y1="15" x2="15" y2="75" stroke="#71717A" stroke-width="1.2" />
+        <rect x="5" y="96" width="80" height="18" rx="9" fill="#FFFFFF" stroke="#27272A" stroke-width="1" />
+        <line x1="20" y1="105" x2="70" y2="105" stroke="#71717A" stroke-width="3" stroke-linecap="round" />
+      </g>
+
+      <!-- Lingkaran 4 (Minuman) -->
+      <g transform="translate(360, 0)">
+        <circle cx="45" cy="45" r="40" fill="#F4F4F5" stroke="#27272A" stroke-width="2" />
+        <line x1="15" y1="15" x2="75" y2="75" stroke="#71717A" stroke-width="1.2" />
+        <line x1="75" y1="15" x2="15" y2="75" stroke="#71717A" stroke-width="1.2" />
+        <rect x="5" y="96" width="80" height="18" rx="9" fill="#FFFFFF" stroke="#27272A" stroke-width="1" />
+        <line x1="22" y1="105" x2="68" y2="105" stroke="#71717A" stroke-width="3" stroke-linecap="round" />
+      </g>
+    </g>
+  </g>
+
+</svg>

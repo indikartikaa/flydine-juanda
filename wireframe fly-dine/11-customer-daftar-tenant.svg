@@ -1,0 +1,185 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1850" width="1440" height="1850" style="background:#F8FAFC; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+
+  <!-- ========================================================================= -->
+  <!-- WIREFRAME PERSIS: DAFTAR TENANT KEMITRAAN (/daftar-tenant)                -->
+  <!-- Murni Kotak-Kotak Struktur (Skeleton Wireframe - Tanpa Browser Frame)     -->
+  <!-- Mengikuti: resources/views/customer/pages/daftar-tenant.blade.php & layout-->
+  <!-- ========================================================================= -->
+
+  <!-- 1. TOP NAVBAR -->
+  <g id="Top-Navbar">
+    <rect x="0" y="0" width="1440" height="80" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+    <g transform="translate(80, 18)">
+      <rect width="140" height="44" rx="8" fill="#FFFFFF" stroke="#27272A" stroke-width="1.8" />
+      <line x1="0" y1="0" x2="140" y2="44" stroke="#71717A" stroke-width="1" />
+      <line x1="140" y1="0" x2="0" y2="44" stroke="#71717A" stroke-width="1" />
+    </g>
+    <g transform="translate(1080, 26)">
+      <g transform="translate(0, 0)">
+        <rect x="0" y="4" width="20" height="20" rx="4" fill="#FFFFFF" stroke="#27272A" stroke-width="1.8" />
+        <path d="M4 4 V2 C4 0 16 0 16 2 V4" fill="none" stroke="#27272A" stroke-width="1.5" />
+        <line x1="28" y1="14" x2="100" y2="14" stroke="#27272A" stroke-width="5" stroke-linecap="round" />
+      </g>
+      <line x1="130" y1="2" x2="130" y2="26" stroke="#E4E4E7" stroke-width="1.5" />
+      <g transform="translate(150, 0)">
+        <rect x="0" y="4" width="20" height="20" rx="4" fill="#FFFFFF" stroke="#27272A" stroke-width="1.8" />
+        <line x1="28" y1="14" x2="130" y2="14" stroke="#27272A" stroke-width="5" stroke-linecap="round" />
+      </g>
+    </g>
+  </g>
+
+  <!-- 2. HEADER TOP BANNER -->
+  <g id="Header-Banner" transform="translate(0, 80)">
+    <rect x="0" y="0" width="1440" height="290" fill="#F4F4F5" stroke="#27272A" stroke-width="2" />
+
+    <g transform="translate(220, 36)">
+      <!-- Tombol Kembali ke Beranda -->
+      <g transform="translate(0, 0)">
+        <rect width="180" height="36" rx="18" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+        <path d="M26 18 L18 18 M22 14 L18 18 L22 22" stroke="#27272A" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+        <line x1="36" y1="18" x2="156" y2="18" stroke="#27272A" stroke-width="4.5" stroke-linecap="round" />
+      </g>
+
+      <!-- Badge "Kemitraan Bisnis" -->
+      <g transform="translate(0, 56)">
+        <rect width="150" height="28" rx="14" fill="#FFFFFF" stroke="#27272A" stroke-width="1.2" />
+        <circle cx="16" cy="14" r="4" fill="#27272A" />
+        <line x1="28" y1="14" x2="136" y2="14" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
+      </g>
+
+      <!-- Judul "Daftar Tenant" -->
+      <line x1="0" y1="120" x2="380" y2="120" stroke="#18181B" stroke-width="12" stroke-linecap="round" />
+
+      <!-- Subtitle -->
+      <line x1="0" y1="154" x2="560" y2="154" stroke="#71717A" stroke-width="4.5" stroke-linecap="round" />
+      <line x1="0" y1="172" x2="430" y2="172" stroke="#71717A" stroke-width="4.5" stroke-linecap="round" />
+
+      <!-- Floating Icon Card Kanan [X] -->
+      <g transform="translate(800, 40)">
+        <rect width="130" height="130" rx="28" fill="#FFFFFF" stroke="#27272A" stroke-width="2.5" />
+        <line x1="0" y1="0" x2="130" y2="130" stroke="#71717A" stroke-width="1.5" />
+        <line x1="130" y1="0" x2="0" y2="130" stroke="#71717A" stroke-width="1.5" />
+        <circle cx="120" cy="10" r="16" fill="#27272A" />
+        <circle cx="120" cy="10" r="6" fill="#FFFFFF" />
+      </g>
+    </g>
+  </g>
+
+  <!-- 3. MAIN FLOATING CONTENT CARD (daftar-tenant.blade.php baris 40-97) -->
+  <g id="Content-Card" transform="translate(220, 330)">
+    <rect width="1000" height="880" rx="32" fill="#FFFFFF" stroke="#27272A" stroke-width="2.5" />
+
+    <!-- Lead Paragraph (baris 43-45) -->
+    <g transform="translate(80, 50)">
+      <line x1="60" y1="10" x2="780" y2="10" stroke="#71717A" stroke-width="4.5" stroke-linecap="round" />
+      <line x1="100" y1="28" x2="740" y2="28" stroke="#71717A" stroke-width="4.5" stroke-linecap="round" />
+    </g>
+
+    <!-- Subheading: Keuntungan Bergabung (baris 47-52) -->
+    <g transform="translate(80, 120)">
+      <circle cx="20" cy="20" r="20" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
+      <circle cx="20" cy="20" r="8" fill="#27272A" />
+      <line x1="56" y1="20" x2="340" y2="20" stroke="#18181B" stroke-width="8" stroke-linecap="round" />
+    </g>
+
+    <!-- Grid 3 Kolom Keuntungan (baris 55-82) -->
+    <g transform="translate(80, 180)">
+      <!-- Col 1: Sistem Khusus Dapur -->
+      <g transform="translate(0, 0)">
+        <rect width="265" height="240" rx="20" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+        <rect x="102" y="24" width="60" height="60" rx="16" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
+        <line x1="102" y1="24" x2="162" y2="84" stroke="#71717A" stroke-width="1.2" />
+        <line x1="162" y1="24" x2="102" y2="84" stroke="#71717A" stroke-width="1.2" />
+
+        <line x1="30" y1="116" x2="235" y2="116" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
+        <line x1="20" y1="144" x2="245" y2="144" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+        <line x1="30" y1="162" x2="235" y2="162" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+        <line x1="40" y1="180" x2="225" y2="180" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+      </g>
+
+      <!-- Col 2: Peningkatan Omset -->
+      <g transform="translate(287, 0)">
+        <rect width="265" height="240" rx="20" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+        <rect x="102" y="24" width="60" height="60" rx="16" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
+        <line x1="102" y1="24" x2="162" y2="84" stroke="#71717A" stroke-width="1.2" />
+        <line x1="162" y1="24" x2="102" y2="84" stroke="#71717A" stroke-width="1.2" />
+
+        <line x1="36" y1="116" x2="229" y2="116" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
+        <line x1="20" y1="144" x2="245" y2="144" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+        <line x1="30" y1="162" x2="235" y2="162" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+        <line x1="50" y1="180" x2="215" y2="180" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+      </g>
+
+      <!-- Col 3: Laporan Analitik -->
+      <g transform="translate(575, 0)">
+        <rect width="265" height="240" rx="20" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+        <rect x="102" y="24" width="60" height="60" rx="16" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
+        <line x1="102" y1="24" x2="162" y2="84" stroke="#71717A" stroke-width="1.2" />
+        <line x1="162" y1="24" x2="102" y2="84" stroke="#71717A" stroke-width="1.2" />
+
+        <line x1="40" y1="116" x2="225" y2="116" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
+        <line x1="20" y1="144" x2="245" y2="144" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+        <line x1="30" y1="162" x2="235" y2="162" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+        <line x1="50" y1="180" x2="215" y2="180" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+      </g>
+    </g>
+
+    <!-- CTA Block: Siap Bermitra dengan Kami? (baris 85-95) -->
+    <g transform="translate(80, 480)">
+      <rect width="840" height="240" rx="24" fill="#F4F4F5" stroke="#27272A" stroke-width="2" />
+      <g transform="translate(60, 36)">
+        <line x1="220" y1="16" x2="500" y2="16" stroke="#18181B" stroke-width="8" stroke-linecap="round" />
+        <line x1="100" y1="46" x2="620" y2="46" stroke="#71717A" stroke-width="4.5" stroke-linecap="round" />
+
+        <!-- Tombol Email Partnership -->
+        <g transform="translate(230, 80)">
+          <rect width="260" height="48" rx="14" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+          <rect x="18" y="16" width="20" height="16" rx="2" fill="none" stroke="#27272A" stroke-width="1.5" />
+          <path d="M18 16 L28 24 L38 16" fill="none" stroke="#27272A" stroke-width="1.5" />
+          <line x1="50" y1="24" x2="230" y2="24" stroke="#27272A" stroke-width="5" stroke-linecap="round" />
+        </g>
+
+        <!-- Note Tambahan Bawah -->
+        <line x1="160" y1="160" x2="560" y2="160" stroke="#A1A1AA" stroke-width="3.5" stroke-linecap="round" />
+      </g>
+    </g>
+  </g>
+
+  <!-- 4. CORPORATE FOOTER -->
+  <g id="Footer" transform="translate(0, 1550)">
+    <rect x="0" y="0" width="1440" height="300" fill="#F4F4F5" stroke="#27272A" stroke-width="2" />
+    <g transform="translate(80, 50)">
+      <g transform="translate(0, 0)">
+        <rect width="140" height="34" rx="4" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+        <line x1="0" y1="0" x2="140" y2="34" stroke="#71717A" stroke-width="1" />
+        <line x1="140" y1="0" x2="0" y2="34" stroke="#71717A" stroke-width="1" />
+        <line x1="0" y1="56" x2="320" y2="56" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+        <line x1="0" y1="72" x2="260" y2="72" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+      </g>
+
+      <g transform="translate(420, 0)">
+        <line x1="0" y1="12" x2="150" y2="12" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
+        <line x1="0" y1="46" x2="130" y2="46" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+        <line x1="0" y1="72" x2="110" y2="72" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+        <line x1="0" y1="98" x2="140" y2="98" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+      </g>
+
+      <g transform="translate(680, 0)">
+        <line x1="0" y1="12" x2="130" y2="12" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
+        <line x1="0" y1="46" x2="140" y2="46" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+        <line x1="0" y1="72" x2="120" y2="72" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+      </g>
+
+      <g transform="translate(940, 0)">
+        <line x1="0" y1="12" x2="140" y2="12" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
+        <rect x="0" y="36" width="160" height="44" rx="8" fill="#FFFFFF" stroke="#27272A" stroke-width="1.8" />
+        <line x1="0" y1="36" x2="160" y2="80" stroke="#71717A" stroke-width="1" />
+        <line x1="160" y1="36" x2="0" y2="80" stroke="#71717A" stroke-width="1" />
+      </g>
+    </g>
+
+    <line x1="80" y1="220" x2="1360" y2="220" stroke="#E4E4E7" stroke-width="1.5" />
+    <line x1="560" y1="250" x2="880" y2="250" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+  </g>
+
+</svg>
