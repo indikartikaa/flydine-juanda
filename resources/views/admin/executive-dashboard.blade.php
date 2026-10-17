@@ -487,7 +487,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const slaChart = new Chart(slaCtx, {
         type: 'bar',
         data: {
-            labels: slaData.map(item => item.name),
+            labels: slaData.map(item => item.terminal ? `${item.name} (${item.terminal})` : item.name),
             datasets: [{
                 label: 'Rata-rata Menit',
                 data: slaData.map(item => item.avg_minutes),
@@ -614,7 +614,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const tenantChart = new Chart(tenantCtx, {
         type: 'bar',
         data: {
-            labels: tenantDataRaw.map(item => item.name),
+            labels: tenantDataRaw.map(item => item.terminal ? `${item.name} (${item.terminal})` : item.name),
             datasets: [{
                 label: 'Total Pesanan',
                 data: tenantDataRaw.map(item => item.total),

@@ -5,13 +5,13 @@
     <title>Laporan Eksekutif FlyDine - Bandara Internasional Juanda</title>
     <style>
         @page {
-            margin: 20px 25px 25px 25px;
+            margin: 12px 20px 14px 20px;
         }
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            font-size: 10px;
+            font-size: 8px;
             color: #1e293b;
-            line-height: 1.4;
+            line-height: 1.25;
             background-color: #ffffff;
             margin: 0;
             padding: 0;
@@ -38,7 +38,7 @@
         .header-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
         .header-table td {
             vertical-align: middle;
@@ -46,7 +46,7 @@
             padding: 0;
         }
         .doc-title {
-            font-size: 16px;
+            font-size: 13px;
             font-weight: 900;
             letter-spacing: 0.5px;
             color: #0b2b48;
@@ -54,22 +54,22 @@
             text-transform: uppercase;
         }
         .doc-subtitle {
-            font-size: 11px;
+            font-size: 9.5px;
             font-weight: 700;
             color: #005ea2;
-            margin: 2px 0 0 0;
+            margin: 1px 0 0 0;
         }
         .doc-location {
-            font-size: 8.5px;
+            font-size: 7.5px;
             font-weight: 600;
             color: #64748b;
             margin-top: 1px;
         }
         .decorative-line {
-            height: 3px;
+            height: 2px;
             background-color: #005ea2;
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             border-radius: 2px;
         }
 
@@ -77,14 +77,14 @@
         .meta-bar {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 14px;
+            margin-bottom: 5px;
             background-color: #f8fafc;
             border: 1px solid #e2e8f0;
-            border-radius: 6px;
+            border-radius: 4px;
         }
         .meta-bar td {
-            padding: 6px 10px;
-            font-size: 8.5px;
+            padding: 3px 6px;
+            font-size: 7.5px;
             border: none;
             color: #475569;
         }
@@ -93,78 +93,78 @@
         .kpi-table {
             width: 100%;
             border-collapse: separate;
-            border-spacing: 6px;
-            margin-bottom: 12px;
-            margin-left: -6px;
-            margin-right: -6px;
+            border-spacing: 4px;
+            margin-bottom: 5px;
+            margin-left: -4px;
+            margin-right: -4px;
         }
         .kpi-card {
             background-color: #ffffff;
             border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 10px 12px;
+            border-radius: 6px;
+            padding: 5px 6px;
             vertical-align: top;
         }
         .kpi-title {
-            font-size: 7.5px;
+            font-size: 6.5px;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.4px;
             color: #64748b;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
         .kpi-value {
-            font-size: 16px;
+            font-size: 12px;
             font-weight: 900;
-            margin-bottom: 2px;
+            margin-bottom: 1px;
             letter-spacing: -0.3px;
         }
         .kpi-sub {
-            font-size: 7.5px;
+            font-size: 6.5px;
             color: #94a3b8;
             font-weight: 600;
         }
 
         /* Section Header */
         .section-header {
-            font-size: 10px;
+            font-size: 7.5px;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.4px;
             color: #0b2b48;
-            margin: 10px 0 6px 0;
-            padding-bottom: 3px;
-            border-bottom: 1.5px solid #005ea2;
+            margin: 4px 0 2px 0;
+            padding-bottom: 1px;
+            border-bottom: 1px solid #005ea2;
         }
 
         /* Modern Tables */
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 12px;
+            margin-bottom: 4px;
             background-color: #ffffff;
             border: 1px solid #e2e8f0;
-            border-radius: 6px;
+            border-radius: 4px;
             overflow: hidden;
         }
         .data-table th {
             background-color: #f1f5f9;
             color: #0b2b48;
             font-weight: 800;
-            font-size: 8px;
+            font-size: 6.5px;
             text-transform: uppercase;
-            letter-spacing: 0.4px;
-            padding: 6px 8px;
-            border-bottom: 1.5px solid #cbd5e1;
+            letter-spacing: 0.3px;
+            padding: 2px 4px;
+            border-bottom: 1px solid #cbd5e1;
             border-top: none;
             border-left: none;
             border-right: none;
         }
         .data-table td {
-            padding: 5.5px 8px;
-            font-size: 8.5px;
+            padding: 1.8px 4px;
+            font-size: 7px;
             color: #334155;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 0.5px solid #f1f5f9;
             border-top: none;
             border-left: none;
             border-right: none;
@@ -176,9 +176,9 @@
         /* Badges / Status Pills */
         .badge {
             display: inline-block;
-            padding: 2px 7px;
-            border-radius: 12px;
-            font-size: 7.5px;
+            padding: 1px 4px;
+            border-radius: 8px;
+            font-size: 6.5px;
             font-weight: 700;
             text-align: center;
         }
@@ -191,16 +191,16 @@
         /* Progress Bar */
         .progress-bar-bg {
             background-color: #f1f5f9;
-            border-radius: 4px;
-            height: 6px;
+            border-radius: 3px;
+            height: 4px;
             width: 100%;
             display: inline-block;
             vertical-align: middle;
             overflow: hidden;
         }
         .progress-bar-fill {
-            height: 6px;
-            border-radius: 4px;
+            height: 4px;
+            border-radius: 3px;
             background-color: #005ea2;
         }
 
@@ -208,7 +208,7 @@
         .two-col-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 8px;
+            margin-bottom: 3px;
         }
         .two-col-table td {
             vertical-align: top;
@@ -219,11 +219,12 @@
         /* Callout Box */
         .callout-box {
             background-color: #f0f7ff;
-            border-left: 3.5px solid #005ea2;
-            padding: 8px 12px;
-            border-radius: 0 6px 6px 0;
-            margin-bottom: 14px;
-            font-size: 8px;
+            border-left: 2.5px solid #005ea2;
+            padding: 3px 6px;
+            border-radius: 0 4px 4px 0;
+            margin-bottom: 4px;
+            font-size: 6.8px;
+            line-height: 1.25;
             color: #1e3a8a;
         }
 
@@ -231,7 +232,8 @@
         .signature-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-top: 3px;
+            page-break-inside: avoid;
         }
         .signature-table td {
             vertical-align: top;
@@ -239,11 +241,11 @@
             padding: 0;
         }
         .signature-box {
-            width: 200px;
+            width: 170px;
             text-align: center;
             float: right;
             border-top: 1px solid #cbd5e1;
-            padding-top: 5px;
+            padding-top: 2px;
         }
 
         .footer {
@@ -251,11 +253,11 @@
             bottom: 0px;
             left: 0px;
             right: 0px;
-            height: 20px;
+            height: 12px;
             border-top: 1px solid #e2e8f0;
-            font-size: 7.5px;
+            font-size: 6.5px;
             color: #94a3b8;
-            padding-top: 4px;
+            padding-top: 2px;
         }
     </style>
 </head>
@@ -351,8 +353,8 @@
             <td width="25%">
                 <div class="kpi-card" style="border-top: 3px solid #f59e0b;">
                     <div class="kpi-title">Rata-rata Waktu Kesiapan</div>
-                    <div class="kpi-value" style="color: #d97706;">{{ round($avgSLA, 1) }} <span style="font-size: 10px; font-weight: 600; color: #64748b;">Menit</span></div>
-                    <div class="kpi-sub">Standar SLA: &le; 15 menit</div>
+                    <div class="kpi-value" style="color: #d97706;">{{ round($avgSLA, 1) }} <span style="font-size: 8px; font-weight: 600; color: #64748b;">Menit</span></div>
+                    <div class="kpi-sub">Standar SLA: maks. 15 menit</div>
                 </div>
             </td>
         </tr>
@@ -384,13 +386,21 @@
                     </thead>
                     <tbody>
                         @forelse($slaPerformance as $index => $sla)
+                        @php
+                            $slaTerm = $sla->terminal ?: (stripos($sla->floor_location ?? '', '2') !== false ? 'T2' : 'T1');
+                        @endphp
                         <tr>
                             <td class="text-center font-bold" style="color: #64748b;">#{{ $index + 1 }}</td>
-                            <td class="font-bold text-dark">{{ $sla->name }}</td>
+                            <td class="font-bold text-dark">
+                                {{ $sla->name }}
+                                @if($slaTerm)
+                                    <span style="font-size: 6.5px; color: #005ea2; font-weight: 800;">({{ $slaTerm }})</span>
+                                @endif
+                            </td>
                             <td class="text-right font-bold text-primary">{{ round($sla->avg_minutes, 1) }} Menit</td>
                             <td class="text-center">
                                 @if($sla->avg_minutes <= 15)
-                                    <span class="badge badge-success">&le; 15 Mnt (Optimal)</span>
+                                    <span class="badge badge-success">&lt;= 15 Mnt (Optimal)</span>
                                 @else
                                     <span class="badge badge-danger">&gt; 15 Mnt (Lambat)</span>
                                 @endif
@@ -505,14 +515,22 @@
                             <th width="10%" class="text-center">No</th>
                             <th width="45%">Restoran</th>
                             <th width="20%" class="text-center">Volume</th>
-                            <th width="25%" class="text-right">Omset</th>
+                            <th width="25%" class="text-right">Omset (Lunas)</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($tenantPerformance as $i => $tp)
+                        @php
+                            $tpTerm = $tp->terminal ?: (stripos($tp->floor_location ?? '', '2') !== false ? 'T2' : 'T1');
+                        @endphp
                         <tr>
                             <td class="text-center font-bold" style="color: #64748b;">#{{ $i + 1 }}</td>
-                            <td class="font-bold text-dark">{{ $tp->name }}</td>
+                            <td class="font-bold text-dark">
+                                {{ $tp->name }}
+                                @if($tpTerm)
+                                    <span style="font-size: 6.5px; color: #005ea2; font-weight: 800;">({{ $tpTerm }})</span>
+                                @endif
+                            </td>
                             <td class="text-center font-bold text-primary">{{ $tp->total_orders }} Pesanan</td>
                             <td class="text-right font-bold text-emerald">Rp {{ number_format($tp->total_omset, 0, ',', '.') }}</td>
                         </tr>
@@ -624,10 +642,10 @@
             </td>
             <td width="40%" class="text-right">
                 <div class="signature-box">
-                    <p style="margin: 0; font-size: 8px; color: #64748b;">Surabaya, {{ now()->format('d M Y') }}</p>
-                    <p style="margin: 2px 0 35px 0; font-weight: bold; font-size: 8.5px; color: #0b2b48;">Commercial & Operation Head<br>Bandara Internasional Juanda</p>
-                    <p style="margin: 0; font-weight: 800; font-size: 9px; color: #005ea2; text-decoration: underline;">MANAGEMENT FLYDINE</p>
-                    <p style="margin: 1px 0 0 0; font-size: 7.5px; color: #94a3b8;">PT Angkasa Pura Indonesia</p>
+                    <p style="margin: 0; font-size: 7.5px; color: #64748b;">Surabaya, {{ now()->format('d M Y') }}</p>
+                    <p style="margin: 1px 0 16px 0; font-weight: bold; font-size: 8px; color: #0b2b48;">Commercial & Operation Head<br>Bandara Internasional Juanda</p>
+                    <p style="margin: 0; font-weight: 800; font-size: 8.5px; color: #005ea2; text-decoration: underline;">MANAGEMENT FLYDINE</p>
+                    <p style="margin: 1px 0 0 0; font-size: 7px; color: #94a3b8;">PT Angkasa Pura Indonesia</p>
                 </div>
             </td>
         </tr>

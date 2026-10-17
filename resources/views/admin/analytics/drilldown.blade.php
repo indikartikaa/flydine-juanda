@@ -7,16 +7,16 @@
 window.drillDownApp = function() {
     return {
         // Query & Filter States
-        startDate: '{{ $startDateFormatted }}',
-        endDate: '{{ $endDateFormatted }}',
-        date: '{{ $initialDate }}',
-        tenantId: '{{ $tenantId ?: "" }}',
-        category: '{{ $initialCategory }}',
-        status: '{{ $initialStatus }}',
-        sla: '{{ $initialSla }}',
-        hour: '{{ $initialHour }}',
-        pickupMethod: '{{ $initialPickupMethod }}',
-        search: '{{ $initialSearch }}',
+        startDate: {!! json_encode($startDateFormatted) !!},
+        endDate: {!! json_encode($endDateFormatted) !!},
+        date: {!! json_encode($initialDate) !!},
+        tenantId: {!! json_encode($tenantId ? (string)$tenantId : "") !!},
+        category: {!! json_encode($initialCategory) !!},
+        status: {!! json_encode($initialStatus) !!},
+        sla: {!! json_encode($initialSla) !!},
+        hour: {!! json_encode($initialHour) !!},
+        pickupMethod: {!! json_encode($initialPickupMethod) !!},
+        search: {!! json_encode($initialSearch) !!},
         categoryMetric: 'volume',
         cachedChartsData: null,
 
@@ -92,6 +92,12 @@ window.drillDownApp = function() {
                 selectTenantEl.value = this.tenantId;
             }
 
+            // Sync category selector if rendered in form
+            const selectCatEl = document.getElementById('filterCategorySelect');
+            if (selectCatEl && this.category) {
+                selectCatEl.value = this.category;
+            }
+
             // Fetch initial data
             this.fetchSummaryAndOrders();
             this.fetchCharts();
@@ -153,11 +159,15 @@ window.drillDownApp = function() {
             this.hour = 'semua';
             const selectTenantEl = document.getElementById('tenantSelect');
             if (selectTenantEl) selectTenantEl.value = '';
+            const selectCatEl = document.getElementById('filterCategorySelect');
+            if (selectCatEl) selectCatEl.value = 'semua';
             this.applyFilter();
         },
 
         clearCategory() {
             this.category = 'semua';
+            const selectCatEl = document.getElementById('filterCategorySelect');
+            if (selectCatEl) selectCatEl.value = 'semua';
             this.applyFilter();
         },
 
@@ -190,6 +200,8 @@ window.drillDownApp = function() {
             this.page = 1;
             const selectTenantEl = document.getElementById('tenantSelect');
             if (selectTenantEl) selectTenantEl.value = '';
+            const selectCatEl = document.getElementById('filterCategorySelect');
+            if (selectCatEl) selectCatEl.value = 'semua';
             this.applyFilter();
         },
 
@@ -717,7 +729,7 @@ if (typeof window.Alpine !== 'undefined') {
 }
 </script>
 
-<div class="space-y-6 pb-12" x-data="window.drillDownApp()" x-init="init()">
+<div class="space-y-6 pb-12" x-data="window.drillDownApp()">
 
     <!-- Page Header & Identity -->
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
@@ -776,12 +788,13 @@ if (typeof window.Alpine !== 'undefined') {
             </label>
             <div class="relative">
                 <select id="filterCategorySelect" 
+                        name="category"
                         x-model="category" 
                         @change="applyFilter()" 
                         class="w-full sm:w-auto px-3.5 py-2.5 bg-slate-50 hover:bg-white border-2 border-slate-300 focus:border-[#005ea2] focus:bg-white rounded-xl text-sm font-extrabold text-slate-900 focus:ring-2 focus:ring-[#005ea2] transition cursor-pointer shadow-xs sm:min-w-[170px] h-[44px]">
-                    <option value="semua">Semua Kategori</option>
+                    <option value="semua" {{ $initialCategory === 'semua' ? 'selected' : '' }}>Semua Kategori</option>
                     @foreach($categories as $cat)
-                        <option value="{{ $cat }}">{{ $cat }}</option>
+                        <option value="{{ $cat }}" {{ $initialCategory === $cat ? 'selected' : '' }}>{{ $cat }}</option>
                     @endforeach
                 </select>
             </div>
@@ -794,15 +807,16 @@ if (typeof window.Alpine !== 'undefined') {
             </label>
             <div class="relative">
                 <select id="filterStatusSelect" 
+                        name="status"
                         x-model="status" 
                         @change="applyFilter()" 
                         class="w-full sm:w-auto px-3.5 py-2.5 bg-slate-50 hover:bg-white border-2 border-slate-300 focus:border-[#005ea2] focus:bg-white rounded-xl text-sm font-extrabold text-slate-900 focus:ring-2 focus:ring-[#005ea2] transition cursor-pointer shadow-xs sm:min-w-[150px] h-[44px]">
-                    <option value="semua">Semua Status</option>
-                    <option value="menunggu">Menunggu</option>
-                    <option value="diproses">Diproses</option>
-                    <option value="siap">Siap</option>
-                    <option value="selesai">Selesai</option>
-                    <option value="dibatalkan">Dibatalkan</option>
+                    <option value="semua" {{ $initialStatus === 'semua' ? 'selected' : '' }}>Semua Status</option>
+                    <option value="menunggu" {{ $initialStatus === 'menunggu' ? 'selected' : '' }}>Menunggu</option>
+                    <option value="diproses" {{ $initialStatus === 'diproses' ? 'selected' : '' }}>Diproses</option>
+                    <option value="siap" {{ $initialStatus === 'siap' ? 'selected' : '' }}>Siap</option>
+                    <option value="selesai" {{ $initialStatus === 'selesai' ? 'selected' : '' }}>Selesai</option>
+                    <option value="dibatalkan" {{ $initialStatus === 'dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
                 </select>
             </div>
         </div>
@@ -814,12 +828,13 @@ if (typeof window.Alpine !== 'undefined') {
             </label>
             <div class="relative">
                 <select id="filterSlaSelect" 
+                        name="sla"
                         x-model="sla" 
                         @change="applyFilter()" 
                         class="w-full sm:w-auto px-3.5 py-2.5 bg-slate-50 hover:bg-white border-2 border-slate-300 focus:border-[#005ea2] focus:bg-white rounded-xl text-sm font-extrabold text-slate-900 focus:ring-2 focus:ring-[#005ea2] transition cursor-pointer shadow-xs sm:min-w-[170px] h-[44px]">
-                    <option value="semua">Semua Kepatuhan</option>
-                    <option value="compliant">✅ Sesuai SOP (≤ 15 mnt)</option>
-                    <option value="breached">⚠️ Melewati SOP (&gt; 15 mnt)</option>
+                    <option value="semua" {{ $initialSla === 'semua' ? 'selected' : '' }}>Semua Kepatuhan</option>
+                    <option value="compliant" {{ $initialSla === 'compliant' ? 'selected' : '' }}>✅ Sesuai SOP (≤ 15 mnt)</option>
+                    <option value="breached" {{ $initialSla === 'breached' ? 'selected' : '' }}>⚠️ Melewati SOP (&gt; 15 mnt)</option>
                 </select>
             </div>
         </div>
@@ -831,12 +846,13 @@ if (typeof window.Alpine !== 'undefined') {
             </label>
             <div class="relative">
                 <select id="filterHourSelect" 
+                        name="hour"
                         x-model="hour" 
                         @change="applyFilter()" 
                         class="w-full sm:w-auto px-3.5 py-2.5 bg-slate-50 hover:bg-white border-2 border-slate-300 focus:border-[#005ea2] focus:bg-white rounded-xl text-sm font-extrabold text-slate-900 focus:ring-2 focus:ring-[#005ea2] transition cursor-pointer shadow-xs sm:min-w-[130px] h-[44px]">
-                    <option value="semua">Semua Jam</option>
+                    <option value="semua" {{ $initialHour === 'semua' ? 'selected' : '' }}>Semua Jam</option>
                     @for($h = 0; $h < 24; $h++)
-                        <option value="{{ $h }}">{{ sprintf('%02d:00', $h) }}</option>
+                        <option value="{{ $h }}" {{ (string)$initialHour === (string)$h ? 'selected' : '' }}>{{ sprintf('%02d:00', $h) }}</option>
                     @endfor
                 </select>
             </div>
@@ -849,12 +865,13 @@ if (typeof window.Alpine !== 'undefined') {
             </label>
             <div class="relative">
                 <select id="filterPickupSelect" 
+                        name="pickup_method"
                         x-model="pickupMethod" 
                         @change="applyFilter()" 
                         class="w-full sm:w-auto px-3.5 py-2.5 bg-slate-50 hover:bg-white border-2 border-slate-300 focus:border-[#005ea2] focus:bg-white rounded-xl text-sm font-extrabold text-slate-900 focus:ring-2 focus:ring-[#005ea2] transition cursor-pointer shadow-xs sm:min-w-[160px] h-[44px]">
-                    <option value="semua">Semua Metode</option>
-                    <option value="ambil_sendiri">Ambil Sendiri di Gerai</option>
-                    <option value="diantar">Diantar Porter ke Gate</option>
+                    <option value="semua" {{ $initialPickupMethod === 'semua' ? 'selected' : '' }}>Semua Metode</option>
+                    <option value="ambil_sendiri" {{ $initialPickupMethod === 'ambil_sendiri' ? 'selected' : '' }}>Ambil Sendiri di Gerai</option>
+                    <option value="diantar" {{ $initialPickupMethod === 'diantar' ? 'selected' : '' }}>Diantar Porter ke Gate</option>
                 </select>
             </div>
         </div>

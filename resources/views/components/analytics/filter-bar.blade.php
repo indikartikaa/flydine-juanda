@@ -102,22 +102,6 @@
         </div>
     </form>
 </div>
-            <span class="text-xs font-black text-slate-500 uppercase tracking-wider mr-1">Preset Cepat:</span>
-            <button type="button" onclick="setQuickDateRange(7)" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-blue-100 hover:text-[#005ea2] text-slate-800 font-extrabold border border-slate-200 transition cursor-pointer">
-                7 Hari
-            </button>
-            <button type="button" onclick="setQuickDateRange(30)" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-blue-100 hover:text-[#005ea2] text-slate-800 font-extrabold border border-slate-200 transition cursor-pointer">
-                30 Hari
-            </button>
-            <button type="button" onclick="setQuickDateRange('month')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-blue-100 hover:text-[#005ea2] text-slate-800 font-extrabold border border-slate-200 transition cursor-pointer">
-                Bulan Ini
-            </button>
-            <button type="button" onclick="setQuickDateRange(90)" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-blue-100 hover:text-[#005ea2] text-slate-800 font-extrabold border border-slate-200 transition cursor-pointer">
-                90 Hari
-            </button>
-        </div>
-    </form>
-</div>
 
 <script nonce="{{ $cspNonce ?? '' }}">
 if (typeof window.setQuickDateRange === 'undefined') {

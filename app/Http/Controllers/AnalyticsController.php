@@ -24,12 +24,12 @@ class AnalyticsController extends Controller
                 $startDate = $endDate->copy()->startOfDay();
                 $endDate = $temp->copy()->endOfDay();
             }
-            $days = max(1, (int) round($startDate->copy()->startOfDay()->diffInDays($endDate->copy()->startOfDay())) + 1);
         } else {
-            $days = (int) $request->input('days', 30);
-            $startDate = Carbon::now()->subDays($days)->startOfDay();
+            $daysInput = (int) $request->input('days', 30);
+            $startDate = Carbon::now()->subDays($daysInput)->startOfDay();
             $endDate = Carbon::now()->endOfDay();
         }
+        $days = max(1, (int) round($startDate->copy()->startOfDay()->diffInDays($endDate->copy()->startOfDay())) + 1);
 
         $startDateFormatted = $startDate->format('Y-m-d');
         $endDateFormatted = $endDate->format('Y-m-d');
@@ -135,7 +135,7 @@ class AnalyticsController extends Controller
 
         // 8. Category Filter (tenants.category)
         if ($request->filled('category') && $request->input('category') !== 'semua') {
-            $category = $request->input('category');
+            $category = html_entity_decode((string)$request->input('category'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
             $query->whereHas('tenant', function ($tq) use ($category) {
                 $tq->where('category', $category);
             });
@@ -169,7 +169,9 @@ class AnalyticsController extends Controller
         $initialSla = $request->input('sla', 'semua');
         $initialHour = $request->input('hour', 'semua');
         $initialPickupMethod = $request->input('pickup_method', 'semua');
-        $initialCategory = $request->input('category', 'semua');
+        $initialCategory = $request->filled('category')
+            ? html_entity_decode((string)$request->input('category'), ENT_QUOTES | ENT_HTML5, 'UTF-8')
+            : 'semua';
         $initialSearch = $request->input('search', '');
         $initialDate = $request->input('date', '');
 
@@ -206,6 +208,9 @@ class AnalyticsController extends Controller
             if ($request->has($key) && ($request->input($key) === 'semua' || $request->input($key) === '')) {
                 $cleanInputs[$key] = null;
             }
+        }
+        if ($request->filled('category')) {
+            $cleanInputs['category'] = html_entity_decode((string)$request->input('category'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         }
         if (!empty($cleanInputs)) {
             $request->merge($cleanInputs);
@@ -348,6 +353,9 @@ class AnalyticsController extends Controller
             if ($request->has($key) && ($request->input($key) === 'semua' || $request->input($key) === '')) {
                 $cleanInputs[$key] = null;
             }
+        }
+        if ($request->filled('category')) {
+            $cleanInputs['category'] = html_entity_decode((string)$request->input('category'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         }
         if (!empty($cleanInputs)) {
             $request->merge($cleanInputs);
@@ -761,7 +769,7 @@ class AnalyticsController extends Controller
                 SUM(CASE WHEN total_orders = 1 THEN 1 ELSE 0 END) as new_customers,
                 SUM(CASE WHEN total_orders BETWEEN 2 AND 5 THEN 1 ELSE 0 END) as regular_customers,
                 SUM(CASE WHEN total_orders > 5 THEN 1 ELSE 0 END) as frequent_customers,
-                COUNT(id) as total_customers
+                COALESCE(SUM(CASE WHEN total_orders > 0 THEN 1 ELSE 0 END), 0) as total_customers
             ")->first();
 
         return view('admin.analytics.customers', compact(

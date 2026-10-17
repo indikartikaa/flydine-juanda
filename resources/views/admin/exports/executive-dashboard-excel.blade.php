@@ -157,7 +157,7 @@
         @php
             $canceledCount = $statusDistribution->where('status', 'dibatalkan')->first()->total ?? 0;
             $cancelRate = $totalOrders > 0 ? round(($canceledCount / $totalOrders) * 100, 1) : 0;
-            $slaMap = $slaPerformance->keyBy('name');
+            $slaMap = $slaPerformance->keyBy('id');
             $avgAllSla = $slaPerformance->avg('avg_minutes');
         @endphp
         <tr>
@@ -191,17 +191,17 @@
             <th width="40">No</th>
             <th width="240">Nama Tenant</th>
             <th width="130">Total Pesanan</th>
-            <th width="170">Total Omset (Rp)</th>
+            <th width="170">Total Omset Lunas (Rp)</th>
             <th width="130">Rata-rata SLA (Menit)</th>
             <th width="150">Status Kinerja SLA</th>
         </tr>
         @forelse($tenantPerformance as $idx => $t)
             @php
-                $tSla = $slaMap->get($t->name)->avg_minutes ?? null;
+                $tSla = $slaMap->get($t->id)->avg_minutes ?? null;
             @endphp
             <tr class="{{ $idx % 2 == 1 ? 'row-zebra' : '' }}">
                 <td class="td-center">{{ $idx + 1 }}</td>
-                <td class="td-data font-bold">{{ $t->name }}</td>
+                <td class="td-data font-bold">{{ $t->name }}{{ $t->terminal ? ' (' . $t->terminal . ')' : '' }}</td>
                 <td class="td-center">{{ number_format($t->total_orders, 0, ',', '.') }}</td>
                 <td class="td-right">Rp {{ number_format($t->total_omset, 0, ',', '.') }}</td>
                 <td class="td-center">{{ $tSla ? round($tSla, 1) : '-' }}</td>

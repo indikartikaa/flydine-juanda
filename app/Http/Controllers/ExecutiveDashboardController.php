@@ -26,12 +26,12 @@ class ExecutiveDashboardController extends Controller
                 $startDate = $endDate->copy()->startOfDay();
                 $endDate = $temp->copy()->endOfDay();
             }
-            $days = max(1, (int) round($startDate->copy()->startOfDay()->diffInDays($endDate->copy()->startOfDay())) + 1);
         } else {
-            $days = (int) $request->input('days', 30);
-            $startDate = Carbon::now()->subDays($days)->startOfDay();
+            $daysInput = (int) $request->input('days', 30);
+            $startDate = Carbon::now()->subDays($daysInput)->startOfDay();
             $endDate = Carbon::now()->endOfDay();
         }
+        $days = max(1, (int) round($startDate->copy()->startOfDay()->diffInDays($endDate->copy()->startOfDay())) + 1);
         $startDateFormatted = $startDate->format('Y-m-d');
         $endDateFormatted = $endDate->format('Y-m-d');
 
@@ -73,8 +73,8 @@ class ExecutiveDashboardController extends Controller
         // 3. Performa Tenant (Volume) - Membaca dari daily_tenant_summaries
         $tenantPerformance = (clone $summaryQuery)
             ->join('tenants', 'daily_tenant_summaries.tenant_id', '=', 'tenants.id')
-            ->select('tenants.id', 'tenants.name', DB::raw('SUM(daily_tenant_summaries.total_orders) as total'))
-            ->groupBy('tenants.id', 'tenants.name')
+            ->select('tenants.id', 'tenants.name', 'tenants.terminal', 'tenants.floor_location', DB::raw('SUM(daily_tenant_summaries.total_orders) as total'))
+            ->groupBy('tenants.id', 'tenants.name', 'tenants.terminal', 'tenants.floor_location')
             ->orderByDesc('total')
             ->take(20)
             ->get();
@@ -101,9 +101,11 @@ class ExecutiveDashboardController extends Controller
             ->select(
                 'tenants.id',
                 'tenants.name',
+                'tenants.terminal',
+                'tenants.floor_location',
                 DB::raw("AVG({$diffMinutesSql}) as avg_minutes")
             )
-            ->groupBy('tenants.id', 'tenants.name')
+            ->groupBy('tenants.id', 'tenants.name', 'tenants.terminal', 'tenants.floor_location')
             ->orderByDesc('avg_minutes')
             ->take(20)
             ->get();
@@ -192,12 +194,12 @@ class ExecutiveDashboardController extends Controller
                 $startDate = $endDate->copy()->startOfDay();
                 $endDate = $temp->copy()->endOfDay();
             }
-            $days = max(1, (int) round($startDate->copy()->startOfDay()->diffInDays($endDate->copy()->startOfDay())) + 1);
         } else {
-            $days = (int) $request->input('days', 30);
-            $startDate = Carbon::now()->subDays($days)->startOfDay();
+            $daysInput = (int) $request->input('days', 30);
+            $startDate = Carbon::now()->subDays($daysInput)->startOfDay();
             $endDate = Carbon::now()->endOfDay();
         }
+        $days = max(1, (int) round($startDate->copy()->startOfDay()->diffInDays($endDate->copy()->startOfDay())) + 1);
         $tenantId = $request->input('tenant_id');
 
         $tenant = $tenantId ? Tenant::find($tenantId) : null;
@@ -237,19 +239,29 @@ class ExecutiveDashboardController extends Controller
             $slaQuery->where('orders.tenant_id', $tenantId);
         }
         $slaPerformance = $slaQuery->select(
+                'tenants.id',
                 'tenants.name',
+                'tenants.terminal',
+                'tenants.floor_location',
                 DB::raw('count(orders.id) as total_completed'),
                 DB::raw("AVG({$diffMinutesSql}) as avg_minutes")
             )
-            ->groupBy('tenants.id', 'tenants.name')
+            ->groupBy('tenants.id', 'tenants.name', 'tenants.terminal', 'tenants.floor_location')
             ->orderBy('avg_minutes')
             ->get();
 
-        // 5. Performa Tenant (Volume Terlaris)
+        // 5. Performa Tenant (Volume Terlaris) - omset hanya dari pesanan lunas
         $tenantPerformance = (clone $orderQuery)
             ->join('tenants', 'orders.tenant_id', '=', 'tenants.id')
-            ->select('tenants.name', DB::raw('count(orders.id) as total_orders'), DB::raw('sum(orders.total_amount) as total_omset'))
-            ->groupBy('tenants.id', 'tenants.name')
+            ->select(
+                'tenants.id',
+                'tenants.name',
+                'tenants.terminal',
+                'tenants.floor_location',
+                DB::raw('count(orders.id) as total_orders'),
+                DB::raw('SUM(CASE WHEN orders.is_paid = 1 THEN orders.total_amount ELSE 0 END) as total_omset')
+            )
+            ->groupBy('tenants.id', 'tenants.name', 'tenants.terminal', 'tenants.floor_location')
             ->orderByDesc('total_orders')
             ->take(5)
             ->get();
@@ -284,7 +296,7 @@ class ExecutiveDashboardController extends Controller
                 SUM(CASE WHEN total_orders = 1 THEN 1 ELSE 0 END) as new_customers,
                 SUM(CASE WHEN total_orders BETWEEN 2 AND 5 THEN 1 ELSE 0 END) as regular_customers,
                 SUM(CASE WHEN total_orders > 5 THEN 1 ELSE 0 END) as frequent_customers,
-                COUNT(id) as total_customers
+                COALESCE(SUM(CASE WHEN total_orders > 0 THEN 1 ELSE 0 END), 0) as total_customers
             ")->first();
 
         // Base64 Logos (Hanya jika GD extension tersedia agar anti-crash)
@@ -323,12 +335,12 @@ class ExecutiveDashboardController extends Controller
                 $startDate = $endDate->copy()->startOfDay();
                 $endDate = $temp->copy()->endOfDay();
             }
-            $days = max(1, (int) round($startDate->copy()->startOfDay()->diffInDays($endDate->copy()->startOfDay())) + 1);
         } else {
-            $days = (int) $request->input('days', 30);
-            $startDate = Carbon::now()->subDays($days)->startOfDay();
+            $daysInput = (int) $request->input('days', 30);
+            $startDate = Carbon::now()->subDays($daysInput)->startOfDay();
             $endDate = Carbon::now()->endOfDay();
         }
+        $days = max(1, (int) round($startDate->copy()->startOfDay()->diffInDays($endDate->copy()->startOfDay())) + 1);
         $tenantId = $request->input('tenant_id');
 
         $tenant = $tenantId ? Tenant::find($tenantId) : null;
@@ -369,19 +381,29 @@ class ExecutiveDashboardController extends Controller
             $slaQuery->where('orders.tenant_id', $tenantId);
         }
         $slaPerformance = $slaQuery->select(
+                'tenants.id',
                 'tenants.name',
+                'tenants.terminal',
+                'tenants.floor_location',
                 DB::raw('count(orders.id) as total_completed'),
                 DB::raw("AVG({$diffMinutesSql}) as avg_minutes")
             )
-            ->groupBy('tenants.id', 'tenants.name')
+            ->groupBy('tenants.id', 'tenants.name', 'tenants.terminal', 'tenants.floor_location')
             ->orderBy('avg_minutes')
             ->get();
 
-        // 5. Performa Tenant
+        // 5. Performa Tenant - omset hanya pesanan lunas
         $tenantPerformance = (clone $orderQuery)
             ->join('tenants', 'orders.tenant_id', '=', 'tenants.id')
-            ->select('tenants.name', DB::raw('count(orders.id) as total_orders'), DB::raw('sum(orders.total_amount) as total_omset'))
-            ->groupBy('tenants.id', 'tenants.name')
+            ->select(
+                'tenants.id',
+                'tenants.name',
+                'tenants.terminal',
+                'tenants.floor_location',
+                DB::raw('count(orders.id) as total_orders'),
+                DB::raw('SUM(CASE WHEN orders.is_paid = 1 THEN orders.total_amount ELSE 0 END) as total_omset')
+            )
+            ->groupBy('tenants.id', 'tenants.name', 'tenants.terminal', 'tenants.floor_location')
             ->orderByDesc('total_orders')
             ->get();
 
@@ -415,7 +437,7 @@ class ExecutiveDashboardController extends Controller
                 SUM(CASE WHEN total_orders = 1 THEN 1 ELSE 0 END) as new_customers,
                 SUM(CASE WHEN total_orders BETWEEN 2 AND 5 THEN 1 ELSE 0 END) as regular_customers,
                 SUM(CASE WHEN total_orders > 5 THEN 1 ELSE 0 END) as frequent_customers,
-                COUNT(id) as total_customers
+                COALESCE(SUM(CASE WHEN total_orders > 0 THEN 1 ELSE 0 END), 0) as total_customers
             ")->first();
 
         $periodLabel = ($request->filled('start_date') && $request->filled('end_date'))

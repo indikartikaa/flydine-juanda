@@ -442,7 +442,43 @@ class DummyOrderSeeder extends Seeder
             ]);
         }
 
+        // 7. Sinkronkan statistik total_orders pada seluruh customer berdasarkan data orders
+        $this->command?->info('Menyelaraskan statistik total_orders pada profil customer...');
+        self::syncCustomerOrderStats();
+
         $this->command?->info('DummyOrderSeeder selesai dengan sukses! 203 pesanan & 10 komplain telah disiapkan.');
+    }
+
+    /**
+     * Sinkronisasi data total_orders, first_order_at, dan last_order_at pada tabel customers
+     * berdasarkan riwayat pesanan aktual di tabel orders.
+     */
+    public static function syncCustomerOrderStats(): void
+    {
+        $stats = DB::table('orders')
+            ->selectRaw('customer_id, COUNT(*) as order_count, MIN(ordered_at) as min_ordered, MAX(ordered_at) as max_ordered')
+            ->whereNotNull('customer_id')
+            ->groupBy('customer_id')
+            ->get();
+
+        foreach ($stats as $stat) {
+            DB::table('customers')->where('id', $stat->customer_id)->update([
+                'total_orders'   => $stat->order_count,
+                'first_order_at' => $stat->min_ordered,
+                'last_order_at'  => $stat->max_ordered,
+                'updated_at'     => now(),
+            ]);
+        }
+
+        $orderedCustomerIds = $stats->pluck('customer_id')->all();
+        if (!empty($orderedCustomerIds)) {
+            DB::table('customers')
+                ->whereNotIn('id', $orderedCustomerIds)
+                ->update([
+                    'total_orders' => 0,
+                    'updated_at'   => now(),
+                ]);
+        }
     }
 
     /**
@@ -467,6 +503,9 @@ class DummyOrderSeeder extends Seeder
 
         // Hapus 30 customer uji
         $deletedCustomers += DB::table('customers')->where('phone_number', 'like', '089999%')->delete();
+
+        // Sinkronkan kembali statistik customer setelah data dummy dibersihkan
+        self::syncCustomerOrderStats();
 
         return compact('deletedOrders', 'deletedItems', 'deletedComplaints', 'deletedCustomers');
     }

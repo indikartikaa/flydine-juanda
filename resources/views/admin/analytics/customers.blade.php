@@ -73,17 +73,29 @@
                 <span>Rasio Pengguna Berdasarkan Loyalitas</span>
                 <span class="tabular-nums">Total Teranalisis: <strong class="text-slate-900">{{ number_format($totalCust) }}</strong> Pelanggan</span>
             </div>
+            @if($totalCust > 0)
             <div class="w-full flex h-7 rounded-xl overflow-hidden bg-slate-100 p-1 gap-1 border border-slate-200/80">
-                <div class="bg-sky-500 rounded-lg flex items-center justify-center text-[11px] font-black text-white transition-all duration-1000 shadow-xs tabular-nums" style="width: {{ max(4, $newPct) }}%" title="Pelanggan Baru ({{ $newPct }}%)">
-                    @if($newPct > 5) {{ $newPct }}% @endif
+                @if($newPct > 0)
+                <div class="bg-sky-500 rounded-lg flex items-center justify-center text-[11px] font-black text-white transition-all duration-1000 shadow-xs tabular-nums" style="width: {{ $newPct }}%" title="Pelanggan Baru ({{ $newPct }}%)">
+                    @if($newPct >= 5) {{ $newPct }}% @endif
                 </div>
-                <div class="bg-amber-500 rounded-lg flex items-center justify-center text-[11px] font-black text-white transition-all duration-1000 shadow-xs tabular-nums" style="width: {{ max(4, $regPct) }}%" title="Pelanggan Reguler ({{ $regPct }}%)">
-                    @if($regPct > 5) {{ $regPct }}% @endif
+                @endif
+                @if($regPct > 0)
+                <div class="bg-amber-500 rounded-lg flex items-center justify-center text-[11px] font-black text-white transition-all duration-1000 shadow-xs tabular-nums" style="width: {{ $regPct }}%" title="Pelanggan Reguler ({{ $regPct }}%)">
+                    @if($regPct >= 5) {{ $regPct }}% @endif
                 </div>
-                <div class="bg-emerald-600 rounded-lg flex items-center justify-center text-[11px] font-black text-white transition-all duration-1000 shadow-xs tabular-nums" style="width: {{ max(4, $freqPct) }}%" title="Pelanggan Setia ({{ $freqPct }}%)">
-                    @if($freqPct > 5) {{ $freqPct }}% @endif
+                @endif
+                @if($freqPct > 0)
+                <div class="bg-emerald-600 rounded-lg flex items-center justify-center text-[11px] font-black text-white transition-all duration-1000 shadow-xs tabular-nums" style="width: {{ $freqPct }}%" title="Pelanggan Setia ({{ $freqPct }}%)">
+                    @if($freqPct >= 5) {{ $freqPct }}% @endif
                 </div>
+                @endif
             </div>
+            @else
+            <div class="w-full flex items-center justify-center h-10 rounded-xl bg-slate-50 border border-dashed border-slate-200 text-xs text-slate-400 font-semibold">
+                Belum ada data transaksi pelanggan untuk dianalisis
+            </div>
+            @endif
             <div class="flex flex-wrap items-center justify-between gap-3 mt-4 text-xs font-bold text-slate-600">
                 <div class="flex items-center"><span class="w-3.5 h-3.5 rounded-full bg-sky-500 mr-2 shadow-xs"></span> Pelanggan Baru (1x transaksi)</div>
                 <div class="flex items-center"><span class="w-3.5 h-3.5 rounded-full bg-amber-500 mr-2 shadow-xs"></span> Pelanggan Reguler (2-5x transaksi)</div>
