@@ -481,6 +481,8 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
                 body: JSON.stringify({
@@ -489,8 +491,27 @@
                     force_replace: forceReplace
                 })
             })
-            .then(response => response.json())
+            .then(async response => {
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    if (response.status === 419) {
+                        alert('Sesi telah kedaluwarsa. Silakan muat ulang (refresh) halaman.');
+                        window.location.reload();
+                        return null;
+                    }
+                    if (response.status === 409 || data.error === 'conflict') {
+                        if (confirm(data.message || 'Anda memiliki pesanan dari restoran lain. Ingin mengganti restoran?')) {
+                            addToCart(productId, tenantId, btnElement, 1);
+                        }
+                        return null;
+                    }
+                    throw new Error(data.message || 'Terjadi kesalahan pada sistem. Silakan coba lagi.');
+                }
+                return data;
+            })
             .then(data => {
+                if (!data) return;
+
                 if (btnElement) {
                     btnElement.disabled = false;
                     btnElement.classList.remove('scale-75');
@@ -531,7 +552,7 @@
                     btnElement.classList.remove('scale-75');
                     btnElement.innerHTML = originalContent;
                 }
-                alert('Terjadi kesalahan pada sistem. Silakan coba lagi.');
+                alert(error.message || 'Terjadi kesalahan pada sistem. Silakan coba lagi.');
             });
         }
 
