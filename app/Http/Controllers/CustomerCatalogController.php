@@ -244,6 +244,7 @@ class CustomerCatalogController extends Controller
         ]);
 
         $cart = session()->get('cart', []);
+        $isJson = $request->expectsJson() || $request->wantsJson() || $request->ajax() || $request->isJson();
 
         // Validate multi-tenant (only 1 tenant per cart)
         if (count($cart) > 0) {
@@ -252,7 +253,7 @@ class CustomerCatalogController extends Controller
                 if ($request->has('force_replace') && $request->force_replace == '1') {
                     $cart = []; // clear cart to replace
                 } else {
-                    if ($request->wantsJson() || $request->ajax()) {
+                    if ($isJson) {
                         return response()->json(['error' => 'conflict', 'message' => 'Anda memiliki pesanan dari restoran lain. Ingin mengganti restoran?'], 409);
                     }
                     return redirect()->back()->with('error', 'Anda memiliki pesanan dari restoran lain.');
@@ -264,7 +265,7 @@ class CustomerCatalogController extends Controller
         $tenant = Tenant::find($request->tenant_id);
 
         if (!$tenant->isOpen()) {
-            if ($request->wantsJson() || $request->ajax()) {
+            if ($isJson) {
                 return response()->json(['error' => 'closed', 'message' => 'Restoran sedang tutup.'], 400);
             }
             return redirect()->back()->with('error', 'Restoran sedang tutup.');
@@ -290,7 +291,7 @@ class CustomerCatalogController extends Controller
             return $carry + ($item['price'] * $item['quantity']);
         }, 0);
 
-        if ($request->wantsJson() || $request->ajax()) {
+        if ($isJson) {
             return response()->json([
                 'success' => true,
                 'message' => 'Produk ditambahkan ke keranjang',
@@ -344,7 +345,9 @@ class CustomerCatalogController extends Controller
             return $carry + ($item['price'] * $item['quantity']);
         }, 0);
 
-        if ($request->wantsJson() || $request->ajax()) {
+        $isJson = $request->expectsJson() || $request->wantsJson() || $request->ajax() || $request->isJson();
+
+        if ($isJson) {
             return response()->json([
                 'success' => true,
                 'item' => $targetItem,
@@ -363,7 +366,8 @@ class CustomerCatalogController extends Controller
     public function clearCart(Request $request)
     {
         session()->forget('cart');
-        if ($request->wantsJson() || $request->ajax()) {
+        $isJson = $request->expectsJson() || $request->wantsJson() || $request->ajax() || $request->isJson();
+        if ($isJson) {
             return response()->json([
                 'success' => true,
                 'item' => null,
