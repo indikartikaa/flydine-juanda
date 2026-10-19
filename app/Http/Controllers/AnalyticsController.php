@@ -514,8 +514,8 @@ class AnalyticsController extends Controller
 
         $order->load([
             'tenant:id,name,floor_location,zone',
-            'orderItems.product:id,name,image_url',
-            'customer:id,name,phone,email',
+            'orderItems.product:id,name,image',
+            'customer:id,name,phone_number',
             'deliveryLocation:id,name,terminal',
             'complaints:id,order_id,category,status,description,created_at'
         ]);
@@ -539,8 +539,8 @@ class AnalyticsController extends Controller
                 'stage' => 'Makanan / Minuman Siap',
                 'time' => Carbon::parse($order->ready_at)->format('d M Y, H:i') . ' WIB',
                 'desc' => $slaMinutes !== null
-                    ? "Waktu saji: {$slaMinutes} menit " . ($slaMinutes <= 15 ? '(✅ Sesuai Standar SOP ≤ 15 mnt)' : '(⚠️ Melewati Batas SOP SLA)')
-                    : 'Pesanan siap diserahkan.',
+                    ? "Pesanan selesai disiapkan gerai dalam waktu {$slaMinutes} menit."
+                    : 'Pesanan siap diserahkan kepada pelanggan / porter bandara.',
                 'done' => true,
                 'sla_compliant' => $slaMinutes !== null ? ($slaMinutes <= 15) : null,
                 'status' => 'ready',
@@ -601,7 +601,7 @@ class AnalyticsController extends Controller
                 'flight_number' => $order->flight_number ?? '-',
                 'gate' => $order->gate ?? '-',
                 'boarding_time' => $order->boarding_time ? Carbon::parse($order->boarding_time)->format('H:i') . ' WIB' : '-',
-                'phone' => $order->customer->phone ?? '-',
+                'phone' => $order->customer->phone_number ?? '-',
             ],
             'sla' => [
                 'minutes' => $slaMinutes,

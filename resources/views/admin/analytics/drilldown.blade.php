@@ -51,6 +51,7 @@ window.drillDownApp = function() {
         chartsLoading: false,
         chartsError: false,
         copiedUrl: false,
+        copiedOrderCode: false,
 
         // Drawer Panel States
         drawerOpen: false,
@@ -711,9 +712,18 @@ window.drillDownApp = function() {
             });
         },
 
+        copyOrderCode() {
+            if (!this.activeOrder) return;
+            navigator.clipboard.writeText(this.activeOrder.order_code).then(() => {
+                this.copiedOrderCode = true;
+                setTimeout(() => { this.copiedOrderCode = false; }, 2000);
+            });
+        },
+
         closeDrawer() {
             this.drawerOpen = false;
             this.activeOrder = null;
+            this.copiedOrderCode = false;
         }
     };
 };
@@ -1554,34 +1564,54 @@ if (typeof window.Alpine !== 'undefined') {
         <div class="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
             <!-- Drawer Content Panel -->
             <div x-show="drawerOpen" 
-                 x-transition:enter="transform transition ease-in-out duration-300"
+                 x-transition:enter="transform transition ease-out duration-300"
                  x-transition:enter-start="translate-x-full"
                  x-transition:enter-end="translate-x-0"
-                 x-transition:leave="transform transition ease-in-out duration-200"
+                 x-transition:leave="transform transition ease-in duration-200"
                  x-transition:leave-start="translate-x-0"
                  x-transition:leave-end="translate-x-full"
-                 class="w-screen max-w-xl bg-white shadow-2xl flex flex-col h-full border-l border-slate-200">
+                 class="w-screen max-w-xl bg-[#f8fafc] shadow-2xl flex flex-col h-full border-l border-slate-200">
                 
-                <!-- Drawer Header -->
-                <div class="h-20 px-6 bg-slate-900 text-white flex items-center justify-between shrink-0 border-b border-slate-800">
-                    <div class="flex items-center gap-3">
-                        <div class="h-10 w-10 rounded-xl bg-[#005ea2] flex items-center justify-center text-white font-black text-lg">
-                            📋
+                <!-- Drawer Header: Executive Aviation Identity -->
+                <div class="px-6 py-5 bg-gradient-to-r from-[#002d54] via-[#004b80] to-[#0066a4] text-white flex items-center justify-between shrink-0 border-b border-blue-900/50 shadow-md relative overflow-hidden">
+                    <!-- Glow Accent -->
+                    <div class="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+
+                    <div class="flex items-center gap-3.5 relative z-10">
+                        <div class="h-11 w-11 rounded-2xl bg-white/15 border border-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-inner shrink-0">
+                            <svg class="w-5 h-5 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
                         </div>
                         <div>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Rincian Transaksi</span>
-                            <div class="flex items-center gap-2">
-                                <h3 class="text-base font-black text-white" x-text="activeOrder ? '#' + activeOrder.order_code : 'Memuat...'"></h3>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-blue-200 block">
+                                Bandara Juanda • Audit Transaksi
+                            </span>
+                            <div class="flex items-center gap-2 mt-0.5">
+                                <h3 class="text-base sm:text-lg font-black text-white tracking-tight flex items-center gap-1.5" x-text="activeOrder ? '#' + activeOrder.order_code : 'Memuat Data...'"></h3>
+                                
                                 <template x-if="activeOrder">
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider"
+                                    <button type="button" 
+                                            @click="copyOrderCode()" 
+                                            class="px-1.5 py-0.5 rounded bg-white/15 hover:bg-white/25 active:bg-white/35 text-blue-100 text-[11px] font-bold transition flex items-center gap-1" 
+                                            title="Salin Kode Pesanan">
+                                        <span x-text="copiedOrderCode ? '✅ Tersalin' : '📋'"></span>
+                                    </button>
+                                </template>
+
+                                <template x-if="activeOrder">
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-xs flex items-center gap-1.5"
                                           :class="{
-                                              'bg-amber-400 text-slate-950': activeOrder.status === 'menunggu',
-                                              'bg-blue-500 text-white': activeOrder.status === 'diproses',
-                                              'bg-purple-500 text-white': activeOrder.status === 'siap',
-                                              'bg-emerald-500 text-white': activeOrder.status === 'selesai',
-                                              'bg-rose-500 text-white': activeOrder.status === 'dibatalkan'
-                                          }"
-                                          x-text="activeOrder.status"></span>
+                                              'bg-amber-400 text-slate-950 font-black': activeOrder.status === 'menunggu',
+                                              'bg-sky-400 text-slate-950 font-black': activeOrder.status === 'diproses',
+                                              'bg-purple-300 text-purple-950 font-black': activeOrder.status === 'siap',
+                                              'bg-emerald-400 text-slate-950 font-black': activeOrder.status === 'selesai',
+                                              'bg-rose-500 text-white font-black': activeOrder.status === 'dibatalkan'
+                                          }">
+                                        <span class="w-1.5 h-1.5 rounded-full" 
+                                              :class="activeOrder.status === 'selesai' ? 'bg-emerald-900 animate-pulse' : (activeOrder.status === 'dibatalkan' ? 'bg-white' : 'bg-slate-900')"></span>
+                                        <span x-text="activeOrder.status_label || activeOrder.status"></span>
+                                    </span>
                                 </template>
                             </div>
                         </div>
@@ -1589,154 +1619,247 @@ if (typeof window.Alpine !== 'undefined') {
 
                     <button type="button" 
                             @click="closeDrawer()" 
-                            class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer text-lg font-bold">
-                        &times;
+                            class="relative z-10 w-9 h-9 rounded-full bg-white/10 hover:bg-white/25 active:bg-white/35 text-white/90 hover:text-white transition flex items-center justify-center cursor-pointer border border-white/20"
+                            title="Tutup Panel">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                     </button>
                 </div>
 
                 <!-- Drawer Body (Scrollable) -->
-                <div class="flex-1 overflow-y-auto p-6 space-y-6">
-                    <!-- Loading State -->
+                <div class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
+                    <!-- Loading Skeleton -->
                     <template x-if="drawerLoading">
                         <div class="space-y-4 animate-pulse">
-                            <div class="h-24 bg-slate-100 rounded-xl"></div>
-                            <div class="h-32 bg-slate-100 rounded-xl"></div>
-                            <div class="h-40 bg-slate-100 rounded-xl"></div>
+                            <div class="h-28 bg-white rounded-2xl border border-slate-200"></div>
+                            <div class="h-36 bg-white rounded-2xl border border-slate-200"></div>
+                            <div class="h-44 bg-white rounded-2xl border border-slate-200"></div>
+                            <div class="h-32 bg-white rounded-2xl border border-slate-200"></div>
                         </div>
                     </template>
 
                     <!-- Error State -->
                     <template x-if="!drawerLoading && drawerError">
-                        <div class="p-6 text-center text-rose-600 bg-rose-50 rounded-2xl border border-rose-200">
-                            <span class="text-3xl block mb-2">⚠️</span>
-                            <p class="text-sm font-bold">Gagal mengambil data rincian pesanan.</p>
-                            <p class="text-xs text-rose-500 mt-1">Pastikan koneksi aman atau coba lagi.</p>
+                        <div class="p-8 text-center text-rose-600 bg-white rounded-2xl border border-rose-200 shadow-sm">
+                            <div class="w-14 h-14 mx-auto rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-2xl mb-3">
+                                ⚠️
+                            </div>
+                            <p class="text-base font-black text-rose-900">Gagal Mengambil Data Rincian Pesanan</p>
+                            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Terjadi kendala saat memuat data dari server. Silakan coba kembali.</p>
+                            <button type="button" 
+                                    @click="openDrawer(activeOrder ? activeOrder.id : 0)" 
+                                    class="mt-4 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-black transition">
+                                Coba Lagi
+                            </button>
                         </div>
                     </template>
 
-                    <!-- Order Details Loaded -->
+                    <!-- Order Details Content -->
                     <template x-if="!drawerLoading && !drawerError && activeOrder">
-                        <div class="space-y-6">
-                            <!-- 1. Ringkasan Finansial & Pembayaran -->
-                            <div class="bg-gradient-to-br from-slate-50 to-blue-50/40 rounded-2xl p-4 border border-blue-100 flex items-center justify-between">
-                                <div>
-                                    <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Total Transaksi</span>
-                                    <span class="text-2xl font-black text-slate-900 block" x-text="activeOrder.total_amount_formatted"></span>
-                                    <span class="text-[11px] font-semibold text-slate-500" x-text="'Biaya Antar: ' + activeOrder.delivery_fee_formatted"></span>
+                        <div class="space-y-4">
+                            
+                            <!-- 1. Hero Financial & Summary Card -->
+                            <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm relative overflow-hidden">
+                                <div class="flex items-start justify-between gap-4">
+                                    <div>
+                                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Total Tagihan Transaksi</span>
+                                        <div class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-0.5" x-text="activeOrder.total_amount_formatted"></div>
+                                        <div class="flex items-center gap-1.5 mt-1.5 text-xs font-bold text-slate-500">
+                                            <span>Biaya Antar Porter:</span>
+                                            <span class="text-emerald-700 font-extrabold" x-text="activeOrder.delivery_fee > 0 ? activeOrder.delivery_fee_formatted : 'Gratis (Rp 0)'"></span>
+                                        </div>
+                                    </div>
+                                    <div class="text-right flex flex-col items-end">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider shadow-2xs border"
+                                              :class="activeOrder.is_paid 
+                                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
+                                                  : 'bg-amber-50 text-amber-800 border-amber-200'">
+                                            <svg x-show="activeOrder.is_paid" class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                            </svg>
+                                            <span x-text="activeOrder.is_paid ? 'Lunas • ' + activeOrder.payment_method : 'Belum Bayar'"></span>
+                                        </span>
+                                        <span class="text-[11px] font-bold text-slate-400 mt-2 block" x-text="activeOrder.ordered_at_formatted"></span>
+                                    </div>
                                 </div>
-                                <div class="text-right">
-                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider"
-                                          :class="activeOrder.is_paid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'">
-                                        <span x-text="activeOrder.is_paid ? '✅ Lunas (' + activeOrder.payment_method + ')' : '⚠️ Belum Lunas'"></span>
-                                    </span>
-                                    <span class="text-[11px] font-bold text-slate-400 block mt-1" x-text="activeOrder.ordered_at_formatted"></span>
+
+                                <!-- Quick Highlights Row -->
+                                <div class="grid grid-cols-2 gap-2.5 mt-4 pt-4 border-t border-slate-100 text-xs">
+                                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/70">
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">🏪 Mitra Gerai F&B</span>
+                                        <span class="font-extrabold text-slate-900 block mt-0.5 truncate" x-text="activeOrder.tenant.name"></span>
+                                        <span class="text-[10px] text-slate-500 block truncate" x-text="activeOrder.tenant.location + ' • ' + activeOrder.tenant.zone"></span>
+                                    </div>
+                                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/70">
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">🛍️ Pengambilan</span>
+                                        <span class="font-extrabold text-[#005ea2] block mt-0.5 truncate" x-text="activeOrder.pickup_method_label"></span>
+                                        <span class="text-[10px] text-slate-500 block truncate" x-text="activeOrder.delivery_target"></span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- 2. Durasi SLA & SOP Penanda 15 Menit -->
-                            <div class="bg-white rounded-2xl p-4 border-2 border-slate-200 space-y-3">
+                            <!-- 2. SLA SOP Cockpit (Standar Pelayanan Minimal 15 Menit) -->
+                            <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm space-y-3.5">
                                 <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-sm font-black text-slate-800">⏱️ Standar Waktu Saji (SLA SOP)</span>
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="w-8 h-8 rounded-xl bg-blue-50 text-[#005ea2] flex items-center justify-center font-bold text-base">⏱️</span>
+                                        <div>
+                                            <span class="text-xs font-black text-slate-900 block">Kepatuhan Standar Waktu Saji (SOP)</span>
+                                            <span class="text-[10px] font-bold text-slate-400 block">Batas Maksimal Layanan F&B Juanda: 15.0 Menit</span>
+                                        </div>
                                     </div>
-                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-black"
-                                          :class="activeOrder.sla.compliant === true ? 'bg-emerald-100 text-emerald-800' : (activeOrder.sla.compliant === false ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-600')"
-                                          x-text="activeOrder.sla.badge"></span>
+                                    <span class="px-3 py-1 rounded-full text-xs font-black shadow-2xs border"
+                                          :class="activeOrder.sla.compliant === true 
+                                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
+                                              : (activeOrder.sla.compliant === false 
+                                                  ? 'bg-rose-50 text-rose-800 border-rose-200' 
+                                                  : 'bg-slate-100 text-slate-600 border-slate-200')">
+                                        <span x-text="activeOrder.sla.compliant === true 
+                                            ? '✅ Sesuai SOP' 
+                                            : (activeOrder.sla.compliant === false ? '⚠️ Melewati SOP' : 'Sedang Diproses')"></span>
+                                    </span>
                                 </div>
 
-                                <!-- SLA Visual Meter -->
-                                <div>
-                                    <div class="flex justify-between text-[11px] font-bold text-slate-500 mb-1">
-                                        <span>Realisasi: <strong class="text-slate-900" x-text="activeOrder.sla.minutes ? activeOrder.sla.minutes + ' menit' : '-'"></strong></span>
-                                        <span>Batas Maksimal SOP: <strong class="text-[#005ea2]">15.0 Menit</strong></span>
+                                <!-- SLA Realization vs Threshold Comparison -->
+                                <div class="grid grid-cols-2 gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200/70 text-xs">
+                                    <div>
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Realisasi Waktu Saji</span>
+                                        <span class="text-xl font-black text-slate-900 mt-0.5 block" 
+                                              x-text="activeOrder.sla.minutes !== null ? activeOrder.sla.minutes + ' Menit' : 'Dalam Proses'"></span>
                                     </div>
-                                    <div class="w-full bg-slate-100 h-3 rounded-full relative overflow-hidden">
-                                        <!-- Baseline Marker at 15 min (75% of 20 min scale) -->
-                                        <div class="absolute top-0 bottom-0 left-[75%] w-0.5 bg-rose-500 z-10" title="Batas SLA 15 Menit"></div>
-                                        <!-- Current Progress -->
-                                        <div class="h-full rounded-full transition-all duration-500" 
-                                             :class="activeOrder.sla.compliant === false ? 'bg-rose-500' : 'bg-emerald-500'" 
+                                    <div>
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Target Maksimal KPI</span>
+                                        <span class="text-xl font-black text-[#005ea2] mt-0.5 block">15.0 Menit</span>
+                                    </div>
+                                </div>
+
+                                <!-- Visual Progress Gauge -->
+                                <div>
+                                    <div class="relative w-full bg-slate-200 h-3 rounded-full overflow-hidden shadow-inner">
+                                        <!-- Baseline Marker at 15 min (75% position on a 20-min scale) -->
+                                        <div class="absolute top-0 bottom-0 left-[75%] w-0.5 bg-rose-600 z-10 shadow-xs" title="Ambang Batas 15 Menit"></div>
+                                        
+                                        <!-- Animated Fill -->
+                                        <div class="h-full rounded-full transition-all duration-700 ease-out" 
+                                             :class="activeOrder.sla.compliant === false ? 'bg-gradient-to-r from-amber-500 to-rose-600' : 'bg-gradient-to-r from-teal-400 to-emerald-500'" 
                                              :style="'width: ' + Math.min(100, Math.round(((activeOrder.sla.minutes || 0) / 20) * 100)) + '%;'"></div>
                                     </div>
-                                    <p class="text-[10px] text-slate-400 font-semibold mt-1">
-                                        * Garis merah vertikal menandai batas waktu toleransi maksimal 15 menit sesuai KPI Bandara Juanda.
-                                    </p>
+                                    <div class="flex justify-between text-[10px] font-bold text-slate-400 mt-1.5 px-0.5">
+                                        <span>0 mnt</span>
+                                        <span class="text-rose-600 font-black">Batas SOP (15 mnt)</span>
+                                        <span>20 mnt</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- 3. Metode Ambil & Lokasi Antar -->
-                            <div class="grid grid-cols-2 gap-3 text-xs">
-                                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Metode Pengambilan</span>
-                                    <span class="font-black text-slate-900 block mt-0.5" x-text="activeOrder.pickup_method_label"></span>
-                                    <span class="text-[11px] text-slate-500 block mt-0.5" x-text="activeOrder.delivery_target"></span>
+                            <!-- 3. Aviation Boarding Pass Card (Penumpang & Tiket) -->
+                            <div class="bg-gradient-to-br from-white to-blue-50/40 rounded-2xl border-2 border-blue-200/70 shadow-sm overflow-hidden">
+                                <!-- Boarding Pass Top Ribbon -->
+                                <div class="px-4 py-2.5 bg-blue-900 text-white flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm">✈️</span>
+                                        <span class="text-[11px] font-black uppercase tracking-wider text-blue-100">Informasi Penumpang & Boarding Pass</span>
+                                    </div>
+                                    <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-white/20 text-white" x-text="activeOrder.customer.flight_number || 'PENERBANGAN'"></span>
                                 </div>
-                                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Mitra Gerai</span>
-                                    <span class="font-black text-slate-900 block mt-0.5" x-text="activeOrder.tenant.name"></span>
-                                    <span class="text-[11px] text-slate-500 block mt-0.5" x-text="activeOrder.tenant.location + ' • ' + activeOrder.tenant.zone"></span>
+
+                                <div class="p-4 space-y-3.5">
+                                    <!-- Passenger Identity Row -->
+                                    <div class="flex items-center justify-between gap-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center text-base font-black text-[#005ea2]">
+                                                👤
+                                            </div>
+                                            <div>
+                                                <span class="text-sm font-black text-slate-900 block" x-text="activeOrder.customer.name"></span>
+                                                <span class="text-xs font-bold text-slate-500 block" x-text="'📱 ' + activeOrder.customer.phone"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Flight & Gate Aviation Grid -->
+                                    <div class="grid grid-cols-3 gap-2 pt-3 border-t border-dashed border-blue-200">
+                                        <div class="p-2.5 rounded-xl bg-white border border-blue-100 text-center">
+                                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Penerbangan</span>
+                                            <span class="text-xs font-black text-slate-900 mt-0.5 block truncate" x-text="activeOrder.customer.flight_number"></span>
+                                        </div>
+                                        <div class="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-center">
+                                            <span class="text-[10px] font-extrabold text-[#005ea2] uppercase tracking-wider block">Boarding Gate</span>
+                                            <span class="text-xs font-black text-[#005ea2] mt-0.5 block truncate" x-text="activeOrder.customer.gate"></span>
+                                        </div>
+                                        <div class="p-2.5 rounded-xl bg-white border border-blue-100 text-center">
+                                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Jam Boarding</span>
+                                            <span class="text-xs font-black text-slate-900 mt-0.5 block truncate" x-text="activeOrder.customer.boarding_time"></span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- 4. Penumpang & Flight / Gate -->
-                            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2 text-xs">
-                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Informasi Penumpang & Tiket</span>
-                                <div class="grid grid-cols-2 gap-2 font-semibold text-slate-700">
-                                    <div>Nama: <strong class="text-slate-900" x-text="activeOrder.customer.name"></strong></div>
-                                    <div>No. HP: <strong class="text-slate-900" x-text="activeOrder.customer.phone"></strong></div>
-                                    <div>Flight: <strong class="text-slate-900" x-text="activeOrder.customer.flight_number"></strong></div>
-                                    <div>Gate / Boarding: <strong class="text-slate-900" x-text="activeOrder.customer.gate + ' (' + activeOrder.customer.boarding_time + ')'"></strong></div>
+                            <!-- 4. Linimasa Progres Pesanan (Journey Timeline) -->
+                            <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">🧭</span>
+                                        <h4 class="text-xs font-black text-slate-900 uppercase tracking-wider">Linimasa Perjalanan Pesanan</h4>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- 5. Linimasa Progres Pesanan (Timeline) -->
-                            <div class="bg-white rounded-2xl p-4 border border-slate-200 space-y-3">
-                                <span class="text-xs font-black text-slate-900 uppercase tracking-wider block">Linimasa Perjalanan Pesanan</span>
-                                <div class="relative pl-6 space-y-4 border-l-2 border-slate-200 ml-2">
+                                <div class="relative pl-6 space-y-3.5 border-l-2 border-slate-200 ml-2">
                                     <template x-for="(step, idx) in activeOrder.timeline" :key="idx">
                                         <div class="relative">
-                                            <!-- Bullet -->
+                                            <!-- Bullet Node -->
                                             <div class="absolute -left-[31px] top-0.5 h-4 w-4 rounded-full border-2 border-white shadow-xs" 
-                                                 :class="step.is_cancelled ? 'bg-rose-500' : (step.done ? 'bg-emerald-500' : 'bg-slate-300')"></div>
-                                            <div>
-                                                <div class="flex items-center justify-between">
-                                                    <span class="text-xs font-black text-slate-900" x-text="step.stage"></span>
-                                                    <span class="text-[10px] font-bold text-slate-400" x-text="step.time"></span>
+                                                 :class="step.is_cancelled ? 'bg-rose-500 ring-4 ring-rose-100' : (step.done ? 'bg-emerald-500 ring-4 ring-emerald-100' : 'bg-slate-300 ring-2 ring-slate-100')"></div>
+                                            
+                                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/70">
+                                                <div class="flex items-center justify-between gap-2">
+                                                    <span class="text-xs font-extrabold text-slate-900" x-text="step.stage"></span>
+                                                    <span class="text-[10px] font-bold text-slate-400 whitespace-nowrap px-2 py-0.5 rounded bg-white border border-slate-200/80" x-text="step.time"></span>
                                                 </div>
-                                                <p class="text-[11px] font-medium text-slate-500 mt-0.5" x-text="step.desc"></p>
+                                                <p class="text-[11px] font-medium text-slate-600 mt-1" x-text="step.desc"></p>
                                             </div>
                                         </div>
                                     </template>
                                 </div>
                             </div>
 
-                            <!-- 6. Rincian Item Menu yang Dipesan -->
-                            <div class="bg-white rounded-2xl p-4 border border-slate-200 space-y-3">
-                                <span class="text-xs font-black text-slate-900 uppercase tracking-wider block">Rincian Menu Item</span>
+                            <!-- 5. Rincian Menu Pesanan (Itemized Gourmet Receipt) -->
+                            <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm space-y-3.5">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-7 h-7 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center font-bold text-sm">🍽️</span>
+                                        <h4 class="text-xs font-black text-slate-900 uppercase tracking-wider">Rincian Menu Item</h4>
+                                    </div>
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700" 
+                                          x-text="activeOrder.items ? activeOrder.items.length + ' Variasi Menu' : ''"></span>
+                                </div>
+
                                 <div class="divide-y divide-slate-100">
                                     <template x-for="item in activeOrder.items" :key="item.id">
-                                        <div class="py-2.5 flex items-center justify-between text-xs">
-                                            <div class="flex items-center gap-2.5">
-                                                <span class="w-6 h-6 rounded-lg bg-blue-50 text-[#005ea2] font-black flex items-center justify-center text-[10px]" x-text="item.quantity + 'x'"></span>
+                                        <div class="py-3 flex items-start justify-between gap-3 text-xs">
+                                            <div class="flex items-start gap-3">
+                                                <span class="w-7 h-7 rounded-lg bg-[#005ea2] text-white font-black flex items-center justify-center text-xs shrink-0 shadow-2xs mt-0.5" 
+                                                      x-text="item.quantity + 'x'"></span>
                                                 <div>
-                                                    <span class="font-extrabold text-slate-900 block" x-text="item.name"></span>
-                                                    <span class="text-[10px] text-slate-400" x-text="'@ ' + item.unit_price_formatted"></span>
+                                                    <span class="font-extrabold text-slate-900 block text-xs leading-snug" x-text="item.name"></span>
+                                                    <span class="text-[11px] font-medium text-slate-400 mt-0.5 block" x-text="'Harga Satuan: ' + item.unit_price_formatted"></span>
                                                 </div>
                                             </div>
-                                            <span class="font-black text-slate-900" x-text="item.subtotal_formatted"></span>
+                                            <span class="font-black text-slate-900 whitespace-nowrap text-xs sm:text-sm mt-0.5" x-text="item.subtotal_formatted"></span>
                                         </div>
                                     </template>
                                 </div>
                             </div>
 
-                            <!-- 7. Komplain Kasus (Jika Ada) -->
+                            <!-- 6. Komplain / Masalah (Jika Ada) -->
                             <template x-if="activeOrder.complaints && activeOrder.complaints.length > 0">
                                 <div class="p-4 bg-rose-50 rounded-2xl border border-rose-200 text-xs space-y-2">
                                     <span class="font-black text-rose-800 uppercase tracking-wider flex items-center gap-1.5">
                                         <span>⚠️ Riwayat Komplain Terkait Pesanan Ini</span>
                                     </span>
                                     <template x-for="c in activeOrder.complaints" :key="c.id">
-                                        <div class="p-2.5 bg-white rounded-xl border border-rose-100">
+                                        <div class="p-3 bg-white rounded-xl border border-rose-100 shadow-2xs">
                                             <div class="flex items-center justify-between font-bold">
                                                 <span class="text-rose-700 uppercase text-[10px]" x-text="c.category"></span>
                                                 <span class="text-[10px] px-2 py-0.5 rounded bg-rose-100 text-rose-800 uppercase" x-text="c.status"></span>
@@ -1752,11 +1875,20 @@ if (typeof window.Alpine !== 'undefined') {
                 </div>
 
                 <!-- Drawer Footer -->
-                <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end shrink-0">
+                <div class="p-4 sm:px-6 bg-white border-t border-slate-200/90 flex items-center justify-between shrink-0 shadow-lg">
+                    <button type="button" 
+                            @click="copyOrderCode()" 
+                            class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border border-slate-200">
+                        <span x-text="copiedOrderCode ? '✅ Kode Tersalin!' : '📋 Salin Kode Order'"></span>
+                    </button>
+
                     <button type="button" 
                             @click="closeDrawer()" 
-                            class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-black transition cursor-pointer shadow-xs">
-                        Tutup Panel
+                            class="px-6 py-2.5 bg-[#005ea2] hover:bg-[#004c80] active:bg-[#003b66] text-white rounded-xl text-xs font-black transition cursor-pointer shadow-md flex items-center gap-2">
+                        <span>Tutup Panel</span>
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                     </button>
                 </div>
 
