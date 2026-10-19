@@ -251,6 +251,12 @@ window.drillDownApp = function() {
             return String(h).padStart(2, '0');
         },
 
+        formatGate(gate) {
+            if (!gate || gate === '-' || gate === '') return '-';
+            const clean = String(gate).trim();
+            return clean.toLowerCase().startsWith('gate') ? clean : 'Gate ' + clean;
+        },
+
         // Fetch Orders & Summary
         fetchSummaryAndOrders() {
             this.ordersLoading = true;
@@ -1460,7 +1466,7 @@ if (typeof window.Alpine !== 'undefined') {
                                     <div class="flex items-center gap-1.5 mt-0.5 text-[10px]">
                                         <span class="font-bold text-slate-600" x-text="order.flight_number !== '-' ? '✈️ ' + order.flight_number : '-'"></span>
                                         <span class="text-slate-300">•</span>
-                                        <span class="font-bold text-slate-600" x-text="order.gate !== '-' ? 'Gate ' + order.gate : '-'"></span>
+                                        <span class="font-bold text-slate-600" x-text="formatGate(order.gate)"></span>
                                     </div>
                                 </td>
 
@@ -1786,7 +1792,7 @@ if (typeof window.Alpine !== 'undefined') {
                                         </div>
                                         <div class="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-center">
                                             <span class="text-[10px] font-extrabold text-[#005ea2] uppercase tracking-wider block">Boarding Gate</span>
-                                            <span class="text-xs font-black text-[#005ea2] mt-0.5 block truncate" x-text="activeOrder.customer.gate"></span>
+                                            <span class="text-xs font-black text-[#005ea2] mt-0.5 block truncate" x-text="formatGate(activeOrder.customer.gate)"></span>
                                         </div>
                                         <div class="p-2.5 rounded-xl bg-white border border-blue-100 text-center">
                                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Jam Boarding</span>
