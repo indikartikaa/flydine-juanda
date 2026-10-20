@@ -560,12 +560,8 @@
 
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 py-6 text-center text-slate-500 text-xs mt-auto">
-        <div class="container mx-auto px-4">
-            <p class="font-medium">Copyright &copy; 2026 FlyDine Juanda. All rights reserved</p>
-        </div>
-    </footer>
+    <!-- Official FlyDine Corporate Footer -->
+    <x-footer />
 
     <!-- Alpine.js Cart Logic Script -->
     <script nonce="{{ $cspNonce ?? '' }}">

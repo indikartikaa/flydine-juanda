@@ -48,9 +48,6 @@
     <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-100">
             <div>
-                <div class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-700 uppercase tracking-wider mb-1">
-                    <span>👑 Customer Loyalty Intel</span>
-                </div>
                 <h2 class="text-xl font-black text-slate-900 tracking-tight">Peta Distribusi Segmen Penumpang</h2>
                 <p class="text-xs text-slate-500 font-semibold mt-0.5">Analisis frekuensi pemesanan per pelanggan unik pada periode terpilih</p>
             </div>

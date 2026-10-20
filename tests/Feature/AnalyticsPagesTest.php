@@ -119,10 +119,7 @@ class AnalyticsPagesTest extends TestCase
         $response->assertSee(route('admin.analytics.whatif', $params));
         $response->assertSee(route('admin.analytics.customers', $params));
 
-        // Cek bahwa 3 kartu tautan di dashboard membawa link ke halaman analytics dengan query parameters
-        $response->assertSee('Buka Rincian Pesanan');
-        $response->assertSee('Mulai Simulasi What-If');
-        $response->assertSee('Lihat Segmentasi Pelanggan');
+
 
         // 2. Kunjungi Drilldown dengan query parameters dan pastikan filter tetap terbawa di submenu
         $drilldownResponse = $this->actingAs($this->adminOps)->get(route('admin.analytics.drilldown', $params));
@@ -173,8 +170,8 @@ class AnalyticsPagesTest extends TestCase
         $response->assertSee('productsChart');
         $response->assertSee('hourlyChart');
 
-        // Harus ada 3 kartu navigasi
-        $response->assertSee('Rincian Pesanan');
+        // Navigasi analitik tersedia
+        $response->assertSee('Drill-Down Pesanan');
         $response->assertSee('Simulasi What-If');
         $response->assertSee('Segmentasi Pelanggan');
 

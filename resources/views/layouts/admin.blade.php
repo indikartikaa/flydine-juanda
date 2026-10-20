@@ -28,7 +28,7 @@
            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
         
         <!-- Logo Area (Besar & Prominen Sesuai Desain Asli) -->
-        <div class="h-20 lg:h-24 flex items-center justify-between px-6 border-b border-slate-100 shrink-0">
+        <div class="h-20 flex items-center justify-between px-6 border-b border-slate-200/80 shrink-0">
             <a href="{{ url('/admin/dashboard') }}" class="flex items-center group w-full justify-center">
                 <img src="{{ asset('images/logo-flydine.png') }}" alt="FlyDine Logo" class="w-44 sm:w-48 object-contain group-hover:scale-105 transition-transform drop-shadow-sm">
             </a>
@@ -165,7 +165,7 @@
     <main class="flex-1 flex flex-col h-full overflow-hidden bg-[#f8fafc] min-w-0 w-full">
         
         <!-- Header Atas (Clean Glassmorphic) -->
-        <header class="bg-white/95 backdrop-blur-md shadow-xs h-16 sm:h-20 lg:h-24 flex items-center justify-between px-4 sm:px-6 lg:px-8 shrink-0 z-10 border-b border-slate-200/80">
+        <header class="bg-white/95 backdrop-blur-md shadow-xs h-20 flex items-center justify-between px-4 sm:px-6 lg:px-8 shrink-0 z-10 border-b border-slate-200/80">
             <div class="flex items-center gap-2.5 sm:gap-4 min-w-0 flex-1 mr-2">
                 <!-- Hamburger Button on Mobile -->
                 <button type="button" 
@@ -176,7 +176,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                 </button>
-                <h1 class="text-base sm:text-xl lg:text-2xl font-extrabold text-slate-900 tracking-tight truncate">@yield('title')</h1>
+                <h1 class="text-base sm:text-xl font-extrabold text-slate-900 tracking-tight truncate">@yield('title')</h1>
             </div>
             
             <div class="flex items-center space-x-2 sm:space-x-4 shrink-0">
@@ -197,12 +197,13 @@
         </header>
 
         <!-- Area Konten Utama -->
-        <div class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-            <div class="max-w-7xl mx-auto space-y-6 sm:space-y-8">
+        <div class="flex-1 overflow-y-auto p-4 sm:p-6">
+            <div class="max-w-7xl mx-auto">
                 @yield('content')
             </div>
         </div>
     </main>
 
+    @stack('scripts')
 </body>
 </html>

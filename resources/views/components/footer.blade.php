@@ -7,6 +7,9 @@
                 
                 <!-- Brand & Contact Info (Lebih Lebar) -->
                 <div class="lg:col-span-4 flex flex-col justify-start">
+                    <a href="{{ route('customer.menu') }}" class="inline-block mb-4 group">
+                        <img src="{{ asset('images/logo-flydine.png') }}" alt="FlyDine Juanda" class="w-40 sm:w-44 object-contain group-hover:scale-105 transition-transform duration-300">
+                    </a>
                     <p class="text-sm text-slate-500 leading-relaxed font-medium mb-6 pr-4">
                         Platform pemesanan makanan terintegrasi pertama di Bandara Internasional Juanda. Pesan dari lounge, ambil tanpa antre.
                     </p>

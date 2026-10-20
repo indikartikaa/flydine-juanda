@@ -5,9 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Struk Digital - {{ $order->order_code }} - FlyDine Juanda</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
+    <style>
+        @media print {
+            body { background: #ffffff !important; margin: 0 !important; padding: 0 !important; }
+            .print-receipt { box-shadow: none !important; border: none !important; border-radius: 0 !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .no-print { display: none !important; }
+            @page { size: portrait; margin: 6mm 10mm; }
+        }
+    </style>
 </head>
-<body class="text-slate-800 min-h-screen flex justify-center py-0 sm:py-8 selection:bg-[#005ea2] selection:text-white">
+<body class="text-slate-800 min-h-screen flex justify-center py-0 sm:py-8 selection:bg-[#005ea2] selection:text-white bg-slate-100">
 
     <!-- Container Wrapper -->
     <div class="w-full max-w-lg bg-white sm:rounded-[2rem] shadow-2xl shadow-slate-200 min-h-screen sm:min-h-0 flex flex-col overflow-hidden relative border border-slate-100 print-receipt">

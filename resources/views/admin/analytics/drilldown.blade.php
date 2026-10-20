@@ -3,7 +3,7 @@
 @section('title', 'Drill-Down Pesanan')
 
 @section('content')
-<script nonce="{{ $cspNonce ?? '' }}">
+<script hidden nonce="{{ $cspNonce ?? '' }}">
 window.drillDownApp = function() {
     return {
         // Query & Filter States
@@ -753,7 +753,7 @@ if (typeof window.Alpine !== 'undefined') {
             <div>
                 <!-- Breadcrumb -->
                 <nav class="flex items-center gap-2 text-xs font-bold text-slate-400 mb-2">
-                    <span>Analitik Operasional</span>
+                    <a href="{{ route('admin.executive-dashboard') }}" class="hover:text-slate-600 transition">Analitik Operasional</a>
                     <svg class="w-3.5 h-3.5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
@@ -775,17 +775,6 @@ if (typeof window.Alpine !== 'undefined') {
                 </div>
             </div>
 
-            <!-- Quick Action / Share indicator -->
-            <div class="flex items-center gap-2 self-start lg:self-center">
-                <button type="button" 
-                        @click="copyShareableUrl()" 
-                        class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer border border-slate-200 shadow-2xs">
-                    <svg class="w-4 h-4 text-[#005ea2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                    </svg>
-                    <span x-text="copiedUrl ? '✅ Link Tersalin!' : 'Bagikan Filter (Salin Link)'"></span>
-                </button>
-            </div>
         </div>
     </div>
 

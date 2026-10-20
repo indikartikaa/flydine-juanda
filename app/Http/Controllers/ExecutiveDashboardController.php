@@ -57,12 +57,42 @@ class ExecutiveDashboardController extends Controller
             $summaryQuery->where('tenant_id', $tenantId);
         }
 
-        // 1. Tren Volume Pesanan Harian (Line Chart) - Membaca dari daily_tenant_summaries
-        $volumePerDay = (clone $summaryQuery)
+        // 1. Tren Volume Pesanan Harian (Line Chart) - Membaca dari daily_tenant_summaries & mencakup seluruh rentang tanggal
+        $rawVolume = (clone $summaryQuery)
             ->select(DB::raw('DATE(summary_date) as date'), DB::raw('SUM(total_orders) as total'))
             ->groupBy(DB::raw('DATE(summary_date)'))
             ->orderBy('date')
             ->get();
+
+        $volumeMap = [];
+        foreach ($rawVolume as $row) {
+            $volumeMap[$row->date] = (int) $row->total;
+        }
+
+        // Pastikan order riil/hari ini yang belum tercakup di batch ETL tetap terhitung
+        $liveOrdersByDate = (clone $orderQuery)
+            ->select(DB::raw('DATE(ordered_at) as date'), DB::raw('COUNT(*) as total'))
+            ->groupBy(DB::raw('DATE(ordered_at)'))
+            ->get();
+        
+        foreach ($liveOrdersByDate as $liveRow) {
+            if (!isset($volumeMap[$liveRow->date]) || $volumeMap[$liveRow->date] < $liveRow->total) {
+                $volumeMap[$liveRow->date] = (int) $liveRow->total;
+            }
+        }
+
+        // Susun rentang tanggal lengkap dari $startDate hingga $endDate agar grafik konsisten dengan filter rentang waktu
+        $volumePerDay = collect();
+        $curr = $startDate->copy()->startOfDay();
+        $endDay = $endDate->copy()->startOfDay();
+        while ($curr->lte($endDay)) {
+            $dStr = $curr->format('Y-m-d');
+            $volumePerDay->push((object) [
+                'date' => $dStr,
+                'total' => $volumeMap[$dStr] ?? 0,
+            ]);
+            $curr->addDay();
+        }
 
         // 2. Distribusi Status Pesanan (Doughnut)
         $statusDistribution = (clone $orderQuery)
@@ -70,13 +100,13 @@ class ExecutiveDashboardController extends Controller
             ->groupBy('status')
             ->get();
 
-        // 3. Performa Tenant (Volume) - Membaca dari daily_tenant_summaries
+        // 3. Performa Tenant (Volume) - Membaca dari daily_tenant_summaries (Top 10)
         $tenantPerformance = (clone $summaryQuery)
             ->join('tenants', 'daily_tenant_summaries.tenant_id', '=', 'tenants.id')
             ->select('tenants.id', 'tenants.name', 'tenants.terminal', 'tenants.floor_location', DB::raw('SUM(daily_tenant_summaries.total_orders) as total'))
             ->groupBy('tenants.id', 'tenants.name', 'tenants.terminal', 'tenants.floor_location')
             ->orderByDesc('total')
-            ->take(20)
+            ->take(10)
             ->get();
 
         // 4. Produk Terlaris
@@ -94,7 +124,7 @@ class ExecutiveDashboardController extends Controller
             ->take(10)
             ->get();
 
-        // 5. SLA Rata-rata per Tenant (Top 20 Paling Lambat)
+        // 5. SLA Rata-rata per Tenant (Top 10 Paling Lambat)
         $slaPerformance = (clone $orderQuery)
             ->join('tenants', 'orders.tenant_id', '=', 'tenants.id')
             ->whereNotNull('ready_at')
@@ -107,7 +137,7 @@ class ExecutiveDashboardController extends Controller
             )
             ->groupBy('tenants.id', 'tenants.name', 'tenants.terminal', 'tenants.floor_location')
             ->orderByDesc('avg_minutes')
-            ->take(20)
+            ->take(10)
             ->get();
 
         // 6. Komplain

@@ -11,17 +11,13 @@
             <div>
                 <!-- Breadcrumb -->
                 <nav class="flex items-center gap-2 text-xs font-bold text-slate-400 mb-2">
-                    <span>Analitik Operasional</span>
+                    <a href="{{ route('admin.executive-dashboard') }}" class="hover:text-slate-600 transition">Analitik Operasional</a>
                     <svg class="w-3.5 h-3.5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
                     <span class="text-[#005ea2] font-extrabold">Ringkasan Eksekutif</span>
                 </nav>
 
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-extrabold uppercase tracking-wider bg-blue-50 border border-blue-200 text-[#005ea2] mb-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>Monitoring Operasional • Bandara Internasional Juanda</span>
-                </div>
                 <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                     Executive Summary & Performance Analytics
                 </h1>
@@ -74,8 +70,10 @@
     @if($selectedTenant)
     <div class="bg-gradient-to-r from-blue-700 via-indigo-700 to-[#005ea2] text-white p-5 rounded-2xl shadow-md border-2 border-blue-400 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div class="flex items-center space-x-4">
-            <div class="h-12 w-12 rounded-xl bg-white/20 text-white flex items-center justify-center font-black shadow shrink-0 text-xl">
-                🎯
+            <div class="h-11 w-11 rounded-xl bg-white/20 text-white flex items-center justify-center shadow shrink-0">
+                <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
             </div>
             <div>
                 <div class="flex items-center gap-2">
@@ -178,7 +176,7 @@
             <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
                 <span class="text-slate-500 font-semibold">SOP Maks:</span>
                 <span class="font-black px-2 py-0.5 rounded {{ $isOverSla ? 'text-rose-700 bg-rose-100' : 'text-emerald-700 bg-emerald-100' }}">
-                    {{ $isOverSla ? '⚠️ > 15m' : '✅ ≤ 15m' }}
+                    {{ $isOverSla ? '> 15m' : '≤ 15m' }}
                 </span>
             </div>
         </div>
@@ -204,7 +202,7 @@
             <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
                 <span class="text-slate-500 font-semibold">{{ $canceled }} order</span>
                 <span class="font-black px-2 py-0.5 rounded {{ $isHighCancel ? 'text-rose-700 bg-rose-100' : 'text-emerald-700 bg-emerald-100' }}">
-                    {{ $isHighCancel ? '⚠️ Waspada' : '✅ Terkendali' }}
+                    {{ $isHighCancel ? 'Waspada' : 'Terkendali' }}
                 </span>
             </div>
         </div>
@@ -234,14 +232,9 @@
         
         <!-- Volume Line Chart -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200">
-            <div class="flex items-center justify-between mb-4">
-                <div>
-                    <h2 class="text-base font-black text-slate-900 uppercase tracking-wide">Tren Volume Pesanan Harian</h2>
-                    <p class="text-xs text-slate-500 font-semibold mt-0.5">Pola fluktuasi jumlah pesanan penumpang per tanggal</p>
-                </div>
-                <span class="px-3 py-1 rounded-lg bg-blue-100 text-[#005ea2] text-xs font-black">
-                    📈 Volume Harian
-                </span>
+            <div class="mb-4">
+                <h2 class="text-base font-black text-slate-900 uppercase tracking-wide">Tren Volume Pesanan</h2>
+                <p class="text-xs text-slate-500 font-semibold mt-0.5">Pola fluktuasi pesanan per tanggal</p>
             </div>
             <div class="relative h-72">
                 <canvas id="volumeChart"></canvas>
@@ -250,14 +243,9 @@
 
         <!-- SLA Bar Chart -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200">
-            <div class="flex items-center justify-between mb-4">
-                <div>
-                    <h2 class="text-base font-black text-slate-900 uppercase tracking-wide">Kinerja Waktu Saji Tenant (SLA)</h2>
-                    <p class="text-xs text-slate-500 font-semibold mt-0.5">Batas standar layanan bandara maksimal 15 menit</p>
-                </div>
-                <span class="inline-flex items-center text-xs font-black uppercase tracking-wider text-[#005ea2] bg-blue-50 border-2 border-blue-200 px-3 py-1 rounded-xl">
-                    🎯 Drill-down: Klik Bar
-                </span>
+            <div class="mb-4">
+                <h2 class="text-base font-black text-slate-900 uppercase tracking-wide">Kinerja Waktu Saji (SLA)</h2>
+                <p class="text-xs text-slate-500 font-semibold mt-0.5">Batas standar layanan maksimal 15 menit (Top 10 Tenant Terlama)</p>
             </div>
             <div class="relative h-72">
                 <canvas id="slaChart"></canvas>
@@ -271,9 +259,8 @@
         
         <!-- Status Doughnut -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200">
-            <div class="flex items-center justify-between mb-4">
+            <div class="mb-4">
                 <h2 class="text-base font-black text-slate-900 uppercase tracking-wide">Distribusi Status Pesanan</h2>
-                <span class="text-xs text-slate-500 font-bold">100% Total</span>
             </div>
             <div class="relative h-64">
                 <canvas id="statusChart"></canvas>
@@ -282,14 +269,9 @@
 
         <!-- Tenant Performance Bar (2 Cols) -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200 lg:col-span-2">
-            <div class="flex items-center justify-between mb-1">
-                <div>
-                    <h2 class="text-base font-black text-slate-900 uppercase tracking-wide">Top 20 Tenant Terlaris (Volume Order)</h2>
-                    <p class="text-xs text-slate-500 font-semibold mt-0.5">Klik salah satu batang tenant untuk mengisolasi analitik secara mendalam (Drill-Down)</p>
-                </div>
-                <span class="inline-flex items-center text-xs font-black uppercase tracking-wider text-[#005ea2] bg-blue-50 border-2 border-blue-200 px-3 py-1 rounded-xl">
-                    🎯 Drill-down: Klik Bar
-                </span>
+            <div class="mb-2">
+                <h2 class="text-base font-black text-slate-900 uppercase tracking-wide">Top 10 Tenant Terlaris</h2>
+                <p class="text-xs text-slate-500 font-semibold mt-0.5">Peringkat 10 tenant teratas berdasarkan akumulasi volume order</p>
             </div>
             <div class="relative h-64 mt-3">
                 <canvas id="tenantChart"></canvas>
@@ -303,14 +285,9 @@
         
         <!-- Col 1: Top 10 Best Selling Products -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200">
-            <div class="flex items-center justify-between mb-4">
-                <div>
-                    <h2 class="text-base font-black text-slate-900 uppercase tracking-wide">10 Menu Makanan & Minuman Terlaris</h2>
-                    <p class="text-xs text-slate-500 font-semibold mt-0.5">Peringkat menu favorit penumpang bandara</p>
-                </div>
-                <span class="px-3 py-1 rounded-lg bg-purple-100 text-purple-800 text-xs font-black">
-                    ⭐ Menu Terlaris
-                </span>
+            <div class="mb-4">
+                <h2 class="text-base font-black text-slate-900 uppercase tracking-wide">Menu Terlaris (Top 10)</h2>
+                <p class="text-xs text-slate-500 font-semibold mt-0.5">Peringkat menu favorit penumpang bandara</p>
             </div>
             <div class="relative h-72">
                 <canvas id="productsChart"></canvas>
@@ -319,15 +296,9 @@
 
         <!-- Col 2: Hourly Peak Transaction Distribution -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200">
-            <div class="flex items-center justify-between mb-4">
-                <div>
-                    <h2 class="text-base font-black text-slate-900 uppercase tracking-wide">Distribusi Transaksi per Jam (Peak Hours)</h2>
-                    <p class="text-xs text-slate-500 font-semibold mt-0.5">Pola volume jam sibuk penerbangan (00:00 - 23:00 WIB)</p>
-                </div>
-                <span class="px-3 py-1 rounded-lg bg-amber-100 text-amber-900 text-xs font-black flex items-center gap-1.5" title="Jam dengan volume pesanan tertinggi">
-                    <span>🔥 Puncak:</span>
-                    <strong class="text-amber-800">{{ $peakHourRange }}</strong>
-                </span>
+            <div class="mb-4">
+                <h2 class="text-base font-black text-slate-900 uppercase tracking-wide">Distribusi Transaksi per Jam</h2>
+                <p class="text-xs text-slate-500 font-semibold mt-0.5">Pola volume transaksi 24 jam operasional bandara (00:00 - 24:00 WIB)</p>
             </div>
             <div class="relative h-72">
                 <canvas id="hourlyChart"></canvas>
@@ -336,80 +307,6 @@
 
     </div>
 
-    <!-- 7. Kartu Tautan ke Fitur Analitik Lanjutan (Drill-Down, What-If, Segmentasi Pelanggan) -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
-        <!-- Card 1: Rincian Pesanan (Drill-Down) -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200 hover:border-[#005ea2] transition-all duration-200 flex flex-col justify-between group">
-            <div>
-                <div class="w-12 h-12 rounded-xl bg-blue-50 text-[#005ea2] flex items-center justify-center font-black text-xl mb-4 group-hover:scale-105 transition-transform shadow-xs">
-                    🔍
-                </div>
-                <h3 class="text-lg font-black text-slate-900 tracking-tight group-hover:text-[#005ea2] transition-colors">
-                    Rincian Pesanan
-                </h3>
-                <p class="text-xs font-semibold text-slate-500 mt-2 leading-relaxed">
-                    Telusuri data individual per transaksi secara mendalam dan inspeksi kepatuhan SLA setiap gerai.
-                </p>
-            </div>
-            <div class="mt-5 pt-4 border-t border-slate-100">
-                <a href="{{ route('admin.analytics.drilldown', request()->only(['start_date', 'end_date', 'tenant_id'])) }}" 
-                   class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#005ea2] hover:bg-[#004b82] text-white rounded-xl text-xs font-black shadow-xs transition cursor-pointer">
-                    <span>Buka Rincian Pesanan</span>
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-
-        <!-- Card 2: Simulasi What-If -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200 hover:border-indigo-500 transition-all duration-200 flex flex-col justify-between group">
-            <div>
-                <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-black text-xl mb-4 group-hover:scale-105 transition-transform shadow-xs">
-                    🎯
-                </div>
-                <h3 class="text-lg font-black text-slate-900 tracking-tight group-hover:text-indigo-700 transition-colors">
-                    Simulasi What-If
-                </h3>
-                <p class="text-xs font-semibold text-slate-500 mt-2 leading-relaxed">
-                    Hitung proyeksi target omset, kebutuhan trafik pengunjung, dan mitigasi risiko operasional gerai.
-                </p>
-            </div>
-            <div class="mt-5 pt-4 border-t border-slate-100">
-                <a href="{{ route('admin.analytics.whatif', request()->only(['start_date', 'end_date', 'tenant_id'])) }}" 
-                   class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black shadow-xs transition cursor-pointer">
-                    <span>Mulai Simulasi What-If</span>
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-
-        <!-- Card 3: Segmentasi Pelanggan -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200 hover:border-emerald-500 transition-all duration-200 flex flex-col justify-between group">
-            <div>
-                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-black text-xl mb-4 group-hover:scale-105 transition-transform shadow-xs">
-                    👥
-                </div>
-                <h3 class="text-lg font-black text-slate-900 tracking-tight group-hover:text-emerald-700 transition-colors">
-                    Segmentasi Pelanggan
-                </h3>
-                <p class="text-xs font-semibold text-slate-500 mt-2 leading-relaxed">
-                    Analisis loyalitas penumpang dan distribusi frekuensi belanja untuk strategi retensi bandara.
-                </p>
-            </div>
-            <div class="mt-5 pt-4 border-t border-slate-100">
-                <a href="{{ route('admin.analytics.customers', request()->only(['start_date', 'end_date', 'tenant_id'])) }}" 
-                   class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-xs transition cursor-pointer">
-                    <span>Lihat Segmentasi Pelanggan</span>
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </div>
 </div>
 <!-- 9. Modern Chart.js Configs with Max Bar Thickness, Gradients, and Custom Tooltips -->
 <script nonce="{{ $cspNonce ?? '' }}">
@@ -458,7 +355,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     padding: 12,
                     cornerRadius: 12,
                     titleFont: { weight: 'bold', size: 13 },
-                    bodyFont: { size: 12 }
+                    bodyFont: { size: 12 },
+                    callbacks: {
+                        title: function(context) {
+                            const raw = context[0].label;
+                            if (!raw) return '';
+                            const d = new Date(raw + 'T00:00:00');
+                            if (!isNaN(d.getTime())) {
+                                return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                            }
+                            return raw;
+                        }
+                    }
                 }
             },
             scales: {
@@ -469,7 +377,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 x: { 
                     grid: { display: false },
-                    ticks: { font: { weight: 'bold', size: 11 } }
+                    ticks: { 
+                        font: { weight: 'bold', size: 11 },
+                        autoSkip: true,
+                        maxTicksLimit: 16,
+                        callback: function(val) {
+                            const raw = this.getLabelForValue(val);
+                            if (!raw) return '';
+                            const parts = raw.split('-');
+                            if (parts.length === 3) return parts[2] + '/' + parts[1];
+                            return raw;
+                        }
+                    }
                 }
             }
         }
@@ -515,10 +434,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     bodyFont: { size: 12 },
                     callbacks: {
                         afterLabel: function(context) {
-                            return context.raw > 15 ? '⚠️ Melewati Batas SLA (15m)' : '✅ Sesuai Standar Layanan (≤ 15m)';
+                            return context.raw > 15 ? 'Melewati Batas SLA (> 15m)' : 'Sesuai Standar Layanan (≤ 15m)';
                         },
                         footer: function() {
-                            return '👉 Klik bar untuk Drill-down ke tenant ini';
+                            return 'Klik bar untuk Drill-down ke tenant ini';
                         }
                     }
                 }
@@ -532,7 +451,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 x: {
                     grid: { display: false },
-                    ticks: { font: { weight: 'bold' } }
+                    ticks: { 
+                        font: { weight: 'bold', size: 10 },
+                        autoSkip: false,
+                        maxRotation: 45,
+                        minRotation: 20
+                    }
                 }
             },
             onClick: (e) => {
@@ -642,7 +566,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     bodyFont: { size: 12 },
                     callbacks: {
                         footer: function() {
-                            return '👉 Klik bar untuk Drill-down ke tenant ini';
+                            return 'Klik bar untuk Drill-down ke tenant ini';
                         }
                     }
                 }
@@ -655,7 +579,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 x: { 
                     grid: { display: false },
-                    ticks: { font: { weight: 'bold' } }
+                    ticks: { 
+                        font: { weight: 'bold', size: 10 },
+                        autoSkip: false,
+                        maxRotation: 45,
+                        minRotation: 20
+                    }
                 }
             },
             onClick: (e) => {
@@ -765,7 +694,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         titleFont: { weight: 'bold' },
                         callbacks: {
                             afterLabel: function(context) {
-                                return context.raw === maxVal && maxVal > 0 ? '🔥 Jam Puncak Tersibuk (Peak Hour Bandara)' : '';
+                                return context.raw === maxVal && maxVal > 0 ? 'Jam Puncak Tersibuk (Peak Hour)' : '';
                             }
                         }
                     }

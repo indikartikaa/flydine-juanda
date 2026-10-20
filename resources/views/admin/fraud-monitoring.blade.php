@@ -14,10 +14,6 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-            <div class="inline-flex items-center space-x-2 bg-rose-50 text-rose-600 border border-rose-100 px-3 py-1 rounded-full text-xs font-bold mb-2">
-                <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-                <span>Sistem Deteksi Anomali</span>
-            </div>
             <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Fraud Monitoring</h1>
             <p class="text-sm text-slate-500 font-medium mt-1">Pantau akun pelanggan yang diblokir akibat pola transaksi mencurigakan (Spam/Fraud).</p>
         </div>

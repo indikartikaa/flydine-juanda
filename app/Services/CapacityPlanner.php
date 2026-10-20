@@ -152,6 +152,7 @@ class CapacityPlanner
                     'tenant_name' => $tenant->name,
                     'tenant_code' => $tenant->tenant_code ?? ('T-' . $tenant->id),
                     'category' => $tenant->category ?? 'Lainnya',
+                    'terminal' => $tenant->terminal ?? 'T1',
                     'floor_location' => $tenant->floor_location ?? '-',
                     'zone' => $tenant->zone ?? '-',
                     'has_sufficient_data' => false,
@@ -213,6 +214,7 @@ class CapacityPlanner
                 'tenant_name' => $tenant->name,
                 'tenant_code' => $tenant->tenant_code ?? ('T-' . $tenant->id),
                 'category' => $tenant->category ?? 'Lainnya',
+                'terminal' => $tenant->terminal ?? 'T1',
                 'floor_location' => $tenant->floor_location ?? '-',
                 'zone' => $tenant->zone ?? '-',
                 'has_sufficient_data' => true,
@@ -247,7 +249,7 @@ class CapacityPlanner
         $sufficientTenants = array_values(array_filter($tenantsResults, fn($t) => $t['has_sufficient_data']));
         $top10Tenants = array_slice($sufficientTenants, 0, 10);
 
-        $chartLabels = array_map(fn($t) => $t['tenant_name'], $top10Tenants);
+        $chartLabels = array_map(fn($t) => $t['tenant_name'] . ' (' . ($t['terminal'] ?? 'T1') . ' • ' . ($t['floor_location'] ?? '-') . ')', $top10Tenants);
         $chartIds = array_map(fn($t) => $t['tenant_id'], $top10Tenants);
         $chartBefore = array_map(fn($t) => $t['utilization_before'], $top10Tenants);
         $chartAfter = array_map(fn($t) => $t['utilization_new'], $top10Tenants);

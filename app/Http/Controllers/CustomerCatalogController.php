@@ -139,7 +139,7 @@ class CustomerCatalogController extends Controller
             return redirect()->route('customer.menu');
         }
 
-        $order = Order::with(['orderItems.product', 'tenant'])->where('order_code', $orderCode)->firstOrFail();
+        $order = Order::with(['orderItems.product', 'tenant', 'deliveryLocation', 'customer'])->where('order_code', $orderCode)->firstOrFail();
 
         // Jika pesanan telah selesai, dibatalkan, atau ditolak, hapus session order_code
         // agar tombol pulsing "LACAK" di navbar tidak terus muncul
@@ -201,7 +201,10 @@ class CustomerCatalogController extends Controller
             }
         }
 
-        return response()->json(['status' => $order->status]);
+        return response()->json([
+            'status' => $order->status,
+            'is_paid' => (bool) $order->is_paid
+        ]);
     }
 
     public function history(Request $request)

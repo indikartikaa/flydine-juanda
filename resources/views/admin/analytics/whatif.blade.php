@@ -3,7 +3,7 @@
 @section('title', 'Simulasi What-If')
 
 @section('content')
-<script nonce="{{ $cspNonce ?? '' }}">
+<script hidden nonce="{{ $cspNonce ?? '' }}">
 window.capacityPlannerApp = function(initialPayload) {
     return {
         startDate: '{{ $startDateFormatted }}',
@@ -33,6 +33,15 @@ window.capacityPlannerApp = function(initialPayload) {
             top_10_chart: { labels: [], tenant_ids: [], utilization_before: [], utilization_after: [], thresholds: { safe: 70, warning: 90 } },
             tenants: []
         },
+
+        // Table Filtering & Pagination States
+        tableSearch: '',
+        tableStatusFilter: 'ALL',
+        tablePage: 1,
+        tablePerPage: 10,
+
+        // Chart View Mode ('auto', 'focused', 'top10')
+        chartViewMode: 'auto',
 
         debounceTimeout: null,
 
@@ -104,6 +113,7 @@ window.capacityPlannerApp = function(initialPayload) {
 
         focusTenant(id) {
             this.tenantId = id ? String(id) : '';
+            this.chartViewMode = 'auto';
             this.calculateNow();
             const el = document.getElementById('capacityControlPanel');
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -114,7 +124,56 @@ window.capacityPlannerApp = function(initialPayload) {
             this.staffCount = 1;
             this.targetSlaMinutes = '';
             this.tenantId = '';
+            this.chartViewMode = 'auto';
+            this.tableSearch = '';
+            this.tableStatusFilter = 'ALL';
+            this.tablePage = 1;
             this.calculateNow();
+        },
+
+        filteredTenants() {
+            let list = (this.data && this.data.tenants) ? this.data.tenants : [];
+            if (this.tableSearch && this.tableSearch.trim()) {
+                const q = this.tableSearch.trim().toLowerCase();
+                list = list.filter(t => 
+                    (t.tenant_name && t.tenant_name.toLowerCase().includes(q)) ||
+                    (t.floor_location && t.floor_location.toLowerCase().includes(q)) ||
+                    (t.category && t.category.toLowerCase().includes(q))
+                );
+            }
+            if (this.tableStatusFilter !== 'ALL') {
+                if (this.tableStatusFilter === 'RISK') {
+                    list = list.filter(t => ['WASPADA', 'KRITIS', 'OVERLOAD'].includes(t.status));
+                } else if (this.tableStatusFilter === 'SUFFICIENT') {
+                    list = list.filter(t => t.has_sufficient_data);
+                } else {
+                    list = list.filter(t => t.status === this.tableStatusFilter);
+                }
+            }
+            return list;
+        },
+
+        paginatedTenants() {
+            const list = this.filteredTenants();
+            if (this.tablePerPage === 'ALL') {
+                return list;
+            }
+            const perPage = parseInt(this.tablePerPage, 10) || 10;
+            const start = (this.tablePage - 1) * perPage;
+            return list.slice(start, start + perPage);
+        },
+
+        tableTotalPages() {
+            if (this.tablePerPage === 'ALL') return 1;
+            const perPage = parseInt(this.tablePerPage, 10) || 10;
+            return Math.ceil(this.filteredTenants().length / perPage) || 1;
+        },
+
+        setTablePage(p) {
+            const total = this.tableTotalPages();
+            if (p >= 1 && p <= total) {
+                this.tablePage = p;
+            }
         },
 
         renderChart() {
@@ -126,8 +185,33 @@ window.capacityPlannerApp = function(initialPayload) {
                 existingChart.destroy();
             }
 
-            const chartData = this.data.top_10_chart || { labels: [], utilization_before: [], utilization_after: [] };
-            if (!chartData.labels || chartData.labels.length === 0) return;
+            const selectedTenant = this.data?.summary?.selected_tenant;
+            const hasTenantFilter = !!(this.tenantId && this.tenantId !== 'semua' && selectedTenant);
+            const isFocused = (this.chartViewMode === 'focused' || (this.chartViewMode === 'auto' && hasTenantFilter));
+
+            let labels = [];
+            let beforeData = [];
+            let afterData = [];
+
+            if (isFocused && selectedTenant) {
+                if (!selectedTenant.has_sufficient_data) {
+                    labels = [selectedTenant.tenant_name];
+                    beforeData = [0];
+                    afterData = [0];
+                } else {
+                    const loc = selectedTenant.floor_location && selectedTenant.floor_location !== '-' ? ' (' + selectedTenant.floor_location + ')' : '';
+                    labels = [selectedTenant.tenant_name + loc];
+                    beforeData = [selectedTenant.utilization_before ?? 0];
+                    afterData = [selectedTenant.utilization_new ?? 0];
+                }
+            } else {
+                const chartData = this.data.top_10_chart || { labels: [], utilization_before: [], utilization_after: [] };
+                labels = chartData.labels || [];
+                beforeData = chartData.utilization_before || [];
+                afterData = chartData.utilization_after || [];
+            }
+
+            if (!labels || labels.length === 0) return;
 
             // Custom plugin untuk garis acuan 70% dan 90%
             const thresholdLinePlugin = {
@@ -174,7 +258,30 @@ window.capacityPlannerApp = function(initialPayload) {
                 }
             };
 
-            const colorsAfter = chartData.utilization_after.map(val => {
+            // Custom plugin untuk label persentase di atas setiap batang
+            const barValuePlugin = {
+                id: 'barValueLabels',
+                afterDatasetsDraw(chart) {
+                    const { ctx } = chart;
+                    chart.data.datasets.forEach((dataset, i) => {
+                        const meta = chart.getDatasetMeta(i);
+                        meta.data.forEach((bar, index) => {
+                            const val = dataset.data[index];
+                            if (val !== undefined && val !== null) {
+                                ctx.save();
+                                ctx.font = 'bold 11px sans-serif';
+                                ctx.fillStyle = i === 0 ? '#005ea2' : (val < 70 ? '#059669' : (val <= 90 ? '#d97706' : '#dc2626'));
+                                ctx.textAlign = 'center';
+                                const yPos = Math.max(18, bar.y - 6);
+                                ctx.fillText(val + '%', bar.x, yPos);
+                                ctx.restore();
+                            }
+                        });
+                    });
+                }
+            };
+
+            const colorsAfter = afterData.map(val => {
                 if (val < 70) return '#10b981'; // Emerald
                 if (val <= 90) return '#f59e0b'; // Amber
                 if (val <= 100) return '#f43f5e'; // Rose
@@ -184,23 +291,23 @@ window.capacityPlannerApp = function(initialPayload) {
             new window.Chart(canvas, {
                 type: 'bar',
                 data: {
-                    labels: chartData.labels,
+                    labels: labels,
                     datasets: [
                         {
                             label: 'Sebelum (Baseline)',
-                            data: chartData.utilization_before,
+                            data: beforeData,
                             backgroundColor: '#005ea2',
-                            borderRadius: 4,
-                            barPercentage: 0.8,
-                            categoryPercentage: 0.8,
+                            borderRadius: 6,
+                            barPercentage: isFocused ? 0.35 : 0.8,
+                            categoryPercentage: isFocused ? 0.45 : 0.8,
                         },
                         {
                             label: 'Sesudah (Proyeksi What-If)',
-                            data: chartData.utilization_after,
+                            data: afterData,
                             backgroundColor: colorsAfter,
-                            borderRadius: 4,
-                            barPercentage: 0.8,
-                            categoryPercentage: 0.8,
+                            borderRadius: 6,
+                            barPercentage: isFocused ? 0.35 : 0.8,
+                            categoryPercentage: isFocused ? 0.45 : 0.8,
                         }
                     ]
                 },
@@ -241,14 +348,14 @@ window.capacityPlannerApp = function(initialPayload) {
                         x: {
                             grid: { display: false },
                             ticks: {
-                                font: { size: 10, weight: 'bold' },
-                                maxRotation: 45,
+                                font: { size: 11, weight: 'bold' },
+                                maxRotation: isFocused ? 0 : 45,
                                 minRotation: 0
                             }
                         }
                     }
                 },
-                plugins: [thresholdLinePlugin]
+                plugins: [thresholdLinePlugin, barValuePlugin]
             });
         },
 
@@ -441,7 +548,7 @@ window.targetPlanningSimulator = function() {
 };
 </script>
 
-<div class="space-y-8 pb-12">
+<div class="space-y-6 pb-12">
 
     <!-- Page Header & Identity -->
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
@@ -449,7 +556,7 @@ window.targetPlanningSimulator = function() {
             <div>
                 <!-- Breadcrumb -->
                 <nav class="flex items-center gap-2 text-xs font-bold text-slate-400 mb-2">
-                    <span>Analitik Operasional</span>
+                    <a href="{{ route('admin.executive-dashboard') }}" class="hover:text-slate-600 transition">Analitik Operasional</a>
                     <svg class="w-3.5 h-3.5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
@@ -543,7 +650,7 @@ window.targetPlanningSimulator = function() {
                             class="w-full px-3.5 py-2.5 bg-slate-50 hover:bg-white border-2 border-slate-300 focus:border-[#005ea2] focus:bg-white rounded-xl text-sm font-extrabold text-slate-900 focus:ring-2 focus:ring-[#005ea2] transition cursor-pointer">
                         <option value="">🏢 Semua Tenant (Konsolidasi)</option>
                         @foreach($tenants as $t)
-                            <option value="{{ $t->id }}">🏢 {{ $t->name }}</option>
+                            <option value="{{ $t->id }}">🏢 {{ $t->name }} ({{ $t->terminal ?? 'T1' }} • {{ $t->floor_location ?? '-' }})</option>
                         @endforeach
                     </select>
                 </div>
@@ -712,26 +819,62 @@ window.targetPlanningSimulator = function() {
 
                 <!-- Grafik Chart.js Batang Berpasangan: Sebelum vs Sesudah -->
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                         <div>
                             <h4 class="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2">
-                                <span>📊 Top 10 Tenant Utilisasi Tertinggi (Sebelum vs Sesudah)</span>
+                                <span>📊</span>
+                                <span x-text="(chartViewMode === 'focused' || (chartViewMode === 'auto' && tenantId && data.summary.selected_tenant)) 
+                                    ? 'Proyeksi Utilisasi Gerai: ' + (data.summary.selected_tenant ? data.summary.selected_tenant.tenant_name : '')
+                                    : 'Top 10 Tenant Utilisasi Tertinggi (Sebelum vs Sesudah)'">
+                                </span>
                             </h4>
-                            <p class="text-xs font-semibold text-slate-500 mt-0.5">
-                                Perbandingan utilisasi sebelum (biru) vs setelah simulasi what-if dengan garis acuan batas waspada (70%) dan kritis (90%).
+                            <p class="text-xs font-semibold text-slate-500 mt-0.5" 
+                               x-text="(chartViewMode === 'focused' || (chartViewMode === 'auto' && tenantId && data.summary.selected_tenant))
+                                    ? 'Perbandingan beban sebelum (biru) vs setelah simulasi what-if (hijau/kuning/merah) untuk gerai ini.'
+                                    : 'Perbandingan utilisasi sebelum (biru) vs setelah simulasi what-if dengan garis acuan batas waspada (70%) dan kritis (90%).'">
                             </p>
                         </div>
-                        <div class="flex items-center gap-3 text-xs font-bold">
-                            <span class="flex items-center gap-1.5 text-amber-700">
-                                <span class="w-3 h-0.5 border-t-2 border-dashed border-amber-500"></span>
-                                <span>70% Waspada</span>
-                            </span>
-                            <span class="flex items-center gap-1.5 text-rose-700">
-                                <span class="w-3 h-0.5 border-t-2 border-dashed border-rose-500"></span>
-                                <span>90% Kritis</span>
-                            </span>
+                        <div class="flex items-center flex-wrap gap-3">
+                            <!-- Toggle Mode jika ada Tenant Terpilih -->
+                            <template x-if="tenantId && data.summary.selected_tenant">
+                                <div class="inline-flex rounded-xl p-1 bg-slate-100 border border-slate-200 text-xs font-extrabold">
+                                    <button type="button" 
+                                            @click="chartViewMode = 'focused'; renderChart()" 
+                                            :class="(chartViewMode === 'focused' || chartViewMode === 'auto') ? 'bg-white text-[#005ea2] shadow-xs' : 'text-slate-600 hover:text-slate-900'"
+                                            class="px-2.5 py-1 rounded-lg transition cursor-pointer">
+                                        Fokus Gerai
+                                    </button>
+                                    <button type="button" 
+                                            @click="chartViewMode = 'top10'; renderChart()" 
+                                            :class="chartViewMode === 'top10' ? 'bg-white text-[#005ea2] shadow-xs' : 'text-slate-600 hover:text-slate-900'"
+                                            class="px-2.5 py-1 rounded-lg transition cursor-pointer">
+                                        Top 10 Bandara
+                                    </button>
+                                </div>
+                            </template>
+                            <div class="flex items-center gap-3 text-xs font-bold">
+                                <span class="flex items-center gap-1.5 text-amber-700">
+                                    <span class="w-3 h-0.5 border-t-2 border-dashed border-amber-500"></span>
+                                    <span>70% Waspada</span>
+                                </span>
+                                <span class="flex items-center gap-1.5 text-rose-700">
+                                    <span class="w-3 h-0.5 border-t-2 border-dashed border-rose-500"></span>
+                                    <span>90% Kritis</span>
+                                </span>
+                            </div>
                         </div>
                     </div>
+
+                    <!-- Peringatan Jika Tenant Terpilih Memiliki Data Kurang -->
+                    <template x-if="(chartViewMode === 'focused' || (chartViewMode === 'auto' && tenantId)) && data.summary.selected_tenant && !data.summary.selected_tenant.has_sufficient_data">
+                        <div class="p-4 mb-4 bg-amber-50 border-2 border-dashed border-amber-200 rounded-xl text-xs font-bold text-amber-900 flex items-start gap-3">
+                            <span class="text-base shrink-0">⚠️</span>
+                            <div>
+                                <span class="font-black block">Data Transaksi Historis Belum Cukup</span>
+                                Gerai ini baru memiliki <span x-text="data.summary.selected_tenant.valid_orders_count"></span> pesanan valid (minimal butuh 10 pesanan valid dan waktu saji terdata) untuk menghasilkan estimasi beban puncak yang akurat. Silakan pilih gerai dengan transaksi aktif seperti A&W (Kedatangan 1A), EXPAT, atau SHIHLIN.
+                            </div>
+                        </div>
+                    </template>
 
                     <div class="relative h-72 w-full">
                         <canvas id="capacityTop10Chart"></canvas>
@@ -756,18 +899,90 @@ window.targetPlanningSimulator = function() {
         </div>
 
         <!-- TABEL SEMUA TENANT (Diurutkan dari Utilisasi Tertinggi) -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h3 class="text-base font-black text-slate-900 tracking-tight">
-                        📋 Matriks Kapasitas Seluruh Mitra Gerai Tenant
-                    </h3>
-                    <p class="text-xs font-semibold text-slate-500 mt-0.5">
-                        Daftar seluruh tenant diurutkan dari utilisasi tertinggi berdasarkan parameter what-if aktif. Klik baris untuk memfokuskan tenant.
-                    </p>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden" id="whatifTenantsTableSection">
+            <!-- Table Toolbar -->
+            <div class="p-5 sm:p-6 border-b border-slate-100 flex flex-col gap-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <h3 class="text-base sm:text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
+                            <span>📋 Matriks Kapasitas Seluruh Mitra Gerai Tenant</span>
+                        </h3>
+                        <p class="text-xs font-semibold text-slate-500 mt-0.5">
+                            Daftar tenant diurutkan dari utilisasi tertinggi. Gunakan pencarian dan filter untuk meninjau gerai tertentu.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-3 self-start sm:self-center">
+                        <div class="flex items-center gap-2 text-xs font-bold text-slate-600">
+                            <span>Tampilkan:</span>
+                            <select x-model="tablePerPage" @change="tablePage = 1" class="px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-black text-slate-900 cursor-pointer">
+                                <option :value="10">10 Baris</option>
+                                <option :value="25">25 Baris</option>
+                                <option :value="50">50 Baris</option>
+                                <option value="ALL">Semua (76)</option>
+                            </select>
+                        </div>
+                        <div class="px-3 py-1 rounded-full text-xs font-black bg-blue-50 text-[#005ea2] border border-blue-200">
+                            Total: <span x-text="filteredTenants().length"></span> Tenant
+                        </div>
+                    </div>
                 </div>
-                <div class="text-xs font-bold text-slate-500">
-                    Total: <strong class="text-slate-900" x-text="data.tenants ? data.tenants.length : 0"></strong> Tenant
+
+                <!-- Quick Search & Status Pills Row -->
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-3 border-t border-slate-100">
+                    <!-- Status Filter Pills -->
+                    <div class="flex flex-wrap items-center gap-1.5 text-xs font-bold">
+                        <button type="button" 
+                                @click="tableStatusFilter = 'ALL'; tablePage = 1" 
+                                :class="tableStatusFilter === 'ALL' ? 'bg-slate-900 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                class="px-3 py-1.5 rounded-lg transition cursor-pointer font-extrabold flex items-center gap-1.5">
+                            <span>Semua</span>
+                            <span class="px-1.5 py-0.5 rounded-full text-[10px]" :class="tableStatusFilter === 'ALL' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'" x-text="data.tenants ? data.tenants.length : 0"></span>
+                        </button>
+                        <button type="button" 
+                                @click="tableStatusFilter = 'RISK'; tablePage = 1" 
+                                :class="tableStatusFilter === 'RISK' ? 'bg-rose-600 text-white shadow-xs' : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200'"
+                                class="px-3 py-1.5 rounded-lg transition cursor-pointer font-extrabold flex items-center gap-1.5">
+                            <span>⚠️ Berisiko (Overload/Kritis)</span>
+                            <span class="px-1.5 py-0.5 rounded-full text-[10px]" :class="tableStatusFilter === 'RISK' ? 'bg-white/20 text-white' : 'bg-rose-200 text-rose-900'" 
+                                  x-text="(data.summary?.status_distribution?.WASPADA || 0) + (data.summary?.status_distribution?.KRITIS || 0) + (data.summary?.status_distribution?.OVERLOAD || 0)"></span>
+                        </button>
+                        <button type="button" 
+                                @click="tableStatusFilter = 'AMAN'; tablePage = 1" 
+                                :class="tableStatusFilter === 'AMAN' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'"
+                                class="px-3 py-1.5 rounded-lg transition cursor-pointer font-extrabold flex items-center gap-1.5">
+                            <span>✅ Aman (≤70%)</span>
+                            <span class="px-1.5 py-0.5 rounded-full text-[10px]" :class="tableStatusFilter === 'AMAN' ? 'bg-white/20 text-white' : 'bg-emerald-200 text-emerald-900'" 
+                                  x-text="data.summary?.status_distribution?.AMAN || 0"></span>
+                        </button>
+                        <button type="button" 
+                                @click="tableStatusFilter = 'INSUFFICIENT'; tablePage = 1" 
+                                :class="tableStatusFilter === 'INSUFFICIENT' ? 'bg-slate-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'"
+                                class="px-3 py-1.5 rounded-lg transition cursor-pointer font-extrabold flex items-center gap-1.5">
+                            <span>Data Belum Cukup</span>
+                            <span class="px-1.5 py-0.5 rounded-full text-[10px]" :class="tableStatusFilter === 'INSUFFICIENT' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'" 
+                                  x-text="data.summary?.status_distribution?.INSUFFICIENT || 0"></span>
+                        </button>
+                    </div>
+
+                    <!-- Search Input -->
+                    <div class="relative w-full lg:w-72">
+                        <input type="text" 
+                               x-model="tableSearch" 
+                               @input="tablePage = 1" 
+                               placeholder="Cari nama gerai, lantai, zona..." 
+                               class="w-full pl-9 pr-8 py-2 bg-slate-50 hover:bg-white border-2 border-slate-200 focus:border-[#005ea2] focus:bg-white rounded-xl text-xs font-bold text-slate-900 transition shadow-2xs h-9">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <button x-show="tableSearch" 
+                                @click="tableSearch = ''; tablePage = 1" 
+                                type="button" 
+                                class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 text-sm font-bold cursor-pointer">
+                            &times;
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -799,7 +1014,19 @@ window.targetPlanningSimulator = function() {
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 font-semibold text-slate-700">
-                        <template x-for="t in data.tenants" :key="t.tenant_id">
+                        <!-- Empty State -->
+                        <tr x-show="filteredTenants().length === 0">
+                            <td colspan="10" class="py-12 px-4 text-center text-slate-400">
+                                <span class="text-3xl block mb-2">🔍</span>
+                                <p class="text-sm font-extrabold text-slate-700">Tidak ada gerai tenant yang sesuai dengan filter atau pencarian</p>
+                                <button type="button" @click="tableSearch = ''; tableStatusFilter = 'ALL'; tablePage = 1" class="mt-2 text-xs font-bold text-[#005ea2] hover:underline cursor-pointer">
+                                    Reset Filter Pencarian
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Rows -->
+                        <template x-for="t in paginatedTenants()" :key="t.tenant_id">
                             <tr class="hover:bg-blue-50/50 transition cursor-pointer group"
                                 :class="tenantId == t.tenant_id ? 'bg-blue-50/80 font-bold' : ''"
                                 @click="focusTenant(t.tenant_id)">
@@ -909,6 +1136,38 @@ window.targetPlanningSimulator = function() {
                         </template>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Pagination Footer -->
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs" x-show="tablePerPage !== 'ALL' && filteredTenants().length > 0">
+                <div class="text-slate-500 font-bold">
+                    Menampilkan baris <strong class="text-slate-900" x-text="(tablePage - 1) * (parseInt(tablePerPage, 10) || 10) + 1"></strong> 
+                    s/d <strong class="text-slate-900" x-text="Math.min(tablePage * (parseInt(tablePerPage, 10) || 10), filteredTenants().length)"></strong> 
+                    dari total <strong class="text-slate-900" x-text="filteredTenants().length"></strong> tenant
+                </div>
+
+                <div class="flex items-center gap-2 self-center sm:self-auto">
+                    <button type="button" 
+                            @click="setTablePage(tablePage - 1)" 
+                            :disabled="tablePage <= 1"
+                            class="px-3.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed font-extrabold transition shadow-2xs cursor-pointer">
+                        &larr; Sebelumnya
+                    </button>
+
+                    <div class="flex items-center gap-1 font-black px-2 text-slate-700">
+                        <span>Halaman</span>
+                        <span class="px-2 py-0.5 rounded bg-[#005ea2] text-white" x-text="tablePage"></span>
+                        <span>dari</span>
+                        <span x-text="tableTotalPages()"></span>
+                    </div>
+
+                    <button type="button" 
+                            @click="setTablePage(tablePage + 1)" 
+                            :disabled="tablePage >= tableTotalPages()"
+                            class="px-3.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed font-extrabold transition shadow-2xs cursor-pointer">
+                        Berikutnya &rarr;
+                    </button>
+                </div>
             </div>
         </div>
 
