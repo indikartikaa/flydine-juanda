@@ -137,7 +137,7 @@
                 <div class="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl bg-white p-3 shadow-2xl ring-4 ring-white/15 shrink-0 flex items-center justify-center transform md:-rotate-1 hover:rotate-0 transition-transform duration-300">
                     <div class="w-full h-full rounded-2xl bg-gradient-to-tr from-slate-50 to-blue-50/50 flex flex-col items-center justify-center overflow-hidden border border-slate-100 relative">
                         @if($tenant->logo)
-                            <img src="{{ asset($tenant->logo) }}" alt="{{ $tenant->name }}" class="w-full h-full object-contain p-1">
+                            <img src="{{ asset($tenant->logo) }}" alt="{{ $tenant->name }}" class="w-full h-full object-contain p-1" loading="lazy" decoding="async">
                         @else
                             <span class="text-3xl sm:text-4xl font-black text-[#005ea2] tracking-tighter">{{ strtoupper(substr(str_replace([' ', "'"], '', $tenant->name), 0, 2)) }}</span>
                             <span class="text-[9px] font-extrabold text-[#8dc63f] uppercase tracking-widest mt-1">JUANDA</span>

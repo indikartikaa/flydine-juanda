@@ -261,7 +261,7 @@
                     <!-- Cover Image Area -->
                     <div class="h-44 bg-gradient-to-br from-slate-100 to-slate-50 relative flex items-center justify-center p-6 overflow-hidden">
                         @if($tenant->logo)
-                            <img src="{{ asset($tenant->logo) }}" alt="{{ $tenant->name }}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <img src="{{ asset($tenant->logo) }}" alt="{{ $tenant->name }}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" decoding="async">
                             <!-- Overlay gradien halus agar badge kontras -->
                             <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 pointer-events-none"></div>
                         @else
