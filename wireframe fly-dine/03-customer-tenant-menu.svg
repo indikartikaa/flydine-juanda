@@ -1,257 +1,382 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1700" width="1440" height="1700" style="background:#FFFFFF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1800" width="1440" height="1800" style="background:#FFFFFF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
 
   <!-- ========================================================================= -->
-  <!-- WIREFRAME PERSIS: DETAIL MENU RESTORAN / TENANT (/menu/{tenant})          -->
-  <!-- Murni Kotak-Kotak Struktur (Skeleton Wireframe - Tanpa Browser Frame)     -->
+  <!-- WIREFRAME PERSIS: DETAIL TENANT & MENU RESTORAN (/menu/{tenant})          -->
+  <!-- Murni Kotak-Kotak Struktur (Skeleton Wireframe - Hitam Putih Abu-Abu)     -->
   <!-- Mengikuti: resources/views/customer/tenant-menu.blade.php                 -->
   <!-- ========================================================================= -->
 
-  <!-- 1. TOP NAVBAR (Sticky Top di tenant-menu.blade.php baris 14-107) -->
+  <!-- 1. TOP NAVBAR (Sticky Top di tenant-menu.blade.php baris 14-114) -->
   <g id="Top-Navbar">
     <rect x="0" y="0" width="1440" height="76" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
 
-    <!-- A. Kiri: Tombol Back Bulat + Judul "Katalog / Kembali ke Beranda" -->
-    <g transform="translate(60, 16)">
-      <!-- Tombol Kembali Kotak rounded -->
-      <rect width="44" height="44" rx="12" fill="#27272A" />
-      <path d="M26 14 L18 22 L26 30" stroke="#FFFFFF" stroke-width="2.5" fill="none" stroke-linecap="round" />
-      
-      <!-- Teks Title & Subtitle -->
-      <line x1="58" y1="18" x2="160" y2="18" stroke="#18181B" stroke-width="7" stroke-linecap="round" />
-      <line x1="58" y1="32" x2="210" y2="32" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+    <!-- A. Kiri: Logo FlyDine Juanda [X] -->
+    <g transform="translate(60, 18)">
+      <rect width="160" height="40" rx="6" fill="#F4F4F5" stroke="#27272A" stroke-width="1.8" />
+      <line x1="0" y1="0" x2="160" y2="40" stroke="#71717A" stroke-width="1.5" />
+      <line x1="160" y1="0" x2="0" y2="40" stroke="#71717A" stroke-width="1.5" />
     </g>
 
-    <!-- B. Kanan: Switch Bahasa, Pesanan, Riwayat, Portal Login -->
-    <g transform="translate(930, 20)">
+    <!-- B. Kanan: Switch Bahasa, Pesanan, Riwayat, Lacak, Portal Login -->
+    <g transform="translate(860, 20)">
+      <!-- Switch Bahasa ID/EN -->
       <rect x="0" y="0" width="90" height="36" rx="18" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
       <rect x="3" y="3" width="42" height="30" rx="15" fill="#27272A" />
       <line x1="14" y1="18" x2="34" y2="18" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" />
       <line x1="56" y1="18" x2="76" y2="18" stroke="#71717A" stroke-width="3" stroke-linecap="round" />
 
-      <!-- Pesanan -->
-      <g transform="translate(110, 0)">
+      <!-- Nav: Pesanan (dengan badge counter) -->
+      <g transform="translate(108, 0)">
         <rect x="0" y="8" width="18" height="18" rx="3" fill="#FFFFFF" stroke="#27272A" stroke-width="1.8" />
         <path d="M4 8 V5 C4 2 14 2 14 5 V8" fill="none" stroke="#27272A" stroke-width="1.5" />
-        <line x1="26" y1="18" x2="88" y2="18" stroke="#27272A" stroke-width="5" stroke-linecap="round" />
+        <circle cx="18" cy="6" r="6" fill="#27272A" />
+        <line x1="26" y1="18" x2="84" y2="18" stroke="#27272A" stroke-width="5" stroke-linecap="round" />
       </g>
 
-      <!-- Riwayat -->
-      <g transform="translate(225, 0)">
+      <!-- Nav: Riwayat -->
+      <g transform="translate(210, 0)">
         <rect x="0" y="8" width="18" height="18" rx="3" fill="#FFFFFF" stroke="#27272A" stroke-width="1.8" />
-        <line x1="4" y1="14" x2="14" y2="14" stroke="#27272A" stroke-width="1.5" />
-        <line x1="4" y1="18" x2="14" y2="18" stroke="#27272A" stroke-width="1.5" />
-        <line x1="26" y1="18" x2="88" y2="18" stroke="#27272A" stroke-width="5" stroke-linecap="round" />
+        <line x1="4" y1="13" x2="14" y2="13" stroke="#27272A" stroke-width="1.5" />
+        <line x1="4" y1="17" x2="14" y2="17" stroke="#27272A" stroke-width="1.5" />
+        <line x1="26" y1="18" x2="84" y2="18" stroke="#27272A" stroke-width="5" stroke-linecap="round" />
       </g>
 
-      <line x1="335" y1="6" x2="335" y2="30" stroke="#E4E4E7" stroke-width="1.5" />
+      <!-- Nav: Lacak (Badge) -->
+      <g transform="translate(312, 0)">
+        <rect width="78" height="36" rx="18" fill="#F4F4F5" stroke="#27272A" stroke-width="1.2" />
+        <circle cx="16" cy="18" r="4" fill="#27272A" />
+        <line x1="26" y1="18" x2="66" y2="18" stroke="#27272A" stroke-width="4" stroke-linecap="round" />
+      </g>
 
-      <!-- Portal Login -->
-      <g transform="translate(355, 0)">
+      <line x1="406" y1="6" x2="406" y2="30" stroke="#E4E4E7" stroke-width="1.5" />
+
+      <!-- Nav: Portal Login -->
+      <g transform="translate(422, 0)">
         <rect x="0" y="8" width="18" height="18" rx="3" fill="#FFFFFF" stroke="#27272A" stroke-width="1.8" />
-        <line x1="26" y1="18" x2="120" y2="18" stroke="#27272A" stroke-width="5" stroke-linecap="round" />
+        <line x1="26" y1="18" x2="114" y2="18" stroke="#27272A" stroke-width="5" stroke-linecap="round" />
       </g>
     </g>
   </g>
 
-  <!-- 2. TENANT COVER HERO & FLOATING LOGO (baris 112-133) -->
-  <g id="Tenant-Hero" transform="translate(0, 76)">
-    <!-- Cover Image Banner [X] -->
-    <rect x="0" y="0" width="1440" height="280" fill="#F4F4F5" stroke="#27272A" stroke-width="2" />
-    <line x1="0" y1="0" x2="1440" y2="280" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="6 6" />
-    <line x1="1440" y1="0" x2="0" y2="280" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="6 6" />
+  <!-- 2. GRAND TENANT HERO SHOWCASE (baris 117-211) -->
+  <g id="Tenant-Hero-Showcase" transform="translate(0, 76)">
+    <!-- Background Hero Gelap -->
+    <rect x="0" y="0" width="1440" height="340" fill="#27272A" stroke="#18181B" stroke-width="2" />
 
-    <!-- Logo Kotak Besar Melayang di Tengah Bawah Cover (-bottom-16 di blade baris 122) -->
-    <g transform="translate(640, 200)">
-      <rect width="160" height="160" rx="32" fill="#FFFFFF" stroke="#27272A" stroke-width="3" />
-      <rect x="10" y="10" width="140" height="140" rx="24" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
-      <!-- Silang Logo [X] -->
-      <line x1="10" y1="10" x2="150" y2="150" stroke="#71717A" stroke-width="1.5" />
-      <line x1="150" y1="10" x2="10" y2="150" stroke="#71717A" stroke-width="1.5" />
+    <!-- A. Tombol Back ke Katalog Restoran (baris 125-132) -->
+    <g transform="translate(60, 24)">
+      <rect width="230" height="36" rx="18" fill="#3F3F46" stroke="#52525B" stroke-width="1.2" />
+      <path d="M18 18 L12 18 M15 14 L11 18 L15 22" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+      <line x1="28" y1="18" x2="210" y2="18" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" />
+    </g>
+
+    <!-- B. Tenant Info Box Horizontal (baris 134-209) -->
+    <g transform="translate(60, 80)">
+      <!-- Avatar / Monogram Card Kiri (130x130) -->
+      <rect width="130" height="130" rx="24" fill="#FFFFFF" stroke="#18181B" stroke-width="2" />
+      <rect x="10" y="10" width="110" height="110" rx="18" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
+      <!-- Monogram Inisial Besar -->
+      <line x1="36" y1="65" x2="94" y2="65" stroke="#18181B" stroke-width="12" stroke-linecap="round" />
+      <!-- Sub-label JUANDA -->
+      <line x1="44" y1="92" x2="86" y2="92" stroke="#71717A" stroke-width="3" stroke-linecap="round" />
+
+      <!-- Detail Tenant Kanan -->
+      <g transform="translate(160, 0)">
+        <!-- Baris 1: Badges (Terminal, Kategori, Status Buka, SLA) -->
+        <g transform="translate(0, 4)">
+          <!-- Badge Terminal & Gate -->
+          <rect width="150" height="28" rx="14" fill="#3F3F46" stroke="#52525B" stroke-width="1.2" />
+          <circle cx="16" cy="14" r="3" fill="#D4D4D8" />
+          <line x1="26" y1="14" x2="136" y2="14" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" />
+
+          <!-- Badge Kategori -->
+          <g transform="translate(160, 0)">
+            <rect width="170" height="28" rx="14" fill="#3F3F46" stroke="#52525B" stroke-width="1.2" />
+            <line x1="16" y1="14" x2="154" y2="14" stroke="#D4D4D8" stroke-width="4" stroke-linecap="round" />
+          </g>
+
+          <!-- Badge Status Buka -->
+          <g transform="translate(340, 0)">
+            <rect width="126" height="28" rx="14" fill="#3F3F46" stroke="#52525B" stroke-width="1.2" />
+            <circle cx="14" cy="14" r="4" fill="#FFFFFF" />
+            <line x1="26" y1="14" x2="112" y2="14" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" />
+          </g>
+
+          <!-- Badge SLA Garansi 15 Menit -->
+          <g transform="translate(476, 0)">
+            <rect width="154" height="28" rx="14" fill="#3F3F46" stroke="#52525B" stroke-width="1.2" />
+            <line x1="16" y1="14" x2="138" y2="14" stroke="#D4D4D8" stroke-width="4" stroke-linecap="round" />
+          </g>
+        </g>
+
+        <!-- Baris 2: Nama Restoran -->
+        <g transform="translate(0, 48)">
+          <line x1="0" y1="18" x2="380" y2="18" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" />
+        </g>
+
+        <!-- Baris 3: Deskripsi Restoran (2 Baris) -->
+        <g transform="translate(0, 84)">
+          <line x1="0" y1="8" x2="680" y2="8" stroke="#D4D4D8" stroke-width="4.5" stroke-linecap="round" />
+          <line x1="0" y1="24" x2="520" y2="24" stroke="#D4D4D8" stroke-width="4.5" stroke-linecap="round" />
+        </g>
+
+        <!-- Baris 4: Quick Meta Info (Menu, Durasi, Pengantaran) -->
+        <g transform="translate(0, 126)">
+          <line x1="0" y1="0" x2="720" y2="0" stroke="#3F3F46" stroke-width="1" />
+          
+          <g transform="translate(0, 14)">
+            <line x1="0" y1="6" x2="120" y2="6" stroke="#A1A1AA" stroke-width="4" stroke-linecap="round" />
+            <circle cx="140" cy="6" r="2" fill="#FFFFFF" opacity="0.4" />
+            <line x1="160" y1="6" x2="300" y2="6" stroke="#A1A1AA" stroke-width="4" stroke-linecap="round" />
+            <circle cx="320" cy="6" r="2" fill="#FFFFFF" opacity="0.4" />
+            <line x1="340" y1="6" x2="510" y2="6" stroke="#A1A1AA" stroke-width="4" stroke-linecap="round" />
+          </g>
+        </g>
+      </g>
     </g>
   </g>
 
-  <!-- 3. TENANT INFO & SEARCH MENU (baris 135-177) -->
-  <g id="Tenant-Info" transform="translate(0, 450)">
-    <!-- Nama Restoran (Besar di Tengah) -->
-    <line x1="560" y1="20" x2="880" y2="20" stroke="#18181B" stroke-width="10" stroke-linecap="round" />
-
-    <!-- Badge Lokasi & Status Buka (baris 141-162) -->
-    <g transform="translate(580, 44)">
-      <!-- Badge Lokasi Gate -->
-      <rect x="0" y="0" width="150" height="26" rx="13" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
-      <circle cx="16" cy="13" r="3" fill="#27272A" />
-      <line x1="28" y1="13" x2="135" y2="13" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
-
-      <!-- Badge OPEN -->
-      <rect x="165" y="0" width="110" height="26" rx="13" fill="#27272A" />
-      <circle cx="180" cy="13" r="4" fill="#FFFFFF" />
-      <line x1="194" y1="13" x2="260" y2="13" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" />
+  <!-- 3. MAIN CONTROLS: JUDUL & DEDICATED SEARCH BAR (baris 218-263) -->
+  <g id="Menu-Controls-Bar" transform="translate(60, 446)">
+    <!-- Kiri: Judul "Daftar Menu" + Counter Menu Tersedia -->
+    <g transform="translate(0, 6)">
+      <line x1="0" y1="12" x2="160" y2="12" stroke="#18181B" stroke-width="9" stroke-linecap="round" />
+      <line x1="0" y1="32" x2="310" y2="32" stroke="#71717A" stroke-width="4.5" stroke-linecap="round" />
     </g>
 
-    <!-- Deskripsi Singkat Restoran -->
-    <line x1="470" y1="94" x2="970" y2="94" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
-    <line x1="520" y1="108" x2="920" y2="108" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
-
-    <!-- Input Pencarian Menu Khusus Restoran Ini (baris 170-177) -->
-    <g transform="translate(470, 140)">
-      <rect width="500" height="48" rx="24" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
-      <circle cx="28" cy="24" r="8" fill="none" stroke="#71717A" stroke-width="2" />
-      <line x1="34" y1="30" x2="40" y2="36" stroke="#71717A" stroke-width="2" stroke-linecap="round" />
-      <line x1="56" y1="24" x2="260" y2="24" stroke="#A1A1AA" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 3" />
+    <!-- Kanan: Form Pencarian Menu Khusus dengan Tombol Cari (baris 229-262) -->
+    <g transform="translate(930, 0)">
+      <rect width="390" height="48" rx="24" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+      
+      <!-- Input Icon Kaca Pembesar -->
+      <circle cx="22" cy="24" r="7" fill="none" stroke="#71717A" stroke-width="1.8" />
+      <line x1="27" y1="29" x2="34" y2="36" stroke="#71717A" stroke-width="1.8" stroke-linecap="round" />
+      
+      <!-- Placeholder Pencarian -->
+      <line x1="46" y1="24" x2="220" y2="24" stroke="#A1A1AA" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 3" />
+      
+      <!-- Tombol Cari -->
+      <g transform="translate(290, 4)">
+        <rect width="94" height="40" rx="20" fill="#27272A" stroke="#18181B" stroke-width="1.5" />
+        <circle cx="24" cy="20" r="5" fill="none" stroke="#FFFFFF" stroke-width="1.5" />
+        <line x1="28" y1="24" x2="33" y2="29" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" />
+        <line x1="42" y1="20" x2="76" y2="20" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" />
+      </g>
     </g>
   </g>
 
-  <!-- 4. GRID PRODUK / MENU MAKANAN (3 KOLOM) (baris 180-219) -->
-  <g id="Products-Grid" transform="translate(80, 680)">
+  <!-- 4. PRODUCTS GRID (3 Kolom x 2 Baris Card Menu) (baris 266-380) -->
+  <g id="Products-Grid" transform="translate(60, 526)">
 
-    <!-- ROW 1 (3 Produk) -->
-    <!-- Card Produk 1 -->
+    <!-- ==================== BARIS 1 ==================== -->
+    <!-- Card 1 -->
     <g transform="translate(0, 0)">
-      <rect width="405" height="340" rx="24" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
-      <!-- Foto Makanan [X] -->
-      <rect x="18" y="18" width="369" height="160" rx="16" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
-      <line x1="18" y1="18" x2="387" y2="178" stroke="#71717A" stroke-width="1.2" />
-      <line x1="387" y1="18" x2="18" y2="178" stroke="#71717A" stroke-width="1.2" />
+      <rect width="420" height="490" rx="24" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+      <g transform="translate(18, 18)">
+        <rect width="384" height="210" rx="16" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
+        <line x1="0" y1="0" x2="384" y2="210" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="6 6" />
+        <line x1="384" y1="0" x2="0" y2="210" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="6 6" />
+        <circle cx="192" cy="105" r="32" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+        <path d="M182 115 L192 98 L202 115 Z" fill="#71717A" />
+      </g>
+      <g transform="translate(24, 252)">
+        <rect width="90" height="22" rx="11" fill="#F4F4F5" stroke="#27272A" stroke-width="1.2" />
+        <line x1="14" y1="11" x2="76" y2="11" stroke="#52525B" stroke-width="3" stroke-linecap="round" />
+        
+        <line x1="0" y1="44" x2="260" y2="44" stroke="#18181B" stroke-width="7" stroke-linecap="round" />
+        <line x1="0" y1="70" x2="360" y2="70" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+        <line x1="0" y1="86" x2="280" y2="86" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
 
-      <!-- Judul & Deskripsi Menu -->
-      <line x1="20" y1="210" x2="220" y2="210" stroke="#18181B" stroke-width="7" stroke-linecap="round" />
-      <line x1="20" y1="234" x2="360" y2="234" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
-      <line x1="20" y1="248" x2="280" y2="248" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
-
-      <!-- Harga & Tombol Tambah Bulat (+) (baris 205-208) -->
-      <line x1="20" y1="295" x2="130" y2="295" stroke="#18181B" stroke-width="8" stroke-linecap="round" />
-      <circle cx="360" cy="295" r="20" fill="#27272A" />
-      <line x1="352" y1="295" x2="368" y2="295" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
-      <line x1="360" y1="287" x2="360" y2="303" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+        <g transform="translate(0, 150)">
+          <line x1="0" y1="20" x2="110" y2="20" stroke="#18181B" stroke-width="8" stroke-linecap="round" />
+          <!-- Tombol + Tambah -->
+          <g transform="translate(230, 0)">
+            <rect width="142" height="42" rx="12" fill="#27272A" stroke="#18181B" stroke-width="1.5" />
+            <line x1="28" y1="21" x2="42" y2="21" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+            <line x1="35" y1="14" x2="35" y2="28" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+            <line x1="56" y1="21" x2="118" y2="21" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" />
+          </g>
+        </g>
+      </g>
     </g>
 
-    <!-- Card Produk 2 -->
-    <g transform="translate(437, 0)">
-      <rect width="405" height="340" rx="24" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
-      <rect x="18" y="18" width="369" height="160" rx="16" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
-      <line x1="18" y1="18" x2="387" y2="178" stroke="#71717A" stroke-width="1.2" />
-      <line x1="387" y1="18" x2="18" y2="178" stroke="#71717A" stroke-width="1.2" />
-
-      <line x1="20" y1="210" x2="240" y2="210" stroke="#18181B" stroke-width="7" stroke-linecap="round" />
-      <line x1="20" y1="234" x2="340" y2="234" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
-      <line x1="20" y1="248" x2="300" y2="248" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
-
-      <line x1="20" y1="295" x2="120" y2="295" stroke="#18181B" stroke-width="8" stroke-linecap="round" />
-      <circle cx="360" cy="295" r="20" fill="#27272A" />
-      <line x1="352" y1="295" x2="368" y2="295" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
-      <line x1="360" y1="287" x2="360" y2="303" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+    <!-- Card 2 -->
+    <g transform="translate(450, 0)">
+      <rect width="420" height="490" rx="24" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+      <g transform="translate(18, 18)">
+        <rect width="384" height="210" rx="16" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
+        <line x1="0" y1="0" x2="384" y2="210" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="6 6" />
+        <line x1="384" y1="0" x2="0" y2="210" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="6 6" />
+        <circle cx="192" cy="105" r="32" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+        <path d="M182 115 L192 98 L202 115 Z" fill="#71717A" />
+      </g>
+      <g transform="translate(24, 252)">
+        <rect width="90" height="22" rx="11" fill="#F4F4F5" stroke="#27272A" stroke-width="1.2" />
+        <line x1="14" y1="11" x2="76" y2="11" stroke="#52525B" stroke-width="3" stroke-linecap="round" />
+        <line x1="0" y1="44" x2="240" y2="44" stroke="#18181B" stroke-width="7" stroke-linecap="round" />
+        <line x1="0" y1="70" x2="350" y2="70" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+        <line x1="0" y1="86" x2="260" y2="86" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+        <g transform="translate(0, 150)">
+          <line x1="0" y1="20" x2="100" y2="20" stroke="#18181B" stroke-width="8" stroke-linecap="round" />
+          <g transform="translate(230, 0)">
+            <rect width="142" height="42" rx="12" fill="#27272A" stroke="#18181B" stroke-width="1.5" />
+            <line x1="28" y1="21" x2="42" y2="21" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+            <line x1="35" y1="14" x2="35" y2="28" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+            <line x1="56" y1="21" x2="118" y2="21" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" />
+          </g>
+        </g>
+      </g>
     </g>
 
-    <!-- Card Produk 3 -->
-    <g transform="translate(874, 0)">
-      <rect width="405" height="340" rx="24" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
-      <rect x="18" y="18" width="369" height="160" rx="16" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
-      <line x1="18" y1="18" x2="387" y2="178" stroke="#71717A" stroke-width="1.2" />
-      <line x1="387" y1="18" x2="18" y2="178" stroke="#71717A" stroke-width="1.2" />
-
-      <line x1="20" y1="210" x2="210" y2="210" stroke="#18181B" stroke-width="7" stroke-linecap="round" />
-      <line x1="20" y1="234" x2="350" y2="234" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
-      <line x1="20" y1="248" x2="270" y2="248" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
-
-      <line x1="20" y1="295" x2="140" y2="295" stroke="#18181B" stroke-width="8" stroke-linecap="round" />
-      <circle cx="360" cy="295" r="20" fill="#27272A" />
-      <line x1="352" y1="295" x2="368" y2="295" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
-      <line x1="360" y1="287" x2="360" y2="303" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+    <!-- Card 3 -->
+    <g transform="translate(900, 0)">
+      <rect width="420" height="490" rx="24" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+      <g transform="translate(18, 18)">
+        <rect width="384" height="210" rx="16" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
+        <line x1="0" y1="0" x2="384" y2="210" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="6 6" />
+        <line x1="384" y1="0" x2="0" y2="210" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="6 6" />
+        <circle cx="192" cy="105" r="32" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+        <path d="M182 115 L192 98 L202 115 Z" fill="#71717A" />
+      </g>
+      <g transform="translate(24, 252)">
+        <rect width="90" height="22" rx="11" fill="#F4F4F5" stroke="#27272A" stroke-width="1.2" />
+        <line x1="14" y1="11" x2="76" y2="11" stroke="#52525B" stroke-width="3" stroke-linecap="round" />
+        <line x1="0" y1="44" x2="280" y2="44" stroke="#18181B" stroke-width="7" stroke-linecap="round" />
+        <line x1="0" y1="70" x2="340" y2="70" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+        <line x1="0" y1="86" x2="250" y2="86" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+        <g transform="translate(0, 150)">
+          <line x1="0" y1="20" x2="115" y2="20" stroke="#18181B" stroke-width="8" stroke-linecap="round" />
+          <g transform="translate(230, 0)">
+            <rect width="142" height="42" rx="12" fill="#27272A" stroke="#18181B" stroke-width="1.5" />
+            <line x1="28" y1="21" x2="42" y2="21" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+            <line x1="35" y1="14" x2="35" y2="28" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+            <line x1="56" y1="21" x2="118" y2="21" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" />
+          </g>
+        </g>
+      </g>
     </g>
 
-    <!-- ROW 2 (3 Produk Lagi) -->
-    <!-- Card Produk 4 -->
-    <g transform="translate(0, 360)">
-      <rect width="405" height="340" rx="24" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
-      <rect x="18" y="18" width="369" height="160" rx="16" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
-      <line x1="18" y1="18" x2="387" y2="178" stroke="#71717A" stroke-width="1.2" />
-      <line x1="387" y1="18" x2="18" y2="178" stroke="#71717A" stroke-width="1.2" />
-
-      <line x1="20" y1="210" x2="230" y2="210" stroke="#18181B" stroke-width="7" stroke-linecap="round" />
-      <line x1="20" y1="234" x2="360" y2="234" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
-      <line x1="20" y1="248" x2="290" y2="248" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
-
-      <line x1="20" y1="295" x2="125" y2="295" stroke="#18181B" stroke-width="8" stroke-linecap="round" />
-      <circle cx="360" cy="295" r="20" fill="#27272A" />
-      <line x1="352" y1="295" x2="368" y2="295" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
-      <line x1="360" y1="287" x2="360" y2="303" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+    <!-- ==================== BARIS 2 ==================== -->
+    <!-- Card 4 -->
+    <g transform="translate(0, 520)">
+      <rect width="420" height="490" rx="24" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+      <g transform="translate(18, 18)">
+        <rect width="384" height="210" rx="16" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
+        <line x1="0" y1="0" x2="384" y2="210" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="6 6" />
+        <line x1="384" y1="0" x2="0" y2="210" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="6 6" />
+        <circle cx="192" cy="105" r="32" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+        <path d="M182 115 L192 98 L202 115 Z" fill="#71717A" />
+      </g>
+      <g transform="translate(24, 252)">
+        <rect width="90" height="22" rx="11" fill="#F4F4F5" stroke="#27272A" stroke-width="1.2" />
+        <line x1="14" y1="11" x2="76" y2="11" stroke="#52525B" stroke-width="3" stroke-linecap="round" />
+        <line x1="0" y1="44" x2="230" y2="44" stroke="#18181B" stroke-width="7" stroke-linecap="round" />
+        <line x1="0" y1="70" x2="330" y2="70" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+        <line x1="0" y1="86" x2="270" y2="86" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+        <g transform="translate(0, 150)">
+          <line x1="0" y1="20" x2="95" y2="20" stroke="#18181B" stroke-width="8" stroke-linecap="round" />
+          <g transform="translate(230, 0)">
+            <rect width="142" height="42" rx="12" fill="#27272A" stroke="#18181B" stroke-width="1.5" />
+            <line x1="28" y1="21" x2="42" y2="21" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+            <line x1="35" y1="14" x2="35" y2="28" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+            <line x1="56" y1="21" x2="118" y2="21" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" />
+          </g>
+        </g>
+      </g>
     </g>
 
-    <!-- Card Produk 5 -->
-    <g transform="translate(437, 360)">
-      <rect width="405" height="340" rx="24" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
-      <rect x="18" y="18" width="369" height="160" rx="16" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
-      <line x1="18" y1="18" x2="387" y2="178" stroke="#71717A" stroke-width="1.2" />
-      <line x1="387" y1="18" x2="18" y2="178" stroke="#71717A" stroke-width="1.2" />
-
-      <line x1="20" y1="210" x2="250" y2="210" stroke="#18181B" stroke-width="7" stroke-linecap="round" />
-      <line x1="20" y1="234" x2="330" y2="234" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
-      <line x1="20" y1="248" x2="280" y2="248" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
-
-      <line x1="20" y1="295" x2="135" y2="295" stroke="#18181B" stroke-width="8" stroke-linecap="round" />
-      <circle cx="360" cy="295" r="20" fill="#27272A" />
-      <line x1="352" y1="295" x2="368" y2="295" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
-      <line x1="360" y1="287" x2="360" y2="303" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+    <!-- Card 5 (Contoh Item Sudah Ada di Cart dengan Qty Selector) -->
+    <g transform="translate(450, 520)">
+      <rect width="420" height="490" rx="24" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+      <g transform="translate(18, 18)">
+        <rect width="384" height="210" rx="16" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
+        <line x1="0" y1="0" x2="384" y2="210" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="6 6" />
+        <line x1="384" y1="0" x2="0" y2="210" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="6 6" />
+        <circle cx="192" cy="105" r="32" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+        <path d="M182 115 L192 98 L202 115 Z" fill="#71717A" />
+      </g>
+      <g transform="translate(24, 252)">
+        <rect width="90" height="22" rx="11" fill="#F4F4F5" stroke="#27272A" stroke-width="1.2" />
+        <line x1="14" y1="11" x2="76" y2="11" stroke="#18181B" stroke-width="3" stroke-linecap="round" />
+        <line x1="0" y1="44" x2="270" y2="44" stroke="#18181B" stroke-width="7" stroke-linecap="round" />
+        <line x1="0" y1="70" x2="360" y2="70" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+        <line x1="0" y1="86" x2="290" y2="86" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+        
+        <!-- Baris Bawah: Kontrol Quantity Plus / Minus -->
+        <g transform="translate(0, 150)">
+          <line x1="0" y1="20" x2="120" y2="20" stroke="#18181B" stroke-width="8" stroke-linecap="round" />
+          <g transform="translate(230, 0)">
+            <rect width="142" height="42" rx="12" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
+            <!-- Tombol Kurang -->
+            <rect x="3" y="3" width="28" height="28" rx="6" fill="#FFFFFF" stroke="#27272A" stroke-width="1" />
+            <line x1="11" y1="17" x2="23" y2="17" stroke="#27272A" stroke-width="2" stroke-linecap="round" />
+            <!-- Angka Qty -->
+            <line x1="64" y1="17" x2="78" y2="17" stroke="#18181B" stroke-width="3.5" stroke-linecap="round" />
+            <!-- Tombol Tambah -->
+            <rect x="104" y="4" width="34" height="34" rx="8" fill="#27272A" />
+            <line x1="114" y1="21" x2="128" y2="21" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" />
+            <line x1="121" y1="14" x2="121" y2="28" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" />
+          </g>
+        </g>
+      </g>
     </g>
 
-    <!-- Card Produk 6 -->
-    <g transform="translate(874, 360)">
-      <rect width="405" height="340" rx="24" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
-      <rect x="18" y="18" width="369" height="160" rx="16" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
-      <line x1="18" y1="18" x2="387" y2="178" stroke="#71717A" stroke-width="1.2" />
-      <line x1="387" y1="18" x2="18" y2="178" stroke="#71717A" stroke-width="1.2" />
+    <!-- Card 6 -->
+    <g transform="translate(900, 520)">
+      <rect width="420" height="490" rx="24" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+      <g transform="translate(18, 18)">
+        <rect width="384" height="210" rx="16" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
+        <line x1="0" y1="0" x2="384" y2="210" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="6 6" />
+        <line x1="384" y1="0" x2="0" y2="210" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="6 6" />
+        <circle cx="192" cy="105" r="32" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+        <path d="M182 115 L192 98 L202 115 Z" fill="#71717A" />
+      </g>
+      <g transform="translate(24, 252)">
+        <rect width="90" height="22" rx="11" fill="#F4F4F5" stroke="#27272A" stroke-width="1.2" />
+        <line x1="14" y1="11" x2="76" y2="11" stroke="#52525B" stroke-width="3" stroke-linecap="round" />
+        <line x1="0" y1="44" x2="250" y2="44" stroke="#18181B" stroke-width="7" stroke-linecap="round" />
+        <line x1="0" y1="70" x2="350" y2="70" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+        <line x1="0" y1="86" x2="280" y2="86" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+        <g transform="translate(0, 150)">
+          <line x1="0" y1="20" x2="105" y2="20" stroke="#18181B" stroke-width="8" stroke-linecap="round" />
+          <g transform="translate(230, 0)">
+            <rect width="142" height="42" rx="12" fill="#27272A" stroke="#18181B" stroke-width="1.5" />
+            <line x1="28" y1="21" x2="42" y2="21" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+            <line x1="35" y1="14" x2="35" y2="28" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+            <line x1="56" y1="21" x2="118" y2="21" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" />
+          </g>
+        </g>
+      </g>
+    </g>
 
-      <line x1="20" y1="210" x2="220" y2="210" stroke="#18181B" stroke-width="7" stroke-linecap="round" />
-      <line x1="20" y1="234" x2="340" y2="234" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
-      <line x1="20" y1="248" x2="260" y2="248" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+  </g>
 
-      <line x1="20" y1="295" x2="150" y2="295" stroke="#18181B" stroke-width="8" stroke-linecap="round" />
-      <circle cx="360" cy="295" r="20" fill="#27272A" />
-      <line x1="352" y1="295" x2="368" y2="295" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
-      <line x1="360" y1="287" x2="360" y2="303" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+  <!-- 5. FLOATING BOTTOM BAR (KERANJANG PESANAN MELAYANG) (baris 390-440) -->
+  <g id="Floating-Cart-Bar" transform="translate(270, 1600)">
+    <rect width="900" height="74" rx="24" fill="#27272A" stroke="#18181B" stroke-width="2" />
+    
+    <!-- Kiri: Icon Keranjang + Info Ringkasan Item -->
+    <g transform="translate(28, 18)">
+      <circle cx="19" cy="19" r="19" fill="#3F3F46" stroke="#52525B" stroke-width="1.5" />
+      <path d="M11 12 H15 L17 25 H27" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      <g transform="translate(50, 4)">
+        <line x1="0" y1="6" x2="140" y2="6" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" />
+        <line x1="0" y1="22" x2="210" y2="22" stroke="#A1A1AA" stroke-width="4" stroke-linecap="round" />
+      </g>
+    </g>
+
+    <!-- Kanan: Tombol CTA "Lihat Keranjang & Checkout" -->
+    <g transform="translate(620, 14)">
+      <rect width="252" height="46" rx="16" fill="#FFFFFF" stroke="#18181B" stroke-width="1.8" />
+      <line x1="30" y1="23" x2="180" y2="23" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
+      <path d="M196 23 L216 23 M208 17 L216 23 L208 29" stroke="#18181B" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
     </g>
   </g>
 
-  <!-- 5. CORPORATE FOOTER (baris 225-240) -->
-  <g id="Footer" transform="translate(0, 1420)">
-    <rect x="0" y="0" width="1440" height="280" fill="#F4F4F5" stroke="#27272A" stroke-width="2" />
-    <g transform="translate(80, 50)">
-      <!-- Col 1: Brand & Desc -->
-      <g transform="translate(0, 0)">
-        <rect width="140" height="34" rx="4" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
-        <line x1="0" y1="0" x2="140" y2="34" stroke="#71717A" stroke-width="1" />
-        <line x1="140" y1="0" x2="0" y2="34" stroke="#71717A" stroke-width="1" />
-        <line x1="0" y1="56" x2="320" y2="56" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
-        <line x1="0" y1="72" x2="260" y2="72" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
-      </g>
-
-      <!-- Col 2: Navigasi Cepat -->
-      <g transform="translate(420, 0)">
-        <line x1="0" y1="12" x2="150" y2="12" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
-        <line x1="0" y1="46" x2="130" y2="46" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
-        <line x1="0" y1="72" x2="110" y2="72" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
-        <line x1="0" y1="98" x2="140" y2="98" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
-      </g>
-
-      <!-- Col 3: Kemitraan -->
-      <g transform="translate(680, 0)">
-        <line x1="0" y1="12" x2="130" y2="12" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
-        <line x1="0" y1="46" x2="140" y2="46" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
-        <line x1="0" y1="72" x2="120" y2="72" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
-      </g>
-
-      <!-- Col 4: Angkasa Pura Support -->
-      <g transform="translate(940, 0)">
-        <line x1="0" y1="12" x2="140" y2="12" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
-        <rect x="0" y="36" width="160" height="44" rx="8" fill="#FFFFFF" stroke="#27272A" stroke-width="1.8" />
-        <line x1="0" y1="36" x2="160" y2="80" stroke="#71717A" stroke-width="1" />
-        <line x1="160" y1="36" x2="0" y2="80" stroke="#71717A" stroke-width="1" />
-      </g>
-    </g>
-
-    <!-- Copyright -->
-    <line x1="80" y1="210" x2="1360" y2="210" stroke="#E4E4E7" stroke-width="1.5" />
-    <line x1="560" y1="240" x2="880" y2="240" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
+  <!-- 6. FOOTER RESMI FLYDINE -->
+  <g id="Footer" transform="translate(0, 1720)">
+    <rect width="1440" height="80" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+    <line x1="520" y1="40" x2="920" y2="40" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
   </g>
 
 </svg>
