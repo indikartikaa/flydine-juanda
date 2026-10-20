@@ -48,7 +48,7 @@ class AdminController extends Controller
                 'actor' => $order->customer_name ?? 'Pelanggan',
                 'tenant_name' => $order->tenant->name ?? 'Tenant',
                 'terminal' => $order->tenant->terminal ?? 'T1',
-                'link' => route('admin.analytics.drilldown.orders', ['search' => $order->order_code])
+                'link' => route('admin.analytics.drilldown', ['search' => $order->order_code])
             ];
         });
         
@@ -125,6 +125,14 @@ class AdminController extends Controller
         abort_unless(auth()->user()->role === 'admin_ops', 403);
 
         $query = Tenant::query();
+
+        if ($request->filled('status')) {
+            if ($request->status === 'active') {
+                $query->where('is_active', true);
+            } elseif ($request->status === 'inactive') {
+                $query->where('is_active', false);
+            }
+        }
 
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {

@@ -213,7 +213,7 @@ window.capacityPlannerApp = function(initialPayload) {
 
             if (!labels || labels.length === 0) return;
 
-            // Custom plugin untuk garis acuan 70% dan 90%
+            // Plugin Garis Acuan 70% dan 90%
             const thresholdLinePlugin = {
                 id: 'thresholdLines',
                 afterDraw(chart) {
@@ -258,7 +258,7 @@ window.capacityPlannerApp = function(initialPayload) {
                 }
             };
 
-            // Custom plugin untuk label persentase di atas setiap batang
+            // Plugin label persentase di atas setiap bar
             const barValuePlugin = {
                 id: 'barValueLabels',
                 afterDatasetsDraw(chart) {
@@ -362,15 +362,15 @@ window.capacityPlannerApp = function(initialPayload) {
         getStatusBadgeClass(status) {
             switch(status) {
                 case 'AMAN':
-                    return 'bg-emerald-100 text-emerald-800 border-emerald-300';
+                    return 'bg-emerald-50 text-emerald-800 border-emerald-300';
                 case 'WASPADA':
-                    return 'bg-amber-100 text-amber-800 border-amber-300';
+                    return 'bg-amber-50 text-amber-800 border-amber-300';
                 case 'KRITIS':
-                    return 'bg-rose-100 text-rose-800 border-rose-300';
+                    return 'bg-rose-50 text-rose-800 border-rose-300';
                 case 'OVERLOAD':
                     return 'bg-red-700 text-white border-red-800 animate-pulse';
                 default:
-                    return 'bg-slate-100 text-slate-600 border-slate-300';
+                    return 'bg-slate-50 text-slate-700 border-slate-300';
             }
         }
     };
@@ -521,28 +521,49 @@ window.targetPlanningSimulator = function() {
             const badStepsText = this.badMitigationSteps.map((s, i) => '  ' + (i + 1) + '. ' + s.replace(/<[^>]*>/g, '')).join('\n');
 
             const text = 'FlyDine Juanda - Rencana Target & Proyeksi Eksekutif (' + periodLabel + '):\n\n' +
-                '📊 KONDISI ACUAN (' + currentLabel + '):\n' +
+                '[KONDISI ACUAN - ' + currentLabel.toUpperCase() + ']\n' +
                 '• Omset Saat Ini: ' + this.formatRupiah(this.inputRevenue) + '\n' +
                 '• Estimasi Pengunjung: ' + Number(this.inputVisitors).toLocaleString('id-ID') + ' orang\n' +
                 '• Rata-rata Waktu Saji: ' + Number(this.inputSlaMinutes).toFixed(1) + ' menit/pesanan\n' +
                 '• Rata-rata Belanja (AOV): ' + this.formatRupiah(this.currentAov) + '/order\n\n' +
-                '🟢 SKENARIO BAIK (TARGET PRIMA):\n' +
+                '[SKENARIO TARGET PRIMA (+' + this.goodGrowthPct + '%)]\n' +
                 '• Proyeksi Omset Baik: ' + this.formatRupiah(this.goodRevenue) + ' (+' + this.goodGrowthPct + '%)\n' +
                 '• Target Pengunjung: ' + this.goodVisitors.toLocaleString('id-ID') + ' orang (+' + this.goodVisitorsDelta + ' orang)\n' +
                 '• Wajib Waktu Saji Kilat: ' + this.goodSla + ' menit/pesanan (SOP Juanda maks 15m)\n' +
                 '• Tingkat Batal: < 1.0% (Terkendali aman sebelum boarding)\n' +
                 'Langkah Kerja Meraih Target:\n' + goodStepsText + '\n\n' +
-                '🔴 SKENARIO BURUK (PERLU WASPADA):\n' +
+                '[SKENARIO RISIKO WASPADA (-' + this.badDropPct + '%)]\n' +
                 '• Risiko Omset Melorot: ' + this.formatRupiah(this.badRevenue) + ' (-' + this.badDropPct + '%)\n' +
                 '• Trafik Terlayani: ' + this.badVisitors.toLocaleString('id-ID') + ' orang\n' +
-                '• Waktu Saji Bottleneck: ' + this.badSla + ' menit/pesanan (MELEWATI BATAS 15 MENIT!)\n' +
+                '• Waktu Saji Bottleneck: ' + this.badSla + ' menit/pesanan (Melewati batas 15 menit!)\n' +
                 '• Tingkat Batal Membengkak: ' + this.badCancelRate + '% (Risiko omset hangus: ' + this.formatRupiah(this.badLostRevenue) + ')\n' +
                 'Langkah Mitigasi Risiko:\n' + badStepsText;
 
-            navigator.clipboard.writeText(text).then(() => {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    this.copied = true;
+                    setTimeout(() => this.copied = false, 2500);
+                }).catch(() => this.fallbackCopyText(text));
+            } else {
+                this.fallbackCopyText(text);
+            }
+        },
+
+        fallbackCopyText(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
                 this.copied = true;
                 setTimeout(() => this.copied = false, 2500);
-            });
+            } catch (err) {
+                console.error('Fallback copy failed', err);
+            }
+            document.body.removeChild(textArea);
         }
     };
 };
@@ -551,12 +572,12 @@ window.targetPlanningSimulator = function() {
 <div class="space-y-6 pb-12">
 
     <!-- Page Header & Identity -->
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
                 <!-- Breadcrumb -->
                 <nav class="flex items-center gap-2 text-xs font-bold text-slate-400 mb-2">
-                    <a href="{{ route('admin.executive-dashboard') }}" class="hover:text-slate-600 transition">Analitik Operasional</a>
+                    <a href="{{ route('admin.executive-dashboard', ['start_date' => $startDateFormatted, 'end_date' => $endDateFormatted, 'tenant_id' => $tenantId]) }}" class="hover:text-slate-600 transition">Analitik Operasional</a>
                     <svg class="w-3.5 h-3.5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
@@ -570,11 +591,27 @@ window.targetPlanningSimulator = function() {
                     Eksplorasi skenario operasional multi-dimensi: estimasi beban puncak dan kebutuhan staf gerai F&B serta proyeksi target omset bandara.
                 </p>
 
-                <div class="mt-2.5 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-800">
-                    <svg class="w-4 h-4 text-[#005ea2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span>Periode Dasar Historis: <strong class="text-[#005ea2]">{{ \Carbon\Carbon::parse($startDateFormatted)->format('d M Y') }}</strong> s/d <strong class="text-[#005ea2]">{{ \Carbon\Carbon::parse($endDateFormatted)->format('d M Y') }}</strong> ({{ (int)$days }} Hari)</span>
+                <div class="mt-3 flex flex-wrap items-center gap-2.5">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-800">
+                        <svg class="w-4 h-4 text-[#005ea2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span>Periode Dasar Historis: <strong class="text-[#005ea2]">{{ \Carbon\Carbon::parse($startDateFormatted)->format('d M Y') }}</strong> s/d <strong class="text-[#005ea2]">{{ \Carbon\Carbon::parse($endDateFormatted)->format('d M Y') }}</strong> ({{ (int)$days }} Hari)</span>
+                    </div>
+
+                    <!-- Quick Navigation Anchors -->
+                    <a href="#capacitySimulationSection" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-[#005ea2] hover:bg-blue-100 text-xs font-extrabold border border-blue-200 transition">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        <span>Kapasitas Gerai</span>
+                    </a>
+                    <a href="#revenueTargetSection" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-extrabold border border-slate-200 transition">
+                        <svg class="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <span>Target Omset</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -590,7 +627,7 @@ window.targetPlanningSimulator = function() {
     />
 
     <!-- ========================================================================= -->
-    <!-- BAGIAN 1: KAPASITAS TENANT (BARU)                                        -->
+    <!-- BAGIAN 1: KAPASITAS TENANT & BOTTLENECK PLANNING                         -->
     <!-- ========================================================================= -->
     <div id="capacitySimulationSection" 
          x-data="window.capacityPlannerApp(@js($initialCapacity))" 
@@ -598,10 +635,13 @@ window.targetPlanningSimulator = function() {
          class="space-y-6">
 
         <!-- Header Seksi Bagian 1 -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-blue-900 to-[#005ea2] text-white p-6 rounded-2xl shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-slate-900 via-[#0a3560] to-[#005ea2] text-white p-6 rounded-2xl shadow-sm border border-slate-800">
             <div>
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-white/10 text-blue-100 border border-white/20 mb-2">
-                    <span>⚡ BAGIAN I • KAPASITAS & BOTTLENECK TENANT</span>
+                    <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span>BAGIAN I • KAPASITAS & BOTTLENECK TENANT</span>
                 </div>
                 <h2 class="text-xl sm:text-2xl font-black tracking-tight text-white">
                     Perencanaan Kapasitas & Utilisasi Beban Puncak Gerai
@@ -627,15 +667,23 @@ window.targetPlanningSimulator = function() {
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
             <!-- PANEL KONTROL KIRI (col-span-4) -->
-            <div id="capacityControlPanel" class="lg:col-span-4 bg-white rounded-2xl p-6 shadow-sm border-2 border-slate-200 space-y-5">
+            <div id="capacityControlPanel" class="lg:col-span-4 bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-5">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
-                        <span>🎛️ Panel Kontrol Simulasi</span>
+                    <h3 class="text-sm font-black text-slate-900 flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-blue-50 text-[#005ea2] flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                            </svg>
+                        </div>
+                        <span>Panel Kontrol Simulasi</span>
                     </h3>
                     <button type="button" 
                             @click="resetSimulation()" 
-                            class="text-xs font-extrabold text-rose-600 hover:text-rose-800 hover:bg-rose-50 px-2.5 py-1 rounded-lg transition cursor-pointer">
-                        Reset
+                            class="inline-flex items-center gap-1 text-xs font-extrabold text-rose-600 hover:text-rose-800 hover:bg-rose-50 px-2.5 py-1 rounded-lg transition cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <span>Reset</span>
                     </button>
                 </div>
 
@@ -647,10 +695,10 @@ window.targetPlanningSimulator = function() {
                     <select id="controlTenantSelect" 
                             x-model="tenantId" 
                             @change="calculateNow()" 
-                            class="w-full px-3.5 py-2.5 bg-slate-50 hover:bg-white border-2 border-slate-300 focus:border-[#005ea2] focus:bg-white rounded-xl text-sm font-extrabold text-slate-900 focus:ring-2 focus:ring-[#005ea2] transition cursor-pointer">
-                        <option value="">🏢 Semua Tenant (Konsolidasi)</option>
+                            class="w-full px-3.5 py-2.5 bg-slate-50 hover:bg-white border-2 border-slate-300 focus:border-[#005ea2] focus:bg-white rounded-xl text-xs sm:text-sm font-extrabold text-slate-900 focus:ring-2 focus:ring-[#005ea2] transition cursor-pointer">
+                        <option value="">Semua Tenant (Konsolidasi Bandara)</option>
                         @foreach($tenants as $t)
-                            <option value="{{ $t->id }}">🏢 {{ $t->name }} ({{ $t->terminal ?? 'T1' }} • {{ $t->floor_location ?? '-' }})</option>
+                            <option value="{{ $t->id }}">{{ $t->name }} ({{ $t->terminal ?? 'T1' }} • {{ $t->floor_location ?? '-' }})</option>
                         @endforeach
                     </select>
                 </div>
@@ -685,11 +733,21 @@ window.targetPlanningSimulator = function() {
                     <!-- Preset Chips -->
                     <div class="flex items-center flex-wrap gap-1.5 mt-2.5">
                         <span class="text-[10px] font-bold text-slate-400">Preset:</span>
-                        <button type="button" @click="setGrowthPreset(-20)" class="px-2 py-0.5 text-[11px] font-extrabold rounded bg-slate-100 hover:bg-slate-200 text-slate-700">-20%</button>
-                        <button type="button" @click="setGrowthPreset(0)" class="px-2 py-0.5 text-[11px] font-extrabold rounded bg-slate-100 hover:bg-slate-200 text-slate-700">0%</button>
-                        <button type="button" @click="setGrowthPreset(25)" class="px-2 py-0.5 text-[11px] font-extrabold rounded bg-slate-100 hover:bg-slate-200 text-slate-700">+25%</button>
-                        <button type="button" @click="setGrowthPreset(50)" class="px-2 py-0.5 text-[11px] font-extrabold rounded bg-slate-100 hover:bg-slate-200 text-slate-700">+50%</button>
-                        <button type="button" @click="setGrowthPreset(100)" class="px-2 py-0.5 text-[11px] font-extrabold rounded bg-slate-100 hover:bg-slate-200 text-slate-700">+100%</button>
+                        <button type="button" @click="setGrowthPreset(-20)" 
+                                :class="orderGrowthPct === -20 ? 'bg-[#005ea2] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'"
+                                class="px-2 py-0.5 text-[11px] font-extrabold rounded transition cursor-pointer">-20%</button>
+                        <button type="button" @click="setGrowthPreset(0)" 
+                                :class="orderGrowthPct === 0 ? 'bg-[#005ea2] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'"
+                                class="px-2 py-0.5 text-[11px] font-extrabold rounded transition cursor-pointer">0%</button>
+                        <button type="button" @click="setGrowthPreset(25)" 
+                                :class="orderGrowthPct === 25 ? 'bg-[#005ea2] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'"
+                                class="px-2 py-0.5 text-[11px] font-extrabold rounded transition cursor-pointer">+25%</button>
+                        <button type="button" @click="setGrowthPreset(50)" 
+                                :class="orderGrowthPct === 50 ? 'bg-[#005ea2] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'"
+                                class="px-2 py-0.5 text-[11px] font-extrabold rounded transition cursor-pointer">+50%</button>
+                        <button type="button" @click="setGrowthPreset(100)" 
+                                :class="orderGrowthPct === 100 ? 'bg-[#005ea2] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'"
+                                class="px-2 py-0.5 text-[11px] font-extrabold rounded transition cursor-pointer">+100%</button>
                     </div>
                 </div>
 
@@ -702,8 +760,11 @@ window.targetPlanningSimulator = function() {
                         <button type="button" 
                                 @click="adjustStaff(-1)" 
                                 :disabled="staffCount <= 1"
-                                class="w-11 h-11 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 disabled:opacity-30 disabled:cursor-not-allowed font-black text-lg text-slate-700 border border-slate-300 transition">
-                            -
+                                aria-label="Kurangi Staf"
+                                class="w-11 h-11 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 disabled:opacity-30 disabled:cursor-not-allowed font-black text-slate-700 border border-slate-300 transition cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4" />
+                            </svg>
                         </button>
                         <input type="number" 
                                min="1" 
@@ -714,8 +775,11 @@ window.targetPlanningSimulator = function() {
                         <button type="button" 
                                 @click="adjustStaff(1)" 
                                 :disabled="staffCount >= 10"
-                                class="w-11 h-11 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 disabled:opacity-30 disabled:cursor-not-allowed font-black text-lg text-slate-700 border border-slate-300 transition">
-                            +
+                                aria-label="Tambah Staf"
+                                class="w-11 h-11 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 disabled:opacity-30 disabled:cursor-not-allowed font-black text-slate-700 border border-slate-300 transition cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                            </svg>
                         </button>
                     </div>
                     <span class="text-[11px] font-semibold text-slate-400 mt-1 block">Default: 1 staf per gerai</span>
@@ -735,7 +799,7 @@ window.targetPlanningSimulator = function() {
                                placeholder="Gunakan Waktu Saji Historis (S₀)" 
                                x-model="targetSlaMinutes" 
                                @input="calculateDebounced()" 
-                               class="w-full px-3.5 py-2.5 bg-slate-50 hover:bg-white border-2 border-slate-300 focus:border-[#005ea2] focus:bg-white rounded-xl text-sm font-extrabold text-slate-900 placeholder:text-slate-400 placeholder:font-normal">
+                               class="w-full px-3.5 py-2.5 bg-slate-50 hover:bg-white border-2 border-slate-300 focus:border-[#005ea2] focus:bg-white rounded-xl text-xs sm:text-sm font-extrabold text-slate-900 placeholder:text-slate-400 placeholder:font-normal">
                     </div>
                     <span class="text-[11px] font-semibold text-slate-400 mt-1 block">
                         Kosongkan untuk otomatis menggunakan waktu saji historis masing-masing tenant (S₀).
@@ -754,7 +818,7 @@ window.targetPlanningSimulator = function() {
                 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                     
                     <!-- Kartu 1: Utilisasi Sebelum vs Sesudah -->
-                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 relative overflow-hidden">
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 relative overflow-hidden">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Utilisasi Puncak</span>
                         <div class="mt-1 flex items-baseline gap-2">
                             <span class="text-3xl font-black text-slate-900" x-text="(data.summary.selected_tenant ? data.summary.selected_tenant.utilization_new : data.summary.avg_utilization_after) + '%'"></span>
@@ -774,10 +838,10 @@ window.targetPlanningSimulator = function() {
                     </div>
 
                     <!-- Kartu 2: Kapasitas per Jam Baru -->
-                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 relative overflow-hidden">
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 relative overflow-hidden">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Kapasitas Baru (&mu;)</span>
                         <div class="mt-1 flex items-baseline gap-1">
-                            <span class="text-3xl font-black text-blue-700" 
+                            <span class="text-3xl font-black text-[#005ea2]" 
                                   x-text="data.summary.selected_tenant ? data.summary.selected_tenant.capacity_new : data.summary.total_capacity_new"></span>
                             <span class="text-xs font-bold text-slate-500">order/jam</span>
                         </div>
@@ -787,7 +851,7 @@ window.targetPlanningSimulator = function() {
                     </div>
 
                     <!-- Kartu 3: Status Kapasitas -->
-                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 relative overflow-hidden">
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 relative overflow-hidden">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Status Ketahanan</span>
                         <div class="mt-2">
                             <span class="inline-block px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider border shadow-2xs"
@@ -795,16 +859,18 @@ window.targetPlanningSimulator = function() {
                                   x-text="data.summary.selected_tenant ? data.summary.selected_tenant.status : data.summary.overall_status">
                             </span>
                         </div>
-                        <span class="text-[11px] font-semibold text-slate-500 mt-3 block">
-                            <span x-show="(data.summary.selected_tenant ? data.summary.selected_tenant.utilization_new : data.summary.avg_utilization_after) < 70">🟢 Kondisi Prima (&lt; 70%)</span>
-                            <span x-show="(data.summary.selected_tenant ? data.summary.selected_tenant.utilization_new : data.summary.avg_utilization_after) >= 70 && (data.summary.selected_tenant ? data.summary.selected_tenant.utilization_new : data.summary.avg_utilization_after) <= 90">🟡 Perlu Waspada (70-90%)</span>
-                            <span x-show="(data.summary.selected_tenant ? data.summary.selected_tenant.utilization_new : data.summary.avg_utilization_after) > 90 && (data.summary.selected_tenant ? data.summary.selected_tenant.utilization_new : data.summary.avg_utilization_after) <= 100">🟠 Risiko Kritis (90-100%)</span>
-                            <span x-show="(data.summary.selected_tenant ? data.summary.selected_tenant.utilization_new : data.summary.avg_utilization_after) > 100">🔴 Overload Kapasitas (&gt; 100%)</span>
-                        </span>
+                        <div class="text-[11px] font-semibold text-slate-500 mt-3 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full inline-block"
+                                  :class="(data.summary.selected_tenant ? data.summary.selected_tenant.utilization_new : data.summary.avg_utilization_after) < 70 ? 'bg-emerald-500' : ((data.summary.selected_tenant ? data.summary.selected_tenant.utilization_new : data.summary.avg_utilization_after) <= 90 ? 'bg-amber-500' : 'bg-rose-500')"></span>
+                            <span x-show="(data.summary.selected_tenant ? data.summary.selected_tenant.utilization_new : data.summary.avg_utilization_after) < 70">Kondisi Prima (&lt; 70%)</span>
+                            <span x-show="(data.summary.selected_tenant ? data.summary.selected_tenant.utilization_new : data.summary.avg_utilization_after) >= 70 && (data.summary.selected_tenant ? data.summary.selected_tenant.utilization_new : data.summary.avg_utilization_after) <= 90">Perlu Waspada (70-90%)</span>
+                            <span x-show="(data.summary.selected_tenant ? data.summary.selected_tenant.utilization_new : data.summary.avg_utilization_after) > 90 && (data.summary.selected_tenant ? data.summary.selected_tenant.utilization_new : data.summary.avg_utilization_after) <= 100">Risiko Kritis (90-100%)</span>
+                            <span x-show="(data.summary.selected_tenant ? data.summary.selected_tenant.utilization_new : data.summary.avg_utilization_after) > 100">Overload Kapasitas (&gt; 100%)</span>
+                        </div>
                     </div>
 
                     <!-- Kartu 4: Rekomendasi Staf Minimum -->
-                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 relative overflow-hidden">
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 relative overflow-hidden">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Staf Minimum (&le; 80%)</span>
                         <div class="mt-1 flex items-baseline gap-1">
                             <span class="text-3xl font-black text-purple-700" 
@@ -822,7 +888,11 @@ window.targetPlanningSimulator = function() {
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                         <div>
                             <h4 class="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2">
-                                <span>📊</span>
+                                <div class="w-6 h-6 rounded-md bg-blue-50 text-[#005ea2] flex items-center justify-center shrink-0">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                </div>
                                 <span x-text="(chartViewMode === 'focused' || (chartViewMode === 'auto' && tenantId && data.summary.selected_tenant)) 
                                     ? 'Proyeksi Utilisasi Gerai: ' + (data.summary.selected_tenant ? data.summary.selected_tenant.tenant_name : '')
                                     : 'Top 10 Tenant Utilisasi Tertinggi (Sebelum vs Sesudah)'">
@@ -867,8 +937,10 @@ window.targetPlanningSimulator = function() {
 
                     <!-- Peringatan Jika Tenant Terpilih Memiliki Data Kurang -->
                     <template x-if="(chartViewMode === 'focused' || (chartViewMode === 'auto' && tenantId)) && data.summary.selected_tenant && !data.summary.selected_tenant.has_sufficient_data">
-                        <div class="p-4 mb-4 bg-amber-50 border-2 border-dashed border-amber-200 rounded-xl text-xs font-bold text-amber-900 flex items-start gap-3">
-                            <span class="text-base shrink-0">⚠️</span>
+                        <div class="p-4 mb-4 bg-amber-50 border border-amber-200 rounded-xl text-xs font-bold text-amber-900 flex items-start gap-3">
+                            <svg class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
                             <div>
                                 <span class="font-black block">Data Transaksi Historis Belum Cukup</span>
                                 Gerai ini baru memiliki <span x-text="data.summary.selected_tenant.valid_orders_count"></span> pesanan valid (minimal butuh 10 pesanan valid dan waktu saji terdata) untuk menghasilkan estimasi beban puncak yang akurat. Silakan pilih gerai dengan transaksi aktif seperti A&W (Kedatangan 1A), EXPAT, atau SHIHLIN.
@@ -876,14 +948,16 @@ window.targetPlanningSimulator = function() {
                         </div>
                     </template>
 
-                    <div class="relative h-72 w-full">
+                    <div class="relative h-72 sm:h-80 w-full">
                         <canvas id="capacityTop10Chart"></canvas>
                     </div>
                 </div>
 
                 <!-- Teks Asumsi Simulasi -->
-                <div class="bg-blue-50/60 border border-blue-200 rounded-2xl p-4 text-xs font-semibold text-blue-900 flex items-start gap-3">
-                    <span class="text-lg shrink-0">ℹ️</span>
+                <div class="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-4 text-xs font-semibold text-blue-900 flex items-start gap-3">
+                    <svg class="w-4 h-4 text-[#005ea2] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                     <div>
                         <strong class="font-black text-blue-950 block mb-0.5">Asumsi Operasional Simulasi:</strong>
                         <ul class="list-disc list-inside space-y-0.5 text-blue-800">
@@ -905,7 +979,12 @@ window.targetPlanningSimulator = function() {
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
                         <h3 class="text-base sm:text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
-                            <span>📋 Matriks Kapasitas Seluruh Mitra Gerai Tenant</span>
+                            <div class="w-7 h-7 rounded-lg bg-blue-50 text-[#005ea2] flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                            </div>
+                            <span>Matriks Kapasitas Seluruh Mitra Gerai Tenant</span>
                         </h3>
                         <p class="text-xs font-semibold text-slate-500 mt-0.5">
                             Daftar tenant diurutkan dari utilisasi tertinggi. Gunakan pencarian dan filter untuk meninjau gerai tertentu.
@@ -918,7 +997,7 @@ window.targetPlanningSimulator = function() {
                                 <option :value="10">10 Baris</option>
                                 <option :value="25">25 Baris</option>
                                 <option :value="50">50 Baris</option>
-                                <option value="ALL">Semua (76)</option>
+                                <option value="ALL">Semua</option>
                             </select>
                         </div>
                         <div class="px-3 py-1 rounded-full text-xs font-black bg-blue-50 text-[#005ea2] border border-blue-200">
@@ -942,7 +1021,10 @@ window.targetPlanningSimulator = function() {
                                 @click="tableStatusFilter = 'RISK'; tablePage = 1" 
                                 :class="tableStatusFilter === 'RISK' ? 'bg-rose-600 text-white shadow-xs' : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200'"
                                 class="px-3 py-1.5 rounded-lg transition cursor-pointer font-extrabold flex items-center gap-1.5">
-                            <span>⚠️ Berisiko (Overload/Kritis)</span>
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <span>Berisiko (Overload/Kritis)</span>
                             <span class="px-1.5 py-0.5 rounded-full text-[10px]" :class="tableStatusFilter === 'RISK' ? 'bg-white/20 text-white' : 'bg-rose-200 text-rose-900'" 
                                   x-text="(data.summary?.status_distribution?.WASPADA || 0) + (data.summary?.status_distribution?.KRITIS || 0) + (data.summary?.status_distribution?.OVERLOAD || 0)"></span>
                         </button>
@@ -950,7 +1032,10 @@ window.targetPlanningSimulator = function() {
                                 @click="tableStatusFilter = 'AMAN'; tablePage = 1" 
                                 :class="tableStatusFilter === 'AMAN' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'"
                                 class="px-3 py-1.5 rounded-lg transition cursor-pointer font-extrabold flex items-center gap-1.5">
-                            <span>✅ Aman (≤70%)</span>
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span>Aman (&le;70%)</span>
                             <span class="px-1.5 py-0.5 rounded-full text-[10px]" :class="tableStatusFilter === 'AMAN' ? 'bg-white/20 text-white' : 'bg-emerald-200 text-emerald-900'" 
                                   x-text="data.summary?.status_distribution?.AMAN || 0"></span>
                         </button>
@@ -958,6 +1043,9 @@ window.targetPlanningSimulator = function() {
                                 @click="tableStatusFilter = 'INSUFFICIENT'; tablePage = 1" 
                                 :class="tableStatusFilter === 'INSUFFICIENT' ? 'bg-slate-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'"
                                 class="px-3 py-1.5 rounded-lg transition cursor-pointer font-extrabold flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
                             <span>Data Belum Cukup</span>
                             <span class="px-1.5 py-0.5 rounded-full text-[10px]" :class="tableStatusFilter === 'INSUFFICIENT' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'" 
                                   x-text="data.summary?.status_distribution?.INSUFFICIENT || 0"></span>
@@ -979,8 +1067,11 @@ window.targetPlanningSimulator = function() {
                         <button x-show="tableSearch" 
                                 @click="tableSearch = ''; tablePage = 1" 
                                 type="button" 
+                                aria-label="Hapus Pencarian"
                                 class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 text-sm font-bold cursor-pointer">
-                            &times;
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
                         </button>
                     </div>
                 </div>
@@ -1017,7 +1108,11 @@ window.targetPlanningSimulator = function() {
                         <!-- Empty State -->
                         <tr x-show="filteredTenants().length === 0">
                             <td colspan="10" class="py-12 px-4 text-center text-slate-400">
-                                <span class="text-3xl block mb-2">🔍</span>
+                                <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
                                 <p class="text-sm font-extrabold text-slate-700">Tidak ada gerai tenant yang sesuai dengan filter atau pencarian</p>
                                 <button type="button" @click="tableSearch = ''; tableStatusFilter = 'ALL'; tablePage = 1" class="mt-2 text-xs font-bold text-[#005ea2] hover:underline cursor-pointer">
                                     Reset Filter Pencarian
@@ -1034,7 +1129,7 @@ window.targetPlanningSimulator = function() {
                                 <!-- 1. Nama Tenant -->
                                 <td class="py-3 px-4">
                                     <div class="flex items-center gap-2">
-                                        <span class="w-2 h-2 rounded-full" 
+                                        <span class="w-2 h-2 rounded-full shrink-0" 
                                               :class="t.has_sufficient_data ? (t.utilization_new < 70 ? 'bg-emerald-500' : (t.utilization_new <= 90 ? 'bg-amber-500' : 'bg-rose-500')) : 'bg-slate-300'"></span>
                                         <div>
                                             <span class="font-extrabold text-slate-900 group-hover:text-[#005ea2]" x-text="t.tenant_name"></span>
@@ -1072,7 +1167,7 @@ window.targetPlanningSimulator = function() {
                                 <!-- 5. Kapasitas Baru Mu -->
                                 <td class="py-3 px-3 text-right">
                                     <template x-if="t.has_sufficient_data">
-                                        <span class="font-black text-blue-700" x-text="t.capacity_new + '/jam'"></span>
+                                        <span class="font-black text-[#005ea2]" x-text="t.capacity_new + '/jam'"></span>
                                     </template>
                                     <template x-if="!t.has_sufficient_data">
                                         <span class="text-slate-400 italic">-</span>
@@ -1150,8 +1245,11 @@ window.targetPlanningSimulator = function() {
                     <button type="button" 
                             @click="setTablePage(tablePage - 1)" 
                             :disabled="tablePage <= 1"
-                            class="px-3.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed font-extrabold transition shadow-2xs cursor-pointer">
-                        &larr; Sebelumnya
+                            class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed font-extrabold transition shadow-2xs cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        <span>Sebelumnya</span>
                     </button>
 
                     <div class="flex items-center gap-1 font-black px-2 text-slate-700">
@@ -1164,8 +1262,11 @@ window.targetPlanningSimulator = function() {
                     <button type="button" 
                             @click="setTablePage(tablePage + 1)" 
                             :disabled="tablePage >= tableTotalPages()"
-                            class="px-3.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed font-extrabold transition shadow-2xs cursor-pointer">
-                        Berikutnya &rarr;
+                            class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed font-extrabold transition shadow-2xs cursor-pointer">
+                        <span>Berikutnya</span>
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                        </svg>
                     </button>
                 </div>
             </div>
@@ -1176,7 +1277,7 @@ window.targetPlanningSimulator = function() {
     <!-- DIVIDER SEKSI -->
     <div class="relative py-4">
         <div class="absolute inset-0 flex items-center" aria-hidden="true">
-            <div class="w-full border-t-2 border-slate-200"></div>
+            <div class="w-full border-t border-slate-200"></div>
         </div>
         <div class="relative flex justify-center">
             <span class="bg-[#f8fafc] px-4 text-xs font-black uppercase tracking-widest text-slate-400">
@@ -1186,16 +1287,20 @@ window.targetPlanningSimulator = function() {
     </div>
 
     <!-- ========================================================================= -->
-    <!-- BAGIAN 2: SKENARIO OMSET (KALKULATOR LAMA DARI LANGKAH 2)                 -->
+    <!-- BAGIAN 2: SKENARIO OMSET (TARGET PLANNING & FORECASTING)                 -->
     <!-- ========================================================================= -->
-    <div class="bg-white rounded-2xl p-6 sm:p-7 shadow-sm border-2 border-indigo-200" 
+    <div id="revenueTargetSection" 
+         class="bg-white rounded-2xl p-6 sm:p-7 shadow-sm border border-slate-200" 
          x-data="window.targetPlanningSimulator()">
         
         <!-- Header: Identitas & Toolbar Kontrol -->
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
             <div>
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200 mb-1.5">
-                    <span>🎯 BAGIAN II • TARGET PLANNING & FORECASTING • BANDARA JUANDA</span>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-blue-50 text-[#005ea2] border border-blue-200 mb-1.5">
+                    <svg class="w-3.5 h-3.5 text-[#005ea2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    <span>BAGIAN II • TARGET PLANNING & FORECASTING • BANDARA JUANDA</span>
                 </div>
                 <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                     Kalkulator Target Omset, Pengunjung & Waktu Saji
@@ -1210,9 +1315,11 @@ window.targetPlanningSimulator = function() {
                 <!-- Tombol 1: Panduan & Rumus Terpadu -->
                 <button type="button" @click="showGuide = !showGuide" 
                         class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border transition shadow-2xs cursor-pointer"
-                        :class="showGuide ? 'bg-indigo-600 text-white border-indigo-600 shadow-indigo-600/20' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'"
+                        :class="showGuide ? 'bg-[#005ea2] text-white border-[#005ea2] shadow-blue-600/20' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'"
                         title="Buka panduan lengkap logika bisnis bandara dan rumus matematika">
-                    <span>📘</span>
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
                     <span x-text="showGuide ? 'Tutup Panduan' : 'Panduan & Rumus Simulasi'"></span>
                 </button>
 
@@ -1245,22 +1352,28 @@ window.targetPlanningSimulator = function() {
              x-transition:leave="transition ease-in duration-150"
              x-transition:leave-start="opacity-100 translate-y-0"
              x-transition:leave-end="opacity-0 -translate-y-2"
-             class="mb-6 p-5 sm:p-6 bg-slate-50 border-2 border-indigo-200 rounded-2xl space-y-4">
+             class="mb-6 p-5 sm:p-6 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
             
             <div class="flex items-center gap-2">
-                <span class="text-xl">📚</span>
+                <div class="w-7 h-7 rounded-lg bg-blue-50 text-[#005ea2] flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                </div>
                 <h3 class="text-base font-black text-slate-900 tracking-tight">Buku Panduan Eksekutif: Metodologi & Rumus Simulasi Target</h3>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                 <!-- Kolom Panduan 1: Filosofi Bisnis Bandara -->
                 <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-2">
-                    <p class="font-extrabold text-indigo-900 flex items-center gap-1.5">
-                        <span>✈️</span>
+                    <p class="font-extrabold text-slate-900 flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-[#005ea2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
+                        </svg>
                         <span>1. Karakteristik Trafik & Penumpang Bandara</span>
                     </p>
                     <ul class="list-disc list-inside space-y-1 text-slate-600 leading-relaxed font-semibold">
-                        <li><strong>Trafik Bersifat Terikat (Captive Market):</strong> Lonjakan omset bandara dipengaruhi oleh tingkat konversi penumpang (conversion rate), bukan sekadar penambahan fisik toko.</li>
+                        <li><strong>Trafik Bersifat Terikat (Captive Market):</strong> Lonjakan omset bandara dipengaruhi oleh tingkat konversi penumpang (conversion rate), bukan sekadar penambahan fisik gerai.</li>
                         <li><strong>Sensitivitas Waktu Ekstrem:</strong> Penumpang memiliki batas toleransi waktu saji maksimal <strong>15 menit</strong> sebelum jadwal boarding dimulai.</li>
                         <li><strong>Efek Bola Salju Waktu Saji:</strong> Jika rata-rata waktu saji naik melewati 15 menit, pembatalan pesanan meningkat drastis akibat penumpang terburu-buru masuk gate.</li>
                     </ul>
@@ -1268,8 +1381,10 @@ window.targetPlanningSimulator = function() {
 
                 <!-- Kolom Panduan 2: Rumus Matematika Proyeksi -->
                 <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-2">
-                    <p class="font-extrabold text-indigo-900 flex items-center gap-1.5">
-                        <span>📐</span>
+                    <p class="font-extrabold text-slate-900 flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-[#005ea2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
                         <span>2. Rumus Matematika Model Simulasi</span>
                     </p>
                     <div class="space-y-1.5 text-slate-700 font-mono text-[11px]">
@@ -1293,20 +1408,26 @@ window.targetPlanningSimulator = function() {
                 <span class="text-xs font-black text-slate-600 uppercase tracking-wider">Horizon Waktu Perencanaan:</span>
                 <div class="inline-flex rounded-lg p-0.5 bg-slate-200">
                     <button type="button" @click="setHorizon('weekly')" 
-                            class="px-3 py-1 rounded-md text-xs font-black transition cursor-pointer"
-                            :class="horizon === 'weekly' ? 'bg-white text-indigo-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900'">
-                        📅 Mingguan (7 Hari)
+                            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-black transition cursor-pointer"
+                            :class="horizon === 'weekly' ? 'bg-white text-[#005ea2] shadow-2xs' : 'text-slate-600 hover:text-slate-900'">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span>Mingguan (7 Hari)</span>
                     </button>
                     <button type="button" @click="setHorizon('monthly')" 
-                            class="px-3 py-1 rounded-md text-xs font-black transition cursor-pointer"
-                            :class="horizon === 'monthly' ? 'bg-white text-indigo-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900'">
-                        🗓️ Bulanan (30 Hari)
+                            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-black transition cursor-pointer"
+                            :class="horizon === 'monthly' ? 'bg-white text-[#005ea2] shadow-2xs' : 'text-slate-600 hover:text-slate-900'">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span>Bulanan (30 Hari)</span>
                     </button>
                 </div>
             </div>
             
             <div class="text-xs font-bold text-slate-500">
-                Data Dasar Diambil dari Riwayat: <span class="font-black text-indigo-900" x-text="horizon === 'weekly' ? '7 Hari Terakhir' : '30 Hari Terakhir'"></span>
+                Data Dasar Diambil dari Riwayat: <span class="font-black text-[#005ea2]" x-text="horizon === 'weekly' ? '7 Hari Terakhir' : '30 Hari Terakhir'"></span>
             </div>
         </div>
 
@@ -1314,25 +1435,31 @@ window.targetPlanningSimulator = function() {
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <!-- Input 1: Omset Baseline -->
             <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                <label class="block text-xs font-black text-slate-600 uppercase tracking-wider mb-1">
-                    💰 Omset Acuan Saat Ini
+                <label class="block text-xs font-black text-slate-600 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Omset Acuan Saat Ini</span>
                 </label>
                 <div class="relative mt-1">
                     <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 font-bold text-sm">Rp</span>
                     <input type="number" step="100000" min="0" x-model.number="inputRevenue" 
-                           class="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-lg text-sm font-black text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-2xs">
+                           class="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-lg text-sm font-black text-slate-900 focus:ring-2 focus:ring-[#005ea2] focus:border-[#005ea2] shadow-2xs">
                 </div>
                 <span class="text-[11px] font-semibold text-slate-400 mt-1 block" x-text="formatRupiah(inputRevenue)"></span>
             </div>
 
             <!-- Input 2: Estimasi Pengunjung -->
             <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                <label class="block text-xs font-black text-slate-600 uppercase tracking-wider mb-1">
-                    👥 Estimasi Pengunjung
+                <label class="block text-xs font-black text-slate-600 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-[#005ea2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <span>Estimasi Pengunjung</span>
                 </label>
                 <div class="relative mt-1">
                     <input type="number" step="10" min="1" x-model.number="inputVisitors" 
-                           class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm font-black text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-2xs">
+                           class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm font-black text-slate-900 focus:ring-2 focus:ring-[#005ea2] focus:border-[#005ea2] shadow-2xs">
                     <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 font-bold text-xs">orang</span>
                 </div>
                 <span class="text-[11px] font-semibold text-slate-400 mt-1 block">Trafik penumpang di terminal</span>
@@ -1340,12 +1467,15 @@ window.targetPlanningSimulator = function() {
 
             <!-- Input 3: Rata-Rata Waktu Saji Baseline -->
             <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                <label class="block text-xs font-black text-slate-600 uppercase tracking-wider mb-1">
-                    ⏱️ Rata-rata Waktu Saji Saat Ini
+                <label class="block text-xs font-black text-slate-600 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Rata-rata Waktu Saji Saat Ini</span>
                 </label>
                 <div class="relative mt-1">
                     <input type="number" step="0.5" min="1" max="45" x-model.number="inputSlaMinutes" 
-                           class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm font-black text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-2xs">
+                           class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm font-black text-slate-900 focus:ring-2 focus:ring-[#005ea2] focus:border-[#005ea2] shadow-2xs">
                     <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 font-bold text-xs">menit</span>
                 </div>
                 <span class="text-[11px] font-semibold text-slate-400 mt-1 block">Batas toleransi SOP: 15.0 menit</span>
@@ -1353,12 +1483,15 @@ window.targetPlanningSimulator = function() {
         </div>
 
         <!-- SLIDER PERSENTASE PERTUMBUHAN / PENURUNAN -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 p-4 bg-indigo-50/50 rounded-xl border border-indigo-100">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
             <!-- Slider Kiri: Target Kenaikan Baik -->
             <div>
                 <div class="flex items-center justify-between mb-1">
-                    <label class="text-xs font-black text-emerald-800 uppercase tracking-wider">
-                        📈 Target Kenaikan Skenario Baik
+                    <label class="text-xs font-black text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                        <span>Target Kenaikan Skenario Baik</span>
                     </label>
                     <span class="text-xs font-black px-2 py-0.5 rounded bg-emerald-100 text-emerald-800" x-text="'+' + goodGrowthPct + '%'"></span>
                 </div>
@@ -1370,8 +1503,11 @@ window.targetPlanningSimulator = function() {
             <!-- Slider Kanan: Risiko Penurunan Buruk -->
             <div>
                 <div class="flex items-center justify-between mb-1">
-                    <label class="text-xs font-black text-rose-800 uppercase tracking-wider">
-                        📉 Batas Waspada Penurunan Skenario Buruk
+                    <label class="text-xs font-black text-rose-800 uppercase tracking-wider flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                        </svg>
+                        <span>Batas Waspada Penurunan Skenario Buruk</span>
                     </label>
                     <span class="text-xs font-black px-2 py-0.5 rounded bg-rose-100 text-rose-800" x-text="'-' + badDropPct + '%'"></span>
                 </div>
@@ -1385,10 +1521,14 @@ window.targetPlanningSimulator = function() {
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             <!-- KARTU HIJAU: SKENARIO BAIK / TARGET PRIMA -->
-            <div class="bg-gradient-to-br from-emerald-50/60 to-white rounded-2xl p-5 border-2 border-emerald-300 shadow-sm space-y-4">
+            <div class="bg-gradient-to-br from-emerald-50/50 to-white rounded-2xl p-5 border border-emerald-300 shadow-sm space-y-4">
                 <div class="flex items-center justify-between border-b border-emerald-200 pb-3">
                     <div class="flex items-center gap-2">
-                        <span class="p-2 rounded-xl bg-emerald-600 text-white font-black text-sm shadow-2xs">🟢</span>
+                        <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black shadow-2xs">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                        </div>
                         <div>
                             <h3 class="text-base font-black text-emerald-950 tracking-tight">Skenario Baik (Target Prima)</h3>
                             <span class="text-xs font-bold text-emerald-700">Peluang Penjualan & Kepuasan Maksimal</span>
@@ -1401,25 +1541,25 @@ window.targetPlanningSimulator = function() {
 
                 <!-- Angka Metrik Utama Skenario Baik -->
                 <div class="grid grid-cols-2 gap-3 text-xs">
-                    <div class="p-3 bg-white rounded-xl border border-emerald-200">
+                    <div class="p-3 bg-white rounded-xl border border-emerald-200 shadow-2xs">
                         <span class="text-slate-500 font-bold block mb-0.5">Target Omset</span>
                         <span class="text-lg font-black text-emerald-700" x-text="formatRupiah(goodRevenue)"></span>
                         <span class="text-[10px] font-extrabold text-emerald-600 block mt-0.5" x-text="'+' + formatRupiah(goodRevenueDelta)"></span>
                     </div>
 
-                    <div class="p-3 bg-white rounded-xl border border-emerald-200">
+                    <div class="p-3 bg-white rounded-xl border border-emerald-200 shadow-2xs">
                         <span class="text-slate-500 font-bold block mb-0.5">Target Pengunjung Terlayani</span>
                         <span class="text-lg font-black text-slate-900" x-text="goodVisitors.toLocaleString('id-ID') + ' pax'"></span>
                         <span class="text-[10px] font-extrabold text-emerald-600 block mt-0.5" x-text="'+' + goodVisitorsDelta.toLocaleString('id-ID') + ' pengunjung'"></span>
                     </div>
 
-                    <div class="p-3 bg-white rounded-xl border border-emerald-200">
+                    <div class="p-3 bg-white rounded-xl border border-emerald-200 shadow-2xs">
                         <span class="text-slate-500 font-bold block mb-0.5">Wajib Waktu Saji Kilat</span>
                         <span class="text-lg font-black text-emerald-700" x-text="goodSla + ' mnt'"></span>
                         <span class="text-[10px] font-semibold text-slate-500 block mt-0.5">SOP Juanda &le; 15 menit</span>
                     </div>
 
-                    <div class="p-3 bg-white rounded-xl border border-emerald-200">
+                    <div class="p-3 bg-white rounded-xl border border-emerald-200 shadow-2xs">
                         <span class="text-slate-500 font-bold block mb-0.5">Kepatuhan Waktu Saji</span>
                         <span class="text-lg font-black text-emerald-700" x-text="goodCompliance + '%'"></span>
                         <span class="text-[10px] font-semibold text-slate-500 block mt-0.5">Batal &lt; 1%</span>
@@ -1428,8 +1568,11 @@ window.targetPlanningSimulator = function() {
 
                 <!-- Langkah Kerja Menuju Target Prima -->
                 <div class="pt-2 border-t border-emerald-100">
-                    <span class="text-xs font-black text-emerald-900 uppercase tracking-wider block mb-2">
-                        🚀 Langkah Kerja Meraih Target:
+                    <span class="text-xs font-black text-emerald-900 uppercase tracking-wider block mb-2 flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Langkah Kerja Meraih Target:</span>
                     </span>
                     <ul class="space-y-1.5 text-xs text-slate-700 leading-relaxed">
                         <template x-for="(step, idx) in goodActionSteps" :key="idx">
@@ -1443,10 +1586,14 @@ window.targetPlanningSimulator = function() {
             </div>
 
             <!-- KARTU MERAH: SKENARIO BURUK / PERLU WASPADA -->
-            <div class="bg-gradient-to-br from-rose-50/60 to-white rounded-2xl p-5 border-2 border-rose-300 shadow-sm space-y-4">
+            <div class="bg-gradient-to-br from-rose-50/50 to-white rounded-2xl p-5 border border-rose-300 shadow-sm space-y-4">
                 <div class="flex items-center justify-between border-b border-rose-200 pb-3">
                     <div class="flex items-center gap-2">
-                        <span class="p-2 rounded-xl bg-rose-600 text-white font-black text-sm shadow-2xs">🔴</span>
+                        <div class="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center font-black shadow-2xs">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
                         <div>
                             <h3 class="text-base font-black text-rose-950 tracking-tight">Skenario Buruk (Perlu Waspada)</h3>
                             <span class="text-xs font-bold text-rose-700">Mitigasi Risiko Waktu Saji & Pembatalan</span>
@@ -1459,25 +1606,25 @@ window.targetPlanningSimulator = function() {
 
                 <!-- Angka Metrik Utama Skenario Buruk -->
                 <div class="grid grid-cols-2 gap-3 text-xs">
-                    <div class="p-3 bg-white rounded-xl border border-rose-200">
+                    <div class="p-3 bg-white rounded-xl border border-rose-200 shadow-2xs">
                         <span class="text-slate-500 font-bold block mb-0.5">Risiko Omset Melorot</span>
                         <span class="text-lg font-black text-rose-700" x-text="formatRupiah(badRevenue)"></span>
                         <span class="text-[10px] font-extrabold text-rose-600 block mt-0.5" x-text="'-' + formatRupiah(badRevenueDelta)"></span>
                     </div>
 
-                    <div class="p-3 bg-white rounded-xl border border-rose-200">
+                    <div class="p-3 bg-white rounded-xl border border-rose-200 shadow-2xs">
                         <span class="text-slate-500 font-bold block mb-0.5">Trafik Terlayani</span>
                         <span class="text-lg font-black text-slate-900" x-text="badVisitors.toLocaleString('id-ID') + ' pax'"></span>
                         <span class="text-[10px] font-extrabold text-rose-600 block mt-0.5" x-text="'-' + badVisitorsDelta.toLocaleString('id-ID') + ' pengunjung'"></span>
                     </div>
 
-                    <div class="p-3 bg-white rounded-xl border border-rose-200">
+                    <div class="p-3 bg-white rounded-xl border border-rose-200 shadow-2xs">
                         <span class="text-slate-500 font-bold block mb-0.5">Risiko Waktu Saji Bottleneck</span>
                         <span class="text-lg font-black text-rose-700" x-text="badSla + ' mnt'"></span>
                         <span class="text-[10px] font-extrabold text-rose-600 block mt-0.5">MELEBIHI BATAS 15 MENIT!</span>
                     </div>
 
-                    <div class="p-3 bg-white rounded-xl border border-rose-200">
+                    <div class="p-3 bg-white rounded-xl border border-rose-200 shadow-2xs">
                         <span class="text-slate-500 font-bold block mb-0.5">Potensi Omset Hangus</span>
                         <span class="text-lg font-black text-rose-700" x-text="formatRupiah(badLostRevenue)"></span>
                         <span class="text-[10px] font-semibold text-rose-600 block mt-0.5" x-text="'Batal ' + badCancelRate + '%'"></span>
@@ -1486,8 +1633,11 @@ window.targetPlanningSimulator = function() {
 
                 <!-- Langkah Mitigasi Skenario Buruk -->
                 <div class="pt-2 border-t border-rose-100">
-                    <span class="text-xs font-black text-rose-900 uppercase tracking-wider block mb-2">
-                        🛡️ Rencana Mitigasi Risiko:
+                    <span class="text-xs font-black text-rose-900 uppercase tracking-wider block mb-2 flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <span>Rencana Mitigasi Risiko:</span>
                     </span>
                     <ul class="space-y-1.5 text-xs text-slate-700 leading-relaxed">
                         <template x-for="(step, idx) in badMitigationSteps" :key="idx">

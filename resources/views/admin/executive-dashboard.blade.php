@@ -97,63 +97,69 @@
     @endif
 
     <!-- 3. Key Operational KPI Cards (6 Matriks Utama Termasuk Okupansi & Jam Puncak) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-5">
         
         <!-- Card 1: Total Volume Pesanan Harian -->
         @php
             $sumVolume = $volumePerDay->sum('total');
             $dailyAvg = $days > 0 ? round($sumVolume / $days, 1) : 0;
         @endphp
-        <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-slate-200 hover:border-blue-400 transition-all duration-200">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider">Volume Pesanan</span>
-                <span class="p-1.5 rounded-lg bg-blue-100 text-[#005ea2]">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                </span>
+        <div class="bg-white p-5 rounded-2xl shadow-xs border border-slate-200 hover:border-blue-400 hover:shadow-sm transition-all duration-200 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Volume Pesanan</span>
+                    <span class="p-2 rounded-xl bg-blue-50 text-[#005ea2]">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    </span>
+                </div>
+                <div class="flex items-baseline gap-1.5">
+                    <span class="text-2xl sm:text-3xl font-black text-slate-900">{{ number_format($sumVolume) }}</span>
+                    <span class="text-xs font-bold text-slate-400">Order</span>
+                </div>
             </div>
-            <div class="flex items-baseline gap-1.5">
-                <span class="text-2xl font-black text-slate-900">{{ number_format($sumVolume) }}</span>
-                <span class="text-xs font-bold text-slate-500">Order</span>
-            </div>
-            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px]">
                 <span class="text-slate-500 font-semibold">Rata-rata:</span>
-                <span class="font-black text-[#005ea2] bg-blue-50 px-2 py-0.5 rounded">{{ $dailyAvg }}/hari</span>
+                <span class="font-bold text-[#005ea2] bg-blue-50 px-2 py-0.5 rounded-lg">{{ $dailyAvg }}/hari</span>
             </div>
         </div>
 
         <!-- Card 2: Volume Transaksi Puncak (Peak Hours) -->
-        <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-slate-200 hover:border-amber-400 transition-all duration-200">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider">Transaksi Puncak</span>
-                <span class="p-1.5 rounded-lg bg-amber-100 text-amber-700">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                </span>
+        <div class="bg-white p-5 rounded-2xl shadow-xs border border-slate-200 hover:border-amber-400 hover:shadow-sm transition-all duration-200 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Transaksi Puncak</span>
+                    <span class="p-2 rounded-xl bg-amber-50 text-amber-700">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    </span>
+                </div>
+                <div class="flex items-baseline gap-1.5">
+                    <span class="text-2xl sm:text-3xl font-black text-amber-600">{{ number_format($peakHourVolume) }}</span>
+                    <span class="text-xs font-bold text-slate-400">Order/Jam</span>
+                </div>
             </div>
-            <div class="flex items-baseline gap-1.5">
-                <span class="text-2xl font-black text-amber-600">{{ number_format($peakHourVolume) }}</span>
-                <span class="text-xs font-bold text-slate-500">Order/Jam</span>
-            </div>
-            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px]">
                 <span class="text-slate-500 font-semibold">Jam Puncak:</span>
-                <span class="font-black text-amber-800 bg-amber-50 px-2 py-0.5 rounded" title="Volume puncak jam sibuk penerbangan">{{ $peakHourRange }}</span>
+                <span class="font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-lg" title="Volume puncak jam sibuk penerbangan">{{ $peakHourRange }}</span>
             </div>
         </div>
 
         <!-- Card 3: Rasio Okupansi Tenant -->
-        <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-slate-200 hover:border-indigo-400 transition-all duration-200">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider">Okupansi Tenant</span>
-                <span class="p-1.5 rounded-lg bg-indigo-100 text-indigo-700">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-                </span>
+        <div class="bg-white p-5 rounded-2xl shadow-xs border border-slate-200 hover:border-indigo-400 hover:shadow-sm transition-all duration-200 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Okupansi Tenant</span>
+                    <span class="p-2 rounded-xl bg-indigo-50 text-indigo-700">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                    </span>
+                </div>
+                <div class="flex items-baseline gap-1.5">
+                    <span class="text-2xl sm:text-3xl font-black text-indigo-700">{{ $tenantOccupancyRate }}%</span>
+                    <span class="text-xs font-bold text-slate-400">Aktif</span>
+                </div>
             </div>
-            <div class="flex items-baseline gap-1.5">
-                <span class="text-2xl font-black text-indigo-700">{{ $tenantOccupancyRate }}%</span>
-                <span class="text-xs font-bold text-slate-500">Aktif</span>
-            </div>
-            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px]">
                 <span class="text-slate-500 font-semibold">Gerai Buka:</span>
-                <span class="font-black text-indigo-800 bg-indigo-50 px-2 py-0.5 rounded">{{ $activeTenantCount }}/{{ $totalTenantCount }} Mitra</span>
+                <span class="font-bold text-indigo-800 bg-indigo-50 px-2 py-0.5 rounded-lg">{{ $activeTenantCount }}/{{ $totalTenantCount }} Mitra</span>
             </div>
         </div>
 
@@ -162,20 +168,22 @@
             $avgMinutes = $slaPerformance->avg('avg_minutes') ?? 0;
             $isOverSla = $avgMinutes > 15;
         @endphp
-        <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-slate-200 hover:border-emerald-400 transition-all duration-200">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider">Rata-rata SLA</span>
-                <span class="p-1.5 rounded-lg {{ $isOverSla ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600' }}">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </span>
+        <div class="bg-white p-5 rounded-2xl shadow-xs border border-slate-200 hover:border-emerald-400 hover:shadow-sm transition-all duration-200 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Rata-rata SLA</span>
+                    <span class="p-2 rounded-xl {{ $isOverSla ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600' }}">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </span>
+                </div>
+                <div class="flex items-baseline gap-1.5">
+                    <span class="text-2xl sm:text-3xl font-black {{ $isOverSla ? 'text-rose-600' : 'text-emerald-700' }}">{{ round($avgMinutes, 1) }}</span>
+                    <span class="text-xs font-bold text-slate-400">Menit</span>
+                </div>
             </div>
-            <div class="flex items-baseline gap-1.5">
-                <span class="text-2xl font-black {{ $isOverSla ? 'text-rose-600' : 'text-emerald-700' }}">{{ round($avgMinutes, 1) }}</span>
-                <span class="text-xs font-bold text-slate-500">Menit</span>
-            </div>
-            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px]">
                 <span class="text-slate-500 font-semibold">SOP Maks:</span>
-                <span class="font-black px-2 py-0.5 rounded {{ $isOverSla ? 'text-rose-700 bg-rose-100' : 'text-emerald-700 bg-emerald-100' }}">
+                <span class="font-bold px-2 py-0.5 rounded-lg {{ $isOverSla ? 'text-rose-700 bg-rose-50' : 'text-emerald-700 bg-emerald-50' }}">
                     {{ $isOverSla ? '> 15m' : '≤ 15m' }}
                 </span>
             </div>
@@ -188,40 +196,44 @@
             $cancelRate = $totalOrders > 0 ? round(($canceled / $totalOrders) * 100, 1) : 0;
             $isHighCancel = $cancelRate > 10;
         @endphp
-        <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-slate-200 hover:border-rose-400 transition-all duration-200">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider">Cancel Rate</span>
-                <span class="p-1.5 rounded-lg {{ $isHighCancel ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600' }}">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </span>
+        <div class="bg-white p-5 rounded-2xl shadow-xs border border-slate-200 hover:border-rose-400 hover:shadow-sm transition-all duration-200 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Cancel Rate</span>
+                    <span class="p-2 rounded-xl {{ $isHighCancel ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600' }}">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </span>
+                </div>
+                <div class="flex items-baseline gap-1.5">
+                    <span class="text-2xl sm:text-3xl font-black {{ $isHighCancel ? 'text-rose-600' : 'text-slate-900' }}">{{ $cancelRate }}%</span>
+                    <span class="text-xs font-bold text-slate-400">Batal</span>
+                </div>
             </div>
-            <div class="flex items-baseline gap-1.5">
-                <span class="text-2xl font-black {{ $isHighCancel ? 'text-rose-600' : 'text-slate-900' }}">{{ $cancelRate }}%</span>
-                <span class="text-xs font-bold text-slate-500">Batal</span>
-            </div>
-            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px]">
                 <span class="text-slate-500 font-semibold">{{ $canceled }} order</span>
-                <span class="font-black px-2 py-0.5 rounded {{ $isHighCancel ? 'text-rose-700 bg-rose-100' : 'text-emerald-700 bg-emerald-100' }}">
+                <span class="font-bold px-2 py-0.5 rounded-lg {{ $isHighCancel ? 'text-rose-700 bg-rose-50' : 'text-emerald-700 bg-emerald-50' }}">
                     {{ $isHighCancel ? 'Waspada' : 'Terkendali' }}
                 </span>
             </div>
         </div>
 
         <!-- Card 6: Komplain Terbuka -->
-        <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-slate-200 hover:border-amber-400 transition-all duration-200">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider">Komplain Kasus</span>
-                <span class="p-1.5 rounded-lg {{ $openComplaints > 0 ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-500' }}">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                </span>
+        <div class="bg-white p-5 rounded-2xl shadow-xs border border-slate-200 hover:border-amber-400 hover:shadow-sm transition-all duration-200 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Komplain Kasus</span>
+                    <span class="p-2 rounded-xl {{ $openComplaints > 0 ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-500' }}">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </span>
+                </div>
+                <div class="flex items-baseline gap-1.5">
+                    <span class="text-2xl sm:text-3xl font-black {{ $openComplaints > 0 ? 'text-amber-600' : 'text-slate-900' }}">{{ $openComplaints }}</span>
+                    <span class="text-xs font-bold text-slate-400">Kasus</span>
+                </div>
             </div>
-            <div class="flex items-baseline gap-1.5">
-                <span class="text-2xl font-black {{ $openComplaints > 0 ? 'text-amber-600' : 'text-slate-900' }}">{{ $openComplaints }}</span>
-                <span class="text-xs font-bold text-slate-500">Kasus Aktif</span>
-            </div>
-            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px]">
                 <span class="text-slate-500 font-semibold">Terselesaikan:</span>
-                <span class="font-black text-slate-800 bg-slate-100 px-2 py-0.5 rounded">{{ $resolvedComplaints }} closed</span>
+                <span class="font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-lg">{{ $resolvedComplaints }} closed</span>
             </div>
         </div>
 
@@ -231,7 +243,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         <!-- Volume Line Chart -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
             <div class="mb-4">
                 <h2 class="text-base font-black text-slate-900 uppercase tracking-wide">Tren Volume Pesanan</h2>
                 <p class="text-xs text-slate-500 font-semibold mt-0.5">Pola fluktuasi pesanan per tanggal</p>
@@ -242,7 +254,7 @@
         </div>
 
         <!-- SLA Bar Chart -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
             <div class="mb-4">
                 <h2 class="text-base font-black text-slate-900 uppercase tracking-wide">Kinerja Waktu Saji (SLA)</h2>
                 <p class="text-xs text-slate-500 font-semibold mt-0.5">Batas standar layanan maksimal 15 menit (Top 10 Tenant Terlama)</p>
@@ -254,37 +266,22 @@
 
     </div>
 
-    <!-- 5. Charts Row 2: Status Distribution, Tenant Volume, & Top Products -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- 5. Charts Row 2: Tenant Volume & Top Products -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        <!-- Status Doughnut -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200">
+        <!-- Tenant Performance Bar -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
             <div class="mb-4">
-                <h2 class="text-base font-black text-slate-900 uppercase tracking-wide">Distribusi Status Pesanan</h2>
-            </div>
-            <div class="relative h-64">
-                <canvas id="statusChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Tenant Performance Bar (2 Cols) -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200 lg:col-span-2">
-            <div class="mb-2">
                 <h2 class="text-base font-black text-slate-900 uppercase tracking-wide">Top 10 Tenant Terlaris</h2>
                 <p class="text-xs text-slate-500 font-semibold mt-0.5">Peringkat 10 tenant teratas berdasarkan akumulasi volume order</p>
             </div>
-            <div class="relative h-64 mt-3">
+            <div class="relative h-72">
                 <canvas id="tenantChart"></canvas>
             </div>
         </div>
 
-    </div>
-
-    <!-- 6. Row 3: Top Products & Hourly Peak Transaction Distribution (Peak Hours) -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        <!-- Col 1: Top 10 Best Selling Products -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200">
+        <!-- Top 10 Best Selling Products -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
             <div class="mb-4">
                 <h2 class="text-base font-black text-slate-900 uppercase tracking-wide">Menu Terlaris (Top 10)</h2>
                 <p class="text-xs text-slate-500 font-semibold mt-0.5">Peringkat menu favorit penumpang bandara</p>
@@ -294,8 +291,24 @@
             </div>
         </div>
 
-        <!-- Col 2: Hourly Peak Transaction Distribution -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-slate-200">
+    </div>
+
+    <!-- 6. Charts Row 3: Status Distribution & Hourly Peak Transaction Distribution -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Status Doughnut -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div class="mb-4">
+                <h2 class="text-base font-black text-slate-900 uppercase tracking-wide">Distribusi Status Pesanan</h2>
+                <p class="text-xs text-slate-500 font-semibold mt-0.5">Proporsi tahapan pesanan aktif dan terselesaikan</p>
+            </div>
+            <div class="relative h-72 flex items-center justify-center">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Hourly Peak Transaction Distribution -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
             <div class="mb-4">
                 <h2 class="text-base font-black text-slate-900 uppercase tracking-wide">Distribusi Transaksi per Jam</h2>
                 <p class="text-xs text-slate-500 font-semibold mt-0.5">Pola volume transaksi 24 jam operasional bandara (00:00 - 24:00 WIB)</p>
@@ -306,8 +319,8 @@
         </div>
 
     </div>
-
 </div>
+
 <!-- 9. Modern Chart.js Configs with Max Bar Thickness, Gradients, and Custom Tooltips -->
 <script nonce="{{ $cspNonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function() {

@@ -125,25 +125,144 @@
 
     <!-- Filter & Action Toolbar -->
     <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-2xs border border-slate-200/90 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
-        <form method="GET" action="{{ url('/admin/tenants-management') }}" class="flex flex-col sm:flex-row items-stretch sm:items-center w-full md:w-auto gap-3">
-            <!-- Search Bar -->
+        <form method="GET" action="{{ url('/admin/tenants-management') }}" id="filter-tenants-form" 
+              onsubmit="event.preventDefault(); window.filterTenantsAjax ? window.filterTenantsAjax() : this.submit();"
+              class="flex flex-col sm:flex-row items-stretch sm:items-center w-full md:w-auto gap-3">
+            <!-- Search Bar (Pencarian via Enter atau Klik Tombol Cari) -->
             <div class="relative w-full sm:w-80">
-                <input type="text" name="search" value="{{ request('search') }}" 
-                       oninput="clearTimeout(this.timer); this.timer = setTimeout(() => { this.closest('form').submit(); }, 400)" 
+                <input type="text" name="search" id="tenant-search-input" value="{{ request('search') }}" 
                        placeholder="Cari nama brand, PT, atau kode tenant..." 
-                       class="w-full pl-9 pr-4 py-2.5 bg-slate-50 focus:bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-hidden focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 transition-all shadow-2xs">
+                       class="w-full pl-9 pr-20 py-2.5 bg-slate-50 focus:bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 transition-all shadow-2xs">
                 <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
+                <button type="submit" 
+                        class="absolute right-1.5 top-1.5 px-3 py-1 bg-[#005ea2] hover:bg-[#004a82] active:scale-95 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
+                    Cari
+                </button>
             </div>
             
-            <!-- Terminal Dropdown Filter (Clean Single Native Arrow) -->
-            <select name="terminal" onchange="this.form.submit()" 
-                    class="w-full sm:w-auto border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-700 bg-slate-50 hover:bg-white focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none transition cursor-pointer shadow-2xs">
-                <option value="">Semua Terminal (T1 & T2)</option>
-                <option value="1" {{ in_array(request('terminal'), ['1', 'T1']) ? 'selected' : '' }}>Terminal 1 (Domestik)</option>
-                <option value="2" {{ in_array(request('terminal'), ['2', 'T2']) ? 'selected' : '' }}>Terminal 2 (Internasional)</option>
-            </select>
+            <!-- Terminal Dropdown Filter (Smooth Alpine.js Dropdown) -->
+            <div x-data="{ 
+                    open: false, 
+                    selected: '{{ request('terminal') === 'T2' || request('terminal') === '2' ? 'T2 (Internasional)' : (request('terminal') === 'T1' || request('terminal') === '1' ? 'T1 (Domestik)' : 'Semua Terminal') }}',
+                    value: '{{ request('terminal', '') }}'
+                 }" 
+                 @click.outside="open = false" 
+                 @reset-tenant-filters.window="value = ''; selected = 'Semua Terminal'"
+                 class="relative w-full sm:w-auto">
+                
+                <input type="hidden" name="terminal" id="terminal-filter-select" :value="value">
+                
+                <button type="button" @click="open = !open" 
+                        class="w-full sm:w-auto min-w-[155px] inline-flex items-center justify-between gap-2 px-3.5 py-2.5 bg-slate-50 hover:bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 transition-all duration-200 shadow-2xs cursor-pointer">
+                    <span class="truncate" x-text="selected"></span>
+                    <svg class="w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180 text-[#005ea2]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                
+                <div x-show="open" 
+                     x-transition:enter="transition ease-out duration-150 transform" 
+                     x-transition:enter-start="opacity-0 scale-95 -translate-y-1" 
+                     x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-100 transform" 
+                     x-transition:leave-start="opacity-100 scale-100 translate-y-0" 
+                     x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
+                     style="display: none;"
+                     class="absolute left-0 mt-1.5 w-full sm:w-48 bg-white border border-slate-200/90 rounded-2xl shadow-xl shadow-slate-200/50 py-1.5 z-50 overflow-hidden">
+                    
+                    <button type="button" 
+                            @click="value = ''; selected = 'Semua Terminal'; open = false; $nextTick(() => window.filterTenantsAjax ? window.filterTenantsAjax() : document.getElementById('filter-tenants-form').submit())"
+                            class="w-full px-3.5 py-2 text-left text-xs font-bold flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer"
+                            :class="value === '' ? 'text-[#005ea2] bg-blue-50/50 font-black' : 'text-slate-700'">
+                        <span>Semua Terminal</span>
+                        <span x-show="value === ''" class="text-[#005ea2]">✓</span>
+                    </button>
+
+                    <button type="button" 
+                            @click="value = 'T1'; selected = 'T1 (Domestik)'; open = false; $nextTick(() => window.filterTenantsAjax ? window.filterTenantsAjax() : document.getElementById('filter-tenants-form').submit())"
+                            class="w-full px-3.5 py-2 text-left text-xs font-bold flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer"
+                            :class="value === 'T1' || value === '1' ? 'text-[#005ea2] bg-blue-50/50 font-black' : 'text-slate-700'">
+                        <span>T1 (Domestik)</span>
+                        <span x-show="value === 'T1' || value === '1'" class="text-[#005ea2]">✓</span>
+                    </button>
+
+                    <button type="button" 
+                            @click="value = 'T2'; selected = 'T2 (Internasional)'; open = false; $nextTick(() => window.filterTenantsAjax ? window.filterTenantsAjax() : document.getElementById('filter-tenants-form').submit())"
+                            class="w-full px-3.5 py-2 text-left text-xs font-bold flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer"
+                            :class="value === 'T2' || value === '2' ? 'text-[#005ea2] bg-blue-50/50 font-black' : 'text-slate-700'">
+                        <span>T2 (Internasional)</span>
+                        <span x-show="value === 'T2' || value === '2'" class="text-[#005ea2]">✓</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Status Operasional Dropdown Filter (Smooth Alpine.js Dropdown) -->
+            <div x-data="{ 
+                    open: false, 
+                    selected: '{{ request('status') === 'active' ? 'Aktif / Buka' : (request('status') === 'inactive' ? 'Tutup' : 'Semua Status') }}',
+                    value: '{{ request('status', '') }}'
+                 }" 
+                 @click.outside="open = false" 
+                 @reset-tenant-filters.window="value = ''; selected = 'Semua Status'"
+                 class="relative w-full sm:w-auto">
+                
+                <input type="hidden" name="status" id="status-filter-select" :value="value">
+                
+                <button type="button" @click="open = !open" 
+                        class="w-full sm:w-auto min-w-[145px] inline-flex items-center justify-between gap-2 px-3.5 py-2.5 bg-slate-50 hover:bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 transition-all duration-200 shadow-2xs cursor-pointer">
+                    <span class="truncate" x-text="selected"></span>
+                    <svg class="w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180 text-[#005ea2]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                
+                <div x-show="open" 
+                     x-transition:enter="transition ease-out duration-150 transform" 
+                     x-transition:enter-start="opacity-0 scale-95 -translate-y-1" 
+                     x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-100 transform" 
+                     x-transition:leave-start="opacity-100 scale-100 translate-y-0" 
+                     x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
+                     style="display: none;"
+                     class="absolute left-0 mt-1.5 w-full sm:w-44 bg-white border border-slate-200/90 rounded-2xl shadow-xl shadow-slate-200/50 py-1.5 z-50 overflow-hidden">
+                    
+                    <button type="button" 
+                            @click="value = ''; selected = 'Semua Status'; open = false; $nextTick(() => window.filterTenantsAjax ? window.filterTenantsAjax() : document.getElementById('filter-tenants-form').submit())"
+                            class="w-full px-3.5 py-2 text-left text-xs font-bold flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer"
+                            :class="value === '' ? 'text-[#005ea2] bg-blue-50/50 font-black' : 'text-slate-700'">
+                        <span>Semua Status</span>
+                        <span x-show="value === ''" class="text-[#005ea2]">✓</span>
+                    </button>
+
+                    <button type="button" 
+                            @click="value = 'active'; selected = 'Aktif / Buka'; open = false; $nextTick(() => window.filterTenantsAjax ? window.filterTenantsAjax() : document.getElementById('filter-tenants-form').submit())"
+                            class="w-full px-3.5 py-2 text-left text-xs font-bold flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer"
+                            :class="value === 'active' ? 'text-[#005ea2] bg-blue-50/50 font-black' : 'text-slate-700'">
+                        <span>Aktif / Buka</span>
+                        <span x-show="value === 'active'" class="text-[#005ea2]">✓</span>
+                    </button>
+
+                    <button type="button" 
+                            @click="value = 'inactive'; selected = 'Tutup'; open = false; $nextTick(() => window.filterTenantsAjax ? window.filterTenantsAjax() : document.getElementById('filter-tenants-form').submit())"
+                            class="w-full px-3.5 py-2 text-left text-xs font-bold flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer"
+                            :class="value === 'inactive' ? 'text-[#005ea2] bg-blue-50/50 font-black' : 'text-slate-700'">
+                        <span>Tutup</span>
+                        <span x-show="value === 'inactive'" class="text-[#005ea2]">✓</span>
+                    </button>
+                </div>
+            </div>
+
+            <span id="filter-reset-wrapper">
+                @if(request()->hasAny(['search', 'terminal', 'status']))
+                <a href="{{ url('/admin/tenants-management') }}" 
+                   class="inline-flex items-center justify-center px-3 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold transition shadow-2xs"
+                   title="Hapus Semua Filter">
+                    ✕ Reset
+                </a>
+                @endif
+            </span>
         </form>
         
         <!-- Primary Action Button: Tambah Mitra Baru -->
@@ -157,7 +276,7 @@
     </div>
 
     <!-- Tabel Data Mitra Tenant (Fit 100% Width, Zero Horizontal Scroll, Auto-Truncate) -->
-    <div class="bg-white rounded-2xl shadow-2xs border border-slate-200/90 overflow-hidden">
+    <div id="tenants-table-container" class="bg-white rounded-2xl shadow-2xs border border-slate-200/90 overflow-hidden transition-opacity">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
@@ -328,361 +447,472 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- MODAL 1: REGISTRASI MITRA TENANT BARU (NON-CLIPPING, FULLY ACCESSIBLE)   -->
+    <!-- MODAL 1: REGISTRASI MITRA TENANT BARU (FULL BLUR BACKDROP & TELEPORT)     -->
     <!-- ========================================================================= -->
-    <div x-show="addTenantModalOpen" 
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         @keydown.escape.window="addTenantModalOpen = false"
-         class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex justify-center p-3 sm:p-5" 
-         style="display: none;">
-        
-        <form action="{{ route('admin.tenants.store') }}" method="POST" 
-             @click.away="addTenantModalOpen = false"
-             class="bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-xl w-full border border-slate-200 flex flex-col max-h-[calc(100vh-2rem)] my-auto overflow-hidden">
-            @csrf
+    <template x-teleport="body">
+        <div x-show="addTenantModalOpen" 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @keydown.escape.window="addTenantModalOpen = false"
+             class="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 overflow-hidden" 
+             style="display: none; background-color: rgba(15, 23, 42, 0.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
             
-            <!-- Modal Header (Compact & Fixed) -->
-            <div class="px-5 py-3.5 text-white flex items-center justify-between shrink-0"
-                 style="background: linear-gradient(135deg, #09131f 0%, #005ea2 50%, #1e40af 100%);">
-                <div class="flex items-center space-x-3">
-                    <div class="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-[#8dc63f] font-black text-base border border-white/20">
-                        +
-                    </div>
-                    <div>
-                        <h3 class="font-black text-sm sm:text-base leading-tight text-white">Registrasi Mitra Tenant Baru</h3>
-                        <p class="text-[11px] text-blue-100 font-medium">Lengkapi identitas, akun PIC, dan alokasi ruang gerai</p>
-                    </div>
-                </div>
-                <button type="button" @click="addTenantModalOpen = false" 
-                        class="text-white/80 hover:text-white p-1.5 rounded-full hover:bg-white/10 transition cursor-pointer">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Form Content (Smoothly Scrollable Middle with flex-1 min-h-0) -->
-            <div class="px-5 py-4 space-y-4 overflow-y-auto flex-1 min-h-0">
+            <form action="{{ route('admin.tenants.store') }}" method="POST" 
+                  @click.away="addTenantModalOpen = false"
+                  class="bg-white rounded-3xl shadow-2xl max-w-xl w-full border border-slate-200 flex flex-col my-auto overflow-hidden"
+                  style="max-height: 90vh; display: flex; flex-direction: column;">
+                @csrf
                 
-                <!-- Live Preview Mini-Card -->
-                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-2.5 min-w-0">
-                        <div class="w-9 h-9 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-[#005ea2] font-black text-xs shrink-0">
-                            <span x-text="newTenant.name ? newTenant.name.substring(0, 2).toUpperCase() : 'FD'"></span>
+                <!-- Modal Header (Compact & Fixed, shrink-0) -->
+                <div class="px-5 py-3.5 text-white flex items-center justify-between shrink-0"
+                     style="background: linear-gradient(135deg, #09131f 0%, #005ea2 50%, #1e40af 100%);">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-[#8dc63f] font-black text-base border border-white/20">
+                            +
                         </div>
-                        <div class="min-w-0">
-                            <div class="font-black text-slate-900 text-xs truncate" x-text="newTenant.name || 'Nama Brand Outlet'"></div>
-                            <div class="flex items-center gap-1.5 mt-0.5">
-                                <span class="font-mono text-[9px] font-bold text-slate-500 bg-white px-1.5 py-0.2 rounded border border-slate-200" x-text="newTenant.tenant_code ? newTenant.tenant_code.toUpperCase() : 'KODE-TENANT'"></span>
-                                <span class="text-[9px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded" x-text="newTenant.terminal === 'T2' ? 'Terminal 2' : 'Terminal 1'"></span>
-                            </div>
+                        <div>
+                            <h3 class="font-black text-sm sm:text-base leading-tight text-white">Registrasi Mitra Tenant Baru</h3>
+                            <p class="text-[11px] text-blue-100 font-medium">Lengkapi identitas, akun PIC, dan alokasi ruang gerai</p>
                         </div>
                     </div>
-                    <span class="text-[9px] font-extrabold uppercase text-slate-400 bg-white px-2 py-0.5 rounded border border-slate-200 shrink-0">
-                        Pratinjau
-                    </span>
+                    <button type="button" @click="addTenantModalOpen = false" 
+                            class="text-white/80 hover:text-white p-1.5 rounded-full hover:bg-white/10 transition cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
 
-                <!-- Section 1: Identitas Brand & Akun Login PIC -->
-                <div class="space-y-2.5">
-                    <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-slate-800 pb-1 border-b border-slate-100">
-                        <span class="w-4 h-4 rounded-md bg-blue-100 text-[#005ea2] flex items-center justify-center text-[10px]">1</span>
-                        <span>Identitas Brand & Akun Login PIC</span>
-                    </div>
+                <!-- Form Content (Smoothly Scrollable Middle with flex: 1 1 0%) -->
+                <div class="px-5 py-4 space-y-4 overscroll-contain"
+                     style="flex: 1 1 0%; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;">
                     
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Nama Brand / Outlet <span class="text-rose-500">*</span></label>
-                            <input type="text" name="name" x-model="newTenant.name" value="{{ old('name') }}" required placeholder="Contoh: Starbucks Coffee" 
-                                   class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
+                    <!-- Live Preview Mini-Card -->
+                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <div class="w-9 h-9 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-[#005ea2] font-black text-xs shrink-0">
+                                <span x-text="newTenant.name ? newTenant.name.substring(0, 2).toUpperCase() : 'FD'"></span>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="font-black text-slate-900 text-xs truncate" x-text="newTenant.name || 'Nama Brand Outlet'"></div>
+                                <div class="flex items-center gap-1.5 mt-0.5">
+                                    <span class="font-mono text-[9px] font-bold text-slate-500 bg-white px-1.5 py-0.2 rounded border border-slate-200" x-text="newTenant.tenant_code ? newTenant.tenant_code.toUpperCase() : 'KODE-TENANT'"></span>
+                                    <span class="text-[9px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded" x-text="newTenant.terminal === 'T2' ? 'Terminal 2' : 'Terminal 1'"></span>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Kode Tenant (Unik) <span class="text-rose-500">*</span></label>
-                            <input type="text" name="tenant_code" x-model="newTenant.tenant_code" value="{{ old('tenant_code') }}" required placeholder="Contoh: T1-SBX" 
-                                   class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none uppercase">
+                        <span class="text-[9px] font-extrabold uppercase text-slate-400 bg-white px-2 py-0.5 rounded border border-slate-200 shrink-0">
+                            Pratinjau
+                        </span>
+                    </div>
+
+                    <!-- Section 1: Identitas Brand & Akun Login PIC -->
+                    <div class="space-y-2.5">
+                        <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-slate-800 pb-1 border-b border-slate-100">
+                            <span class="w-4 h-4 rounded-md bg-blue-100 text-[#005ea2] flex items-center justify-center text-[10px]">1</span>
+                            <span>Identitas Brand & Akun Login PIC</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Nama Brand / Outlet <span class="text-rose-500">*</span></label>
+                                <input type="text" name="name" x-model="newTenant.name" value="{{ old('name') }}" required placeholder="Contoh: Starbucks Coffee" 
+                                       class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Kode Tenant (Unik) <span class="text-rose-500">*</span></label>
+                                <input type="text" name="tenant_code" x-model="newTenant.tenant_code" value="{{ old('tenant_code') }}" required placeholder="Contoh: T1-SBX" 
+                                       class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none uppercase">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Email Login PIC <span class="text-rose-500">*</span></label>
+                                <input type="email" name="email" value="{{ old('email') }}" required placeholder="Contoh: starbucks@flydine.com" 
+                                       class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
+                                <div class="mt-1 flex items-center gap-1.5 text-[10px] text-slate-500 font-medium">
+                                    <span class="text-amber-600 font-bold">🔑</span>
+                                    <span>Password default: <strong class="text-slate-800">juanda123</strong></span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Nama Perusahaan (PT/CV)</label>
+                                <input type="text" name="company_name" value="{{ old('company_name') }}" placeholder="Contoh: PT Sari Coffee Indonesia" 
+                                       class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
+                            </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Email Login PIC <span class="text-rose-500">*</span></label>
-                            <input type="email" name="email" value="{{ old('email') }}" required placeholder="Contoh: starbucks@flydine.com" 
-                                   class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
-                            <div class="mt-1 flex items-center gap-1.5 text-[10px] text-slate-500 font-medium">
-                                <span class="text-amber-600 font-bold">🔑</span>
-                                <span>Password default: <strong class="text-slate-800">juanda123</strong></span>
+                    <!-- Section 2: Kategori F&B & Penempatan Ruang -->
+                    <div class="space-y-2.5 pt-1">
+                        <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-slate-800 pb-1 border-b border-slate-100">
+                            <span class="w-4 h-4 rounded-md bg-purple-100 text-purple-700 flex items-center justify-center text-[10px]">2</span>
+                            <span>Kategori F&B & Penempatan Ruang Bandara</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Kategori F&B <span class="text-rose-500">*</span></label>
+                                <select name="category" x-model="newTenant.category" required 
+                                        class="w-full border border-slate-200 rounded-xl pl-3.5 pr-9 py-2 text-xs font-bold text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none bg-white cursor-pointer">
+                                    <option value="">-- Pilih Kategori --</option>
+                                    <option value="Beverages & Coffee" {{ old('category') == 'Beverages & Coffee' ? 'selected' : '' }}>Beverages & Coffee</option>
+                                    <option value="Fast Food & Restaurant" {{ old('category') == 'Fast Food & Restaurant' ? 'selected' : '' }}>Fast Food & Restaurant</option>
+                                    <option value="Bakery & Pastry" {{ old('category') == 'Bakery & Pastry' ? 'selected' : '' }}>Bakery & Pastry</option>
+                                    <option value="Indonesian Traditional" {{ old('category') == 'Indonesian Traditional' ? 'selected' : '' }}>Indonesian Traditional</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Terminal <span class="text-rose-500">*</span></label>
+                                <select name="terminal" x-model="newTenant.terminal" required 
+                                        class="w-full border border-slate-200 rounded-xl pl-3.5 pr-9 py-2 text-xs font-bold text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none bg-white cursor-pointer">
+                                    <option value="T1" {{ old('terminal') == 'T1' ? 'selected' : '' }}>Terminal 1 (T1 Domestik)</option>
+                                    <option value="T2" {{ old('terminal') == 'T2' ? 'selected' : '' }}>Terminal 2 (T2 Internasional)</option>
+                                </select>
                             </div>
                         </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Area <span class="text-rose-500">*</span></label>
+                                <select name="zone" required 
+                                        class="w-full border border-slate-200 rounded-xl pl-3.5 pr-9 py-2 text-xs font-bold text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none bg-white cursor-pointer">
+                                    <option value="Landside" {{ old('zone') == 'Landside' ? 'selected' : '' }}>Area Publik (Landside)</option>
+                                    <option value="Airside" {{ old('zone') == 'Airside' ? 'selected' : '' }}>Ruang Tunggu (Airside)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Detail Ruang / Space <span class="text-rose-500">*</span></label>
+                                <input type="text" name="floor_location" value="{{ old('floor_location') }}" required placeholder="Contoh: Lt. 2 Gate 8 (EP-01)" 
+                                       class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Masa Kontrak Sewa -->
+                    <div class="space-y-2.5 pt-1">
+                        <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-slate-800 pb-1 border-b border-slate-100">
+                            <span class="w-4 h-4 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px]">3</span>
+                            <span>Periode Masa Kontrak Sewa</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Tanggal Mulai Kontrak</label>
+                                <input type="date" name="contract_start" value="{{ old('contract_start') }}" 
+                                       class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Tanggal Akhir Kontrak</label>
+                                <input type="date" name="contract_end" value="{{ old('contract_end') }}" 
+                                       class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Modal Footer (Fixed at Bottom, shrink-0) -->
+                <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2.5 shrink-0">
+                    <button type="button" @click="addTenantModalOpen = false" 
+                            class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-white text-xs font-bold transition cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="submit" 
+                            class="px-5 py-2 rounded-xl bg-[#005ea2] hover:bg-[#004a82] text-white text-xs font-black shadow-md shadow-blue-900/20 transition cursor-pointer flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-[#8dc63f]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Simpan Tenant Baru</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </template>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL 2: EDIT DATA MITRA TENANT (FULL BLUR BACKDROP & TELEPORT)           -->
+    <!-- ========================================================================= -->
+    <template x-teleport="body">
+        <div x-show="editTenantModalOpen" 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @keydown.escape.window="editTenantModalOpen = false"
+             class="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 overflow-hidden" 
+             style="display: none; background-color: rgba(15, 23, 42, 0.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+            
+            <form :action="`/admin/tenants-management/${editData.id}`" method="POST" 
+                  @click.away="editTenantModalOpen = false"
+                  class="bg-white rounded-3xl shadow-2xl max-w-xl w-full border border-slate-200 flex flex-col my-auto overflow-hidden"
+                  style="max-height: 90vh; display: flex; flex-direction: column;">
+                @csrf
+                @method('PUT')
+                
+                <!-- Modal Header (Compact & Fixed, shrink-0) -->
+                <div class="px-5 py-3.5 text-white flex items-center justify-between shrink-0"
+                     style="background: linear-gradient(135deg, #09131f 0%, #005ea2 50%, #1e40af 100%);">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-amber-300 font-black text-sm border border-white/20">
+                            ✎
+                        </div>
+                        <div>
+                            <h3 class="font-black text-sm sm:text-base leading-tight text-white">Edit Data Mitra Tenant</h3>
+                            <p class="text-[11px] text-blue-100 font-medium">Perbarui informasi gerai, penempatan, dan masa kontrak</p>
+                        </div>
+                    </div>
+                    <button type="button" @click="editTenantModalOpen = false" 
+                            class="text-white/80 hover:text-white p-1.5 rounded-full hover:bg-white/10 transition cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Form Content (Smoothly Scrollable Middle with flex: 1 1 0%) -->
+                <div class="px-5 py-4 space-y-4 overscroll-contain"
+                     style="flex: 1 1 0%; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;">
+                    
+                    <!-- Live Preview Mini-Card for Edit -->
+                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <div class="w-9 h-9 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-[#005ea2] font-black text-xs shrink-0">
+                                <span x-text="editData.name ? editData.name.substring(0, 2).toUpperCase() : 'FD'"></span>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="font-black text-slate-900 text-xs truncate" x-text="editData.name || 'Nama Brand Outlet'"></div>
+                                <div class="flex items-center gap-1.5 mt-0.5">
+                                    <span class="font-mono text-[9px] font-bold text-slate-500 bg-white px-1.5 py-0.2 rounded border border-slate-200" x-text="editData.tenant_code ? editData.tenant_code.toUpperCase() : 'KODE'"></span>
+                                    <span class="text-[9px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded" x-text="editData.terminal === 'T2' ? 'Terminal 2' : 'Terminal 1'"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="text-[9px] font-extrabold uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 shrink-0">
+                            Mode Edit
+                        </span>
+                    </div>
+
+                    <!-- Section 1: Identitas Brand & Perusahaan -->
+                    <div class="space-y-2.5">
+                        <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-slate-800 pb-1 border-b border-slate-100">
+                            <span class="w-4 h-4 rounded-md bg-blue-100 text-[#005ea2] flex items-center justify-center text-[10px]">1</span>
+                            <span>Identitas Brand & Perusahaan</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Nama Brand / Outlet <span class="text-rose-500">*</span></label>
+                                <input type="text" name="name" x-model="editData.name" required placeholder="Contoh: Starbucks Coffee" 
+                                       class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Kode Tenant (Unik) <span class="text-rose-500">*</span></label>
+                                <input type="text" name="tenant_code" x-model="editData.tenant_code" required placeholder="Contoh: T1-SBX" 
+                                       class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none uppercase">
+                            </div>
+                        </div>
+
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">Nama Perusahaan (PT/CV)</label>
-                            <input type="text" name="company_name" value="{{ old('company_name') }}" placeholder="Contoh: PT Sari Coffee Indonesia" 
+                            <input type="text" name="company_name" x-model="editData.company_name" placeholder="Contoh: PT Sari Coffee Indonesia" 
                                    class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
                         </div>
                     </div>
-                </div>
 
-                <!-- Section 2: Kategori F&B & Penempatan Ruang -->
-                <div class="space-y-2.5 pt-1">
-                    <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-slate-800 pb-1 border-b border-slate-100">
-                        <span class="w-4 h-4 rounded-md bg-purple-100 text-purple-700 flex items-center justify-center text-[10px]">2</span>
-                        <span>Kategori F&B & Penempatan Ruang Bandara</span>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Kategori F&B <span class="text-rose-500">*</span></label>
-                            <select name="category" x-model="newTenant.category" required class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
-                                <option value="">-- Pilih Kategori --</option>
-                                <option value="Beverages & Coffee" {{ old('category') == 'Beverages & Coffee' ? 'selected' : '' }}>Beverages & Coffee</option>
-                                <option value="Fast Food & Restaurant" {{ old('category') == 'Fast Food & Restaurant' ? 'selected' : '' }}>Fast Food & Restaurant</option>
-                                <option value="Bakery & Pastry" {{ old('category') == 'Bakery & Pastry' ? 'selected' : '' }}>Bakery & Pastry</option>
-                                <option value="Indonesian Traditional" {{ old('category') == 'Indonesian Traditional' ? 'selected' : '' }}>Indonesian Traditional</option>
-                            </select>
+                    <!-- Section 2: Kategori F&B & Penempatan Ruang -->
+                    <div class="space-y-2.5 pt-1">
+                        <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-slate-800 pb-1 border-b border-slate-100">
+                            <span class="w-4 h-4 rounded-md bg-purple-100 text-purple-700 flex items-center justify-center text-[10px]">2</span>
+                            <span>Kategori F&B & Penempatan Ruang Bandara</span>
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Terminal <span class="text-rose-500">*</span></label>
-                            <select name="terminal" x-model="newTenant.terminal" required class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
-                                <option value="T1" {{ old('terminal') == 'T1' ? 'selected' : '' }}>Terminal 1 (T1 Domestik)</option>
-                                <option value="T2" {{ old('terminal') == 'T2' ? 'selected' : '' }}>Terminal 2 (T2 Internasional)</option>
-                            </select>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Kategori F&B <span class="text-rose-500">*</span></label>
+                                <select name="category" x-model="editData.category" required 
+                                        class="w-full border border-slate-200 rounded-xl pl-3.5 pr-9 py-2 text-xs font-bold text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none bg-white cursor-pointer">
+                                    <option value="">-- Pilih Kategori --</option>
+                                    <option value="Beverages & Coffee">Beverages & Coffee</option>
+                                    <option value="Fast Food & Restaurant">Fast Food & Restaurant</option>
+                                    <option value="Bakery & Pastry">Bakery & Pastry</option>
+                                    <option value="Indonesian Traditional">Indonesian Traditional</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Terminal <span class="text-rose-500">*</span></label>
+                                <select name="terminal" x-model="editData.terminal" required 
+                                        class="w-full border border-slate-200 rounded-xl pl-3.5 pr-9 py-2 text-xs font-bold text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none bg-white cursor-pointer">
+                                    <option value="T1">Terminal 1 (T1 Domestik)</option>
+                                    <option value="T2">Terminal 2 (T2 Internasional)</option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Area <span class="text-rose-500">*</span></label>
-                            <select name="zone" required class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
-                                <option value="Landside" {{ old('zone') == 'Landside' ? 'selected' : '' }}>Area Publik (Landside)</option>
-                                <option value="Airside" {{ old('zone') == 'Airside' ? 'selected' : '' }}>Ruang Tunggu (Airside)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Detail Ruang / Space <span class="text-rose-500">*</span></label>
-                            <input type="text" name="floor_location" value="{{ old('floor_location') }}" required placeholder="Contoh: Lt. 2 Gate 8 (EP-01)" 
-                                   class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Section 3: Masa Kontrak Sewa -->
-                <div class="space-y-2.5 pt-1">
-                    <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-slate-800 pb-1 border-b border-slate-100">
-                        <span class="w-4 h-4 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px]">3</span>
-                        <span>Periode Masa Kontrak Sewa</span>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Tanggal Mulai Kontrak</label>
-                            <input type="date" name="contract_start" value="{{ old('contract_start') }}" 
-                                   class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Tanggal Akhir Kontrak</label>
-                            <input type="date" name="contract_end" value="{{ old('contract_end') }}" 
-                                   class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Modal Footer (Fixed at Bottom, Never Cut Off) -->
-            <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2.5 shrink-0">
-                <button type="button" @click="addTenantModalOpen = false" 
-                        class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-white text-xs font-bold transition cursor-pointer">
-                    Batal
-                </button>
-                <button type="submit" 
-                        class="px-5 py-2 rounded-xl bg-[#005ea2] hover:bg-[#004a82] text-white text-xs font-black shadow-md shadow-blue-900/20 transition cursor-pointer flex items-center gap-1.5">
-                    <svg class="w-4 h-4 text-[#8dc63f]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>Simpan Tenant Baru</span>
-                </button>
-            </div>
-        </form>
-    </div>
-
-    <!-- ========================================================================= -->
-    <!-- MODAL 2: EDIT DATA MITRA TENANT (NON-CLIPPING, FULLY ACCESSIBLE)          -->
-    <!-- ========================================================================= -->
-    <div x-show="editTenantModalOpen" 
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         @keydown.escape.window="editTenantModalOpen = false"
-         class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex justify-center p-3 sm:p-5" 
-         style="display: none;">
-        
-        <form :action="`/admin/tenants-management/${editData.id}`" method="POST" 
-             @click.away="editTenantModalOpen = false"
-             class="bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-xl w-full border border-slate-200 flex flex-col max-h-[calc(100vh-2rem)] my-auto overflow-hidden">
-            @csrf
-            @method('PUT')
-            
-            <!-- Modal Header (Compact & Fixed) -->
-            <div class="px-5 py-3.5 text-white flex items-center justify-between shrink-0"
-                 style="background: linear-gradient(135deg, #09131f 0%, #005ea2 50%, #1e40af 100%);">
-                <div class="flex items-center space-x-3">
-                    <div class="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-amber-300 font-black text-sm border border-white/20">
-                        ✎
-                    </div>
-                    <div>
-                        <h3 class="font-black text-sm sm:text-base leading-tight text-white">Edit Data Mitra Tenant</h3>
-                        <p class="text-[11px] text-blue-100 font-medium">Perbarui informasi gerai, penempatan, dan masa kontrak</p>
-                    </div>
-                </div>
-                <button type="button" @click="editTenantModalOpen = false" 
-                        class="text-white/80 hover:text-white p-1.5 rounded-full hover:bg-white/10 transition cursor-pointer">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Form Content (Smoothly Scrollable Middle with flex-1 min-h-0) -->
-            <div class="px-5 py-4 space-y-4 overflow-y-auto flex-1 min-h-0">
-                
-                <!-- Live Preview Mini-Card for Edit -->
-                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-2.5 min-w-0">
-                        <div class="w-9 h-9 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-[#005ea2] font-black text-xs shrink-0">
-                            <span x-text="editData.name ? editData.name.substring(0, 2).toUpperCase() : 'FD'"></span>
-                        </div>
-                        <div class="min-w-0">
-                            <div class="font-black text-slate-900 text-xs truncate" x-text="editData.name || 'Nama Brand Outlet'"></div>
-                            <div class="flex items-center gap-1.5 mt-0.5">
-                                <span class="font-mono text-[9px] font-bold text-slate-500 bg-white px-1.5 py-0.2 rounded border border-slate-200" x-text="editData.tenant_code ? editData.tenant_code.toUpperCase() : 'KODE'"></span>
-                                <span class="text-[9px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded" x-text="editData.terminal === 'T2' ? 'Terminal 2' : 'Terminal 1'"></span>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Area <span class="text-rose-500">*</span></label>
+                                <select name="zone" x-model="editData.zone" required 
+                                        class="w-full border border-slate-200 rounded-xl pl-3.5 pr-9 py-2 text-xs font-bold text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none bg-white cursor-pointer">
+                                    <option value="Landside">Area Publik (Landside)</option>
+                                    <option value="Airside">Ruang Tunggu (Airside)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Detail Ruang / Space <span class="text-rose-500">*</span></label>
+                                <input type="text" name="floor_location" x-model="editData.floor_location" required placeholder="Contoh: Lt. 2 Gate 8 (EP-01)" 
+                                       class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
                             </div>
                         </div>
                     </div>
-                    <span class="text-[9px] font-extrabold uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 shrink-0">
-                        Mode Edit
-                    </span>
+
+                    <!-- Section 3: Masa Kontrak Sewa -->
+                    <div class="space-y-2.5 pt-1">
+                        <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-slate-800 pb-1 border-b border-slate-100">
+                            <span class="w-4 h-4 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px]">3</span>
+                            <span>Periode Masa Kontrak Sewa</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Tanggal Mulai Kontrak</label>
+                                <input type="date" name="contract_start" x-model="editData.contract_start" 
+                                       class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Tanggal Akhir Kontrak</label>
+                                <input type="date" name="contract_end" x-model="editData.contract_end" 
+                                       class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
-                <!-- Section 1: Identitas Brand & Perusahaan -->
-                <div class="space-y-2.5">
-                    <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-slate-800 pb-1 border-b border-slate-100">
-                        <span class="w-4 h-4 rounded-md bg-blue-100 text-[#005ea2] flex items-center justify-center text-[10px]">1</span>
-                        <span>Identitas Brand & Perusahaan</span>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Nama Brand / Outlet <span class="text-rose-500">*</span></label>
-                            <input type="text" name="name" x-model="editData.name" required placeholder="Contoh: Starbucks Coffee" 
-                                   class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Kode Tenant (Unik) <span class="text-rose-500">*</span></label>
-                            <input type="text" name="tenant_code" x-model="editData.tenant_code" required placeholder="Contoh: T1-SBX" 
-                                   class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none uppercase">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Nama Perusahaan (PT/CV)</label>
-                        <input type="text" name="company_name" x-model="editData.company_name" placeholder="Contoh: PT Sari Coffee Indonesia" 
-                               class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
-                    </div>
+                <!-- Modal Footer (Fixed at Bottom, shrink-0) -->
+                <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2.5 shrink-0">
+                    <button type="button" @click="editTenantModalOpen = false" 
+                            class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-white text-xs font-bold transition cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="submit" 
+                            class="px-5 py-2 rounded-xl bg-[#005ea2] hover:bg-[#004a82] text-white text-xs font-black shadow-md shadow-blue-900/20 transition cursor-pointer flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-[#8dc63f]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Simpan Perubahan</span>
+                    </button>
                 </div>
-
-                <!-- Section 2: Kategori F&B & Penempatan Ruang -->
-                <div class="space-y-2.5 pt-1">
-                    <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-slate-800 pb-1 border-b border-slate-100">
-                        <span class="w-4 h-4 rounded-md bg-purple-100 text-purple-700 flex items-center justify-center text-[10px]">2</span>
-                        <span>Kategori F&B & Penempatan Ruang Bandara</span>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Kategori F&B <span class="text-rose-500">*</span></label>
-                            <select name="category" x-model="editData.category" required 
-                                    class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
-                                <option value="">-- Pilih Kategori --</option>
-                                <option value="Beverages & Coffee">Beverages & Coffee</option>
-                                <option value="Fast Food & Restaurant">Fast Food & Restaurant</option>
-                                <option value="Bakery & Pastry">Bakery & Pastry</option>
-                                <option value="Indonesian Traditional">Indonesian Traditional</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Terminal <span class="text-rose-500">*</span></label>
-                            <select name="terminal" x-model="editData.terminal" required 
-                                    class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
-                                <option value="T1">Terminal 1 (T1 Domestik)</option>
-                                <option value="T2">Terminal 2 (T2 Internasional)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Area <span class="text-rose-500">*</span></label>
-                            <select name="zone" x-model="editData.zone" required 
-                                    class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
-                                <option value="Landside">Area Publik (Landside)</option>
-                                <option value="Airside">Ruang Tunggu (Airside)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Detail Ruang / Space <span class="text-rose-500">*</span></label>
-                            <input type="text" name="floor_location" x-model="editData.floor_location" required placeholder="Contoh: Lt. 2 Gate 8 (EP-01)" 
-                                   class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Section 3: Masa Kontrak Sewa -->
-                <div class="space-y-2.5 pt-1">
-                    <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-slate-800 pb-1 border-b border-slate-100">
-                        <span class="w-4 h-4 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px]">3</span>
-                        <span>Periode Masa Kontrak Sewa</span>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Tanggal Mulai Kontrak</label>
-                            <input type="date" name="contract_start" x-model="editData.contract_start" 
-                                   class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Tanggal Akhir Kontrak</label>
-                            <input type="date" name="contract_end" x-model="editData.contract_end" 
-                                   class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-[#005ea2] focus:ring-2 focus:ring-[#005ea2]/20 outline-none">
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Modal Footer (Fixed at Bottom, Never Cut Off) -->
-            <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2.5 shrink-0">
-                <button type="button" @click="editTenantModalOpen = false" 
-                        class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-white text-xs font-bold transition cursor-pointer">
-                    Batal
-                </button>
-                <button type="submit" 
-                        class="px-5 py-2 rounded-xl bg-[#005ea2] hover:bg-[#004a82] text-white text-xs font-black shadow-md shadow-blue-900/20 transition cursor-pointer flex items-center gap-1.5">
-                    <svg class="w-4 h-4 text-[#8dc63f]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>Simpan Perubahan</span>
-                </button>
-            </div>
-        </form>
-    </div>
+            </form>
+        </div>
+    </template>
 
 </div>
+
+@push('scripts')
+<script>
+(function() {
+    let abortController = null;
+
+    window.filterTenantsUrl = function(url) {
+        const tableContainer = document.getElementById('tenants-table-container');
+        const resetWrapper = document.getElementById('filter-reset-wrapper');
+        const form = document.getElementById('filter-tenants-form');
+
+        if (abortController) {
+            abortController.abort();
+        }
+        abortController = new AbortController();
+
+        if (tableContainer) {
+            tableContainer.style.transition = 'opacity 0.15s ease';
+            tableContainer.style.opacity = '0.55';
+        }
+
+        fetch(url, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            signal: abortController.signal
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network error');
+            return response.text();
+        })
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newTable = doc.getElementById('tenants-table-container');
+            const newReset = doc.getElementById('filter-reset-wrapper');
+
+            if (newTable && tableContainer) {
+                tableContainer.innerHTML = newTable.innerHTML;
+                if (window.Alpine) {
+                    window.Alpine.initTree(tableContainer);
+                }
+            }
+            if (newReset && resetWrapper) {
+                resetWrapper.innerHTML = newReset.innerHTML;
+            }
+            window.history.pushState({}, '', url);
+        })
+        .catch(err => {
+            if (err.name !== 'AbortError') {
+                console.error('Filter AJAX error, submitting natively:', err);
+                if (form) form.submit();
+            }
+        })
+        .finally(() => {
+            if (tableContainer) {
+                tableContainer.style.opacity = '1';
+            }
+        });
+    };
+
+    window.filterTenantsAjax = function() {
+        const searchInput = document.getElementById('tenant-search-input');
+        const terminalSelect = document.getElementById('terminal-filter-select');
+        const statusSelect = document.getElementById('status-filter-select');
+
+        const queryParams = new URLSearchParams();
+        const searchVal = searchInput ? searchInput.value.trim() : '';
+        const terminalVal = terminalSelect ? terminalSelect.value : '';
+        const statusVal = statusSelect ? statusSelect.value : '';
+
+        if (searchVal) queryParams.set('search', searchVal);
+        if (terminalVal) queryParams.set('terminal', terminalVal);
+        if (statusVal) queryParams.set('status', statusVal);
+
+        const baseUrl = "{{ url('/admin/tenants-management') }}";
+        const finalUrl = baseUrl + (queryParams.toString() ? '?' + queryParams.toString() : '');
+        window.filterTenantsUrl(finalUrl);
+    };
+
+    document.addEventListener('click', function (e) {
+        const link = e.target.closest('a');
+        if (link && link.href && link.href.includes('/admin/tenants-management')) {
+            const urlObj = new URL(link.href, window.location.origin);
+            if (urlObj.pathname === '/admin/tenants-management') {
+                e.preventDefault();
+                const searchInput = document.getElementById('tenant-search-input');
+                const terminalSelect = document.getElementById('terminal-filter-select');
+                const statusSelect = document.getElementById('status-filter-select');
+                if (link.textContent.includes('Reset')) {
+                    if (searchInput) searchInput.value = '';
+                    if (terminalSelect) terminalSelect.value = '';
+                    if (statusSelect) statusSelect.value = '';
+                    window.dispatchEvent(new CustomEvent('reset-tenant-filters'));
+                }
+                window.filterTenantsUrl(link.href);
+            }
+        }
+    });
+})();
+</script>
+@endpush
 @endsection

@@ -78,10 +78,54 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/tenants-management', [\App\Http\Controllers\AdminController::class, 'storeTenant'])->name('admin.tenants.store');
     Route::put('/tenants-management/{tenant}', [\App\Http\Controllers\AdminController::class, 'updateTenant'])->name('admin.tenants.update');
     Route::patch('/tenants-management/{tenant}/toggle-status', [\App\Http\Controllers\AdminController::class, 'toggleTenantStatus'])->name('admin.tenants.toggle-status');
-    Route::get('/complaints', function () {
+    Route::get('/complaints', function (\Illuminate\Http\Request $request) {
         abort_unless(auth()->user()->role === 'admin_ops', 403);
         
-        $complaints = \App\Models\Complaint::with(['order.tenant'])->latest()->get();
+        $query = \App\Models\Complaint::with(['order.tenant']);
+
+        // Search Filter (Pencarian kode tiket, nama pelapor, no kontak, deskripsi, kode order, nama tenant)
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function($q) use ($search) {
+                $q->where('complaint_code', 'like', "%{$search}%")
+                  ->orWhere('reporter_name', 'like', "%{$search}%")
+                  ->orWhere('reporter_contact', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhereHas('order', function($oq) use ($search) {
+                      $oq->where('order_code', 'like', "%{$search}%")
+                         ->orWhereHas('tenant', function($tq) use ($search) {
+                             $tq->where('name', 'like', "%{$search}%");
+                         });
+                  });
+            });
+        }
+
+        // Status Filter
+        if ($request->filled('status')) {
+            if ($request->status === 'open') {
+                $query->where('status', 'open');
+            } elseif ($request->status === 'in_progress') {
+                $query->where('status', 'in_progress');
+            } elseif ($request->status === 'resolved') {
+                $query->whereIn('status', ['resolved', 'closed']);
+            } elseif ($request->status === 'closed') {
+                $query->where('status', 'closed');
+            }
+        }
+
+        // Category Filter
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+
+        // Pagination 10 items per page
+        $complaints = $query->latest()->paginate(10)->withQueryString();
+
+        // Global KPI Stats
+        $total_open = \App\Models\Complaint::where('status', 'open')->count();
+        $total_in_progress = \App\Models\Complaint::where('status', 'in_progress')->count();
+        $total_resolved = \App\Models\Complaint::whereIn('status', ['resolved', 'closed'])->count();
+        $total_all = \App\Models\Complaint::count();
 
         // Analytics: Distribusi Kategori
         $complaintCategories = \App\Models\Complaint::select('category', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
@@ -89,27 +133,47 @@ Route::middleware('auth')->prefix('admin')->group(function () {
             ->orderByDesc('total')
             ->get();
 
-        // Analytics: Rata-rata Waktu Penyelesaian
-        $avgResolutionTime = \App\Models\Complaint::whereNotNull('resolved_at')
-            ->select(\Illuminate\Support\Facades\DB::raw('AVG(TIMESTAMPDIFF(MINUTE, created_at, resolved_at)) as avg_minutes'))
-            ->value('avg_minutes');
+        // Analytics: Rata-rata Waktu Penyelesaian (Database-agnostic)
+        $driver = \Illuminate\Support\Facades\DB::connection()->getDriverName();
+        if ($driver === 'sqlite') {
+            $avgResolutionTime = \App\Models\Complaint::whereNotNull('resolved_at')
+                ->select(\Illuminate\Support\Facades\DB::raw('AVG((strftime("%s", resolved_at) - strftime("%s", created_at)) / 60) as avg_minutes'))
+                ->value('avg_minutes');
+        } else {
+            $avgResolutionTime = \App\Models\Complaint::whereNotNull('resolved_at')
+                ->select(\Illuminate\Support\Facades\DB::raw('AVG(TIMESTAMPDIFF(MINUTE, created_at, resolved_at)) as avg_minutes'))
+                ->value('avg_minutes');
+        }
+        $avgResolutionTime = $avgResolutionTime !== null ? round((float) $avgResolutionTime) : null;
 
-        return view('admin.complaints', compact('complaints', 'complaintCategories', 'avgResolutionTime'));
+        return view('admin.complaints', compact(
+            'complaints', 
+            'complaintCategories', 
+            'avgResolutionTime',
+            'total_open',
+            'total_in_progress',
+            'total_resolved',
+            'total_all'
+        ));
     })->name('admin.complaints');
 
-    Route::post('/complaints/{complaint}/status', function (Illuminate\Http\Request $request, \App\Models\Complaint $complaint) {
+    Route::post('/complaints/{complaint}/status', function (\Illuminate\Http\Request $request, \App\Models\Complaint $complaint) {
         abort_unless(auth()->user()->role === 'admin_ops', 403);
         
-        $request->validate(['status' => 'required|in:in_progress,resolved,closed']);
+        $request->validate(['status' => 'required|in:open,in_progress,resolved,closed']);
         
         $complaint->status = $request->status;
         if ($request->status === 'resolved' || $request->status === 'closed') {
-            $complaint->resolved_at = now();
+            if (!$complaint->resolved_at) {
+                $complaint->resolved_at = now();
+            }
+        } else {
+            $complaint->resolved_at = null;
         }
         $complaint->handled_by_user_id = auth()->id();
         $complaint->save();
         
-        return redirect()->back()->with('success', 'Status komplain berhasil diperbarui!');
+        return redirect()->back()->with('success', 'Status tiket ' . $complaint->complaint_code . ' berhasil diperbarui!');
     })->name('admin.complaints.status');
 
     Route::get('/fraud-monitoring', [\App\Http\Controllers\AdminFraudController::class, 'index'])->name('admin.fraud');

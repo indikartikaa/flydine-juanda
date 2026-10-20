@@ -49,7 +49,6 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-100">
             <div>
                 <h2 class="text-xl font-black text-slate-900 tracking-tight">Peta Distribusi Segmen Penumpang</h2>
-                <p class="text-xs text-slate-500 font-semibold mt-0.5">Analisis frekuensi pemesanan per pelanggan unik pada periode terpilih</p>
             </div>
         </div>
 
@@ -96,7 +95,7 @@
             <div class="flex flex-wrap items-center justify-between gap-3 mt-4 text-xs font-bold text-slate-600">
                 <div class="flex items-center"><span class="w-3.5 h-3.5 rounded-full bg-sky-500 mr-2 shadow-xs"></span> Pelanggan Baru (1x transaksi)</div>
                 <div class="flex items-center"><span class="w-3.5 h-3.5 rounded-full bg-amber-500 mr-2 shadow-xs"></span> Pelanggan Reguler (2-5x transaksi)</div>
-                <div class="flex items-center"><span class="w-3.5 h-3.5 rounded-full bg-emerald-600 mr-2 shadow-xs"></span> Pelanggan Setia VIP (> 5x transaksi)</div>
+                <div class="flex items-center"><span class="w-3.5 h-3.5 rounded-full bg-emerald-600 mr-2 shadow-xs"></span> Pelanggan Setia (> 5x transaksi)</div>
             </div>
         </div>
 
@@ -128,13 +127,12 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-black uppercase tracking-wider text-emerald-900">Pelanggan Setia</span>
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-600 text-white uppercase">VIP</span>
                     </div>
                     <span class="text-3xl font-black text-slate-900 mt-1 block tabular-nums">{{ number_format($freqCust) }}</span>
                     <span class="text-xs text-emerald-800 font-semibold block mt-1">&gt; 5 Kali Pemesanan</span>
                 </div>
                 <div class="h-12 w-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black shadow-xs text-base shrink-0">
-                    VIP
+                    >5x
                 </div>
             </div>
         </div>
