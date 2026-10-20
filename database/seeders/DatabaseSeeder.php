@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             Terminal2Seeder::class,  // 16 Tenant & 239 Menu Resmi Terminal 2 (T2)
             DeliveryLocationSeeder::class,
             TenantCategorySeeder::class,
+            TenantPhotoSeeder::class, // Mapping foto tenant otomatis
             UserSeeder::class,       // Akun Admin Ops & Staff cadangan
             ProductSeeder::class,    // dummy
             CustomerSeeder::class,   // dummy
