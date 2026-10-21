@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             DeliveryLocationSeeder::class,
             TenantCategorySeeder::class,
             TenantPhotoSeeder::class, // Mapping foto tenant otomatis
+            ProductPhotoSeeder::class, // Mapping foto produk otomatis
             UserSeeder::class,       // Akun Admin Ops & Staff cadangan
             ProductSeeder::class,    // dummy
             CustomerSeeder::class,   // dummy
