@@ -204,19 +204,35 @@
                             <div class="flex justify-between items-end mb-5">
                                 <div>
                                     <p class="text-[10px] text-slate-400 font-black uppercase tracking-wider mb-0.5">Total Tagihan</p>
-                                    <p class="font-black text-xl text-slate-900 tracking-tight">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</p>
+                                    <div class="flex items-center gap-2">
+                                        <p class="font-black text-xl text-slate-900 tracking-tight">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</p>
+                                        @if($order->is_paid)
+                                            <span class="inline-flex items-center text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                LUNAS
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center text-[10px] font-black px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200">
+                                                BELUM BAYAR
+                                            </span>
+                                        @endif
+                                    </div>
                                 </div>
                                 
                                 @php
-                                    $statusData = [
-                                        'menunggu' => ['bg-amber-50 text-amber-700 border-amber-200/80', 'Menunggu Bayar', 'bg-amber-500 animate-pulse'],
-                                        'diproses' => ['bg-emerald-50 text-emerald-700 border-emerald-200/80', 'Sedang Dimasak', 'bg-emerald-500 animate-pulse'],
-                                        'siap' => ['bg-blue-50 text-[#005ea2] border-blue-200/80', 'Siap Diambil', 'bg-[#005ea2] animate-pulse'],
-                                        'selesai' => ['bg-slate-50 text-slate-600 border-slate-200', 'Selesai', 'bg-slate-400'],
-                                        'ditolak' => ['bg-rose-50 text-rose-700 border-rose-200', 'Ditolak', 'bg-rose-500'],
-                                        'dibatalkan' => ['bg-rose-50 text-rose-700 border-rose-200', 'Dibatalkan', 'bg-rose-500'],
-                                    ];
-                                    $s = $statusData[$order->status] ?? $statusData['menunggu'];
+                                    if (!$order->is_paid && $order->status === 'menunggu') {
+                                        $s = ['bg-amber-50 text-amber-700 border-amber-200/80', 'Menunggu Bayar', 'bg-amber-500 animate-pulse'];
+                                    } elseif ($order->status === 'menunggu') {
+                                        $s = ['bg-amber-50 text-amber-800 border-amber-200/80', 'Menunggu Konfirmasi Tenant', 'bg-amber-500 animate-pulse'];
+                                    } else {
+                                        $statusData = [
+                                            'diproses' => ['bg-emerald-50 text-emerald-700 border-emerald-200/80', 'Sedang Dimasak', 'bg-emerald-500 animate-pulse'],
+                                            'siap' => ['bg-blue-50 text-[#005ea2] border-blue-200/80', $order->pickup_method === 'diantar' ? 'Sedang Diantar Porter' : 'Siap Diambil di Counter', 'bg-[#005ea2] animate-pulse'],
+                                            'selesai' => ['bg-slate-50 text-slate-600 border-slate-200', 'Selesai', 'bg-slate-400'],
+                                            'ditolak' => ['bg-rose-50 text-rose-700 border-rose-200', 'Ditolak Tenant', 'bg-rose-500'],
+                                            'dibatalkan' => ['bg-rose-50 text-rose-700 border-rose-200', 'Dibatalkan', 'bg-rose-500'],
+                                        ];
+                                        $s = $statusData[$order->status] ?? ['bg-slate-50 text-slate-600 border-slate-200', ucfirst($order->status), 'bg-slate-400'];
+                                    }
                                 @endphp
                                 
                                 <div class="flex items-center space-x-1.5 {{ $s[0] }} px-3.5 py-1.5 rounded-full border">

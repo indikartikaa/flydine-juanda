@@ -233,6 +233,10 @@ Route::middleware('auth')
         Route::delete('/products/{product}',
             [TenantProductController::class, 'destroy']
         )->name('products.destroy');
+
+        Route::patch('/products/{product}/toggle',
+            [TenantProductController::class, 'toggle']
+        )->name('products.toggle');
     });
 
 /* Profile */

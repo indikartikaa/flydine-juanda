@@ -8,7 +8,7 @@
             <span class="font-extrabold text-slate-800 bg-slate-100 border border-slate-200/60 px-2 py-0.5 rounded-md">{{ $paginator->firstItem() }} - {{ $paginator->lastItem() }}</span>
             <span data-id="dari" data-en="of">dari</span>
             <span class="font-extrabold text-[#005ea2]">{{ $paginator->total() }}</span>
-            <span data-id="{{ $itemName ?? (request()->is('admin*') ? 'data' : 'restoran') }}" data-en="{{ $itemNameEn ?? (request()->is('admin*') ? 'items' : 'restaurants') }}">{{ $itemName ?? (request()->is('admin*') ? 'data' : 'restoran') }}</span>
+            <span data-id="{{ $itemName ?? (request()->is('admin*') ? 'data' : (request()->is('tenant*') ? 'pesanan' : 'restoran')) }}" data-en="{{ $itemNameEn ?? (request()->is('admin*') ? 'items' : (request()->is('tenant*') ? 'orders' : 'restaurants')) }}">{{ $itemName ?? (request()->is('admin*') ? 'data' : (request()->is('tenant*') ? 'pesanan' : 'restoran')) }}</span>
         </div>
 
         <!-- Pagination Controls Bar -->

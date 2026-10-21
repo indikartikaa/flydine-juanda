@@ -1,440 +1,892 @@
 @extends('layouts.tenant')
 
-@section('title', 'Katalog Produk Tenant')
+@section('title', 'Katalog Menu & Produk')
 
 @section('content')
-
-
-
-{{-- HEADER SECTION --}}
-<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-    <div>
-        <h1 class="text-2xl font-black text-[#005ea2] tracking-tight">Katalog Produk</h1>
-        <p class="text-sm text-gray-500 font-medium mt-1">
-            Kelola menu tenant Anda untuk ditampilkan kepada pelanggan.
-        </p>
-    </div>
-
-    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-        <div class="relative w-full sm:w-64">
-            <input id="searchProduct" type="text" placeholder="Cari produk..." class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition-all">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 absolute left-3.5 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-        </div>
-        <a href="{{ route('tenant.products.create') }}" class="bg-[#005ea2] hover:bg-blue-800 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-blue-500/20 transition-all hover:-translate-y-0.5 flex items-center justify-center whitespace-nowrap outline-none focus:ring-4 focus:ring-blue-100">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Tambah Produk
-        </a>
-    </div>
-</div>
-
-{{-- PRODUCT GRID --}}
-@if($products->count())
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-
-    @foreach($products as $product)
-    <div class="product-card bg-white rounded-[1.25rem] border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative group flex flex-col h-full overflow-hidden">
-
-        {{-- FOTO --}}
-        <div class="h-44 w-full bg-gray-50 relative overflow-hidden shrink-0 border-b border-gray-50">
-            @php
-                $hasTenantProdImage = false;
-                $tenantProdImageUrl = null;
-                if (!empty($product->image)) {
-                    if (\Illuminate\Support\Str::startsWith($product->image, ['http://', 'https://'])) {
-                        $hasTenantProdImage = true;
-                        $tenantProdImageUrl = $product->image;
-                    } elseif (\Illuminate\Support\Str::startsWith($product->image, 'images/')) {
-                        if (file_exists(public_path($product->image))) {
-                            $hasTenantProdImage = true;
-                            $tenantProdImageUrl = asset($product->image);
-                        }
-                    } else {
-                        if (file_exists(public_path('storage/' . $product->image)) || file_exists(storage_path('app/public/' . $product->image))) {
-                            $hasTenantProdImage = true;
-                            $tenantProdImageUrl = asset('storage/' . $product->image);
-                        }
-                    }
+@php
+    $tenantName = auth()->user()?->tenant?->name ?? 'Gerai Tenant';
+    $tenantCategory = auth()->user()?->tenant?->category ?? 'Kuliner Bandara';
+    
+    // Siapkan koleksi metadata produk untuk sinkronisasi Alpine.js
+    $productsData = $products->map(function($product) use ($tenantCategory) {
+        $imgUrl = null;
+        if (!empty($product->image)) {
+            if (\Illuminate\Support\Str::startsWith($product->image, ['http://', 'https://'])) {
+                $imgUrl = $product->image;
+            } elseif (\Illuminate\Support\Str::startsWith($product->image, 'images/')) {
+                if (file_exists(public_path($product->image))) {
+                    $imgUrl = asset($product->image);
                 }
-            @endphp
-            @if($hasTenantProdImage)
-                <img src="{{ $tenantProdImageUrl }}" 
-                     alt="{{ $product->name }}" 
-                     loading="lazy" 
-                     onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.classList.remove('hidden');" 
-                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                <div class="hidden w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100 group-hover:scale-110 transition-transform duration-700">
-                    <span class="text-6xl font-black text-blue-200 select-none">
-                        {{ strtoupper(substr($product->name, 0, 1)) }}
-                    </span>
-                </div>
-            @else
-                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100 group-hover:scale-110 transition-transform duration-700">
-                    <span class="text-6xl font-black text-blue-200 select-none">
-                        {{ strtoupper(substr($product->name, 0, 1)) }}
-                    </span>
-                </div>
-            @endif
+            } else {
+                if (file_exists(public_path('storage/' . $product->image)) || file_exists(storage_path('app/public/' . $product->image))) {
+                    $imgUrl = asset('storage/' . $product->image);
+                }
+            }
+        }
 
-            {{-- BADGE STATUS --}}
-            <div class="absolute top-3 left-3 flex gap-2">
-                <span class="{{ $product->is_available ? 'bg-emerald-500' : 'bg-gray-500' }} text-white text-[9px] font-black px-2.5 py-1 rounded-md shadow-sm tracking-widest uppercase flex items-center gap-1">
-                    @if($product->is_available)
-                        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-                    @endif
-                    {{ $product->is_available ? 'Aktif' : 'Nonaktif' }}
+        // Tentukan kategori default jika masih kosong di database
+        $computedCat = $product->category;
+        if (empty($computedCat)) {
+            $lowerName = strtolower($product->name);
+            if (\Illuminate\Support\Str::contains($lowerName, ['kopi', 'coffee', 'latte', 'tea', 'teh', 'milo', 'juice', 'jus', 'drink', 'beverage', 'air', 'mineral'])) {
+                $computedCat = 'Minuman';
+            } elseif (\Illuminate\Support\Str::contains($lowerName, ['toast', 'roti', 'bread', 'croissant', 'donut', 'cookie', 'cake', 'sandwich', 'pastry', 'snack', 'fries'])) {
+                $computedCat = 'Snack';
+            } elseif (\Illuminate\Support\Str::contains($lowerName, ['dessert', 'ice cream', 'pudding', 'es'])) {
+                $computedCat = 'Dessert';
+            } else {
+                $computedCat = 'Makanan Utama';
+            }
+        }
+
+        return [
+            'id' => $product->id,
+            'name' => $product->name,
+            'category' => $computedCat,
+            'original_category' => $product->category ?? '',
+            'price' => (float) $product->price,
+            'formatted_price' => number_format($product->price, 0, ',', '.'),
+            'stock' => (int) $product->stock,
+            'is_available' => (bool) $product->is_available,
+            'description' => $product->description ?? '',
+            'note' => $product->note ?? '',
+            'image' => $imgUrl,
+            'has_image' => !empty($imgUrl),
+        ];
+    });
+
+    $totalProducts = $products->count();
+    $activeProducts = $products->where('is_available', true)->count();
+    $emptyStockProducts = $products->where('stock', '<=', 0)->count();
+    $categoriesList = $productsData->pluck('category')->unique()->values()->all();
+@endphp
+
+<div x-data="productCatalog()" class="space-y-6">
+
+    <!-- ========================================================================= -->
+    <!-- 1. HEADER HALAMAN & TOMBOL TAMBAH MENU                                    -->
+    <!-- ========================================================================= -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2">
+                <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Katalog Menu & Produk</h2>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-[#005ea2] border border-blue-200/60">
+                    {{ $tenantName }}
                 </span>
             </div>
-        </div>
-
-        {{-- INFORMASI --}}
-        <div class="p-5 flex-1 flex flex-col bg-white">
-            <div class="flex justify-between items-start mb-1">
-                <p class="text-[10px] font-bold uppercase tracking-wider text-yellow-500">
-                    {{ $product->category ?? 'Tanpa kategori' }}
-                </p>
-                <p class="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
-                    Stok: <span class="{{ $product->stock > 0 ? 'text-gray-700' : 'text-red-500' }}">{{ $product->stock }}</span>
-                </p>
-            </div>
-
-            <h3 class="product-name font-extrabold text-gray-800 text-base leading-snug line-clamp-2 mt-1">
-                {{ $product->name }}
-            </h3>
-
-            <p class="text-lg font-black text-[#005ea2] mt-2 mb-4">
-                Rp {{ number_format($product->price, 0, ',', '.') }}
+            <p class="text-xs sm:text-sm font-semibold text-slate-500 mt-1">
+                Kelola hidangan, sesuaikan harga jual, stok harian, dan pantau ketersediaan menu gerai di bandara.
             </p>
-
-            <div class="mt-auto space-y-2.5">
-                {{-- DETAIL BUTTON --}}
-                <button type="button" 
-                        onclick="showDetail(this)" 
-                        data-name="{{ $product->name }}" 
-                        data-category="{{ $product->category ?? '-' }}" 
-                        data-price="{{ number_format($product->price, 0, ',', '.') }}" 
-                        data-stock="{{ $product->stock }}" 
-                        data-description="{{ $product->description ?? '-' }}" 
-                        data-note="{{ $product->note ?? '-' }}" 
-                        data-image="{{ $product->image ? asset('storage/'.$product->image) : '' }}" 
-                        data-status="{{ $product->is_available ? 'Aktif' : 'Tidak tersedia' }}" 
-                        class="w-full bg-blue-50 hover:bg-blue-100 text-[#005ea2] py-2.5 rounded-xl text-xs font-bold transition-colors flex justify-center items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                    Lihat Detail
-                </button>
-
-                {{-- EDIT / HAPUS --}}
-                <div class="grid grid-cols-2 gap-2.5">
-                    <button type="button" 
-                            onclick="editProduct(this)" 
-                            data-id="{{ $product->id }}" 
-                            data-name="{{ $product->name }}" 
-                            data-category="{{ $product->category ?? '' }}" 
-                            data-description="{{ $product->description ?? '' }}" 
-                            data-note="{{ $product->note ?? '' }}" 
-                            data-price="{{ $product->price }}" 
-                            data-stock="{{ $product->stock }}" 
-                            data-image="{{ $product->image ? asset('storage/'.$product->image) : '' }}" 
-                            data-status="{{ $product->is_available ? '1' : '0' }}" 
-                            class="w-full border border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-600 py-2 rounded-xl text-xs font-bold transition-colors">
-                        Edit
-                    </button>
-
-                    <form method="POST" action="{{ route('tenant.products.destroy', $product) }}" onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk ini? Tindakan ini tidak dapat dibatalkan.')" class="w-full">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="w-full border border-rose-100 bg-rose-50 hover:bg-rose-500 hover:text-white text-rose-600 py-2 rounded-xl text-xs font-bold transition-colors">
-                            Hapus
-                        </button>
-                    </form>
-                </div>
-            </div>
         </div>
-    </div>
-    @endforeach
-
-</div>
-
-@else
-
-{{-- EMPTY STATE --}}
-<div class="bg-white rounded-[1.5rem] border border-dashed border-gray-300 text-center py-24 shadow-sm flex flex-col items-center justify-center">
-    <div class="h-24 w-24 bg-gray-50 rounded-full flex items-center justify-center mb-5 border border-gray-100 shadow-inner">
-        <span class="text-5xl drop-shadow-sm">🍽️</span>
-    </div>
-    <h2 class="text-xl font-black text-gray-800">Belum ada produk</h2>
-    <p class="text-sm text-gray-500 mt-2 max-w-sm mx-auto font-medium leading-relaxed">
-        Katalog produk Anda masih kosong. Ayo tambahkan menu andalan Anda sekarang agar pelanggan bisa mulai memesan.
-    </p>
-    <a href="{{ route('tenant.products.create') }}" class="inline-flex items-center mt-8 bg-[#005ea2] hover:bg-blue-800 text-white px-8 py-3.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 transition-all hover:-translate-y-1 outline-none focus:ring-4 focus:ring-blue-100">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-        </svg>
-        Tambah Produk Pertama
-    </a>
-</div>
-
-@endif
-
-{{-- DETAIL MODAL --}}
-<div id="detailModal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 items-center justify-center p-4 sm:p-5 transition-opacity">
-    <div class="bg-white rounded-[1.5rem] max-w-md w-full shadow-2xl max-h-[90vh] overflow-hidden flex flex-col transform transition-transform duration-300 scale-95" id="detailModalCard">
         
-        <div id="detailImage" class="h-60 bg-gray-50 flex items-center justify-center relative border-b border-gray-100">
-            <button onclick="closeModal('detailModal')" class="absolute top-4 right-4 h-8 w-8 bg-black/20 hover:bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-colors z-10 focus:outline-none focus:ring-2 focus:ring-white/50">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
-        </div>
-
-        <div class="p-6 md:p-8 overflow-y-auto">
-            <p class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-1">Info Menu</p>
-            <h2 id="detailName" class="text-2xl font-black text-gray-800 leading-tight"></h2>
-            <p id="detailPrice" class="text-2xl font-black text-[#005ea2] mt-2"></p>
-
-            <div class="mt-6 space-y-4 text-sm bg-gray-50 p-5 rounded-2xl border border-gray-100">
-                <div class="flex justify-between items-center border-b border-gray-200 pb-3">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Kategori</p>
-                    <p id="detailCategory" class="font-bold text-gray-700"></p>
-                </div>
-                <div class="flex justify-between items-center border-b border-gray-200 pb-3">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Stok</p>
-                    <p id="detailStock" class="font-bold text-gray-700"></p>
-                </div>
-                <div class="flex justify-between items-center border-b border-gray-200 pb-3">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Status</p>
-                    <p id="detailStatus" class="font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md"></p>
-                </div>
-                <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Deskripsi</p>
-                    <p id="detailDescription" class="text-gray-600 font-medium leading-relaxed"></p>
-                </div>
-                <div class="pt-1">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Catatan Dapur</p>
-                    <p id="detailNote" class="text-gray-600 font-medium italic"></p>
-                </div>
-            </div>
-
-            <button onclick="closeModal('detailModal')" class="w-full mt-8 bg-gray-100 hover:bg-gray-200 text-gray-800 py-3.5 rounded-xl text-sm font-bold transition-colors outline-none focus:ring-4 focus:ring-gray-200">
-                Tutup Jendela
-            </button>
+        <div class="flex items-center gap-2.5 sm:gap-3 shrink-0">
+            <!-- Tombol Tambah Menu Baru -->
+            <a href="{{ route('tenant.products.create') }}" 
+               class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#005ea2] hover:bg-[#004b82] active:scale-95 text-white text-xs sm:text-sm font-bold shadow-sm shadow-blue-600/20 transition-all cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Tambah Menu Baru</span>
+            </a>
         </div>
     </div>
-</div>
 
-{{-- EDIT MODAL --}}
-<div id="editModal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 items-center justify-center p-4 sm:p-5 transition-opacity">
-    <div class="bg-white rounded-[1.5rem] max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform transition-transform duration-300 scale-95" id="editModalCard">
+    <!-- ========================================================================= -->
+    <!-- 2. RINGKASAN METRIK OPERASIONAL KATALOG (4 KARTU RESPONSIF)                -->
+    <!-- ========================================================================= -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         
-        <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-            <h2 class="text-lg font-black text-gray-800">Edit Produk</h2>
-            <button onclick="closeModal('editModal')" class="text-gray-400 hover:text-gray-600 focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
+        <!-- Kartu 1: Total Menu -->
+        <div @click="filterStatus = 'all'; filterStock = 'all'" 
+             class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs hover:border-slate-300 transition-all cursor-pointer">
+            <div class="flex items-center justify-between mb-1.5 sm:mb-2">
+                <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400">Total Menu</span>
+                <span class="w-2.5 h-2.5 rounded-full bg-[#005ea2]"></span>
+            </div>
+            <h3 class="text-lg sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">
+                {{ $totalProducts }}
+            </h3>
+            <span class="text-[10px] sm:text-xs font-semibold text-slate-500 block mt-1">Menu Terdaftar di Gerai</span>
         </div>
 
-        <form id="editForm" method="POST" enctype="multipart/form-data" class="overflow-y-auto p-6 md:p-8">
-            @csrf
-            @method('PUT')
+        <!-- Kartu 2: Menu Aktif Siap Jual -->
+        <div @click="filterStatus = 'active'" 
+             class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs hover:border-emerald-300 transition-all cursor-pointer">
+            <div class="flex items-center justify-between mb-1.5 sm:mb-2">
+                <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400">Menu Aktif</span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+            </div>
+            <h3 class="text-lg sm:text-2xl font-black text-emerald-600 tracking-tight leading-tight">
+                {{ $activeProducts }}
+            </h3>
+            <span class="text-[10px] sm:text-xs font-semibold text-emerald-600 block mt-1">Tersedia untuk Pesanan</span>
+        </div>
 
-            {{-- Nama --}}
-            <div class="mb-4">
-                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Nama Produk <span class="text-rose-500">*</span></label>
-                <input id="editName" name="name" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition-all">
+        <!-- Kartu 3: Stok Habis / Perlu Update -->
+        <div @click="filterStock = 'empty'" 
+             class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs hover:border-rose-300 transition-all cursor-pointer">
+            <div class="flex items-center justify-between mb-1.5 sm:mb-2">
+                <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400">Stok Kosong / 0</span>
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+            </div>
+            <h3 class="text-lg sm:text-2xl font-black text-rose-600 tracking-tight leading-tight">
+                {{ $emptyStockProducts }}
+            </h3>
+            <span class="text-[10px] sm:text-xs font-semibold text-rose-500 block mt-1">Perlu Pembaruan Stok</span>
+        </div>
+
+        <!-- Kartu 4: Variasi Kategori -->
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
+            <div class="flex items-center justify-between mb-1.5 sm:mb-2">
+                <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400">Kategori Menu</span>
+                <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+            </div>
+            <h3 class="text-lg sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">
+                {{ count($categoriesList) }}
+            </h3>
+            <span class="text-[10px] sm:text-xs font-semibold text-purple-600 block mt-1">Variasi Sajian Gerai</span>
+        </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 3. BAR FILTER REAL-TIME & PENCARIAN PRODUK                                -->
+    <!-- ========================================================================= -->
+    <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-2xs">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            
+            <!-- Input Pencarian Teks -->
+            <div class="relative flex-1 min-w-[200px]">
+                <input type="text" 
+                       x-model="searchQuery" 
+                       placeholder="Cari nama menu, kategori, harga..." 
+                       class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition">
+                <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
             </div>
 
-            {{-- Kategori --}}
-            <div class="mb-4">
-                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Kategori</label>
-                <select id="editCategory" name="category" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition-all appearance-none">
-                    <option value="">Pilih kategori</option>
-                    <option value="Makanan Utama">Makanan Utama</option>
-                    <option value="Snack">Snack</option>
-                    <option value="Minuman">Minuman</option>
-                    <option value="Dessert">Dessert</option>
-                </select>
-            </div>
-
-            {{-- Harga & Stok Grid --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Harga (Rp) <span class="text-rose-500">*</span></label>
-                    <input id="editPrice" type="number" name="price" required min="0" step="any" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition-all">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Jumlah Stok <span class="text-rose-500">*</span></label>
-                    <input id="editStock" type="number" name="stock" required min="0" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition-all">
-                </div>
-            </div>
-
-            {{-- Deskripsi --}}
-            <div class="mb-4">
-                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Deskripsi (Opsional)</label>
-                <textarea id="editDescription" name="description" rows="2" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition-all"></textarea>
-            </div>
-
-            {{-- Catatan --}}
-            <div class="mb-4">
-                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Catatan Dapur</label>
-                <textarea id="editNote" name="note" rows="2" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition-all"></textarea>
-            </div>
-
-            {{-- Foto --}}
-            <div class="mb-6">
-                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Perbarui Foto (Opsional)</label>
+            <!-- Filter Dropdowns Row -->
+            <div class="flex flex-wrap items-center gap-2">
                 
-                {{-- Preview foto saat ini / baru --}}
-                <div class="flex items-center gap-4 mb-3">
-                    <div id="editCurrentPhotoPreview" class="h-16 w-16 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden shrink-0">
-                        <span class="text-[10px] text-gray-400 font-semibold text-center px-1">Tanpa Foto</span>
-                    </div>
-                    <div class="flex-1">
-                        <p id="editPhotoNote" class="text-xs text-gray-600 font-medium">Pilih file gambar jika ingin memperbarui foto produk.</p>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Mendukung format JPG, PNG, WEBP (maks. 5MB)</p>
+                <!-- Filter Kategori -->
+                <div class="relative flex-1 sm:flex-none">
+                    <select x-model="filterCategory" 
+                            style="-webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: none;"
+                            class="w-full sm:w-auto pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition appearance-none cursor-pointer">
+                        <option value="all">Semua Kategori</option>
+                        @foreach($categoriesList as $cat)
+                            <option value="{{ $cat }}">{{ $cat }}</option>
+                        @endforeach
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
                     </div>
                 </div>
 
-                <input id="editImageInput" type="file" name="image" accept="image/png,image/jpeg,image/jpg,image/webp" onchange="previewEditImage(event)" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-[#005ea2] hover:file:bg-blue-100 transition-all cursor-pointer">
+                <!-- Filter Status Ketersediaan -->
+                <div class="relative flex-1 sm:flex-none">
+                    <select x-model="filterStatus" 
+                            style="-webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: none;"
+                            class="w-full sm:w-auto pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition appearance-none cursor-pointer">
+                        <option value="all">Semua Status</option>
+                        <option value="active">Aktif (Tersedia)</option>
+                        <option value="inactive">Nonaktif</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Filter Stok -->
+                <div class="relative flex-1 sm:flex-none">
+                    <select x-model="filterStock" 
+                            style="-webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: none;"
+                            class="w-full sm:w-auto pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition appearance-none cursor-pointer">
+                        <option value="all">Semua Stok</option>
+                        <option value="ready">Tersedia (>0)</option>
+                        <option value="empty">Stok 0 / Habis</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Tombol Reset Filter -->
+                <button type="button" 
+                        x-show="searchQuery || filterCategory !== 'all' || filterStatus !== 'all' || filterStock !== 'all'" 
+                        @click="resetFilters()" 
+                        class="text-xs font-bold text-slate-500 hover:text-rose-600 px-3 py-2 transition-colors flex items-center gap-1 cursor-pointer">
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <span>Reset</span>
+                </button>
+
             </div>
 
-            {{-- Status --}}
-            <div class="mb-8 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                <label class="flex items-center gap-3 cursor-pointer">
-                    <input id="editStatus" type="checkbox" name="is_available" value="1" class="w-5 h-5 text-[#8dc63f] bg-white border-gray-300 rounded focus:ring-[#8dc63f] focus:ring-2 transition-all">
-                    <span class="text-sm font-bold text-gray-700">Tampilkan produk ini di katalog</span>
-                </label>
-            </div>
+        </div>
 
-            <div class="grid grid-cols-2 gap-3 mt-auto">
-                <button type="button" onclick="closeModal('editModal')" class="w-full border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 py-3.5 rounded-xl text-sm font-bold transition-colors outline-none focus:ring-4 focus:ring-gray-100">
-                    Batal
-                </button>
-                <button type="submit" class="w-full bg-[#8dc63f] hover:bg-green-600 text-white py-3.5 rounded-xl text-sm font-bold shadow-md shadow-green-500/20 transition-all hover:-translate-y-0.5 outline-none focus:ring-4 focus:ring-green-100">
-                    Simpan Perubahan
-                </button>
-            </div>
-        </form>
+        <!-- Info Hitungan Hasil Filter -->
+        <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-medium">
+            <span>
+                Menampilkan <strong class="text-slate-800" x-text="filteredProducts.length"></strong> dari <strong class="text-[#005ea2]">{{ $totalProducts }}</strong> menu
+            </span>
+        </div>
     </div>
+
+    <!-- ========================================================================= -->
+    <!-- 4. GRID KATALOG MENU (RESPONSIF & AESTHETIC PREMIUM)                      -->
+    <!-- ========================================================================= -->
+    @if($totalProducts > 0)
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5"
+             x-show="filteredProducts.length > 0">
+            
+            @foreach($products as $product)
+                @php
+                    $pData = $productsData->firstWhere('id', $product->id);
+                    $productCategory = $pData['category'];
+                    $hasImage = $pData['has_image'];
+                    $imageUrl = $pData['image'];
+
+                    // Deteksi jenis icon fallback kuliner
+                    $lowerName = strtolower($product->name);
+                    $isBeverage = \Illuminate\Support\Str::contains($lowerName, ['kopi', 'coffee', 'latte', 'tea', 'teh', 'milo', 'juice', 'jus', 'drink', 'beverage', 'air', 'mineral']) || $productCategory === 'Minuman';
+                    $isBakery = \Illuminate\Support\Str::contains($lowerName, ['toast', 'roti', 'bread', 'croissant', 'donut', 'cookie', 'cake', 'sandwich', 'pastry', 'snack', 'fries']) || $productCategory === 'Snack';
+                @endphp
+
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col overflow-hidden group"
+                     x-show="isProductVisible({{ $product->id }})"
+                     x-transition:enter="transition ease-out duration-150"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100">
+
+                    <!-- Foto Produk / Fallback Kuliner Estetik -->
+                    <div class="h-44 sm:h-48 w-full relative overflow-hidden bg-slate-50 border-b border-slate-100 flex items-center justify-center shrink-0">
+                        @if($hasImage)
+                            <img src="{{ $imageUrl }}" 
+                                 alt="{{ $product->name }}" 
+                                 loading="lazy" 
+                                 onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');" 
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            
+                            <!-- Fallback jika link gambar rusak -->
+                            <div class="hidden w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50/40 p-4 text-center">
+                                <div class="w-12 h-12 rounded-2xl bg-white shadow-2xs border border-slate-200/60 flex items-center justify-center text-slate-400 mb-1.5">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Foto Produk</span>
+                            </div>
+                        @else
+                            <!-- Tampilan Pengganti Foto (Rapi, Elegan, Bebas Huruf Raksasa) -->
+                            <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-slate-100/60 to-blue-50/30 p-4 text-center group-hover:bg-slate-100/80 transition-colors">
+                                <div class="w-13 h-13 rounded-2xl bg-white shadow-2xs border border-slate-200/80 flex items-center justify-center text-[#005ea2] mb-2 group-hover:scale-110 transition-transform">
+                                    @if($isBeverage)
+                                        <!-- Ikon Minuman -->
+                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7m14-5v2a4 4 0 01-4 4H8a4 4 0 01-4-4V4m0 0h16" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 16v5m-4 0h8" />
+                                        </svg>
+                                    @elseif($isBakery)
+                                        <!-- Ikon Roti / Snack -->
+                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 15.5a5 5 0 01-7 4.5 5 5 0 01-7-4.5V11a2 2 0 012-2h10a2 2 0 012 2v4.5z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 11V7a2 2 0 012-2h12a2 2 0 012 2v4" />
+                                        </svg>
+                                    @else
+                                        <!-- Ikon Makanan Utama / Sajian Dapur -->
+                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 3v2m0 16a9 9 0 009-9H3a9 9 0 009 9z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7 10h10" />
+                                        </svg>
+                                    @endif
+                                </div>
+                                <span class="text-[11px] font-bold text-slate-500">Foto Belum Diunggah</span>
+                                <span class="text-[10px] text-slate-400 font-semibold mt-0.5">Klik edit untuk pasang foto</span>
+                            </div>
+                        @endif
+
+                        <!-- Badge Status Tayang di Pojok Kiri Atas -->
+                        <div class="absolute top-3 left-3">
+                            @if(!$product->is_available)
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-600 text-white shadow-xs">
+                                    <span>Nonaktif</span>
+                                </span>
+                            @elseif($product->stock <= 0)
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-500 text-white shadow-xs">
+                                    <span>Stok Habis</span>
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500 text-white shadow-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                                    <span>Aktif</span>
+                                </span>
+                            @endif
+                        </div>
+
+                        <!-- Tombol Cepat Toggle Status di Pojok Kanan Atas -->
+                        <div class="absolute top-3 right-3">
+                            <form method="POST" action="{{ route('tenant.products.toggle', $product) }}">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" 
+                                        title="{{ $product->is_available ? 'Klik untuk nonaktifkan menu ini' : 'Klik untuk mengaktifkan menu ini' }}"
+                                        class="h-7 px-2.5 rounded-lg bg-white/95 hover:bg-white text-slate-700 shadow-xs backdrop-blur-xs text-[10px] font-bold flex items-center gap-1.5 transition-all active:scale-95 border border-slate-200 cursor-pointer">
+                                    @if(!$product->is_available)
+                                        <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                                        <span class="text-slate-500">Off</span>
+                                    @elseif($product->stock <= 0)
+                                        <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                                        <span class="text-rose-600 font-bold">Habis</span>
+                                    @else
+                                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                        <span class="text-emerald-700 font-bold">On</span>
+                                    @endif
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Informasi Produk -->
+                    <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between">
+                        
+                        <div>
+                            <!-- Kategori & Stok Badge -->
+                            <div class="flex items-center justify-between gap-2 mb-2">
+                                <span class="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md truncate max-w-[140px]" 
+                                      title="{{ $productCategory }}">
+                                    {{ $productCategory }}
+                                </span>
+                                
+                                @if($product->stock > 10)
+                                    <span class="text-[10px] sm:text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/70 px-2 py-0.5 rounded-md shrink-0">
+                                        Stok: {{ $product->stock }}
+                                    </span>
+                                @elseif($product->stock > 0)
+                                    <span class="text-[10px] sm:text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200/70 px-2 py-0.5 rounded-md shrink-0">
+                                        Stok: {{ $product->stock }}
+                                    </span>
+                                @else
+                                    <span class="text-[10px] sm:text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200/70 px-2 py-0.5 rounded-md shrink-0">
+                                        Stok: 0
+                                    </span>
+                                @endif
+                            </div>
+
+                            <!-- Nama Produk -->
+                            <h3 class="font-black text-slate-900 text-sm sm:text-base leading-snug line-clamp-2 group-hover:text-[#005ea2] transition-colors" 
+                                title="{{ $product->name }}">
+                                {{ $product->name }}
+                            </h3>
+
+                            <!-- Harga -->
+                            <div class="text-base sm:text-lg font-black text-[#005ea2] mt-1.5">
+                                Rp {{ number_format($product->price, 0, ',', '.') }}
+                            </div>
+
+                            <!-- Deskripsi Singkat jika ada -->
+                            @if($product->description)
+                                <p class="text-xs text-slate-500 font-medium line-clamp-1 mt-1">
+                                    {{ $product->description }}
+                                </p>
+                            @endif
+                        </div>
+
+                        <!-- Baris Aksi Kartu: Rapi, Modern, dan Sejajar -->
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-1.5">
+                            
+                            <!-- Tombol Edit Menu -->
+                            <button type="button" 
+                                    @click="openEditModal(@js($pData))" 
+                                    class="flex-1 bg-slate-100 hover:bg-[#005ea2] hover:text-white text-slate-700 font-bold text-xs py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                                <span>Edit</span>
+                            </button>
+
+                            <!-- Tombol Lihat Detail -->
+                            <button type="button" 
+                                    @click="openDetailModal(@js($pData))" 
+                                    class="p-2 rounded-xl bg-blue-50/80 hover:bg-blue-100 text-[#005ea2] transition-colors flex items-center justify-center cursor-pointer shadow-2xs" 
+                                    title="Lihat detail menu">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+
+                            <!-- Tombol Hapus Menu -->
+                            <form method="POST" 
+                                  action="{{ route('tenant.products.destroy', $product) }}" 
+                                  onsubmit="return confirm('Apakah Anda yakin ingin menghapus menu \'{{ addslashes($product->name) }}\'? Menu yang dihapus tidak dapat dipulihkan.')" 
+                                  class="inline-block">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" 
+                                        class="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors flex items-center justify-center cursor-pointer shadow-2xs" 
+                                        title="Hapus menu dari katalog">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            @endforeach
+
+        </div>
+
+        <!-- State Kosong Jika Filter Tidak Menemukan Hasil -->
+        <div x-show="filteredProducts.length === 0" 
+             x-cloak 
+             class="bg-white rounded-2xl border border-dashed border-slate-300 text-center py-16 px-4 shadow-2xs">
+            <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3 text-slate-400">
+                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+            <h4 class="text-base font-black text-slate-900">Menu Tidak Ditemukan</h4>
+            <p class="text-xs text-slate-500 font-semibold mt-1 max-w-sm mx-auto">
+                Tidak ada menu yang cocok dengan kata kunci atau filter yang Anda pilih.
+            </p>
+            <button type="button" 
+                    @click="resetFilters()" 
+                    class="mt-4 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer">
+                Reset Semua Filter
+            </button>
+        </div>
+
+    @else
+        <!-- State Kosong: Belum Ada Produk Sama Sekali -->
+        <div class="bg-white rounded-2xl border border-dashed border-slate-300 text-center py-20 px-4 shadow-2xs">
+            <div class="w-16 h-16 bg-blue-50 text-[#005ea2] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-black text-slate-900">Katalog Menu Masih Kosong</h3>
+            <p class="text-xs sm:text-sm text-slate-500 font-semibold mt-1 max-w-md mx-auto">
+                Tambahkan hidangan andalan gerai Anda sekarang agar penumpang di bandara dapat mulai memesan secara online.
+            </p>
+            <a href="{{ route('tenant.products.create') }}" 
+               class="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#005ea2] hover:bg-[#004b82] text-white text-xs sm:text-sm font-bold shadow-md shadow-blue-600/20 transition-all cursor-pointer">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Tambah Menu Pertama</span>
+            </a>
+        </div>
+    @endif
+
+    <!-- ========================================================================= -->
+    <!-- 5. MODAL DETAIL PRODUK (TELEPORT KE BODY)                                 -->
+    <!-- ========================================================================= -->
+    <template x-teleport="body">
+        <div x-show="showDetailModal" 
+             x-cloak 
+             class="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+             @keydown.escape.window="showDetailModal = false">
+            
+            <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 relative overflow-hidden flex flex-col max-h-[90vh]"
+                 @click.away="showDetailModal = false">
+                
+                <!-- Foto Banner / Fallback di Modal -->
+                <div class="h-52 bg-slate-100 relative flex items-center justify-center overflow-hidden shrink-0 border-b border-slate-100">
+                    <template x-if="activeProduct && activeProduct.image">
+                        <img :src="activeProduct.image" :alt="activeProduct.name" class="w-full h-full object-cover">
+                    </template>
+                    <template x-if="!activeProduct || !activeProduct.image">
+                        <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50/50 p-4">
+                            <div class="w-14 h-14 rounded-2xl bg-white shadow-2xs border border-slate-200 flex items-center justify-center text-[#005ea2] mb-1.5">
+                                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 3v2m0 16a9 9 0 009-9H3a9 9 0 009 9z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7 10h10" />
+                                </svg>
+                            </div>
+                            <span class="text-xs font-bold text-slate-500">Foto Belum Diunggah</span>
+                        </div>
+                    </template>
+                    
+                    <!-- Tombol Tutup Silang di Sudut Atas -->
+                    <button type="button" 
+                            @click="showDetailModal = false" 
+                            class="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-900/40 hover:bg-slate-900/60 backdrop-blur-xs text-white flex items-center justify-center transition cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Konten Rincian Menu -->
+                <div class="p-5 sm:p-6 overflow-y-auto space-y-4">
+                    
+                    <div>
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-md" 
+                                  x-text="activeProduct ? activeProduct.category : ''"></span>
+                            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full"
+                                  :class="activeProduct && activeProduct.is_available ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600 border border-slate-200'"
+                                  x-text="activeProduct && activeProduct.is_available ? 'Aktif (Siap Dipesan)' : 'Nonaktif'"></span>
+                        </div>
+                        
+                        <h3 class="text-xl font-black text-slate-900 mt-2 leading-snug" 
+                            x-text="activeProduct ? activeProduct.name : ''"></h3>
+                        
+                        <div class="text-2xl font-black text-[#005ea2] mt-1" 
+                             x-text="activeProduct ? 'Rp ' + activeProduct.formatted_price : ''"></div>
+                    </div>
+
+                    <!-- Kotak Parameter Operasional -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-2.5 text-xs">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-slate-500 uppercase tracking-wider">Jumlah Stok:</span>
+                            <span class="font-black text-slate-800" x-text="activeProduct ? activeProduct.stock + ' porsi' : ''"></span>
+                        </div>
+                        <div class="flex items-center justify-between border-t border-slate-200/60 pt-2">
+                            <span class="font-bold text-slate-500 uppercase tracking-wider">Estimasi SLA Dapur:</span>
+                            <span class="font-black text-emerald-600">≤ 15 Menit</span>
+                        </div>
+                    </div>
+
+                    <!-- Deskripsi Produk -->
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Deskripsi Hidangan:</h4>
+                        <p class="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed bg-white p-3 rounded-xl border border-slate-100" 
+                           x-text="activeProduct && activeProduct.description ? activeProduct.description : 'Tidak ada deskripsi tambahan.'"></p>
+                    </div>
+
+                    <!-- Catatan Dapur -->
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Catatan Khusus Dapur:</h4>
+                        <p class="text-xs sm:text-sm text-slate-700 font-medium italic bg-amber-50/50 p-3 rounded-xl border border-amber-200/50 text-amber-900" 
+                           x-text="activeProduct && activeProduct.note ? activeProduct.note : 'Tidak ada catatan dapur khusus.'"></p>
+                    </div>
+
+                    <!-- Tombol Aksi Modal -->
+                    <div class="pt-2 flex items-center gap-2.5">
+                        <button type="button" 
+                                @click="showDetailModal = false; openEditModal(activeProduct)" 
+                                class="flex-1 py-2.5 px-4 rounded-xl bg-[#005ea2] hover:bg-[#004b82] text-white text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            <span>Edit Menu Ini</span>
+                        </button>
+                        <button type="button" 
+                                @click="showDetailModal = false" 
+                                class="py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer">
+                            Tutup
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </template>
+
+    <!-- ========================================================================= -->
+    <!-- 6. MODAL EDIT PRODUK (TELEPORT KE BODY)                                   -->
+    <!-- ========================================================================= -->
+    <template x-teleport="body">
+        <div x-show="showEditModal" 
+             x-cloak 
+             class="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+             @keydown.escape.window="showEditModal = false">
+            
+            <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 relative flex flex-col max-h-[92vh] overflow-hidden"
+                 @click.away="showEditModal = false">
+                
+                <!-- Header Modal Edit -->
+                <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/60 shrink-0">
+                    <div>
+                        <h3 class="text-base font-black text-slate-900">Edit Informasi Menu</h3>
+                        <p class="text-xs text-slate-500 font-semibold mt-0.5">Perbarui harga, ketersediaan, stok, atau foto produk.</p>
+                    </div>
+                    <button type="button" 
+                            @click="showEditModal = false" 
+                            class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Form Edit Produk -->
+                <form :action="editActionUrl" 
+                      method="POST" 
+                      enctype="multipart/form-data" 
+                      class="overflow-y-auto p-5 sm:p-6 space-y-4">
+                    @csrf
+                    @method('PUT')
+
+                    <!-- Nama Menu -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                            Nama Menu <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" 
+                               name="name" 
+                               x-model="editForm.name" 
+                               required 
+                               maxlength="120" 
+                               class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition">
+                    </div>
+
+                    <!-- Kategori -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                            Kategori Menu
+                        </label>
+                        <select name="category" 
+                                x-model="editForm.category" 
+                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition cursor-pointer">
+                            <option value="">Pilih Kategori Menu...</option>
+                            <option value="Makanan Utama">Makanan Utama</option>
+                            <option value="Snack">Snack</option>
+                            <option value="Minuman">Minuman</option>
+                            <option value="Dessert">Dessert</option>
+                            @foreach($categoriesList as $c)
+                                @if(!in_array($c, ['Makanan Utama', 'Snack', 'Minuman', 'Dessert']))
+                                    <option value="{{ $c }}">{{ $c }}</option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Grid Harga & Stok -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                                Harga Jual (Rp) <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="number" 
+                                   name="price" 
+                                   x-model="editForm.price" 
+                                   required 
+                                   min="0" 
+                                   step="any" 
+                                   class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                                Jumlah Stok (Porsi) <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="number" 
+                                   name="stock" 
+                                   x-model="editForm.stock" 
+                                   required 
+                                   min="0" 
+                                   class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition">
+                        </div>
+                    </div>
+
+                    <!-- Deskripsi -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                            Deskripsi Menu (Opsional)
+                        </label>
+                        <textarea name="description" 
+                                  x-model="editForm.description" 
+                                  rows="2" 
+                                  maxlength="300" 
+                                  placeholder="Jelaskan komposisi atau rasa hidangan ini..." 
+                                  class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition"></textarea>
+                    </div>
+
+                    <!-- Catatan Dapur -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                            Catatan Khusus Dapur (Opsional)
+                        </label>
+                        <textarea name="note" 
+                                  x-model="editForm.note" 
+                                  rows="2" 
+                                  maxlength="1000" 
+                                  placeholder="Petunjuk khusus koki, misal: bumbu terpisah, alergi, dsb..." 
+                                  class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition"></textarea>
+                    </div>
+
+                    <!-- Foto Produk -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                            Foto Menu Produk (Opsional)
+                        </label>
+                        
+                        <div class="flex items-center gap-3 mb-2.5">
+                            <!-- Preview Box -->
+                            <div class="w-16 h-16 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden shrink-0">
+                                <template x-if="editPreviewUrl">
+                                    <img :src="editPreviewUrl" class="w-full h-full object-cover">
+                                </template>
+                                <template x-if="!editPreviewUrl">
+                                    <span class="text-[10px] text-slate-400 font-bold text-center px-1">Tanpa Foto</span>
+                                </template>
+                            </div>
+                            <div class="text-xs text-slate-500">
+                                <p class="font-bold text-slate-700" x-text="editPreviewUrl ? 'Foto siap digunakan' : 'Pilih file gambar untuk menambah foto'"></p>
+                                <p class="text-[11px] text-slate-400">Format: JPG, PNG, WEBP (Maksimal 5MB)</p>
+                            </div>
+                        </div>
+
+                        <input type="file" 
+                               name="image" 
+                               accept="image/png,image/jpeg,image/jpg,image/webp" 
+                               @change="handleImageChange($event)" 
+                               class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-[#005ea2] hover:file:bg-blue-100 transition cursor-pointer">
+                    </div>
+
+                    <!-- Status Ketersediaan Checkbox -->
+                    <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" 
+                                   name="is_available" 
+                                   value="1" 
+                                   x-model="editForm.is_available" 
+                                   class="w-4 h-4 text-[#005ea2] bg-white border-slate-300 rounded focus:ring-[#005ea2] focus:ring-2 transition cursor-pointer">
+                            <div>
+                                <span class="text-xs sm:text-sm font-bold text-slate-800 block">Tampilkan menu ini di katalog penumpang</span>
+                                <span class="text-[11px] text-slate-400 font-medium">Bila dicentang, menu akan langsung dapat dipesan oleh penumpang.</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Tombol Sticky Footer -->
+                    <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+                        <button type="button" 
+                                @click="showEditModal = false" 
+                                class="px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-bold transition cursor-pointer">
+                            Batal
+                        </button>
+                        <button type="submit" 
+                                class="px-5 py-2.5 rounded-xl bg-[#005ea2] hover:bg-[#004b82] text-white text-xs font-bold shadow-md shadow-blue-600/20 transition-all cursor-pointer">
+                            Simpan Perubahan
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </template>
+
 </div>
 
-<script nonce="{{ $cspNonce }}">
-// Logika Pencarian
-const search = document.getElementById('searchProduct');
-search?.addEventListener('input', function () {
-    const keyword = this.value.toLowerCase();
-    document.querySelectorAll('.product-card').forEach(card => {
-        const name = card.querySelector('.product-name').textContent.toLowerCase();
-        // Cukup ubah style display kartunya secara langsung
-        if (name.includes(keyword)) {
-            card.style.display = "";
-        } else {
-            card.style.display = "none";
+<script nonce="{{ $cspNonce ?? '' }}">
+function productCatalog() {
+    return {
+        products: @js($productsData),
+        searchQuery: '',
+        filterCategory: 'all',
+        filterStatus: 'all',
+        filterStock: 'all',
+        showDetailModal: false,
+        showEditModal: false,
+        activeProduct: null,
+        editActionUrl: '',
+        editPreviewUrl: null,
+        editForm: {
+            id: null,
+            name: '',
+            category: '',
+            price: 0,
+            stock: 0,
+            description: '',
+            note: '',
+            is_available: true
+        },
+
+        get filteredProducts() {
+            return this.products.filter(p => {
+                // Filter Pencarian Teks
+                if (this.searchQuery) {
+                    const q = this.searchQuery.toLowerCase();
+                    const matchName = p.name.toLowerCase().includes(q);
+                    const matchCat = (p.category || '').toLowerCase().includes(q);
+                    const matchPrice = p.price.toString().includes(q) || p.formatted_price.includes(q);
+                    const matchDesc = (p.description || '').toLowerCase().includes(q);
+                    if (!matchName && !matchCat && !matchPrice && !matchDesc) {
+                        return false;
+                    }
+                }
+
+                // Filter Kategori
+                if (this.filterCategory !== 'all' && p.category !== this.filterCategory) {
+                    return false;
+                }
+
+                // Filter Status Ketersediaan
+                if (this.filterStatus === 'active' && !p.is_available) {
+                    return false;
+                }
+                if (this.filterStatus === 'inactive' && p.is_available) {
+                    return false;
+                }
+
+                // Filter Stok
+                if (this.filterStock === 'ready' && p.stock <= 0) {
+                    return false;
+                }
+                if (this.filterStock === 'empty' && p.stock > 0) {
+                    return false;
+                }
+
+                return true;
+            });
+        },
+
+        isProductVisible(id) {
+            return this.filteredProducts.some(p => p.id === id);
+        },
+
+        resetFilters() {
+            this.searchQuery = '';
+            this.filterCategory = 'all';
+            this.filterStatus = 'all';
+            this.filterStock = 'all';
+        },
+
+        openDetailModal(product) {
+            this.activeProduct = product;
+            this.showDetailModal = true;
+        },
+
+        openEditModal(product) {
+            this.editForm = {
+                id: product.id,
+                name: product.name,
+                category: product.category,
+                price: product.price,
+                stock: product.stock,
+                description: product.description,
+                note: product.note,
+                is_available: product.is_available
+            };
+            this.editActionUrl = '/tenant/products/' + product.id;
+            this.editPreviewUrl = product.image;
+            this.showEditModal = true;
+        },
+
+        handleImageChange(event) {
+            const file = event.target.files[0];
+            if (file) {
+                this.editPreviewUrl = URL.createObjectURL(file);
+            }
         }
-    });
-});
-
-// Modal Populator
-function showDetail(button) {
-    document.getElementById('detailName').textContent = button.dataset.name;
-    document.getElementById('detailCategory').textContent = button.dataset.category || '-';
-    document.getElementById('detailPrice').textContent = 'Rp ' + button.dataset.price;
-    document.getElementById('detailStock').textContent = (button.dataset.stock ?? 0) + ' item';
-    document.getElementById('detailDescription').textContent = button.dataset.description || '-';
-    document.getElementById('detailNote').textContent = button.dataset.note || '-';
-    document.getElementById('detailStatus').textContent = button.dataset.status;
-
-    const image = document.getElementById('detailImage');
-    if (button.dataset.image) {
-        image.innerHTML = `<img src="${button.dataset.image}" class="w-full h-full object-cover">
-                           <button onclick="closeModal('detailModal')" class="absolute top-4 right-4 h-8 w-8 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-colors z-10"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>`;
-    } else {
-        image.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-blue-50 to-gray-100 flex items-center justify-center"><span class="text-7xl font-black text-blue-200 select-none">${button.dataset.name.charAt(0).toUpperCase()}</span></div>
-                           <button onclick="closeModal('detailModal')" class="absolute top-4 right-4 h-8 w-8 bg-black/5 hover:bg-black/10 rounded-full flex items-center justify-center text-gray-500 transition-colors z-10"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>`;
-    }
-
-    openModal('detailModal', 'detailModalCard');
-}
-
-function previewEditImage(event) {
-    const file = event.target.files[0];
-    const previewContainer = document.getElementById('editCurrentPhotoPreview');
-    const noteEl = document.getElementById('editPhotoNote');
-    if (file) {
-        const url = URL.createObjectURL(file);
-        previewContainer.innerHTML = `<img src="${url}" class="w-full h-full object-cover">`;
-        noteEl.textContent = `Foto terpilih: ${file.name}`;
-    }
-}
-
-function editProduct(button) {
-    document.getElementById('editName').value = button.dataset.name;
-    
-    // Set kategori (jika belum ada di opsi default, tambahkan opsi baru secara dinamis)
-    const catSelect = document.getElementById('editCategory');
-    const currentCat = button.dataset.category || '';
-    if (currentCat && ![...catSelect.options].some(opt => opt.value === currentCat)) {
-        const newOpt = document.createElement('option');
-        newOpt.value = currentCat;
-        newOpt.textContent = currentCat;
-        catSelect.appendChild(newOpt);
-    }
-    catSelect.value = currentCat;
-
-    document.getElementById('editPrice').value = button.dataset.price;
-    document.getElementById('editStock').value = button.dataset.stock ?? 0;
-    document.getElementById('editDescription').value = button.dataset.description;
-    document.getElementById('editNote').value = button.dataset.note;
-    document.getElementById('editStatus').checked = button.dataset.status === '1';
-
-    // Reset input file
-    const fileInput = document.getElementById('editImageInput');
-    if (fileInput) fileInput.value = '';
-
-    // Tampilkan foto saat ini jika ada
-    const previewContainer = document.getElementById('editCurrentPhotoPreview');
-    const noteEl = document.getElementById('editPhotoNote');
-    if (button.dataset.image) {
-        previewContainer.innerHTML = `<img src="${button.dataset.image}" class="w-full h-full object-cover">`;
-        noteEl.textContent = 'Foto saat ini tersimpan. Pilih file baru jika ingin mengubahnya.';
-    } else {
-        previewContainer.innerHTML = `<span class="text-[10px] text-gray-400 font-semibold text-center px-1">Tanpa Foto</span>`;
-        noteEl.textContent = 'Pilih file gambar jika ingin menambahkan foto produk.';
-    }
-
-    document.getElementById('editForm').action = `/tenant/products/${button.dataset.id}`;
-
-    openModal('editModal', 'editModalCard');
-}
-
-// Interaksi Animasi Modal JS Murni (Vanilla)
-function openModal(modalId, cardId) {
-    const modal = document.getElementById(modalId);
-    const card = document.getElementById(cardId);
-
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    
-    // Memberikan delay mikro agar transisi scale berjalan
-    requestAnimationFrame(() => {
-        card.classList.remove('scale-95');
-        card.classList.add('scale-100');
-    });
-}
-
-function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    const card = modal.querySelector('div[id$="Card"]');
-
-    if (card) {
-        card.classList.remove('scale-100');
-        card.classList.add('scale-95');
-    }
-
-    // Menunggu durasi animasi selesai sebelum hide (300ms sesuai class Tailwind)
-    setTimeout(() => {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }, 300);
+    };
 }
 </script>
 @endsection

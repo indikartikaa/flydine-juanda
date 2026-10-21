@@ -39,6 +39,20 @@ class TenantOrderController extends Controller
             ->where('is_available', true)
             ->count();
 
+        // Total Omzet Penjualan Selesai Hari Ini
+        $todayRevenue = (float) Order::where('tenant_id', $tenantId)
+            ->where('is_paid', true)
+            ->where('status', 'selesai')
+            ->where('updated_at', '>=', $today)
+            ->sum('total_amount');
+
+        // Ringkasan Menu Produk Aktif
+        $activeProducts = Product::where('tenant_id', $tenantId)
+            ->where('is_available', true)
+            ->latest()
+            ->take(4)
+            ->get();
+
         // 5 Pesanan Terbaru
         $recentOrders = Order::with('orderItems')
             ->where('tenant_id', $tenantId)
@@ -52,6 +66,8 @@ class TenantOrderController extends Controller
             'countDiproses', 
             'countSelesai', 
             'countProduk', 
+            'todayRevenue',
+            'activeProducts',
             'recentOrders'
         ));
     }
@@ -63,7 +79,7 @@ class TenantOrderController extends Controller
     {
         $tenantId = auth()->user()->tenant_id;
 
-        $orders = Order::with(['orderItems', 'deliveryLocation'])
+        $orders = Order::with(['orderItems', 'deliveryLocation', 'customer'])
             ->where('tenant_id', $tenantId)
             ->where('is_paid', true)
             ->whereIn('status', ['menunggu', 'diproses', 'siap'])
@@ -80,13 +96,13 @@ class TenantOrderController extends Controller
     {
         $tenantId = auth()->user()->tenant_id;
 
-        $query = Order::with(['orderItems', 'deliveryLocation'])
+        $query = Order::with(['orderItems', 'deliveryLocation', 'customer'])
             ->where('tenant_id', $tenantId)
             ->where('is_paid', true)
             ->whereIn('status', ['selesai', 'ditolak', 'dibatalkan']);
 
         // Filter Tanggal
-        if ($request->filled('date_filter')) {
+        if ($request->filled('date_filter') && $request->date_filter !== 'all') {
             $filter = $request->date_filter;
             if ($filter === 'today') {
                 $query->whereDate('ordered_at', today());
@@ -100,9 +116,41 @@ class TenantOrderController extends Controller
             }
         }
 
-        $orders = $query->latest('ordered_at')->paginate(15)->withQueryString();
+        // Filter Pencarian (ID Pesanan, Customer, Flight)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('order_code', 'like', "%{$search}%")
+                  ->orWhere('customer_name', 'like', "%{$search}%")
+                  ->orWhere('flight_number', 'like', "%{$search}%");
+            });
+        }
 
-        return view('tenant.history', compact('orders'));
+        // Filter Status Khusus (Selesai / Dibatalkan)
+        if ($request->filled('status_filter') && $request->status_filter !== 'all') {
+            if ($request->status_filter === 'selesai') {
+                $query->where('status', 'selesai');
+            } elseif (in_array($request->status_filter, ['dibatalkan', 'ditolak'])) {
+                $query->whereIn('status', ['dibatalkan', 'ditolak']);
+            }
+        }
+
+        // Ringkasan Statistik Riwayat
+        $baseStatsQuery = Order::where('tenant_id', $tenantId)->where('is_paid', true);
+        $totalCompleted = (clone $baseStatsQuery)->where('status', 'selesai')->count();
+        $totalRevenue = (float) (clone $baseStatsQuery)->where('status', 'selesai')->sum('total_amount');
+        $totalCancelled = (clone $baseStatsQuery)->whereIn('status', ['ditolak', 'dibatalkan'])->count();
+        $todayCompleted = (clone $baseStatsQuery)->where('status', 'selesai')->whereDate('ordered_at', today())->count();
+
+        $orders = $query->latest('ordered_at')->paginate(10)->withQueryString();
+
+        return view('tenant.history', compact(
+            'orders',
+            'totalCompleted',
+            'totalRevenue',
+            'totalCancelled',
+            'todayCompleted'
+        ));
     }
 
     /**
@@ -116,10 +164,23 @@ class TenantOrderController extends Controller
         }
 
         $request->validate([
-            'status' => 'required|in:diproses,siap,selesai,dibatalkan'
+            'status' => 'required|in:diproses,siap,selesai,dibatalkan,ditolak'
         ]);
 
-        $order->status = $request->status;
+        $oldStatus = $order->status;
+        $status = in_array($request->status, ['dibatalkan', 'ditolak']) ? 'dibatalkan' : $request->status;
+        $order->status = $status;
+        
+        // Kembalikan kuota stok jika pesanan ditolak/dibatalkan oleh tenant dan DB trigger tidak aktif (SQLite test)
+        if (in_array($request->status, ['dibatalkan', 'ditolak']) && !in_array($oldStatus, ['dibatalkan', 'ditolak'])) {
+            if (!in_array(\Illuminate\Support\Facades\DB::getDriverName(), ['mysql', 'mariadb'])) {
+                foreach ($order->orderItems as $item) {
+                    if ($item->product_id) {
+                        Product::where('id', $item->product_id)->increment('stock', $item->quantity);
+                    }
+                }
+            }
+        }
         
         if ($request->status === 'siap' || $request->status === 'selesai') {
             if (!$order->ready_at) {

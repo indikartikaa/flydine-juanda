@@ -284,20 +284,40 @@
                             }
                         }
                     }
+                    $isAvailable = $product->is_available && $product->stock > 0;
+                    $isLowStock = $isAvailable && $product->stock <= 5;
                 @endphp
-                <div class="menu-item-card bg-white rounded-[1.75rem] border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-blue-300 transition-all duration-300 p-4 sm:p-5 flex flex-col group relative overflow-hidden"
+                <div class="menu-item-card bg-white rounded-[1.75rem] border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-blue-300 transition-all duration-300 p-4 sm:p-5 flex flex-col group relative overflow-hidden {{ !$isAvailable ? 'opacity-85 bg-slate-50/40' : '' }}"
                      data-name="{{ strtolower($product->name) }}"
                      data-desc="{{ strtolower($product->description ?? '') }}"
                      data-category="{{ strtolower($product->category ?? '') }}">
                     
                     <!-- Dedicated Image Frame (Fits Uploaded Images or Clean Frame Placeholder) -->
                     <div class="h-44 sm:h-48 rounded-2xl overflow-hidden relative mb-4 bg-slate-50 border border-slate-100 flex items-center justify-center">
+                        @if(!$isAvailable)
+                            <!-- High-Contrast Out-of-Stock Center Overlay -->
+                            <div class="absolute inset-0 z-30 flex flex-col items-center justify-center p-3 text-center" style="background-color: rgba(15, 23, 42, 0.45); backdrop-filter: blur(2px);">
+                                <div class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full shadow-lg border border-white/30" style="background-color: #dc2626; color: #ffffff;">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                    </svg>
+                                    <span class="text-xs font-black uppercase tracking-wider" data-id="Stok Habis" data-en="Sold Out">Stok Habis</span>
+                                </div>
+                            </div>
+                        @elseif($isLowStock)
+                            <!-- Floating Low Stock Warning Badge -->
+                            <div class="absolute top-3 left-3 z-20 inline-flex items-center space-x-1 px-2.5 py-1 rounded-full shadow-md" style="background-color: #d97706; color: #ffffff;">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                <span class="text-[10px] font-bold tracking-wide">Sisa {{ $product->stock }} porsi</span>
+                            </div>
+                        @endif
+
                         @if($hasProductImage)
                             <img src="{{ $productImageUrl }}" 
                                  alt="{{ $product->name }}" 
                                  loading="lazy" 
                                  onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.classList.remove('hidden');" 
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 {{ !$isAvailable ? 'grayscale opacity-60' : '' }}">
                             <!-- Graceful fallback if image fails to load -->
                             <div class="hidden w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100/70 text-slate-300">
                                 <div class="w-12 h-12 rounded-2xl bg-white shadow-xs border border-slate-200/60 flex items-center justify-center text-slate-300">
@@ -321,7 +341,7 @@
                     </div>
 
                     <!-- Title & Optional Description -->
-                    <h3 class="font-extrabold text-base sm:text-lg text-slate-900 tracking-tight mb-1.5 group-hover:text-[#005ea2] transition-colors line-clamp-1">
+                    <h3 class="font-extrabold text-base sm:text-lg text-slate-900 tracking-tight mb-1.5 group-hover:text-[#005ea2] transition-colors line-clamp-1 {{ !$isAvailable ? 'text-slate-400' : '' }}">
                         {{ $product->name }}
                     </h3>
                     
@@ -337,18 +357,28 @@
                     <div class="flex items-center justify-between pt-3 border-t border-slate-100 mt-auto">
                         <div>
                             <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Harga</span>
-                            <span class="font-black text-lg sm:text-xl text-[#005ea2] tracking-tight">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                            <span class="font-black text-lg sm:text-xl {{ $isAvailable ? 'text-[#005ea2]' : 'text-slate-400 line-through decoration-slate-300' }} tracking-tight">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
                         </div>
                         
-                        <button type="button" 
-                                onclick="addToCart({{ $product->id }}, {{ $tenant->id }}, this)" 
-                                aria-label="Tambah {{ $product->name }}" 
-                                class="add-to-cart-btn inline-flex items-center space-x-1.5 bg-[#005ea2] hover:bg-blue-700 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-md shadow-blue-500/20 active:scale-95 transition-all cursor-pointer group/btn">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover/btn:scale-110 transition-transform pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-                            </svg>
-                            <span class="pointer-events-none">Pesan</span>
-                        </button>
+                        @if($isAvailable)
+                            <button type="button" 
+                                    onclick="addToCart({{ $product->id }}, {{ $tenant->id }}, this)" 
+                                    aria-label="Tambah {{ $product->name }}" 
+                                    class="add-to-cart-btn inline-flex items-center space-x-1.5 bg-[#005ea2] hover:bg-blue-700 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-md shadow-blue-500/20 active:scale-95 transition-all cursor-pointer group/btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover/btn:scale-110 transition-transform pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                                </svg>
+                                <span class="pointer-events-none">Pesan</span>
+                            </button>
+                        @else
+                            <button type="button" 
+                                    disabled 
+                                    class="inline-flex items-center space-x-1.5 font-black text-xs px-4 py-2.5 rounded-xl cursor-not-allowed border shadow-none"
+                                    style="background-color: #fff1f2; color: #dc2626; border-color: #fecdd3;">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+                                <span data-id="Stok Habis" data-en="Sold Out">Stok Habis</span>
+                            </button>
+                        @endif
                     </div>
                 </div>
                 @empty

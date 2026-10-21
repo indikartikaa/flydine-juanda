@@ -132,4 +132,27 @@ class TenantProductController extends Controller
             ->route('tenant.products')
             ->with('success', 'Produk berhasil dihapus.');
     }
+
+    public function toggle(Product $product)
+    {
+        $this->checkTenant($product);
+
+        $product->update([
+            'is_available' => !$product->is_available,
+        ]);
+
+        $statusText = $product->is_available ? 'diaktifkan' : 'dinonaktifkan';
+
+        if (request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'is_available' => $product->is_available,
+                'message' => "Status menu '{$product->name}' berhasil {$statusText}.",
+            ]);
+        }
+
+        return redirect()
+            ->route('tenant.products')
+            ->with('success', "Status menu '{$product->name}' berhasil {$statusText}.");
+    }
 }

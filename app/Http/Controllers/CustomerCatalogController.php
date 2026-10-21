@@ -172,6 +172,15 @@ class CustomerCatalogController extends Controller
             $order->save();
             session()->forget('order_code');
 
+            // Kembalikan kuota stok produk yang dibatalkan jika DB trigger tidak aktif (misal di SQLite test)
+            if (!in_array(DB::getDriverName(), ['mysql', 'mariadb'])) {
+                foreach ($order->orderItems as $item) {
+                    if ($item->product_id) {
+                        Product::where('id', $item->product_id)->increment('stock', $item->quantity);
+                    }
+                }
+            }
+
             // Deteksi Pola Fraud / Spam (jika customer batalkan >= 5 order dalam 30 menit)
             if ($order->customer_id) {
                 $fraudService = app(\App\Services\FraudDetectionService::class);
@@ -274,9 +283,22 @@ class CustomerCatalogController extends Controller
             return redirect()->back()->with('error', 'Restoran sedang tutup.');
         }
 
+        if (!$product || !$product->is_available || $product->stock <= 0) {
+            if ($isJson) {
+                return response()->json(['error' => 'unavailable', 'message' => 'Mohon maaf, menu ini sedang habis atau tidak tersedia.'], 400);
+            }
+            return redirect()->back()->with('error', 'Mohon maaf, menu ini sedang habis atau tidak tersedia.');
+        }
+
         $productId = $product->id;
 
         if (isset($cart[$productId])) {
+            if ($cart[$productId]['quantity'] >= $product->stock) {
+                if ($isJson) {
+                    return response()->json(['error' => 'stock_limit', 'message' => "Stok hanya tersedia {$product->stock} porsi."], 400);
+                }
+                return redirect()->back()->with('error', "Stok hanya tersedia {$product->stock} porsi.");
+            }
             $cart[$productId]['quantity']++;
         } else {
             $cart[$productId] = [
@@ -314,18 +336,28 @@ class CustomerCatalogController extends Controller
     {
         $request->validate([
             'product_id' => 'required',
-            'action' => 'required|in:increase,decrease,remove'
+            'action' => 'required|in:increase,decrease,remove,set',
+            'quantity' => 'nullable|integer|min:0'
         ]);
 
         $cart = session()->get('cart', []);
         $productId = $request->product_id;
+        $isJson = $request->expectsJson() || $request->wantsJson() || $request->ajax() || $request->isJson();
 
         $targetItem = null;
         $jumlah = 0;
         $subtotal = 0;
 
         if (isset($cart[$productId])) {
+            $product = Product::find($productId);
+
             if ($request->action == 'increase') {
+                if ($product && $cart[$productId]['quantity'] >= $product->stock) {
+                    if ($isJson) {
+                        return response()->json(['error' => 'stock_limit', 'message' => "Stok maksimal tercapai ({$product->stock} porsi)."], 400);
+                    }
+                    return redirect()->back()->with('error', "Stok maksimal tercapai ({$product->stock} porsi).");
+                }
                 $cart[$productId]['quantity']++;
             } elseif ($request->action == 'decrease') {
                 $cart[$productId]['quantity']--;
@@ -334,6 +366,25 @@ class CustomerCatalogController extends Controller
                 }
             } elseif ($request->action == 'remove') {
                 unset($cart[$productId]);
+            } elseif ($request->action == 'set') {
+                $targetQty = (int) $request->input('quantity', 1);
+                if ($targetQty <= 0) {
+                    unset($cart[$productId]);
+                } else {
+                    if ($product && $targetQty > $product->stock) {
+                        if ($isJson) {
+                            return response()->json([
+                                'error' => 'stock_limit', 
+                                'message' => "Stok hanya tersedia {$product->stock} porsi.",
+                                'available_stock' => $product->stock,
+                                'item' => $cart[$productId],
+                                'jumlah' => $cart[$productId]['quantity'],
+                            ], 400);
+                        }
+                        return redirect()->back()->with('error', "Stok hanya tersedia {$product->stock} porsi.");
+                    }
+                    $cart[$productId]['quantity'] = $targetQty;
+                }
             }
             session()->put('cart', $cart);
 
@@ -419,6 +470,15 @@ class CustomerCatalogController extends Controller
         }
 
         $request->validate($rules);
+
+        // Validasi ketersediaan dan stok produk terkini sebelum memproses checkout
+        foreach ($cart as $item) {
+            $productCheck = Product::find($item['id']);
+            if (!$productCheck || !$productCheck->is_available || $productCheck->stock < $item['quantity']) {
+                $avail = ($productCheck && $productCheck->is_available) ? $productCheck->stock : 0;
+                return redirect()->route('customer.cart')->with('error', "Mohon maaf, stok untuk menu '{$item['name']}' tidak mencukupi (tersedia {$avail} porsi). Silakan sesuaikan jumlah pesanan Anda.");
+            }
+        }
 
         $totalAmount = array_reduce($cart, function($carry, $item) {
             return $carry + ($item['price'] * $item['quantity']);
@@ -506,6 +566,15 @@ class CustomerCatalogController extends Controller
                     'unit_price' => $item['price'],
                     'subtotal' => $item['price'] * $item['quantity'],
                 ]);
+
+                // Kurangi stok produk secara otomatis saat dibeli jika DB trigger tidak aktif (misal di SQLite test)
+                if (!in_array(DB::getDriverName(), ['mysql', 'mariadb'])) {
+                    $product = Product::find($item['id']);
+                    if ($product && $product->stock > 0) {
+                        $newStock = max(0, $product->stock - $item['quantity']);
+                        $product->update(['stock' => $newStock]);
+                    }
+                }
             }
 
             return $newOrder;
