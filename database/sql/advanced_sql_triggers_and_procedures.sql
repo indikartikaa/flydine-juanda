@@ -94,14 +94,61 @@ END$$
 -- ----------------------------------------------------------------------------
 -- 4. STORED PROCEDURE: sp_ringkasan_transaksi_harian
 -- Parameter: IN p_tanggal DATE
--- Fungsi   : Menghasilkan 2 Result Set agregasi analitik harian:
---            1. Ringkasan Eksekutif KPI Bandara (Omset, SLA, Cancel Rate)
---            2. Breakdown Rincian Kinerja per Tenant F&B
+-- Karakter : Transaksional (ACID) dengan START TRANSACTION, COMMIT, dan ROLLBACK Handler
+-- Fungsi   : 1. Agregasi JOIN transaksi mentah harian per gerai tenant
+--            2. Menyimpan/Upsert hasil ke tabel analitik `daily_tenant_summaries`
+--            3. Menampilkan Result Set Ringkasan Eksekutif KPI Bandara Juanda
 -- ----------------------------------------------------------------------------
 DROP PROCEDURE IF EXISTS sp_ringkasan_transaksi_harian$$
 CREATE PROCEDURE sp_ringkasan_transaksi_harian(IN p_tanggal DATE)
 BEGIN
-    -- Result Set 1: Ringkasan Metrik KPI Eksekutif Harian Bandara Juanda
+    -- Error Handler Transaksional: Rollback otomatis jika ada error SQL
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    -- Buka transaksi terisolasi
+    START TRANSACTION;
+
+        -- 1. Idempotensi: Hapus data ringkasan lama untuk tanggal yang diproses jika ada
+        DELETE FROM daily_tenant_summaries WHERE summary_date = p_tanggal;
+
+        -- 2. Agregasi JOIN & Simpan hasil ke tabel ringkasan harian per tenant
+        INSERT INTO daily_tenant_summaries (
+            summary_date,
+            tenant_id,
+            total_orders,
+            paid_orders,
+            cancelled_orders,
+            total_revenue,
+            ready_orders,
+            sla_compliant_orders,
+            avg_sla_minutes,
+            created_at,
+            updated_at
+        )
+        SELECT 
+            p_tanggal AS summary_date,
+            t.id AS tenant_id,
+            COUNT(o.id) AS total_orders,
+            SUM(CASE WHEN o.is_paid = 1 THEN 1 ELSE 0 END) AS paid_orders,
+            SUM(CASE WHEN o.status = 'dibatalkan' THEN 1 ELSE 0 END) AS cancelled_orders,
+            COALESCE(SUM(CASE WHEN o.is_paid = 1 THEN o.total_amount ELSE 0 END), 0) AS total_revenue,
+            SUM(CASE WHEN o.ready_at IS NOT NULL THEN 1 ELSE 0 END) AS ready_orders,
+            SUM(CASE WHEN o.ready_at IS NOT NULL AND o.ready_at >= o.ordered_at AND TIMESTAMPDIFF(MINUTE, o.ordered_at, o.ready_at) <= 15 THEN 1 ELSE 0 END) AS sla_compliant_orders,
+            ROUND(AVG(CASE WHEN o.ready_at IS NOT NULL AND o.ready_at >= o.ordered_at THEN TIMESTAMPDIFF(MINUTE, o.ordered_at, o.ready_at) END), 2) AS avg_sla_minutes,
+            NOW(),
+            NOW()
+        FROM tenants t
+        LEFT JOIN orders o ON t.id = o.tenant_id AND DATE(o.ordered_at) = p_tanggal
+        GROUP BY t.id;
+
+    -- Commit transaksi: seluruh agregasi harian tersimpan permanen
+    COMMIT;
+
+    -- 3. Menampilkan Result Set Ringkasan Eksekutif KPI Bandara Juanda
     SELECT 
         p_tanggal AS tanggal_rekap,
         COUNT(o.id) AS total_pesanan,
@@ -111,30 +158,16 @@ BEGIN
         COALESCE(SUM(CASE WHEN o.is_paid = 1 THEN o.total_amount ELSE 0 END), 0) AS total_omset_lunas,
         ROUND(COALESCE(AVG(CASE WHEN o.ready_at IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, o.ordered_at, o.ready_at) END), 0), 1) AS avg_sla_menit,
         (
-            SELECT t.name 
+            SELECT t2.name 
             FROM orders o2 
-            JOIN tenants t ON o2.tenant_id = t.id 
+            JOIN tenants t2 ON o2.tenant_id = t2.id 
             WHERE DATE(o2.ordered_at) = p_tanggal AND o2.is_paid = 1 
-            GROUP BY t.id, t.name 
+            GROUP BY t2.id, t2.name 
             ORDER BY SUM(o2.total_amount) DESC 
             LIMIT 1
         ) AS top_tenant_hari_ini
     FROM orders o
     WHERE DATE(o.ordered_at) = p_tanggal;
-
-    -- Result Set 2: Breakdown Kinerja per Mitra Tenant
-    SELECT 
-        t.id AS tenant_id,
-        t.name AS nama_tenant,
-        COUNT(o.id) AS total_order,
-        SUM(CASE WHEN o.status = 'selesai' THEN 1 ELSE 0 END) AS order_selesai,
-        SUM(CASE WHEN o.status = 'dibatalkan' THEN 1 ELSE 0 END) AS order_batal,
-        COALESCE(SUM(CASE WHEN o.is_paid = 1 THEN o.total_amount ELSE 0 END), 0) AS total_omset,
-        ROUND(COALESCE(AVG(CASE WHEN o.ready_at IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, o.ordered_at, o.ready_at) END), 0), 1) AS avg_sla_menit
-    FROM tenants t
-    LEFT JOIN orders o ON t.id = o.tenant_id AND DATE(o.ordered_at) = p_tanggal
-    GROUP BY t.id, t.name
-    ORDER BY total_omset DESC, total_order DESC;
 END$$
 
 DELIMITER ;
