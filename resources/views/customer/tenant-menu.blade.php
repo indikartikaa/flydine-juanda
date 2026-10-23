@@ -291,13 +291,13 @@
                      data-category="{{ strtolower($product->category ?? '') }}">
                     
                     <!-- Dedicated Image Frame (Fits Uploaded Images or Clean Frame Placeholder) -->
-                    <div class="h-44 sm:h-48 rounded-2xl overflow-hidden relative mb-4 bg-slate-50 border border-slate-100 flex items-center justify-center">
+                    <div class="h-44 sm:h-48 rounded-2xl overflow-hidden relative mb-4 bg-slate-50/80 border border-slate-100 flex items-center justify-center p-2">
                         @if($hasProductImage)
                             <img src="{{ $productImageUrl }}" 
                                  alt="{{ $product->name }}" 
                                  loading="lazy" 
                                  onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.classList.remove('hidden');" 
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                 class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300">
                             <!-- Graceful fallback if image fails to load -->
                             <div class="hidden w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100/70 text-slate-300">
                                 <div class="w-12 h-12 rounded-2xl bg-white shadow-xs border border-slate-200/60 flex items-center justify-center text-slate-300">
