@@ -131,3 +131,16 @@ body {
     border-color: #005ea2;
     box-shadow: 0 0 0 3px rgba(0,94,162,.15);
 }
+
+/* Hilangkan panah default bawaan Windows/Chrome agar panah custom tidak tumpang tindih */
+select.appearance-none,
+select[class*="appearance-none"] {
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    background-image: none !important;
+}
+select.appearance-none::-ms-expand,
+select[class*="appearance-none"]::-ms-expand {
+    display: none !important;
+}

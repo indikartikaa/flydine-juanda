@@ -5366,8 +5366,9 @@ class Terminal1Seeder extends Seeder
                             'name'      => $menu['name'],
                         ],
                         [
+                            'category'         => $menu['category'] ?? $item['category'] ?? 'Makanan Utama',
                             'price'            => $menu['price'],
-                            'stock'            => $menu['stock'] ?? 100,
+                            'stock'            => !empty($menu['stock']) ? $menu['stock'] : 50,
                             'is_available'     => $menu['is_available'] ?? true,
                             'preparation_time' => $menu['preparation_time'] ?? 15,
                             'description'      => $menu['description'] ?? null,

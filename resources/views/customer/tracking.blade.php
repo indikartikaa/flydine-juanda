@@ -476,15 +476,21 @@
             <!-- ========================================================================= -->
             <div class="lg:col-span-5 space-y-6">
 
-                <!-- 1. AIRPORT DIGITAL BOARDING PASS CARD (Ticket with Cutout Notches) -->
+                @php
+                    $hasFlight = !empty($order->flight_number) || !empty($order->boarding_time);
+                @endphp
+
+                <!-- 1. AIRPORT DIGITAL BOARDING PASS / ORDER INFO CARD -->
                 <div class="bg-white rounded-3xl border border-slate-200/90 shadow-md overflow-hidden transition-all duration-300">
                     
-                    <!-- Top Airline Flight Accent Bar -->
+                    <!-- Top Airline / Pickup Accent Bar -->
                     <div class="bg-gradient-to-r from-[#002b49] via-[#00436d] to-[#005ea2] px-6 py-4 text-white flex items-center justify-between">
                         <div class="flex items-center gap-2.5">
-                            <span class="text-lg">✈️</span>
+                            <span class="text-lg">{{ $hasFlight ? '✈️' : '🏪' }}</span>
                             <div>
-                                <span class="text-[10px] font-black uppercase tracking-widest text-blue-200 block">Boarding Pass FlyDine</span>
+                                <span class="text-[10px] font-black uppercase tracking-widest text-blue-200 block">
+                                    {{ $hasFlight ? 'Boarding Pass & Penerbangan' : 'Informasi Pengambilan' }}
+                                </span>
                                 <span class="text-xs font-extrabold text-white">Bandara Internasional Juanda (SUB)</span>
                             </div>
                         </div>
@@ -495,36 +501,56 @@
 
                     <!-- Ticket Information Body -->
                     <div class="p-6">
-                        <!-- Passenger & Flight Row -->
-                        <div class="grid grid-cols-2 gap-4 pb-4">
-                            <div>
-                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5">Nama Penumpang</span>
-                                <span class="text-sm font-black text-slate-800 truncate block">
-                                    {{ $order->customer_name ?: 'Tamu Bandara' }}
-                                </span>
+                        @if($hasFlight)
+                            <!-- Passenger & Flight Details -->
+                            <div class="grid grid-cols-2 gap-4 pb-4">
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5">Nama Pemesan</span>
+                                    <span class="text-sm font-black text-slate-800 truncate block">
+                                        {{ $order->customer_name ?: 'Tamu Bandara' }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5">No. Penerbangan</span>
+                                    <span class="text-sm font-black text-[#005ea2] block">
+                                        {{ $order->flight_number }}
+                                    </span>
+                                </div>
                             </div>
-                            <div>
-                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5">No. Penerbangan</span>
-                                <span class="text-sm font-black text-[#005ea2] block">
-                                    {{ $order->flight_number ?: 'Reguler / Transit' }}
-                                </span>
-                            </div>
-                        </div>
 
-                        <div class="grid grid-cols-2 gap-4 pb-2">
-                            <div>
-                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5">Pintu / Gate</span>
-                                <span class="text-sm font-black text-slate-800 block">
-                                    {{ $order->gate ? (preg_match('/^gate\s*/i', trim($order->gate)) ? trim($order->gate) : 'Gate ' . trim($order->gate)) : 'Area Terminal' }}
-                                </span>
+                            @if($order->gate || $order->boarding_time)
+                            <div class="grid grid-cols-2 gap-4 pb-2">
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5">Pintu / Gate</span>
+                                    <span class="text-sm font-black text-slate-800 block">
+                                        {{ $order->gate ? (preg_match('/^gate\s*/i', trim($order->gate)) ? trim($order->gate) : 'Gate ' . trim($order->gate)) : '-' }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5">Waktu Boarding</span>
+                                    <span class="text-sm font-black text-amber-600 block">
+                                        {{ $order->boarding_time ? $order->boarding_time->format('H:i') . ' WIB' : '-' }}
+                                    </span>
+                                </div>
                             </div>
-                            <div>
-                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5">Waktu Boarding</span>
-                                <span class="text-sm font-black text-amber-600 block">
-                                    {{ $order->boarding_time ? $order->boarding_time->format('H:i') . ' WIB' : 'Fleksibel' }}
-                                </span>
+                            @endif
+                        @else
+                            <!-- General Customer / Staff Info (No Flight Info) -->
+                            <div class="grid grid-cols-2 gap-4 pb-2">
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5">Nama Pemesan</span>
+                                    <span class="text-sm font-black text-slate-800 truncate block">
+                                        {{ $order->customer_name ?: 'Tamu Bandara' }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5">No. WhatsApp / HP</span>
+                                    <span class="text-sm font-mono font-bold text-slate-800 block">
+                                        {{ $order->customer->phone_number ?? '-' }}
+                                    </span>
+                                </div>
                             </div>
-                        </div>
+                        @endif
 
                         <!-- Ticket Perforated Cutout Notch -->
                         <div class="relative py-2 my-2">

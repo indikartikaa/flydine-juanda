@@ -3,354 +3,318 @@
 @section('title', 'Tambah Menu Baru')
 
 @section('content')
+<div class="space-y-6 max-w-5xl mx-auto">
 
-<div class="mb-6 flex items-center justify-between">
-    <a href="{{ route('tenant.products') }}"
-       class="flex items-center text-sm font-bold text-slate-500 hover:text-[#005ea2] transition-colors bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        Kembali ke Katalog
-    </a>
-</div>
-
-@if ($errors->any())
-    <div class="mb-8 bg-rose-50 border border-rose-200 rounded-2xl p-5 shadow-sm">
-        <div class="flex items-center mb-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-rose-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <h3 class="text-sm font-bold text-rose-800">Terdapat kesalahan pada input Anda:</h3>
+    <!-- ========================================================================= -->
+    <!-- 1. HEADER HALAMAN & TOMBOL KEMBALI                                        -->
+    <!-- ========================================================================= -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2">
+                <a href="{{ route('tenant.products') }}" 
+                   class="p-2 -ml-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                   title="Kembali ke Katalog">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                </a>
+                <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Tambah Menu Baru</h2>
+            </div>
+            <p class="text-xs sm:text-sm font-semibold text-slate-500 mt-1">
+                Lengkapi rincian menu, tentukan harga, tetapkan kuota stok porsi harian, dan unggah foto hidangan.
+            </p>
         </div>
-        <ul class="list-disc list-inside text-sm text-rose-600 pl-2 space-y-1">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
+
+        <div class="shrink-0">
+            <a href="{{ route('tenant.products') }}" 
+               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold shadow-2xs transition cursor-pointer">
+                <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <span>Batal & Kembali</span>
+            </a>
+        </div>
     </div>
-@endif
 
-<form action="{{ route('tenant.products.store') }}"
-      method="POST"
-      enctype="multipart/form-data">
-
-    @csrf
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-        {{-- KIRI --}}
-        <div class="lg:col-span-2 space-y-8">
-
-            {{-- INFORMASI PRODUK --}}
-            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div class="p-6 md:p-8 border-b border-slate-100 bg-slate-50/50">
-                    <h2 class="text-lg font-extrabold text-slate-800 tracking-tight">
-                        Informasi Dasar Menu
-                    </h2>
-                    <p class="text-sm text-slate-500 font-medium mt-1">Lengkapi detail dasar tentang produk yang akan dijual.</p>
-                </div>
-
-                <div class="p-6 md:p-8 space-y-6">
-
-                    {{-- Nama --}}
-                    <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-2">
-                            Nama Menu <span class="text-rose-500">*</span>
-                        </label>
-
-                        <input type="text"
-                               name="name"
-                               value="{{ old('name') }}"
-                               placeholder="Contoh: Kopi Susu Aren"
-                               required
-                               maxlength="120"
-                               class="w-full border border-slate-200 rounded-xl
-                                      px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20
-                                      focus:border-[#005ea2] transition-colors bg-slate-50 focus:bg-white">
-                    </div>
-
-                    {{-- Kategori + Harga --}}
-                    <div class="grid md:grid-cols-2 gap-6">
-
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-2">
-                                Kategori
-                            </label>
-
-                            <select name="category"
-                                    class="w-full border border-slate-200 rounded-xl
-                                           px-4 py-3 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] transition-colors appearance-none">
-                                <option value="">Pilih kategori...</option>
-                                <option value="Makanan Utama">Makanan Utama</option>
-                                <option value="Snack">Snack</option>
-                                <option value="Minuman">Minuman</option>
-                                <option value="Dessert">Dessert</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-2">
-                                Harga Dasar (Rp) <span class="text-rose-500">*</span>
-                            </label>
-
-                            <input type="number"
-                                   name="price"
-                                   value="{{ old('price') }}"
-                                   placeholder="15000"
-                                   min="0"
-                                   required
-                                   class="w-full border border-slate-200 rounded-xl
-                                          px-4 py-3 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] transition-colors">
-                        </div>
-
-                    </div>
-
-                    {{-- Stok --}}
-                    <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-2">
-                            Jumlah Stok <span class="text-rose-500">*</span>
-                        </label>
-
-                        <input type="number"
-                               name="stock"
-                               value="{{ old('stock', 0) }}"
-                               min="0"
-                               required
-                               class="w-full border border-slate-200 rounded-xl
-                                      px-4 py-3 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] transition-colors">
-                    </div>
-
-                    {{-- Deskripsi --}}
-                    <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-2">
-                            Deskripsi Menu
-                        </label>
-
-                        <textarea name="description"
-                                  rows="4"
-                                  maxlength="300"
-                                  placeholder="Berikan deskripsi menarik tentang menu ini..."
-                                  class="w-full border border-slate-200 rounded-xl
-                                         px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20
-                                         focus:border-[#005ea2] transition-colors bg-slate-50 focus:bg-white">{{ old('description') }}</textarea>
-
-                        <p class="text-[11px] font-bold text-slate-400 mt-2 uppercase tracking-wider">
-                            Maksimal 300 karakter.
-                        </p>
-                    </div>
-
-                    {{-- Status --}}
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 mt-2">
-                        <label class="flex items-center cursor-pointer">
-                            <input type="checkbox"
-                                   name="is_available"
-                                   value="1"
-                                   checked
-                                   class="w-5 h-5 rounded border-slate-300 text-[#005ea2] focus:ring-[#005ea2] cursor-pointer">
-                            <span class="ml-3 text-sm font-bold text-slate-700">
-                                Produk langsung tersedia (Aktif)
-                            </span>
-                        </label>
-                    </div>
-
-                </div>
+    <!-- Alert Kesalahan Validasi -->
+    @if ($errors->any())
+        <div class="bg-rose-50 border border-rose-200 rounded-2xl p-4 sm:p-5 shadow-2xs">
+            <div class="flex items-center gap-2 mb-2 text-rose-800">
+                <svg class="h-5 w-5 text-rose-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <h4 class="text-sm font-bold">Mohon periksa kembali input Anda:</h4>
             </div>
+            <ul class="list-disc list-inside text-xs sm:text-sm text-rose-600 space-y-1 pl-2">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
+    <!-- ========================================================================= -->
+    <!-- 2. FORMULIR TAMBAH PRODUK                                                 -->
+    <!-- ========================================================================= -->
+    <form action="{{ route('tenant.products.store') }}" 
+          method="POST" 
+          enctype="multipart/form-data" 
+          class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        @csrf
 
-            {{-- OPSI KUSTOMISASI --}}
-            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div class="p-6 md:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+        <!-- ======================= KOLOM KIRI (2 SPAN) ======================= -->
+        <div class="lg:col-span-2 space-y-6">
+
+            <!-- Card: Detail Dasar Menu -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
+                <div class="p-5 sm:p-6 border-b border-slate-100 bg-slate-50/50">
+                    <h3 class="text-base font-black text-slate-900 tracking-tight">Informasi Dasar Hidangan</h3>
+                    <p class="text-xs text-slate-500 font-semibold mt-0.5">Nama menu, kategori, harga jual, dan stok porsi harian.</p>
+                </div>
+
+                <div class="p-5 sm:p-6 space-y-4 sm:space-y-5">
+                    
+                    <!-- Nama Menu -->
                     <div>
-                        <h2 class="text-lg font-extrabold text-slate-800 tracking-tight">
-                            Opsi Kustomisasi
-                        </h2>
-                        <p class="text-sm text-slate-500 font-medium mt-1">
-                            Contoh: Ukuran Gelas, Level Gula, Topping.
+                        <label for="name" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                            Nama Menu Hidangan <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="name" 
+                               name="name" 
+                               value="{{ old('name') }}" 
+                               required 
+                               maxlength="120" 
+                               placeholder="Contoh: Nasi Lemak With Chicken Katsu" 
+                               class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition">
+                    </div>
+
+                    <!-- Kategori & Harga -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        
+                        <!-- Kategori (Dengan Panah Dropdown Rapi Tanpa Dobel) -->
+                        <div>
+                            <label for="category" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                                Kategori Sajian <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <select id="category" 
+                                        name="category" 
+                                        required 
+                                        style="-webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: none;"
+                                        class="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition appearance-none cursor-pointer">
+                                    <option value="">Pilih Kategori Menu...</option>
+                                    <option value="Makanan Utama" {{ old('category') === 'Makanan Utama' ? 'selected' : '' }}>Makanan Utama</option>
+                                    <option value="Snack" {{ old('category') === 'Snack' ? 'selected' : '' }}>Snack / Camilan</option>
+                                    <option value="Minuman" {{ old('category') === 'Minuman' ? 'selected' : '' }}>Minuman</option>
+                                    <option value="Dessert" {{ old('category') === 'Dessert' ? 'selected' : '' }}>Dessert</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Harga Jual -->
+                        <div>
+                            <label for="price" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                                Harga Jual (Rp) <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-3 text-xs sm:text-sm font-black text-slate-400">Rp</span>
+                                <input type="number" 
+                                       id="price" 
+                                       name="price" 
+                                       value="{{ old('price') }}" 
+                                       required 
+                                       min="0" 
+                                       step="any" 
+                                       placeholder="50000" 
+                                       class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition">
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Jumlah Stok Porsi (Default 50, Bukan 0!) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label for="stock" class="block text-xs font-bold uppercase tracking-wider text-slate-600">
+                                    Jumlah Stok (Porsi) <span class="text-rose-500">*</span>
+                                </label>
+                                <span class="text-[11px] font-semibold text-slate-400">Porsi siap saji</span>
+                            </div>
+                            <input type="number" 
+                                   id="stock" 
+                                   name="stock" 
+                                   value="{{ old('stock', 50) }}" 
+                                   required 
+                                   min="0" 
+                                   placeholder="50" 
+                                   class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition">
+                            <p class="text-[11px] text-slate-400 font-medium mt-1">
+                                Rekomendasi kuota porsi harian. Bila diisi 0, menu otomatis berstatus Habis.
+                            </p>
+                        </div>
+
+                        <!-- Estimasi SLA Masak Dapur -->
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600">
+                                    Target SLA Dapur
+                                </label>
+                                <span class="text-[11px] font-bold text-emerald-600">Standar Bandara</span>
+                            </div>
+                            <div class="w-full px-4 py-3 bg-slate-100/70 border border-slate-200/60 rounded-xl text-xs sm:text-sm font-bold text-slate-700 flex items-center justify-between">
+                                <span>≤ 15 Menit Penyajian</span>
+                                <span class="text-emerald-600 text-xs font-extrabold">✓ Terstandar</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 font-medium mt-1">
+                                Waktu maksimal penyiapan hidangan sebelum diserahkan ke penumpang/porter.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Deskripsi Hidangan -->
+                    <div>
+                        <label for="description" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                            Deskripsi Menu (Opsional)
+                        </label>
+                        <textarea id="description" 
+                                  name="description" 
+                                  rows="3" 
+                                  maxlength="300" 
+                                  placeholder="Jelaskan kelezatan hidangan, bahan utama, atau sensasi rasa..." 
+                                  class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition">{{ old('description') }}</textarea>
+                        <p class="text-[11px] font-semibold text-slate-400 mt-1">
+                            Maksimal 300 karakter. Ditampilkan pada katalog aplikasi pelanggan.
                         </p>
                     </div>
 
-                    <button type="button"
-                            onclick="addGroup()"
-                            class="text-sm font-bold text-[#005ea2] bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-xl transition-colors">
-                        + Tambah Grup
-                    </button>
-                </div>
-
-                <div class="p-6 md:p-8" id="groupList">
-                    {{-- GROUP DEFAULT --}}
-                    <div class="group-box border border-slate-200 bg-slate-50 rounded-2xl p-6 relative group mb-6">
-                        <button type="button"
-                                onclick="this.closest('.group-box').remove()"
-                                class="absolute top-4 right-4 h-8 w-8 bg-white border border-rose-200 text-rose-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-50 shadow-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </button>
-
-                        <div class="grid sm:grid-cols-2 gap-4 mb-5 pr-8">
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Nama Grup</label>
-                                <input type="text"
-                                       name="groups[0][name]"
-                                       placeholder="Contoh: Ukuran Gelas"
-                                       class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] bg-white">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Sifat Pilihan</label>
-                                <select name="groups[0][required]"
-                                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] bg-white appearance-none">
-                                    <option value="1">Wajib dipilih</option>
-                                    <option value="0">Opsional</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="option-list space-y-3 bg-white p-4 rounded-xl border border-slate-200">
-                            <div class="option-row flex items-center gap-3">
-                                <input type="text"
-                                       name="groups[0][options][0][name]"
-                                       placeholder="Nama pilihan (ex: Regular)"
-                                       class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#005ea2]">
-                                <input type="number"
-                                       name="groups[0][options][0][price]"
-                                       value="0"
-                                       min="0"
-                                       placeholder="+ Harga"
-                                       class="w-28 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#005ea2]">
-                                <button type="button"
-                                        onclick="this.closest('.option-row').remove()"
-                                        class="text-rose-400 hover:text-rose-600 p-1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                                </button>
-                            </div>
-
-                            <div class="option-row flex items-center gap-3">
-                                <input type="text"
-                                       name="groups[0][options][1][name]"
-                                       placeholder="Nama pilihan (ex: Large)"
-                                       class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#005ea2]">
-                                <input type="number"
-                                       name="groups[0][options][1][price]"
-                                       value="3000"
-                                       min="0"
-                                       placeholder="+ Harga"
-                                       class="w-28 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#005ea2]">
-                                <button type="button"
-                                        onclick="this.closest('.option-row').remove()"
-                                        class="text-rose-400 hover:text-rose-600 p-1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                                </button>
-                            </div>
-                        </div>
-
-                        <button type="button"
-                                onclick="addOption(this)"
-                                class="mt-4 flex items-center text-[13px] font-bold text-[#005ea2] hover:text-blue-700">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                            Tambah Pilihan Lain
-                        </button>
+                    <!-- Catatan Khusus Dapur -->
+                    <div>
+                        <label for="note" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                            Catatan Khusus Dapur (Opsional)
+                        </label>
+                        <textarea id="note" 
+                                  name="note" 
+                                  rows="2" 
+                                  maxlength="1000" 
+                                  placeholder="Contoh: Pisahkan sambal, saus pedas di wadah kecil, alergen kacang..." 
+                                  class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] transition">{{ old('note') }}</textarea>
+                        <p class="text-[11px] font-semibold text-slate-400 mt-1">
+                            Instruksi internal untuk staf dan koki gerai saat pesanan disiapkan.
+                        </p>
                     </div>
+
+                    <!-- Checkbox Status Aktif Langsung -->
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/80">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" 
+                                   name="is_available" 
+                                   value="1" 
+                                   checked 
+                                   class="w-5 h-5 mt-0.5 text-[#005ea2] bg-white border-slate-300 rounded focus:ring-[#005ea2] focus:ring-2 transition cursor-pointer">
+                            <div>
+                                <span class="text-xs sm:text-sm font-bold text-slate-800 block">Langsung Aktifkan & Tayangkan Menu Ini</span>
+                                <span class="text-[11px] text-slate-500 font-medium">Bila dicentang, menu akan langsung muncul di katalog pemesanan online penumpang Juanda.</span>
+                            </div>
+                        </label>
+                    </div>
+
                 </div>
             </div>
 
         </div>
 
+        <!-- ======================= KOLOM KANAN (1 SPAN) ======================= -->
+        <div class="space-y-6">
 
-        {{-- KANAN --}}
-        <div class="space-y-8">
-
-            {{-- FOTO --}}
-            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div class="p-6 border-b border-slate-100 bg-slate-50/50">
-                    <h2 class="text-lg font-extrabold text-slate-800 tracking-tight">
-                        Foto Produk
-                    </h2>
+            <!-- Card: Upload Foto Produk -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
+                <div class="p-5 border-b border-slate-100 bg-slate-50/50">
+                    <h3 class="text-base font-black text-slate-900 tracking-tight">Foto Produk</h3>
+                    <p class="text-xs text-slate-500 font-semibold mt-0.5">Unggah foto sajian menarik untuk menggugah selera pembeli.</p>
                 </div>
-                
-                <div class="p-6">
-                    <label for="image"
-                           class="block border-2 border-dashed border-slate-200 bg-slate-50 rounded-2xl p-8 text-center cursor-pointer hover:bg-slate-100 hover:border-blue-300 transition-all group overflow-hidden relative">
 
+                <div class="p-5">
+                    <label for="imageInput" 
+                           class="block border-2 border-dashed border-slate-300 hover:border-[#005ea2] bg-slate-50 hover:bg-slate-100/60 rounded-2xl p-6 text-center cursor-pointer transition-all duration-200 relative overflow-hidden group">
+                        
+                        <!-- Placeholder Sebelum Upload -->
                         <div id="uploadPlaceholder" class="flex flex-col items-center">
-                            <div class="h-16 w-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4 group-hover:scale-110 transition-transform">
-                                <span class="text-2xl">📸</span>
+                            <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-xs border border-slate-200 mb-3 group-hover:scale-110 transition-transform text-[#005ea2]">
+                                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
                             </div>
-                            <p class="text-sm font-extrabold text-[#005ea2]">
-                                Upload file foto
-                            </p>
-                            <p class="text-xs font-medium text-slate-400 mt-2">
-                                Format JPG/PNG maksimal 5 MB
-                            </p>
+                            <span class="text-xs sm:text-sm font-extrabold text-[#005ea2] block">
+                                Klik untuk Unggah Foto
+                            </span>
+                            <span class="text-[11px] font-semibold text-slate-400 mt-1 block">
+                                Format JPG, PNG, WEBP (Maksimal 5 MB)
+                            </span>
                         </div>
 
-                        <img id="preview"
-                             class="hidden absolute inset-0 w-full h-full object-cover">
-                        
-                        <div id="previewOverlay" class="hidden absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <p class="text-white font-bold text-sm">Ganti Foto</p>
+                        <!-- Gambar Preview Saat Dipilih -->
+                        <img id="imagePreview" 
+                             class="hidden w-full h-48 object-cover rounded-xl shadow-xs" 
+                             alt="Preview Foto Menu">
+
+                        <!-- Overlay Ganti Foto -->
+                        <div id="previewOverlay" 
+                             class="hidden absolute inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span class="px-3 py-1.5 rounded-lg bg-white text-slate-800 text-xs font-bold shadow-md">
+                                Ganti Foto
+                            </span>
                         </div>
 
                     </label>
 
-                    <input id="image"
-                           type="file"
-                           name="image"
-                           accept="image/jpeg,image/png,image/webp"
-                           class="hidden"
-                           onchange="previewImage(event)">
+                    <input type="file" 
+                           id="imageInput" 
+                           name="image" 
+                           accept="image/jpeg,image/png,image/webp,image/jpg" 
+                           class="hidden" 
+                           onchange="handleImagePreview(event)">
+
+                    <p class="text-[11px] text-slate-400 font-medium text-center mt-3">
+                        *Jika tidak diunggah, katalog otomatis menggunakan ikon sajian kuliner elegan.
+                    </p>
                 </div>
             </div>
 
-
-            {{-- CATATAN --}}
-            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div class="p-6 border-b border-slate-100 bg-slate-50/50">
-                    <h2 class="text-lg font-extrabold text-slate-800 tracking-tight">
-                        Catatan Internal
-                    </h2>
-                </div>
-                
-                <div class="p-6">
-                    <textarea name="note"
-                              rows="4"
-                              maxlength="1000"
-                              placeholder="Catatan khusus untuk staf saat menyiapkan menu ini..."
-                              class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] transition-colors bg-slate-50 focus:bg-white">{{ old('note') }}</textarea>
-                </div>
-            </div>
-
-
-            {{-- ACTION --}}
-            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-                <button type="submit"
-                        class="w-full bg-[#005ea2] hover:bg-blue-700 text-white py-3.5 rounded-xl text-sm font-extrabold shadow-md shadow-blue-500/20 transition-all hover:-translate-y-0.5 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                    Simpan & Publikasikan
+            <!-- Card: Tombol Simpan & Publikasikan -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-5 space-y-3">
+                <button type="submit" 
+                        class="w-full bg-[#005ea2] hover:bg-[#004b82] active:scale-95 text-white py-3 rounded-xl text-sm font-bold shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Simpan & Publikasikan</span>
                 </button>
 
-                <a href="{{ route('tenant.products') }}"
-                   class="block text-center w-full mt-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 py-3 rounded-xl text-sm font-bold transition-colors">
+                <a href="{{ route('tenant.products') }}" 
+                   class="block text-center w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer">
                     Batalkan
                 </a>
             </div>
 
         </div>
 
-    </div>
+    </form>
 
-</form>
+</div>
 
-
-<script nonce="{{ $cspNonce }}">
-
-let groupIndex = 1;
-
-function previewImage(event)
-{
+<script nonce="{{ $cspNonce ?? '' }}">
+function handleImagePreview(event) {
     const file = event.target.files[0];
     if (!file) return;
 
-    const preview = document.getElementById('preview');
+    const preview = document.getElementById('imagePreview');
     const placeholder = document.getElementById('uploadPlaceholder');
     const overlay = document.getElementById('previewOverlay');
 
@@ -359,99 +323,5 @@ function previewImage(event)
     overlay.classList.remove('hidden');
     placeholder.classList.add('hidden');
 }
-
-function addOption(button)
-{
-    const group = button.closest('.group-box');
-    const list = group.querySelector('.option-list');
-    const groupId = [...document.querySelectorAll('.group-box')].indexOf(group);
-    const index = list.querySelectorAll('.option-row').length;
-
-    const row = document.createElement('div');
-    row.className = 'option-row flex items-center gap-3';
-    row.innerHTML = `
-        <input type="text"
-               name="groups[${groupId}][options][${index}][name]"
-               placeholder="Nama pilihan"
-               class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#005ea2]">
-
-        <input type="number"
-               name="groups[${groupId}][options][${index}][price]"
-               value="0"
-               min="0"
-               class="w-28 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#005ea2]">
-
-        <button type="button"
-                onclick="this.closest('.option-row').remove()"
-                class="text-rose-400 hover:text-rose-600 p-1">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-        </button>
-    `;
-    list.appendChild(row);
-}
-
-function addGroup()
-{
-    const container = document.getElementById('groupList');
-    const groupId = groupIndex++;
-
-    const group = document.createElement('div');
-    group.className = 'group-box border border-slate-200 bg-slate-50 rounded-2xl p-6 relative group mb-6';
-    group.innerHTML = `
-        <button type="button"
-                onclick="this.closest('.group-box').remove()"
-                class="absolute top-4 right-4 h-8 w-8 bg-white border border-rose-200 text-rose-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-50 shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-        </button>
-
-        <div class="grid sm:grid-cols-2 gap-4 mb-5 pr-8">
-            <div>
-                <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Nama Grup</label>
-                <input type="text"
-                       name="groups[${groupId}][name]"
-                       placeholder="Contoh: Ukuran Gelas"
-                       class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] bg-white">
-            </div>
-            <div>
-                <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Sifat Pilihan</label>
-                <select name="groups[${groupId}][required]"
-                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#005ea2] bg-white appearance-none">
-                    <option value="1">Wajib dipilih</option>
-                    <option value="0">Opsional</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="option-list space-y-3 bg-white p-4 rounded-xl border border-slate-200">
-            <div class="option-row flex items-center gap-3">
-                <input type="text"
-                       name="groups[${groupId}][options][0][name]"
-                       placeholder="Nama pilihan"
-                       class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#005ea2]">
-                <input type="number"
-                       name="groups[${groupId}][options][0][price]"
-                       value="0"
-                       min="0"
-                       class="w-28 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#005ea2]">
-                <button type="button"
-                        onclick="this.closest('.option-row').remove()"
-                        class="text-rose-400 hover:text-rose-600 p-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-            </div>
-        </div>
-
-        <button type="button"
-                onclick="addOption(this)"
-                class="mt-4 flex items-center text-[13px] font-bold text-[#005ea2] hover:text-blue-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-            Tambah Pilihan Lain
-        </button>
-    `;
-    container.appendChild(group);
-}
 </script>
-
 @endsection

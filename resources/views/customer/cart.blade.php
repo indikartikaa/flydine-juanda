@@ -208,21 +208,40 @@
                                         Rp <span x-text="formatNumber(items['{{ $id }}'] ? (items['{{ $id }}'].price * items['{{ $id }}'].quantity) : {{ $item['price'] * $item['quantity'] }})">{{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}</span>
                                     </span>
                                     
-                                    <!-- Quantity Adjustment Buttons -->
-                                    <div class="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-xl">
-                                        <form action="{{ route('customer.cart.update') }}" method="POST" class="inline" @submit.prevent="updateQuantity('{{ $id }}', 'decrease')">
-                                            @csrf
-                                            <input type="hidden" name="product_id" value="{{ $id }}">
-                                            <input type="hidden" name="action" value="decrease">
-                                            <button type="submit" :disabled="loadingItemId === '{{ $id }}'" class="w-7 h-7 rounded-lg bg-white text-slate-700 flex items-center justify-center text-xs font-black shadow-sm hover:bg-rose-50 hover:text-rose-600 transition-colors disabled:opacity-50" title="Kurangi">−</button>
-                                        </form>
-                                        <span class="w-6 text-center text-xs font-black text-slate-800" x-text="items['{{ $id }}'] ? items['{{ $id }}'].quantity : {{ $item['quantity'] }}">{{ $item['quantity'] }}</span>
-                                        <form action="{{ route('customer.cart.update') }}" method="POST" class="inline" @submit.prevent="updateQuantity('{{ $id }}', 'increase')">
-                                            @csrf
-                                            <input type="hidden" name="product_id" value="{{ $id }}">
-                                            <input type="hidden" name="action" value="increase">
-                                            <button type="submit" :disabled="loadingItemId === '{{ $id }}'" class="w-7 h-7 rounded-lg bg-white text-slate-700 flex items-center justify-center text-xs font-black shadow-sm hover:bg-blue-50 hover:text-[#005ea2] transition-colors disabled:opacity-50" title="Tambah">+</button>
-                                        </form>
+                                    <!-- Quantity Adjustment Stepper with Direct Number Input -->
+                                    <div class="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200/80 shadow-xs">
+                                        <!-- Decrease Button (-) -->
+                                        <button type="button" 
+                                                @click="updateQuantity('{{ $id }}', 'decrease')" 
+                                                :disabled="loadingItemId === '{{ $id }}'" 
+                                                class="w-7 h-7 rounded-lg bg-white text-slate-700 flex items-center justify-center text-xs font-black shadow-xs hover:bg-rose-50 hover:text-rose-600 transition-colors disabled:opacity-50 active:scale-95 cursor-pointer" 
+                                                title="Kurangi 1">
+                                            −
+                                        </button>
+                                        
+                                        <!-- Direct Editable Number Input -->
+                                        <input type="number" 
+                                               min="1" 
+                                               max="99" 
+                                               :value="items['{{ $id }}'] ? items['{{ $id }}'].quantity : {{ $item['quantity'] }}" 
+                                               @change="
+                                                   let val = parseInt($event.target.value, 10);
+                                                   if (isNaN(val) || val < 1) val = 1;
+                                                   updateQuantity('{{ $id }}', 'set', val, $event.target);
+                                               " 
+                                               @keydown.enter.prevent="$event.target.blur()"
+                                               :disabled="loadingItemId === '{{ $id }}'" 
+                                               class="w-12 h-7 text-center text-xs font-black text-slate-900 bg-white rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#005ea2] focus:border-[#005ea2] transition-all disabled:opacity-50"
+                                               title="Ketik jumlah langsung (contoh: 10)">
+                                        
+                                        <!-- Increase Button (+) -->
+                                        <button type="button" 
+                                                @click="updateQuantity('{{ $id }}', 'increase')" 
+                                                :disabled="loadingItemId === '{{ $id }}'" 
+                                                class="w-7 h-7 rounded-lg bg-white text-slate-700 flex items-center justify-center text-xs font-black shadow-xs hover:bg-blue-50 hover:text-[#005ea2] transition-colors disabled:opacity-50 active:scale-95 cursor-pointer" 
+                                                title="Tambah 1">
+                                            +
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -439,18 +458,6 @@
                                 <div class="shine-effect"></div>
                             </button>
                         </div>
-
-                        <!-- Guarantees -->
-                        <div class="mt-5 pt-4 border-t border-slate-100 space-y-2 text-[11px] text-slate-500 font-medium">
-                            <div class="flex items-center space-x-2">
-                                <span class="text-amber-500 text-sm">⏱️</span>
-                                <span>Standar SLA penyiapan makanan maksimal 15 menit.</span>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="text-emerald-500 text-sm">🛡️</span>
-                                <span>Transaksi aman & struk digital diterbitkan otomatis.</span>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -612,9 +619,17 @@
                     const diffInMinutes = (boardTime - now) / 60000;
                     return diffInMinutes >= 0 && diffInMinutes < 30;
                 },
-                updateQuantity(productId, action) {
+                updateQuantity(productId, action, newQty = null, inputElement = null) {
                     this.loadingItemId = productId;
                     this.errorMessage = '';
+
+                    const payload = {
+                        product_id: productId,
+                        action: action
+                    };
+                    if (action === 'set' && newQty !== null) {
+                        payload.quantity = parseInt(newQty, 10);
+                    }
 
                     fetch('{{ route('customer.cart.update') }}', {
                         method: 'POST',
@@ -623,14 +638,14 @@
                             'Accept': 'application/json',
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
                         },
-                        body: JSON.stringify({
-                            product_id: productId,
-                            action: action
-                        })
+                        body: JSON.stringify(payload)
                     })
                     .then(async res => {
                         const data = await res.json().catch(() => ({}));
                         if (!res.ok) {
+                            if (inputElement && this.items[productId]) {
+                                inputElement.value = this.items[productId].quantity;
+                            }
                             throw new Error(data.message || 'Gagal memperbarui item.');
                         }
                         return data;
@@ -650,11 +665,17 @@
                         } else {
                             this.errorMessage = data.message || 'Gagal memperbarui item keranjang.';
                             setTimeout(() => { this.errorMessage = ''; }, 4000);
+                            if (inputElement && this.items[productId]) {
+                                inputElement.value = this.items[productId].quantity;
+                            }
                         }
                     })
                     .catch(err => {
                         this.errorMessage = err.message || 'Terjadi kesalahan pada sistem. Silakan coba lagi.';
                         setTimeout(() => { this.errorMessage = ''; }, 4000);
+                        if (inputElement && this.items[productId]) {
+                            inputElement.value = this.items[productId].quantity;
+                        }
                     })
                     .finally(() => {
                         this.loadingItemId = null;

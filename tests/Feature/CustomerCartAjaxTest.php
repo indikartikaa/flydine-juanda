@@ -239,6 +239,38 @@ class CustomerCartAjaxTest extends TestCase
         $response->assertRedirect(route('customer.cart'));
     }
 
+    public function test_update_cart_sets_direct_quantity_successfully()
+    {
+        $cart = [
+            $this->productA->id => [
+                'id' => $this->productA->id,
+                'name' => $this->productA->name,
+                'price' => 35000,
+                'quantity' => 1,
+                'tenant_id' => $this->tenant->id,
+            ],
+        ];
+
+        $response = $this->withSession(['cart' => $cart])
+            ->withHeaders(['Accept' => 'application/json'])
+            ->post(route('customer.cart.update'), [
+                'product_id' => $this->productA->id,
+                'action' => 'set',
+                'quantity' => 10,
+            ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+            'jumlah' => 10,
+            'subtotal' => 350000,
+            'total' => 350000,
+            'cart_count' => 1,
+        ]);
+        $this->assertEquals(10, $response->json('item.quantity'));
+        $this->assertEquals(10, session('cart')[$this->productA->id]['quantity']);
+    }
+
     public function test_clear_cart_returns_json_and_empties_cart()
     {
         $cart = [
