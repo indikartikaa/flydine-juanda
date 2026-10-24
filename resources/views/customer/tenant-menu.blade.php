@@ -292,12 +292,12 @@
                      data-desc="{{ strtolower($product->description ?? '') }}"
                      data-category="{{ strtolower($product->category ?? '') }}">
                     
-                    <!-- Dedicated Image Frame (Fits Uploaded Images or Clean Frame Placeholder) -->
-                    <div class="h-44 sm:h-48 rounded-2xl overflow-hidden relative mb-4 bg-slate-50/80 border border-slate-100 flex items-center justify-center p-2">
+                    <!-- Dedicated Image Frame (Clean Pure White Background) -->
+                    <div class="h-44 sm:h-48 rounded-2xl overflow-hidden relative mb-4 bg-white border border-slate-100/80 flex items-center justify-center p-2">
                         @if(!$isAvailable)
-                            <!-- High-Contrast Out-of-Stock Center Overlay -->
-                            <div class="absolute inset-0 z-30 flex flex-col items-center justify-center p-3 text-center" style="background-color: rgba(15, 23, 42, 0.45); backdrop-filter: blur(2px);">
-                                <div class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full shadow-lg border border-white/30" style="background-color: #dc2626; color: #ffffff;">
+                            <!-- High-Contrast Out-of-Stock Center Overlay (Clean Frosted White Veil) -->
+                            <div class="absolute inset-0 z-30 flex flex-col items-center justify-center p-3 text-center" style="background-color: rgba(255, 255, 255, 0.72); backdrop-filter: blur(1px);">
+                                <div class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full shadow-lg border border-white/60" style="background-color: #dc2626; color: #ffffff;">
                                     <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                                     </svg>
@@ -317,7 +317,7 @@
                                  alt="{{ $product->name }}" 
                                  loading="lazy" 
                                  onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.classList.remove('hidden');" 
-                                 class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 {{ !$isAvailable ? 'grayscale opacity-60' : '' }}">
+                                 class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 {{ !$isAvailable ? 'opacity-70' : '' }}">
                             <!-- Graceful fallback if image fails to load -->
                             <div class="hidden w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100/70 text-slate-300">
                                 <div class="w-12 h-12 rounded-2xl bg-white shadow-xs border border-slate-200/60 flex items-center justify-center text-slate-300">
