@@ -276,13 +276,13 @@
                      x-transition:enter-end="opacity-100 scale-100">
 
                     <!-- Foto Produk / Fallback Kuliner Estetik -->
-                    <div class="h-44 sm:h-48 w-full relative overflow-hidden bg-slate-50 border-b border-slate-100 flex items-center justify-center shrink-0">
+                    <div class="h-44 sm:h-48 w-full relative overflow-hidden bg-white border-b border-slate-100 flex items-center justify-center shrink-0">
                         @if($hasImage)
                             <img src="{{ $imageUrl }}" 
                                  alt="{{ $product->name }}" 
                                  loading="lazy" 
                                  onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');" 
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                 class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300">
                             
                             <!-- Fallback jika link gambar rusak -->
                             <div class="hidden w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50/40 p-4 text-center">
@@ -526,7 +526,7 @@
                 <!-- Foto Banner / Fallback di Modal -->
                 <div class="h-52 bg-slate-100 relative flex items-center justify-center overflow-hidden shrink-0 border-b border-slate-100">
                     <template x-if="activeProduct && activeProduct.image">
-                        <img :src="activeProduct.image" :alt="activeProduct.name" class="w-full h-full object-cover">
+                        <img :src="activeProduct.image" :alt="activeProduct.name" class="w-full h-full object-contain p-2">
                     </template>
                     <template x-if="!activeProduct || !activeProduct.image">
                         <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50/50 p-4">
@@ -820,7 +820,7 @@
                             <!-- Preview Box -->
                             <div class="w-16 h-16 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden shrink-0">
                                 <template x-if="editPreviewUrl">
-                                    <img :src="editPreviewUrl" class="w-full h-full object-cover">
+                                    <img :src="editPreviewUrl" class="w-full h-full object-contain p-2">
                                 </template>
                                 <template x-if="!editPreviewUrl">
                                     <span class="text-[10px] text-slate-400 font-bold text-center px-1">Tanpa Foto</span>

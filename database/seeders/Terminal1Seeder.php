@@ -14,7 +14,7 @@ class Terminal1Seeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * Menginput 60 Tenant dan 672 Menu Resmi Terminal 1 Bandara Juanda.
+     * Menginput 60 Tenant dan 676 Menu Resmi Terminal 1 Bandara Juanda.
      */
     public function run(): void
     {
@@ -2436,6 +2436,34 @@ class Terminal1Seeder extends Seeder
                     [
                         'name'             => 'Bakmi Lebar Spesial',
                         'price'            => 54000,
+                        'stock'            => 0,
+                        'is_available'     => true,
+                        'preparation_time' => 15,
+                    ],
+                    [
+                        'name'             => 'Nasi Goreng Ayam Spesial',
+                        'price'            => 58000,
+                        'stock'            => 0,
+                        'is_available'     => true,
+                        'preparation_time' => 15,
+                    ],
+                    [
+                        'name'             => 'Bakmi Goreng Spesial',
+                        'price'            => 58000,
+                        'stock'            => 0,
+                        'is_available'     => true,
+                        'preparation_time' => 15,
+                    ],
+                    [
+                        'name'             => 'Ifumie Ayam',
+                        'price'            => 64000,
+                        'stock'            => 0,
+                        'is_available'     => true,
+                        'preparation_time' => 15,
+                    ],
+                    [
+                        'name'             => 'Nasi Sapi Lada Hitam',
+                        'price'            => 65000,
                         'stock'            => 0,
                         'is_available'     => true,
                         'preparation_time' => 15,

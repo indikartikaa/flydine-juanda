@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            Terminal1Seeder::class,  // 60 Tenant & 672 Menu Resmi Terminal 1 (T1)
+            Terminal1Seeder::class,  // 60 Tenant & 676 Menu Resmi Terminal 1 (T1)
             Terminal2Seeder::class,  // 16 Tenant & 239 Menu Resmi Terminal 2 (T2)
             DeliveryLocationSeeder::class,
             TenantCategorySeeder::class,
