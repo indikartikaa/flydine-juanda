@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pelacakan & Pembayaran Pesanan - {{ $order->order_code }} - FlyDine Juanda</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>[x-cloak] { display: none !important; }</style>
+    <style nonce="{{ $cspNonce ?? '' }}">[x-cloak] { display: none !important; }</style>
 </head>
 <body class="text-slate-800 min-h-screen selection:bg-[#005ea2] selection:text-white bg-slate-50/80 antialiased flex flex-col" x-data="{ mobileMenuOpen: false, copyToast: false }">
 

@@ -237,11 +237,18 @@ class AdminController extends Controller
     {
         abort_unless(auth()->user()->role === 'admin_ops', 403);
 
+        $newStatus = !$tenant->is_active;
+
         $tenant->update([
-            'is_active' => !$tenant->is_active
+            'is_active' => $newStatus
         ]);
 
-        $statusText = $tenant->is_active ? 'diaktifkan' : 'ditangguhkan (suspend)';
+        // Sinkronkan status aktif akun staf (users) milik tenant terkait
+        \App\Models\User::where('tenant_id', $tenant->id)->update([
+            'is_active' => $newStatus
+        ]);
+
+        $statusText = $newStatus ? 'diaktifkan' : 'ditangguhkan (suspend)';
         return redirect()->back()->with('success', "Tenant berhasil $statusText!");
     }
 }

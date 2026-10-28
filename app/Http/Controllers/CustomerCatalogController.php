@@ -140,19 +140,35 @@ class CustomerCatalogController extends Controller
 
         if (count($cart) > 0) {
             $firstItem = reset($cart);
-            $tenant = Tenant::find($firstItem['tenant_id']);
+            $tenant = Tenant::with(['products' => function ($q) {
+                $q->where('is_available', true)->orderBy('name');
+            }])->find($firstItem['tenant_id']);
             
+            $removedMenuNames = [];
             foreach ($cart as $key => $item) {
-                $product = Product::find($item['id']);
-                if ($product) {
-                    $cart[$key]['price'] = (float) $product->price;
-                    $cart[$key]['name'] = $product->name;
-                    $cart[$key]['preparation_time'] = (int) ($product->preparation_time ?? 15);
+                $actualProductId = (int) ($item['id'] ?? $key);
+                $product = Product::find($actualProductId);
+                if (!$product || !$product->is_available || $product->stock <= 0) {
+                    $removedMenuNames[] = $item['name'] ?? 'Menu';
+                    unset($cart[$key]);
+                    continue;
+                }
+                $cart[$key]['id'] = $product->id;
+                $cart[$key]['price'] = (float) $product->price;
+                $cart[$key]['name'] = $product->name;
+                $cart[$key]['preparation_time'] = (int) ($product->preparation_time ?? 15);
+                if ($cart[$key]['quantity'] > $product->stock) {
+                    $cart[$key]['quantity'] = (int) $product->stock;
                 }
                 $total += $cart[$key]['price'] * $cart[$key]['quantity'];
             }
 
             session()->put('cart', $cart);
+
+            if (!empty($removedMenuNames)) {
+                $namesList = implode(', ', array_unique($removedMenuNames));
+                session()->now('error', "Mohon maaf, menu ({$namesList}) baru saja habis atau dinonaktifkan oleh restoran sehingga otomatis dikeluarkan dari keranjang.");
+            }
         }
 
         return view('customer.cart', compact('cart', 'tenant', 'total'));
@@ -387,6 +403,20 @@ class CustomerCatalogController extends Controller
         $cart = session()->get('cart', []);
         $isJson = $request->expectsJson() || $request->wantsJson() || $request->ajax() || $request->isJson();
 
+        $product = Product::find($request->product_id);
+        $tenant = Tenant::find($request->tenant_id);
+
+        // Validasi integritas kepemilikan produk terhadap tenant (mencegah manipulasi payload lintas tenant)
+        if (!$product || !$tenant || (int) $product->tenant_id !== (int) $tenant->id) {
+            if ($isJson) {
+                return response()->json([
+                    'error' => 'invalid_tenant_product',
+                    'message' => 'Produk tidak valid atau bukan milik restoran yang dipilih.'
+                ], 422);
+            }
+            return redirect()->back()->with('error', 'Produk tidak valid atau bukan milik restoran yang dipilih.');
+        }
+
         // Validate multi-tenant (only 1 tenant per cart)
         if (count($cart) > 0) {
             $firstItem = reset($cart);
@@ -402,9 +432,6 @@ class CustomerCatalogController extends Controller
             }
         }
 
-        $product = Product::find($request->product_id);
-        $tenant = Tenant::find($request->tenant_id);
-
         if (!$tenant->isOpen()) {
             if ($isJson) {
                 return response()->json(['error' => 'closed', 'message' => 'Restoran sedang tutup.'], 400);
@@ -412,31 +439,58 @@ class CustomerCatalogController extends Controller
             return redirect()->back()->with('error', 'Restoran sedang tutup.');
         }
 
-        if (!$product || !$product->is_available || $product->stock <= 0) {
+        if (!$product->is_available || $product->stock <= 0) {
             if ($isJson) {
                 return response()->json(['error' => 'unavailable', 'message' => 'Mohon maaf, menu ini sedang habis atau tidak tersedia.'], 400);
             }
             return redirect()->back()->with('error', 'Mohon maaf, menu ini sedang habis atau tidak tersedia.');
         }
 
-        $productId = $product->id;
         $cleanVariants = $request->filled('variants')
             ? mb_substr(trim(preg_replace('/\s+/', ' ', (string) $request->variants)), 0, 180)
             : null;
+        if ($cleanVariants === '') {
+            $cleanVariants = null;
+        }
 
-        if (isset($cart[$productId])) {
-            if ($cart[$productId]['quantity'] >= $product->stock) {
+        // Hitung total kuantitas produk yang sama di seluruh baris keranjang (lintas varian) untuk menjaga batas stok
+        $totalProductQtyInCart = collect($cart)
+            ->filter(fn($item, $k) => (int) ($item['id'] ?? $k) === (int) $product->id)
+            ->sum('quantity');
+
+        // Cari apakah sudah ada item di keranjang untuk produk DAN varian yang persis sama
+        $cartKey = null;
+        foreach ($cart as $existingKey => $existingItem) {
+            $existingProdId = (int) ($existingItem['id'] ?? $existingKey);
+            $existingVar = $existingItem['variants'] ?? null;
+            if ($existingProdId === (int) $product->id && (string) $existingVar === (string) $cleanVariants) {
+                $cartKey = (string) $existingKey;
+                break;
+            }
+        }
+
+        if ($cartKey === null) {
+            $cartKey = ($cleanVariants === null && !isset($cart[$product->id]))
+                ? (string) $product->id
+                : $product->id . '__' . substr(md5(mb_strtolower((string) $cleanVariants)), 0, 8);
+        }
+
+        if (isset($cart[$cartKey])) {
+            if ($totalProductQtyInCart >= $product->stock) {
                 if ($isJson) {
                     return response()->json(['error' => 'stock_limit', 'message' => "Stok hanya tersedia {$product->stock} porsi."], 400);
                 }
                 return redirect()->back()->with('error', "Stok hanya tersedia {$product->stock} porsi.");
             }
-            $cart[$productId]['quantity']++;
-            if ($cleanVariants !== null) {
-                $cart[$productId]['variants'] = $cleanVariants;
-            }
+            $cart[$cartKey]['quantity']++;
         } else {
-            $cart[$productId] = [
+            if ($totalProductQtyInCart >= $product->stock) {
+                if ($isJson) {
+                    return response()->json(['error' => 'stock_limit', 'message' => "Stok hanya tersedia {$product->stock} porsi."], 400);
+                }
+                return redirect()->back()->with('error', "Stok hanya tersedia {$product->stock} porsi.");
+            }
+            $cart[$cartKey] = [
                 'id' => $product->id,
                 'name' => $product->name,
                 'price' => $product->price,
@@ -458,9 +512,9 @@ class CustomerCatalogController extends Controller
                 'success' => true,
                 'message' => 'Produk ditambahkan ke keranjang',
                 'cart_count' => count($cart),
-                'item' => $cart[$productId],
-                'jumlah' => $cart[$productId]['quantity'],
-                'subtotal' => $cart[$productId]['price'] * $cart[$productId]['quantity'],
+                'item' => $cart[$cartKey],
+                'jumlah' => $cart[$cartKey]['quantity'],
+                'subtotal' => $cart[$cartKey]['price'] * $cart[$cartKey]['quantity'],
                 'total' => $total,
                 'cart' => $cart,
             ]);
@@ -485,50 +539,71 @@ class CustomerCatalogController extends Controller
         $jumlah = 0;
         $subtotal = 0;
 
+        $warningMessage = null;
+
         if (isset($cart[$productId])) {
-            $product = Product::find($productId);
+            $itemName = $cart[$productId]['name'] ?? 'Menu';
+            $actualProductId = (int) ($cart[$productId]['id'] ?? $productId);
+            $product = Product::find($actualProductId);
 
-            if ($request->action == 'increase') {
-                if ($product && $cart[$productId]['quantity'] >= $product->stock) {
-                    if ($isJson) {
-                        return response()->json(['error' => 'stock_limit', 'message' => "Stok maksimal tercapai ({$product->stock} porsi)."], 400);
-                    }
-                    return redirect()->back()->with('error', "Stok maksimal tercapai ({$product->stock} porsi).");
-                }
-                $cart[$productId]['quantity']++;
-            } elseif ($request->action == 'decrease') {
-                $cart[$productId]['quantity']--;
-                if ($cart[$productId]['quantity'] <= 0) {
-                    unset($cart[$productId]);
-                }
-            } elseif ($request->action == 'remove') {
+            // Jika produk tiba-tiba dinonaktifkan atau stok habis saat pelanggan masih di keranjang
+            if (in_array($request->action, ['increase', 'set'], true) && (!$product || !$product->is_available || $product->stock <= 0)) {
                 unset($cart[$productId]);
-            } elseif ($request->action == 'set') {
-                $targetQty = (int) $request->input('quantity', 1);
-                if ($targetQty <= 0) {
-                    unset($cart[$productId]);
-                } else {
-                    if ($product && $targetQty > $product->stock) {
-                        if ($isJson) {
-                            return response()->json([
-                                'error' => 'stock_limit', 
-                                'message' => "Stok hanya tersedia {$product->stock} porsi.",
-                                'available_stock' => $product->stock,
-                                'item' => $cart[$productId],
-                                'jumlah' => $cart[$productId]['quantity'],
-                            ], 400);
-                        }
-                        return redirect()->back()->with('error', "Stok hanya tersedia {$product->stock} porsi.");
-                    }
-                    $cart[$productId]['quantity'] = $targetQty;
-                }
-            }
-            session()->put('cart', $cart);
+                session()->put('cart', $cart);
+                $warningMessage = "Mohon maaf, menu '{$itemName}' baru saja habis atau dinonaktifkan oleh restoran.";
 
-            if (isset($cart[$productId])) {
-                $targetItem = $cart[$productId];
-                $jumlah = $cart[$productId]['quantity'];
-                $subtotal = $cart[$productId]['price'] * $cart[$productId]['quantity'];
+                if (!$isJson) {
+                    return redirect()->route('customer.cart')->with('error', $warningMessage);
+                }
+            } else {
+                $otherVariantsQty = collect($cart)
+                    ->except([$productId])
+                    ->filter(fn($item, $k) => (int) ($item['id'] ?? $k) === $actualProductId)
+                    ->sum('quantity');
+
+                if ($request->action == 'increase') {
+                    if ($product && ($cart[$productId]['quantity'] + $otherVariantsQty) >= $product->stock) {
+                        if ($isJson) {
+                            return response()->json(['error' => 'stock_limit', 'message' => "Stok maksimal tercapai ({$product->stock} porsi)."], 400);
+                        }
+                        return redirect()->back()->with('error', "Stok maksimal tercapai ({$product->stock} porsi).");
+                    }
+                    $cart[$productId]['quantity']++;
+                } elseif ($request->action == 'decrease') {
+                    $cart[$productId]['quantity']--;
+                    if ($cart[$productId]['quantity'] <= 0) {
+                        unset($cart[$productId]);
+                    }
+                } elseif ($request->action == 'remove') {
+                    unset($cart[$productId]);
+                } elseif ($request->action == 'set') {
+                    $targetQty = (int) $request->input('quantity', 1);
+                    if ($targetQty <= 0) {
+                        unset($cart[$productId]);
+                    } else {
+                        if ($product && ($targetQty + $otherVariantsQty) > $product->stock) {
+                            $availForThisRow = max(0, $product->stock - $otherVariantsQty);
+                            if ($isJson) {
+                                return response()->json([
+                                    'error' => 'stock_limit', 
+                                    'message' => "Stok hanya tersedia {$product->stock} porsi.",
+                                    'available_stock' => $availForThisRow,
+                                    'item' => $cart[$productId],
+                                    'jumlah' => $cart[$productId]['quantity'],
+                                ], 400);
+                            }
+                            return redirect()->back()->with('error', "Stok hanya tersedia {$product->stock} porsi.");
+                        }
+                        $cart[$productId]['quantity'] = $targetQty;
+                    }
+                }
+                session()->put('cart', $cart);
+
+                if (isset($cart[$productId])) {
+                    $targetItem = $cart[$productId];
+                    $jumlah = $cart[$productId]['quantity'];
+                    $subtotal = $cart[$productId]['price'] * $cart[$productId]['quantity'];
+                }
             }
         }
 
@@ -547,7 +622,8 @@ class CustomerCatalogController extends Controller
                 'total' => $total,
                 'cart_count' => count($cart),
                 'cart' => $cart,
-                'message' => 'Keranjang berhasil diperbarui',
+                'warning' => $warningMessage,
+                'message' => $warningMessage ?? 'Keranjang berhasil diperbarui',
             ]);
         }
 
@@ -680,17 +756,30 @@ class CustomerCatalogController extends Controller
 
         $request->validate($rules, $customMessages);
 
-        // Validasi ketersediaan, stok, waktu persiapan (preparation_time), dan sinkronisasi harga produk terkini dari database sebelum memproses checkout
+        // Validasi ketersediaan, stok gabungan lintas varian, waktu persiapan (preparation_time), dan sinkronisasi harga produk terkini dari database sebelum memproses checkout
+        $requestedQtyByProduct = [];
+        foreach ($cart as $key => $item) {
+            $pid = (int) ($item['id'] ?? $key);
+            $requestedQtyByProduct[$pid] = ($requestedQtyByProduct[$pid] ?? 0) + (int) $item['quantity'];
+        }
+
         $maxPrepTime = 15;
         foreach ($cart as $key => $item) {
-            $productCheck = Product::find($item['id']);
-            if (!$productCheck || !$productCheck->is_available || $productCheck->stock < $item['quantity']) {
+            $pid = (int) ($item['id'] ?? $key);
+            $productCheck = Product::find($pid);
+            $totalNeeded = $requestedQtyByProduct[$pid] ?? (int) $item['quantity'];
+
+            if (!$productCheck || (int) $productCheck->tenant_id !== (int) $tenant->id || !$productCheck->is_available || $productCheck->stock < $totalNeeded) {
+                if ($productCheck && (int) $productCheck->tenant_id !== (int) $tenant->id) {
+                    return redirect()->route('customer.cart')->with('error', "Menu '{$item['name']}' tidak terdaftar pada restoran '{$tenant->name}'. Silakan kosongkan dan ulangi pesanan Anda.");
+                }
                 $avail = ($productCheck && $productCheck->is_available) ? $productCheck->stock : 0;
                 return redirect()->route('customer.cart')->with('error', "Mohon maaf, stok untuk menu '{$item['name']}' tidak mencukupi (tersedia {$avail} porsi). Silakan sesuaikan jumlah pesanan Anda.");
             }
 
             // Gunakan harga, nama, dan waktu persiapan terbaru langsung dari database (bukan data lama di session)
             $prepTime = (int) ($productCheck->preparation_time ?? 15);
+            $cart[$key]['id'] = $productCheck->id;
             $cart[$key]['price'] = (float) $productCheck->price;
             $cart[$key]['name'] = $productCheck->name;
             $cart[$key]['preparation_time'] = $prepTime;

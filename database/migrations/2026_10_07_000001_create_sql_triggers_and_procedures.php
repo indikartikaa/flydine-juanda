@@ -99,12 +99,16 @@ return new class extends Migration
                         );
                     END IF;
 
-                    -- Auto-Restore Stok: Jika status berubah menjadi dibatalkan
+                    -- Auto-Restore Stok: Jika status berubah menjadi dibatalkan (akurat lintas varian menu yang sama)
                     IF OLD.status <> 'dibatalkan' AND NEW.status = 'dibatalkan' THEN
                         UPDATE products p
-                        INNER JOIN order_items oi ON p.id = oi.product_id
-                        SET p.stock = p.stock + oi.quantity
-                        WHERE oi.order_id = NEW.id;
+                        INNER JOIN (
+                            SELECT product_id, SUM(quantity) AS total_qty
+                            FROM order_items
+                            WHERE order_id = NEW.id
+                            GROUP BY product_id
+                        ) oi ON p.id = oi.product_id
+                        SET p.stock = p.stock + oi.total_qty;
                     END IF;
                 END;
             ");

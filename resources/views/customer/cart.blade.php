@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>
+    <style nonce="{{ $cspNonce ?? '' }}">
         [x-cloak] { display: none !important; }
         /* Hilangkan spinner default browser pada input type number */
         input[type=number]::-webkit-inner-spin-button,
@@ -38,9 +38,8 @@
                     
                     <a href="{{ route('customer.cart') }}" class="flex items-center space-x-2 text-sm font-bold text-[#005ea2] transition-colors group">
                         <div class="relative">
-                            @if(session('cart') && count(session('cart')) > 0)
-                                <span class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ count(session('cart')) }}</span>
-                            @endif
+                            <span id="navbar-cart-badge"
+                                  class="{{ (session('cart') && count(session('cart')) > 0) ? 'flex' : 'hidden' }} absolute -top-1.5 -right-1.5 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full items-center justify-center">{{ session('cart') ? count(session('cart')) : 0 }}</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                         </div>
                         <span>PESANAN</span>
@@ -208,7 +207,7 @@
                             </div>
                             <form action="{{ route('customer.cart.clear') }}" method="POST" @submit.prevent="clearCart()">
                                 @csrf
-                                <button type="submit" :disabled="isClearing || loadingItemId !== null" class="text-xs font-bold text-rose-500 hover:text-rose-700 disabled:opacity-50 flex items-center space-x-1.5 py-1 px-3 rounded-lg hover:bg-rose-50 transition-colors">
+                                <button type="submit" :disabled="isClearing || loadingItemId !== null" class="text-xs font-bold text-rose-500 hover:text-rose-700 disabled:opacity-50 flex items-center space-x-1.5 py-1 px-3 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                     <span x-show="!isClearing">Kosongkan Keranjang</span>
                                     <span x-show="isClearing" x-cloak>Menghapus...</span>
@@ -216,74 +215,94 @@
                             </form>
                         </div>
 
-                        <!-- Item Rows -->
+                        <!-- Item Rows (Reactive Alpine List) -->
                         <div class="divide-y divide-slate-100">
-                            @foreach($cart as $id => $item)
-                            <div class="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 group relative transition-all duration-200"
-                                 x-show="items['{{ $id }}'] && items['{{ $id }}'].quantity > 0"
-                                 :class="{ 'opacity-60 pointer-events-none': loadingItemId === '{{ $id }}' }">
-                                <div class="flex items-center space-x-3.5">
-                                    <div class="w-10 h-10 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center font-black text-xs text-[#005ea2] shrink-0">
-                                        <span x-text="(items['{{ $id }}'] ? items['{{ $id }}'].quantity : {{ $item['quantity'] }}) + 'x'">{{ $item['quantity'] }}x</span>
+                            <template x-for="(item, id) in items" :key="id">
+                                <div class="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 group relative transition-all duration-200"
+                                     x-show="item && item.quantity > 0"
+                                     :class="{ 'opacity-60 pointer-events-none': loadingItemId === id }">
+                                    <div class="flex items-center space-x-3.5">
+                                        <div class="w-10 h-10 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center font-black text-xs text-[#005ea2] shrink-0">
+                                            <span x-text="item.quantity + 'x'"></span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-extrabold text-sm sm:text-base text-slate-800" x-text="item.name"></h4>
+                                            <div class="flex flex-wrap items-center gap-1.5 mt-1">
+                                                <template x-if="item.variants">
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-50 text-[#005ea2] border border-blue-100">
+                                                        <span>✨</span>
+                                                        <span x-text="item.variants"></span>
+                                                    </span>
+                                                </template>
+                                                <template x-if="hasProductVariants(item.id)">
+                                                    <button type="button"
+                                                            @click="openQuickMenuModal(item.id)"
+                                                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-[#005ea2] border border-slate-200 hover:border-blue-200 transition cursor-pointer">
+                                                        <span>+ Varian Lain</span>
+                                                    </button>
+                                                </template>
+                                            </div>
+                                            <p class="text-xs text-slate-400 font-semibold mt-0.5">@ Rp <span x-text="formatNumber(item.price)"></span></p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h4 class="font-extrabold text-sm sm:text-base text-slate-800">{{ $item['name'] }}</h4>
-                                        @if(!empty($item['variants']))
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 mt-1 rounded-md text-[11px] font-bold bg-blue-50 text-[#005ea2] border border-blue-100">
-                                                <span>✨</span>
-                                                <span>{{ $item['variants'] }}</span>
-                                            </span>
-                                        @endif
-                                        <p class="text-xs text-slate-400 font-semibold mt-0.5">@ Rp {{ number_format($item['price'], 0, ',', '.') }}</p>
-                                    </div>
-                                </div>
 
-                                <div class="flex items-center justify-between sm:justify-end sm:space-x-6">
-                                    <span class="font-black text-slate-900 text-sm sm:text-base">
-                                        Rp <span x-text="formatNumber(items['{{ $id }}'] ? (items['{{ $id }}'].price * items['{{ $id }}'].quantity) : {{ $item['price'] * $item['quantity'] }})">{{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}</span>
-                                    </span>
-                                    
-                                    <!-- Quantity Adjustment Stepper with Direct Number Input -->
-                                    <div class="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200/80 shadow-xs">
-                                        <!-- Decrease Button (-) -->
-                                        <button type="button" 
-                                                @click="updateQuantity('{{ $id }}', 'decrease')" 
-                                                :disabled="loadingItemId === '{{ $id }}'" 
-                                                class="w-7 h-7 rounded-lg bg-white text-slate-700 flex items-center justify-center text-xs font-black shadow-xs hover:bg-rose-50 hover:text-rose-600 transition-colors disabled:opacity-50 active:scale-95 cursor-pointer" 
-                                                title="Kurangi 1">
-                                            −
-                                        </button>
+                                    <div class="flex items-center justify-between sm:justify-end sm:space-x-6">
+                                        <span class="font-black text-slate-900 text-sm sm:text-base">
+                                            Rp <span x-text="formatNumber(item.price * item.quantity)"></span>
+                                        </span>
                                         
-                                        <!-- Direct Editable Number Input -->
-                                        <input type="number" 
-                                               inputmode="numeric"
-                                               min="1" 
-                                               max="99" 
-                                               :value="items['{{ $id }}'] ? items['{{ $id }}'].quantity : {{ $item['quantity'] }}" 
-                                               @change="
-                                                   let val = parseInt($event.target.value, 10);
-                                                   if (isNaN(val) || val < 1) val = 1;
-                                                   if (val > 99) val = 99;
-                                                   $event.target.value = val;
-                                                   updateQuantity('{{ $id }}', 'set', val, $event.target);
-                                               " 
-                                               @keydown.enter.prevent="$event.target.blur()"
-                                               :disabled="loadingItemId === '{{ $id }}'" 
-                                               class="w-14 h-7 text-center text-xs font-black text-slate-900 bg-white rounded-lg border border-slate-200 px-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus:outline-none focus:ring-2 focus:ring-[#005ea2] focus:border-[#005ea2] transition-all disabled:opacity-50"
-                                               title="Ketik jumlah langsung (contoh: 10)">
-                                        
-                                        <!-- Increase Button (+) -->
-                                        <button type="button" 
-                                                @click="updateQuantity('{{ $id }}', 'increase')" 
-                                                :disabled="loadingItemId === '{{ $id }}'" 
-                                                class="w-7 h-7 rounded-lg bg-white text-slate-700 flex items-center justify-center text-xs font-black shadow-xs hover:bg-blue-50 hover:text-[#005ea2] transition-colors disabled:opacity-50 active:scale-95 cursor-pointer" 
-                                                title="Tambah 1">
-                                            +
-                                        </button>
+                                        <!-- Quantity Adjustment Stepper with Direct Number Input -->
+                                        <div class="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200/80 shadow-xs">
+                                            <!-- Decrease Button (-) -->
+                                            <button type="button" 
+                                                    @click="updateQuantity(id, 'decrease')" 
+                                                    :disabled="loadingItemId === id" 
+                                                    class="w-7 h-7 rounded-lg bg-white text-slate-700 flex items-center justify-center text-xs font-black shadow-xs hover:bg-rose-50 hover:text-rose-600 transition-colors disabled:opacity-50 active:scale-95 cursor-pointer" 
+                                                    title="Kurangi 1">
+                                                −
+                                            </button>
+                                            
+                                            <!-- Direct Editable Number Input -->
+                                            <input type="number" 
+                                                   inputmode="numeric"
+                                                   min="1" 
+                                                   max="99" 
+                                                   :value="item.quantity" 
+                                                   @change="
+                                                       let val = parseInt($event.target.value, 10);
+                                                       if (isNaN(val) || val < 1) val = 1;
+                                                       if (val > 99) val = 99;
+                                                       $event.target.value = val;
+                                                       updateQuantity(id, 'set', val, $event.target);
+                                                   " 
+                                                   @keydown.enter.prevent="$event.target.blur()"
+                                                   :disabled="loadingItemId === id" 
+                                                   class="w-14 h-7 text-center text-xs font-black text-slate-900 bg-white rounded-lg border border-slate-200 px-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus:outline-none focus:ring-2 focus:ring-[#005ea2] focus:border-[#005ea2] transition-all disabled:opacity-50"
+                                                   title="Ketik jumlah langsung (contoh: 10)">
+                                            
+                                            <!-- Increase Button (+) -->
+                                            <button type="button" 
+                                                    @click="updateQuantity(id, 'increase')" 
+                                                    :disabled="loadingItemId === id" 
+                                                    class="w-7 h-7 rounded-lg bg-white text-slate-700 flex items-center justify-center text-xs font-black shadow-xs hover:bg-blue-50 hover:text-[#005ea2] transition-colors disabled:opacity-50 active:scale-95 cursor-pointer" 
+                                                    title="Tambah 1">
+                                                +
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            @endforeach
+                            </template>
+                        </div>
+
+                        <!-- Quick Add More Menu Bar -->
+                        <div class="mt-4 pt-4 border-t border-dashed border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                            <p class="text-xs font-semibold text-slate-500">Ingin tambah menu atau varian lain dari <strong class="text-slate-700">{{ $tenant->name ?? 'restoran ini' }}</strong>?</p>
+                            <button type="button"
+                                    @click="openQuickMenuModal()"
+                                    class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-slate-50 hover:bg-blue-50 text-[#005ea2] border border-slate-200 hover:border-blue-200 text-xs font-extrabold transition-all cursor-pointer">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                <span>Tambah Menu Lainnya</span>
+                            </button>
                         </div>
                     </div>
 
@@ -944,6 +963,120 @@
             </div>
         </div>
 
+        <!-- Modal Tambah Menu & Varian Langsung dari Halaman Keranjang -->
+        <div x-show="quickMenuOpen" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4" @keydown.escape.window="closeQuickMenuModal()">
+            <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[88vh]" @click.away="closeQuickMenuModal()">
+                <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+                    <div>
+                        <span class="text-[10px] font-black uppercase tracking-wider text-[#005ea2] bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md">Tambah Pesanan</span>
+                        <h3 class="text-base font-black text-slate-900 mt-1">{{ $tenant->name ?? 'Menu Restoran' }}</h3>
+                    </div>
+                    <button type="button" @click="closeQuickMenuModal()" class="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+
+                <!-- Search Bar inside Modal -->
+                <div class="px-5 pt-3.5 pb-2 border-b border-slate-100">
+                    <div class="relative">
+                        <input type="text"
+                               x-model="quickMenuSearch"
+                               placeholder="Cari menu makanan atau minuman..."
+                               class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-semibold text-slate-800 focus:bg-white focus:border-[#005ea2] focus:outline-none">
+                        <button type="button" x-show="quickMenuSearch" @click="quickMenuSearch = ''" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 hover:text-slate-600 cursor-pointer">✕</button>
+                    </div>
+                </div>
+
+                <!-- Menu List -->
+                <div class="p-4 overflow-y-auto space-y-3 divide-y divide-slate-100">
+                    <template x-for="prod in filteredTenantMenus" :key="prod.id">
+                        <div class="pt-3 first:pt-0">
+                            <div class="flex items-center justify-between gap-3">
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <h4 class="font-extrabold text-sm text-slate-900 truncate" x-text="prod.name"></h4>
+                                        <template x-if="getProductTotalInCart(prod.id) > 0">
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-50 text-[#005ea2] border border-blue-200 shrink-0"
+                                                  x-text="getProductTotalInCart(prod.id) + ' di keranjang'"></span>
+                                        </template>
+                                    </div>
+                                    <p class="text-xs font-black text-[#005ea2] mt-0.5">
+                                        Rp <span x-text="formatNumber(prod.price)"></span>
+                                        <span class="text-[11px] font-semibold text-slate-400 ml-1.5" x-text="'• Sisa ' + prod.stock + ' porsi'"></span>
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <template x-if="prod.stock <= 0 || getProductTotalInCart(prod.id) >= prod.stock">
+                                        <span class="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-[11px] font-bold">Stok Maks</span>
+                                    </template>
+                                    <template x-if="prod.stock > 0 && getProductTotalInCart(prod.id) < prod.stock">
+                                        <div>
+                                            <template x-if="!prod.variants || prod.variants.length === 0">
+                                                <button type="button"
+                                                        @click="addFromModal(prod, null)"
+                                                        :disabled="addingFromModalId === prod.id"
+                                                        class="px-3.5 py-2 rounded-xl bg-[#005ea2] hover:bg-blue-700 text-white text-xs font-extrabold transition cursor-pointer shadow-xs disabled:opacity-50">
+                                                    + Tambah
+                                                </button>
+                                            </template>
+                                            <template x-if="prod.variants && prod.variants.length > 0">
+                                                <button type="button"
+                                                        @click="toggleVariantPicker(prod)"
+                                                        class="px-3.5 py-2 rounded-xl border text-xs font-extrabold transition cursor-pointer"
+                                                        :class="activeVariantProductId === prod.id ? 'bg-slate-800 text-white border-slate-800' : 'bg-blue-50 text-[#005ea2] border-blue-200 hover:bg-[#005ea2] hover:text-white'">
+                                                    <span x-text="activeVariantProductId === prod.id ? 'Tutup Opsi' : '+ Pilih Varian'"></span>
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Inline Variant Picker for Menu with Variants -->
+                            <div x-show="activeVariantProductId === prod.id" x-cloak class="mt-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-3">
+                                <template x-for="(grp, gIdx) in (prod.variants || [])" :key="gIdx">
+                                    <div>
+                                        <label class="block text-[11px] font-black text-slate-600 uppercase tracking-wider mb-1.5" x-text="'✨ ' + grp.label"></label>
+                                        <div class="flex flex-wrap gap-1.5">
+                                            <template x-for="choice in grp.choices" :key="choice">
+                                                <button type="button"
+                                                        @click="selectModalVariant(gIdx, choice)"
+                                                        class="px-3 py-1.5 rounded-xl text-xs font-bold border transition cursor-pointer"
+                                                        :class="modalVariantSelections[gIdx] === choice
+                                                            ? 'bg-[#005ea2] text-white border-[#005ea2] shadow-2xs'
+                                                            : 'bg-white text-slate-700 border-slate-200 hover:border-blue-300'"
+                                                        x-text="choice"></button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                                <div class="pt-2 flex justify-end">
+                                    <button type="button"
+                                            @click="confirmAddVariantFromModal(prod)"
+                                            :disabled="addingFromModalId === prod.id"
+                                            class="px-4 py-2 rounded-xl bg-[#005ea2] hover:bg-blue-700 text-white text-xs font-extrabold shadow-sm transition cursor-pointer disabled:opacity-50">
+                                        + Tambahkan Varian Ini
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <div x-show="filteredTenantMenus.length === 0" class="py-8 text-center text-xs font-bold text-slate-400">
+                        Menu tidak ditemukan.
+                    </div>
+                </div>
+
+                <div class="px-5 py-3.5 border-t border-slate-100 bg-slate-50/70 flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-500">Total di keranjang: <strong class="text-[#005ea2]" x-text="itemsCount + ' baris menu'"></strong></span>
+                    <button type="button" @click="closeQuickMenuModal()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold transition cursor-pointer">
+                        Selesai
+                    </button>
+                </div>
+            </div>
+        </div>
+
         @else
         <!-- Server-rendered Empty State (Wide & Beautiful on Desktop) -->
         <div class="max-w-3xl mx-auto bg-white rounded-3xl p-5 sm:p-10 md:p-14 text-center border border-slate-200/80 shadow-sm animate-fade-up">
@@ -1021,13 +1154,35 @@
     <!-- Official FlyDine Corporate Footer -->
     <x-footer />
 
+    @php
+        $isTenantOpenSafe = (bool) ($tenant && $tenant->isOpen() && $tenant->is_active);
+        $tenantMenusPayload = ($tenant && $tenant->relationLoaded('products'))
+            ? $tenant->products->map(function ($p) {
+                return [
+                    'id' => $p->id,
+                    'name' => $p->name,
+                    'price' => (float) $p->price,
+                    'stock' => (int) $p->stock,
+                    'variants' => $p->getNormalizedCustomizationGroups(),
+                ];
+            })->values()->all()
+            : [];
+    @endphp
+
     <!-- Alpine.js Cart Logic Script -->
     <script nonce="{{ $cspNonce ?? '' }}">
         function cartManager() {
             return {
                 items: @json((object)$cart),
+                tenantId: {{ $tenant->id ?? 'null' }},
+                tenantMenus: @json($tenantMenusPayload),
+                quickMenuOpen: false,
+                quickMenuSearch: '',
+                activeVariantProductId: null,
+                modalVariantSelections: {},
+                addingFromModalId: null,
                 isTenantAirside: {{ ($tenant && $tenant->isAirside()) ? 'true' : 'false' }},
-                isTenantClosed: {{ !$isTenantOpen ? 'true' : 'false' }},
+                isTenantClosed: {{ !$isTenantOpenSafe ? 'true' : 'false' }},
                 customerType: '{{ old('customer_type', 'penumpang') }}', 
                 boardingTime: '{{ old('boarding_time', '') }}',
                 pickupMethod: '{{ old('pickup_method', 'ambil_sendiri') }}',
@@ -1065,9 +1220,23 @@
                     this.orderNotes = current.slice(0, 100);
                 },
 
+                syncNavbarBadge() {
+                    const badge = document.getElementById('navbar-cart-badge');
+                    if (!badge) return;
+                    const count = Object.keys(this.items || {}).length;
+                    badge.textContent = count;
+                    if (count > 0) {
+                        badge.classList.remove('hidden');
+                        badge.classList.add('flex');
+                    } else {
+                        badge.classList.remove('flex');
+                        badge.classList.add('hidden');
+                    }
+                },
                 init() {
                     this.fetchLocations();
                     this.handleCustomerTypeChange();
+                    this.syncNavbarBadge();
                 },
 
                 handleCustomerTypeChange() {
@@ -1223,6 +1392,11 @@
                                     [productId]: data.item
                                 };
                             }
+                            if (data.warning) {
+                                this.errorMessage = data.warning;
+                                setTimeout(() => { this.errorMessage = ''; }, 5000);
+                            }
+                            this.syncNavbarBadge();
                         } else {
                             this.errorMessage = data.message || 'Gagal memperbarui item keranjang.';
                             setTimeout(() => { this.errorMessage = ''; }, 4000);
@@ -1240,6 +1414,107 @@
                     })
                     .finally(() => {
                         this.loadingItemId = null;
+                    });
+                },
+                get filteredTenantMenus() {
+                    const q = (this.quickMenuSearch || '').trim().toLowerCase();
+                    if (!q) return this.tenantMenus || [];
+                    return (this.tenantMenus || []).filter(p => String(p.name || '').toLowerCase().includes(q));
+                },
+                hasProductVariants(productId) {
+                    const found = (this.tenantMenus || []).find(p => Number(p.id) === Number(productId));
+                    return Boolean(found && Array.isArray(found.variants) && found.variants.length > 0);
+                },
+                getProductTotalInCart(productId) {
+                    return Object.values(this.items || {}).reduce((sum, it) => {
+                        return Number(it.id) === Number(productId) ? sum + Number(it.quantity || 0) : sum;
+                    }, 0);
+                },
+                openQuickMenuModal(focusProductId = null) {
+                    this.quickMenuOpen = true;
+                    this.quickMenuSearch = '';
+                    if (focusProductId) {
+                        const targetProd = (this.tenantMenus || []).find(p => Number(p.id) === Number(focusProductId));
+                        if (targetProd && Array.isArray(targetProd.variants) && targetProd.variants.length > 0) {
+                            this.toggleVariantPicker(targetProd, true);
+                        }
+                    } else {
+                        this.activeVariantProductId = null;
+                        this.modalVariantSelections = {};
+                    }
+                },
+                closeQuickMenuModal() {
+                    this.quickMenuOpen = false;
+                    this.activeVariantProductId = null;
+                    this.modalVariantSelections = {};
+                },
+                toggleVariantPicker(prod, forceOpen = false) {
+                    if (!forceOpen && this.activeVariantProductId === prod.id) {
+                        this.activeVariantProductId = null;
+                        this.modalVariantSelections = {};
+                        return;
+                    }
+                    this.activeVariantProductId = prod.id;
+                    const defaults = {};
+                    (prod.variants || []).forEach((grp, idx) => {
+                        if (grp && Array.isArray(grp.choices) && grp.choices.length > 0) {
+                            defaults[idx] = grp.choices[0];
+                        }
+                    });
+                    this.modalVariantSelections = defaults;
+                },
+                selectModalVariant(groupIdx, choice) {
+                    this.modalVariantSelections = {
+                        ...this.modalVariantSelections,
+                        [groupIdx]: choice
+                    };
+                },
+                confirmAddVariantFromModal(prod) {
+                    const chosen = (prod.variants || [])
+                        .map((_, idx) => this.modalVariantSelections[idx])
+                        .filter(Boolean)
+                        .join(' • ');
+                    this.addFromModal(prod, chosen || null);
+                },
+                addFromModal(prod, variantsString = null) {
+                    if (!this.tenantId) return;
+                    this.addingFromModalId = prod.id;
+                    this.errorMessage = '';
+
+                    fetch('{{ route('customer.cart.add') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            product_id: prod.id,
+                            tenant_id: this.tenantId,
+                            variants: variantsString
+                        })
+                    })
+                    .then(async res => {
+                        const data = await res.json().catch(() => ({}));
+                        if (!res.ok) {
+                            throw new Error(data.message || 'Gagal menambahkan menu.');
+                        }
+                        return data;
+                    })
+                    .then(data => {
+                        if (data.success && data.cart) {
+                            this.items = data.cart;
+                            this.activeVariantProductId = null;
+                            this.syncNavbarBadge();
+                        }
+                    })
+                    .catch(err => {
+                        this.errorMessage = err.message || 'Gagal menambahkan menu.';
+                        setTimeout(() => { this.errorMessage = ''; }, 4000);
+                    })
+                    .finally(() => {
+                        this.addingFromModalId = null;
                     });
                 },
                 clearCart() {
@@ -1265,6 +1540,7 @@
                     .then(data => {
                         if (data.success) {
                             this.items = {};
+                            this.syncNavbarBadge();
                         } else {
                             this.errorMessage = data.message || 'Gagal mengosongkan keranjang.';
                             setTimeout(() => { this.errorMessage = ''; }, 4000);

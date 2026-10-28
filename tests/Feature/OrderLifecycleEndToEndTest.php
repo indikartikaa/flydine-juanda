@@ -917,6 +917,22 @@ class OrderLifecycleEndToEndTest extends TestCase
         $response = $exceptionHandler->render($request, new \Symfony\Component\HttpKernel\Exception\HttpException(419));
         $this->assertEquals(302, $response->getStatusCode());
         $this->assertEquals(route('customer.cart'), $response->headers->get('Location'));
+
+        // 3. Sinkronisasi status akun staf (users.is_active) saat Admin Ops men-suspend / mengaktifkan kembali mitra tenant
+        $this->actingAs($admin)
+            ->patch(route('admin.tenants.toggle-status', $this->tenant->id))
+            ->assertRedirect();
+
+        $this->assertFalse((bool) $this->tenant->fresh()->is_active);
+        $this->assertFalse((bool) $this->tenantStaff->fresh()->is_active);
+
+        // Aktifkan kembali mitra tenant -> akun staf ikut aktif kembali
+        $this->actingAs($admin)
+            ->patch(route('admin.tenants.toggle-status', $this->tenant->id))
+            ->assertRedirect();
+
+        $this->assertTrue((bool) $this->tenant->fresh()->is_active);
+        $this->assertTrue((bool) $this->tenantStaff->fresh()->is_active);
     }
 
     /**
@@ -1086,14 +1102,27 @@ class OrderLifecycleEndToEndTest extends TestCase
         $this->assertEquals('Potongan Ayam', $normalized[0]['label']);
         $this->assertEquals(['Dada', 'Paha Atas', 'Sayap'], $normalized[0]['choices']);
 
-        // 2. Pelanggan memesan menu tersebut dengan pilihan varian
+        // 2. Pelanggan memesan menu tersebut dengan 2 pilihan varian BERBEDA (1x Paha Atas • Blackpepper & 1x Dada • Cheese)
         $this->postJson(route('customer.cart.add'), [
             'product_id' => $paketAyam->id,
             'tenant_id' => $this->tenant->id,
             'variants' => 'Paha Atas • Blackpepper',
         ])->assertOk();
 
-        // 3. Checkout dan pastikan pilihan varian tercatat pada product_name_snapshot di tabel order_items
+        $this->postJson(route('customer.cart.add'), [
+            'product_id' => $paketAyam->id,
+            'tenant_id' => $this->tenant->id,
+            'variants' => 'Dada • Cheese',
+        ])->assertOk();
+
+        // Jika memesan varian yang SAMA lagi, kuantitas pada varian tersebut bertambah menjadi 2
+        $this->postJson(route('customer.cart.add'), [
+            'product_id' => $paketAyam->id,
+            'tenant_id' => $this->tenant->id,
+            'variants' => 'Paha Atas • Blackpepper',
+        ])->assertOk();
+
+        // 3. Checkout dan pastikan kedua varian tercatat terpisah pada product_name_snapshot di tabel order_items
         $this->post(route('customer.checkout'), [
             'customer_name' => 'Rina Pecinta Kuliner',
             'phone_number' => '081277889900',
@@ -1107,7 +1136,56 @@ class OrderLifecycleEndToEndTest extends TestCase
             'order_id' => $order->id,
             'product_id' => $paketAyam->id,
             'product_name_snapshot' => 'Paket Ayam Crispy Bandara (Paha Atas • Blackpepper)',
+            'quantity' => 2,
         ]);
+        $this->assertDatabaseHas('order_items', [
+            'order_id' => $order->id,
+            'product_id' => $paketAyam->id,
+            'product_name_snapshot' => 'Paket Ayam Crispy Bandara (Dada • Cheese)',
+            'quantity' => 1,
+        ]);
+        // Stok berkurang total 3 porsi (25 - 3 = 22)
+        $this->assertEquals(22, $paketAyam->fresh()->stock);
+
+        // 4. Validasi Kepemilikan Produk terhadap Tenant: manipulasi payload product_id milik Tenant A dengan tenant_id milik Tenant B harus ditolak (422)
+        $otherTenant = Tenant::create([
+            'tenant_code' => 'T-E2E-02',
+            'name' => 'Restoran Lain T2',
+            'floor_location' => 'Lantai 2',
+            'terminal' => 'T2',
+            'is_active' => true,
+            'opening_time' => '05:00',
+            'closing_time' => '23:00',
+        ]);
+
+        $this->postJson(route('customer.cart.add'), [
+            'product_id' => $paketAyam->id,
+            'tenant_id' => $otherTenant->id,
+            'force_replace' => '1',
+        ])->assertStatus(422)
+          ->assertJson(['error' => 'invalid_tenant_product']);
+
+        // 5. Sinkronisasi Menu yang Tiba-Tiba Dinonaktifkan saat Pelanggan di Halaman /cart
+        $this->postJson(route('customer.cart.add'), [
+            'product_id' => $paketAyam->id,
+            'tenant_id' => $this->tenant->id,
+        ])->assertOk();
+
+        // Tenant tiba-tiba menonaktifkan menu
+        $paketAyam->update(['is_available' => false]);
+
+        // Pelanggan menekan tombol + (increase) di halaman /cart -> item otomatis dikeluarkan dengan pesan warning
+        $updateResp = $this->postJson(route('customer.cart.update'), [
+            'product_id' => $paketAyam->id,
+            'action' => 'increase',
+        ]);
+        $updateResp->assertOk()
+            ->assertJson([
+                'success' => true,
+                'jumlah' => 0,
+                'cart_count' => 0,
+            ]);
+        $this->assertNotEmpty($updateResp->json('warning'));
     }
 }
 

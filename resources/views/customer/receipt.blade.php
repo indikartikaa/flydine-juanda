@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Struk Digital Resmi - {{ $order->order_code }} - FlyDine Juanda</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>
+    <style nonce="{{ $cspNonce ?? '' }}">
         [x-cloak] { display: none !important; }
         
         /* Specialized Print Stylesheet */

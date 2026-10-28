@@ -671,7 +671,7 @@
 </div>
 
 <!-- CSS Khusus Cetak Struk Kasir Termal -->
-<style>
+<style nonce="{{ $cspNonce ?? '' }}">
 @media print {
     body * {
         visibility: hidden !important;

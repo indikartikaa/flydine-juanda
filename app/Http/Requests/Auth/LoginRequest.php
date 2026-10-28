@@ -48,6 +48,7 @@ class LoginRequest extends FormRequest
 
         // 1. Coba login langsung dengan email yang diinput
         if (Auth::attempt(['email' => $loginInput, 'password' => $password], $remember)) {
+            $this->ensureAccountAndTenantAreActive();
             RateLimiter::clear($this->throttleKey());
             return;
         }
@@ -58,6 +59,7 @@ class LoginRequest extends FormRequest
         if ($tenant) {
             $user = \App\Models\User::where('tenant_id', $tenant->id)->first();
             if ($user && Auth::attempt(['email' => $user->email, 'password' => $password], $remember)) {
+                $this->ensureAccountAndTenantAreActive();
                 RateLimiter::clear($this->throttleKey());
                 return;
             }
@@ -67,6 +69,7 @@ class LoginRequest extends FormRequest
         if (!str_contains($loginInput, '@')) {
             $user = \App\Models\User::where('email', $loginInput . '@flydine.test')->first();
             if ($user && Auth::attempt(['email' => $user->email, 'password' => $password], $remember)) {
+                $this->ensureAccountAndTenantAreActive();
                 RateLimiter::clear($this->throttleKey());
                 return;
             }
@@ -77,6 +80,22 @@ class LoginRequest extends FormRequest
         throw ValidationException::withMessages([
             'email' => trans('auth.failed'),
         ]);
+    }
+
+    /**
+     * Pastikan akun user dan mitra tenant (jika tenant_staff) berstatus aktif (tidak sedang di-suspend).
+     *
+     * @throws ValidationException
+     */
+    protected function ensureAccountAndTenantAreActive(): void
+    {
+        $user = Auth::user();
+        if ($user && (!$user->is_active || ($user->role === 'tenant_staff' && $user->tenant && !$user->tenant->is_active))) {
+            Auth::logout();
+            throw ValidationException::withMessages([
+                'email' => 'Akun atau mitra restoran ini sedang ditangguhkan (suspend) oleh Admin Operasional.',
+            ]);
+        }
     }
 
     /**

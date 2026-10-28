@@ -254,7 +254,3 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
-Route::get('/test-products', function () {
-    $products = \App\Models\Product::take(3)->get();
-    return view('tenant.products', compact('products'));
-});

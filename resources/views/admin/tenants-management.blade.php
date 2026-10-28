@@ -817,7 +817,7 @@
 </div>
 
 @push('scripts')
-<script>
+<script nonce="{{ $cspNonce ?? '' }}">
 (function() {
     let abortController = null;
 

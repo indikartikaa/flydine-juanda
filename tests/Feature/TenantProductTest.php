@@ -162,11 +162,13 @@ class TenantProductTest extends TestCase
             ]
         ]);
 
-        // Lakukan Checkout
+        // Lakukan Checkout (Restoran Airside wajib sebagai Penumpang)
         $response = $this->post(route('customer.checkout'), [
             'customer_name' => 'John Passenger',
             'phone_number' => '081299998888',
-            'customer_type' => 'pengunjung',
+            'customer_type' => 'penumpang',
+            'flight_number' => 'GA-301',
+            'boarding_time' => now()->addHours(2)->format('H:i'),
             'payment_method' => 'qris',
             'pickup_method' => 'ambil_sendiri',
         ]);
