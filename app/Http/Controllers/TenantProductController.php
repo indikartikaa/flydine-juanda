@@ -27,6 +27,56 @@ class TenantProductController extends Controller
         return view('tenant.create-product');
     }
 
+    private function parseCustomizationOptions(Request $request, ?Product $existingProduct = null): ?array
+    {
+        if ($request->has('variant_groups')) {
+            $rawGroups = $request->input('variant_groups', []);
+            if (!is_array($rawGroups)) {
+                return null;
+            }
+
+            $parsed = [];
+            foreach ($rawGroups as $grp) {
+                if (!is_array($grp)) {
+                    continue;
+                }
+                $label = mb_substr(trim((string) ($grp['label'] ?? '')), 0, 50);
+                $rawChoices = $grp['choices'] ?? '';
+                $choiceArr = is_array($rawChoices) ? $rawChoices : explode(',', (string) $rawChoices);
+                $choices = [];
+                foreach ($choiceArr as $c) {
+                    $cleanChoice = mb_substr(trim((string) $c), 0, 40);
+                    if ($cleanChoice !== '' && !in_array($cleanChoice, $choices, true)) {
+                        $choices[] = $cleanChoice;
+                    }
+                }
+                if ($label !== '' && count($choices) > 0) {
+                    $parsed[] = [
+                        'label' => $label,
+                        'choices' => $choices,
+                    ];
+                }
+            }
+
+            return !empty($parsed) ? $parsed : null;
+        }
+
+        if ($request->has('customization_options')) {
+            $raw = $request->input('customization_options', []);
+            if (is_array($raw)) {
+                $filtered = array_values(array_filter($raw));
+                return !empty($filtered) ? $filtered : null;
+            }
+            return null;
+        }
+
+        if ($request->boolean('customization_options_submitted')) {
+            return null;
+        }
+
+        return $existingProduct ? ($existingProduct->customization_options ?: null) : null;
+    }
+
     public function store(Request $request)
     {
         abort_unless(
@@ -42,6 +92,8 @@ class TenantProductController extends Controller
             'price' => 'required|numeric|min:0',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
             'note' => 'nullable|string|max:1000',
+            'customization_options' => 'nullable|array',
+            'variant_groups' => 'nullable|array',
             'stock' => 'required|integer|min:0',
         ]);
 
@@ -49,6 +101,8 @@ class TenantProductController extends Controller
             $data['image'] = $request->file('image')
                 ->store('products', 'public');
         }
+
+        $options = $this->parseCustomizationOptions($request);
 
         Product::create([
             'tenant_id' => auth()->user()->tenant_id,
@@ -58,6 +112,7 @@ class TenantProductController extends Controller
             'price' => $data['price'],
             'image' => $data['image'] ?? null,
             'note' => $data['note'] ?? null,
+            'customization_options' => $options,
             'stock' => $data['stock'],
             'is_available' => $request->boolean('is_available'),
         ]);
@@ -90,25 +145,32 @@ class TenantProductController extends Controller
             'price' => 'required|numeric|min:0',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
             'note' => 'nullable|string|max:1000',
+            'customization_options' => 'nullable|array',
+            'variant_groups' => 'nullable|array',
             'stock' => 'required|integer|min:0',
         ]);
 
+        $oldImage = $product->getRawOriginal('image');
+
         if ($request->hasFile('image')) {
-            if ($product->image && \Illuminate\Support\Facades\Storage::disk('public')->exists($product->image)) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($product->image);
+            if ($oldImage && !str_starts_with($oldImage, 'images/') && \Illuminate\Support\Facades\Storage::disk('public')->exists($oldImage)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($oldImage);
             }
 
             $data['image'] = $request->file('image')
                 ->store('products', 'public');
         }
 
+        $options = $this->parseCustomizationOptions($request, $product);
+
         $product->update([
             'name' => $data['name'],
             'category' => $data['category'] ?? null,
             'description' => $data['description'] ?? null,
             'price' => $data['price'],
-            'image' => $data['image'] ?? $product->image,
+            'image' => $data['image'] ?? $oldImage,
             'note' => $data['note'] ?? null,
+            'customization_options' => $options,
             'stock' => $data['stock'],
             'is_available' => $request->boolean('is_available'),
         ]);
@@ -122,8 +184,9 @@ class TenantProductController extends Controller
     {
         $this->checkTenant($product);
 
-        if ($product->image && \Illuminate\Support\Facades\Storage::disk('public')->exists($product->image)) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($product->image);
+        $oldImage = $product->getRawOriginal('image');
+        if ($oldImage && !str_starts_with($oldImage, 'images/') && \Illuminate\Support\Facades\Storage::disk('public')->exists($oldImage)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($oldImage);
         }
 
         $product->delete();

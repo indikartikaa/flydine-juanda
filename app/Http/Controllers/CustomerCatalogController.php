@@ -16,7 +16,9 @@ class CustomerCatalogController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Tenant::with('products')->where('is_active', true);
+        $query = Tenant::with(['products' => function ($q) {
+            $q->where('is_available', true);
+        }])->where('is_active', true);
 
         // Filter by Search (Nama Tenant, Lokasi / Gate, atau Nama Menu)
         if ($request->filled('search')) {
@@ -28,7 +30,8 @@ class CustomerCatalogController extends Controller
                   ->orWhere('floor_location', 'like', '%' . $search . '%')
                   ->orWhere('floor_location', 'like', '%' . $gateSearch . '%')
                   ->orWhereHas('products', function($pq) use ($search) {
-                      $pq->where('name', 'like', '%' . $search . '%');
+                      $pq->where('is_available', true)
+                         ->where('name', 'like', '%' . $search . '%');
                   });
             });
 
@@ -112,7 +115,9 @@ class CustomerCatalogController extends Controller
 
     public function show($id)
     {
-        $tenant = Tenant::with('products')->findOrFail($id);
+        $tenant = Tenant::with(['products' => function ($query) {
+            $query->where('is_available', true);
+        }])->findOrFail($id);
         
         if (!$tenant->isOpen()) {
             return redirect()->route('customer.menu')->with('error', 'Restoran sedang tutup.');
@@ -137,9 +142,17 @@ class CustomerCatalogController extends Controller
             $firstItem = reset($cart);
             $tenant = Tenant::find($firstItem['tenant_id']);
             
-            foreach ($cart as $item) {
-                $total += $item['price'] * $item['quantity'];
+            foreach ($cart as $key => $item) {
+                $product = Product::find($item['id']);
+                if ($product) {
+                    $cart[$key]['price'] = (float) $product->price;
+                    $cart[$key]['name'] = $product->name;
+                    $cart[$key]['preparation_time'] = (int) ($product->preparation_time ?? 15);
+                }
+                $total += $cart[$key]['price'] * $cart[$key]['quantity'];
             }
+
+            session()->put('cart', $cart);
         }
 
         return view('customer.cart', compact('cart', 'tenant', 'total'));
@@ -332,10 +345,35 @@ class CustomerCatalogController extends Controller
 
     public function simulatePayment(Request $request)
     {
-        $order = Order::where('order_code', $request->order_code)->firstOrFail();
-        $order->is_paid = true;
-        $order->save();
-        
+        $request->validate([
+            'order_code' => 'required|string',
+        ]);
+
+        $order = Order::with('orderItems')->where('order_code', $request->order_code)->firstOrFail();
+
+        // Passive Auto-Cancel Check: batalkan pesanan terlebih dahulu jika batas waktu bayar (auto_cancel_at) sudah terlewati
+        $this->checkAndApplyAutoCancel($order);
+
+        // Tolak konfirmasi pembayaran jika status pesanan bukan 'menunggu' (misal: sudah 'dibatalkan' atau 'ditolak')
+        if ($order->status !== 'menunggu') {
+            if (in_array($order->status, ['selesai', 'dibatalkan', 'ditolak']) && session('order_code') === $order->order_code) {
+                session()->forget('order_code');
+            }
+
+            if ($order->is_paid) {
+                return redirect()->route('customer.tracking', ['order' => $order->order_code])
+                    ->with('success', 'Pembayaran pesanan ini sudah terkonfirmasi.');
+            }
+
+            return redirect()->route('customer.tracking', ['order' => $order->order_code])
+                ->with('error', 'Pembayaran ditolak: Waktu pembayaran telah habis atau pesanan telah dibatalkan. Silakan buat pesanan baru.');
+        }
+
+        if (!$order->is_paid) {
+            $order->is_paid = true;
+            $order->save();
+        }
+
         return redirect()->route('customer.tracking', ['order' => $order->order_code])->with('success', 'Pembayaran berhasil dikonfirmasi!');
     }
 
@@ -382,6 +420,9 @@ class CustomerCatalogController extends Controller
         }
 
         $productId = $product->id;
+        $cleanVariants = $request->filled('variants')
+            ? mb_substr(trim(preg_replace('/\s+/', ' ', (string) $request->variants)), 0, 180)
+            : null;
 
         if (isset($cart[$productId])) {
             if ($cart[$productId]['quantity'] >= $product->stock) {
@@ -391,6 +432,9 @@ class CustomerCatalogController extends Controller
                 return redirect()->back()->with('error', "Stok hanya tersedia {$product->stock} porsi.");
             }
             $cart[$productId]['quantity']++;
+            if ($cleanVariants !== null) {
+                $cart[$productId]['variants'] = $cleanVariants;
+            }
         } else {
             $cart[$productId] = [
                 'id' => $product->id,
@@ -398,6 +442,8 @@ class CustomerCatalogController extends Controller
                 'price' => $product->price,
                 'quantity' => 1,
                 'tenant_id' => $request->tenant_id,
+                'preparation_time' => (int) ($product->preparation_time ?? 15),
+                'variants' => $cleanVariants,
             ];
         }
 
@@ -597,6 +643,13 @@ class CustomerCatalogController extends Controller
             $rules['boarding_time'] = 'required|date_format:H:i';
         }
 
+        // Validasi Zona Bandara (Opsi A Ketat per Zona: Restoran Airside 100% Khusus Penumpang)
+        if ($tenant->isAirside() && $request->customer_type === 'pengunjung') {
+            return redirect()->back()->withInput()->withErrors([
+                'customer_type' => "Restoran '{$tenant->name}' berada di Zona Airside ({$tenant->floor_location} — Area Steril Ruang Tunggu Boarding). Pemesanan dari restoran ini khusus untuk Penumpang Pesawat yang memiliki tiket/boarding pass dan tidak melayani pengantaran ke luar area steril (Landside)."
+            ]);
+        }
+
         // Validasi conditional untuk delivery
         if ($request->pickup_method === 'diantar') {
             $rules['delivery_location_id'] = 'required|exists:delivery_locations,id';
@@ -614,11 +667,43 @@ class CustomerCatalogController extends Controller
                     'delivery_location_id' => "Layanan antar porter hanya melayani area Terminal {$tenantTerminalNum}. Titik lokasi pengantaran tidak boleh berada di Terminal {$locTerminalNum} karena perbedaan gedung terminal bandara."
                 ]);
             }
+
+            // Validasi Integritas Zona Bandara (Porter Tidak Boleh Lintas Zona Landside <-> Airside)
+            if ($deliveryLocation && $tenant->isAirside() !== $deliveryLocation->isAirside()) {
+                $tenantZoneLabel = $tenant->isAirside() ? 'Zona Airside (Boarding Lounge)' : 'Zona Landside (Area Publik / Lobby)';
+                $locZoneLabel = $deliveryLocation->isAirside() ? 'Zona Airside (Boarding Lounge)' : 'Zona Landside (Area Publik / Lobby)';
+                return redirect()->back()->withInput()->withErrors([
+                    'delivery_location_id' => "Layanan antar porter tidak dapat melintasi batas pemeriksaan keamanan antara {$tenantZoneLabel} dan {$locZoneLabel}. Silakan pilih titik pengantaran yang berada di {$tenantZoneLabel}."
+                ]);
+            }
         }
 
         $request->validate($rules, $customMessages);
 
-        // Validasi SLA Waktu Boarding untuk Penumpang (Minimal >= 15 menit dari sekarang)
+        // Validasi ketersediaan, stok, waktu persiapan (preparation_time), dan sinkronisasi harga produk terkini dari database sebelum memproses checkout
+        $maxPrepTime = 15;
+        foreach ($cart as $key => $item) {
+            $productCheck = Product::find($item['id']);
+            if (!$productCheck || !$productCheck->is_available || $productCheck->stock < $item['quantity']) {
+                $avail = ($productCheck && $productCheck->is_available) ? $productCheck->stock : 0;
+                return redirect()->route('customer.cart')->with('error', "Mohon maaf, stok untuk menu '{$item['name']}' tidak mencukupi (tersedia {$avail} porsi). Silakan sesuaikan jumlah pesanan Anda.");
+            }
+
+            // Gunakan harga, nama, dan waktu persiapan terbaru langsung dari database (bukan data lama di session)
+            $prepTime = (int) ($productCheck->preparation_time ?? 15);
+            $cart[$key]['price'] = (float) $productCheck->price;
+            $cart[$key]['name'] = $productCheck->name;
+            $cart[$key]['preparation_time'] = $prepTime;
+
+            if ($prepTime > $maxPrepTime) {
+                $maxPrepTime = $prepTime;
+            }
+        }
+        session()->put('cart', $cart);
+
+        $minBoardingMinutes = max(15, $maxPrepTime);
+
+        // Validasi SLA Waktu Boarding untuk Penumpang (Minimal >= max(15, preparation_time) menit dari sekarang)
         $boardingDateTime = null;
         if ($request->customer_type === 'penumpang') {
             $boardingCarbon = \Carbon\Carbon::createFromFormat('H:i', $request->boarding_time);
@@ -642,19 +727,10 @@ class CustomerCatalogController extends Controller
                 ]);
             }
 
-            if ($diffMinutes < 15) {
+            if ($diffMinutes < $minBoardingMinutes) {
                 return redirect()->back()->withInput()->withErrors([
-                    'boarding_time' => 'Waktu boarding terlalu dekat (kurang dari 15 menit dari sekarang). Dapur membutuhkan waktu penyiapan makanan dan gerbang keberangkatan pesawat ditutup 15 menit sebelum lepas landas.'
+                    'boarding_time' => "Waktu boarding terlalu dekat (kurang dari {$minBoardingMinutes} menit dari sekarang). Dapur membutuhkan waktu penyiapan makanan minimal {$minBoardingMinutes} menit dan gerbang keberangkatan pesawat ditutup sebelum lepas landas."
                 ]);
-            }
-        }
-
-        // Validasi ketersediaan dan stok produk terkini sebelum memproses checkout
-        foreach ($cart as $item) {
-            $productCheck = Product::find($item['id']);
-            if (!$productCheck || !$productCheck->is_available || $productCheck->stock < $item['quantity']) {
-                $avail = ($productCheck && $productCheck->is_available) ? $productCheck->stock : 0;
-                return redirect()->route('customer.cart')->with('error', "Mohon maaf, stok untuk menu '{$item['name']}' tidak mencukupi (tersedia {$avail} porsi). Silakan sesuaikan jumlah pesanan Anda.");
             }
         }
 
@@ -690,6 +766,24 @@ class CustomerCatalogController extends Controller
             $fraudService = app(\App\Services\FraudDetectionService::class);
             if ($fraudService->checkCancelledOrderPattern($customer->id)) {
                 return redirect()->route('customer.menu')->with('error', 'Pesanan ditolak: Anda telah diblokir karena terdeteksi melakukan terlalu banyak pembatalan/spam pesanan dalam waktu singkat.');
+            }
+
+            // Passive Auto-Cancel untuk order milik customer ini yang sudah melewati auto_cancel_at
+            $expiredUnpaidOrders = Order::with('orderItems')
+                ->where('customer_id', $customer->id)
+                ->where('status', 'menunggu')
+                ->where('is_paid', false)
+                ->whereNotNull('auto_cancel_at')
+                ->where('auto_cancel_at', '<=', now())
+                ->get();
+            foreach ($expiredUnpaidOrders as $expiredOrder) {
+                $this->checkAndApplyAutoCancel($expiredOrder);
+            }
+
+            // Validasi Batas Pesanan Aktif (Mencegah Kuras Stok / Stock Hoarding Tanpa Bayar)
+            $orderSecurityService = app(\App\Services\OrderSecurityService::class);
+            if (!$orderSecurityService->checkActiveOrderLimit($customer->id)) {
+                return redirect()->route('customer.cart')->withInput()->with('error', 'Pesanan ditolak: Anda telah mencapai batas maksimal 5 pesanan aktif yang sedang berjalan atau menunggu pembayaran. Silakan selesaikan pembayaran atau batalkan pesanan sebelumnya terlebih dahulu.');
             }
 
             // Customer exists, update name and last order time
@@ -749,10 +843,14 @@ class CustomerCatalogController extends Controller
             ]);
 
             foreach ($cart as $item) {
+                $snapshotName = !empty($item['variants'])
+                    ? $item['name'] . ' (' . $item['variants'] . ')'
+                    : $item['name'];
+
                 OrderItem::create([
                     'order_id' => $newOrder->id,
                     'product_id' => $item['id'],
-                    'product_name_snapshot' => $item['name'],
+                    'product_name_snapshot' => mb_substr($snapshotName, 0, 120),
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['price'],
                     'subtotal' => $item['price'] * $item['quantity'],
@@ -784,7 +882,31 @@ class CustomerCatalogController extends Controller
             return response()->json([]);
         }
         $terminalNum = str_ireplace('t', '', (string) $terminal);
-        $locations = DeliveryLocation::active()->byTerminal($terminalNum)->get(['id', 'name']);
+        $zone = $request->get('zone'); // 'Airside' atau 'Landside'
+        $customerType = $request->get('customer_type');
+
+        $locations = DeliveryLocation::active()
+            ->byTerminal($terminalNum)
+            ->get(['id', 'name'])
+            ->filter(function (DeliveryLocation $loc) use ($zone, $customerType) {
+                if (!empty($zone)) {
+                    $wantAirside = strcasecmp(trim((string) $zone), 'Airside') === 0;
+                    return $loc->isAirside() === $wantAirside;
+                }
+                if ($customerType === 'pengunjung' && $loc->isAirside()) {
+                    return false;
+                }
+                return true;
+            })
+            ->map(function (DeliveryLocation $loc) {
+                return [
+                    'id' => $loc->id,
+                    'name' => $loc->name,
+                    'is_airside' => $loc->isAirside(),
+                ];
+            })
+            ->values();
+
         return response()->json($locations);
     }
 
@@ -799,11 +921,47 @@ class CustomerCatalogController extends Controller
         ]);
 
         $orderId = null;
+        $reporterVariations = $this->getPhoneVariations((string) $request->reporter_contact);
+
         if ($request->filled('order_code')) {
-            $order = Order::where('order_code', $request->order_code)->first();
+            $order = Order::with('customer')->where('order_code', trim((string) $request->order_code))->first();
             if ($order) {
+                // 1. Verifikasi kepemilikan pesanan: nomor WhatsApp pelapor harus cocok dengan nomor pemesan (setelah dinormalisasi)
+                $orderPhone = (string) ($order->customer->phone_number ?? $order->customer_phone ?? '');
+                $orderPhoneVariations = $this->getPhoneVariations($orderPhone);
+
+                if (empty($reporterVariations) || empty(array_intersect($reporterVariations, $orderPhoneVariations))) {
+                    return redirect()->back()->withInput()->withErrors([
+                        'reporter_contact' => 'Nomor WhatsApp pelapor tidak sesuai dengan nomor pemesan pada ID Pesanan tersebut.'
+                    ]);
+                }
+
+                // 2. Verifikasi status pembayaran: hanya pesanan yang sudah dibayar lunas (is_paid = true) yang dapat dilaporkan
+                if (!$order->is_paid) {
+                    return redirect()->back()->withInput()->withErrors([
+                        'order_code' => 'Laporan kendala pesanan hanya dapat diajukan untuk pesanan yang sudah dibayar lunas.'
+                    ]);
+                }
+
                 $orderId = $order->id;
             }
+        } elseif (in_array($request->category, ['pesanan_salah', 'status_tidak_update'])) {
+            // Jika order_code dikosongkan namun memilih kategori masalah pesanan, cari otomatis pesanan lunas terbaru dari nomor WA pelapor
+            $customerIds = !empty($reporterVariations)
+                ? Customer::whereIn('phone_number', $reporterVariations)->pluck('id')->all()
+                : [];
+
+            $latestPaidOrder = !empty($customerIds)
+                ? Order::whereIn('customer_id', $customerIds)->where('is_paid', true)->latest('ordered_at')->first()
+                : null;
+
+            if (!$latestPaidOrder) {
+                return redirect()->back()->withInput()->withErrors([
+                    'order_code' => 'Tidak ditemukan riwayat pesanan lunas pada nomor WhatsApp tersebut. Silakan cek ID Pesanan (ORD-...) Anda di menu Riwayat, atau pilih kategori Pertanyaan Umum / Saran.'
+                ]);
+            }
+
+            $orderId = $latestPaidOrder->id;
         }
 
         \App\Models\Complaint::create([

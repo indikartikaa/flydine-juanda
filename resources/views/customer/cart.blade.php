@@ -162,10 +162,19 @@
                                 {{ strtoupper(substr(str_replace([' ', "'"], '', $tenant->name ?? 'FD'), 0, 2)) }}
                             </div>
                             <div>
-                                <div class="flex items-center gap-2">
+                                <div class="flex flex-wrap items-center gap-2">
                                     <h2 class="font-black text-slate-900 text-lg leading-tight">{{ $tenant->name ?? 'Restoran' }}</h2>
                                     @if(!empty($tenant->terminal))
                                     <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-[#005ea2]/10 text-[#005ea2] uppercase">{{ $tenant->terminal }}</span>
+                                    @endif
+                                    @if($tenant && $tenant->isAirside())
+                                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200">
+                                        🛫 Airside • Boarding Lounge
+                                    </span>
+                                    @else
+                                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        🏢 Landside • Area Publik
+                                    </span>
                                     @endif
                                 </div>
                                 <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1 flex items-center">
@@ -174,10 +183,20 @@
                                 </p>
                             </div>
                         </div>
-                        <span class="inline-flex items-center space-x-1.5 text-xs font-extrabold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200/60 self-start sm:self-auto">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                            <span>Restoran Buka</span>
-                        </span>
+                        @php
+                            $isTenantOpen = (bool) ($tenant && $tenant->isOpen() && $tenant->is_active);
+                        @endphp
+                        @if($isTenantOpen)
+                            <span class="inline-flex items-center space-x-1.5 text-xs font-extrabold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200/60 self-start sm:self-auto">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                <span>Restoran Buka</span>
+                            </span>
+                        @else
+                            <span class="inline-flex items-center space-x-1.5 text-xs font-extrabold text-rose-600 bg-rose-50 px-3 py-1.5 rounded-full border border-rose-200/80 self-start sm:self-auto">
+                                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                                <span>Restoran Sedang Tutup</span>
+                            </span>
+                        @endif
                     </div>
 
                     <!-- Items List Card -->
@@ -209,6 +228,12 @@
                                     </div>
                                     <div>
                                         <h4 class="font-extrabold text-sm sm:text-base text-slate-800">{{ $item['name'] }}</h4>
+                                        @if(!empty($item['variants']))
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 mt-1 rounded-md text-[11px] font-bold bg-blue-50 text-[#005ea2] border border-blue-100">
+                                                <span>✨</span>
+                                                <span>{{ $item['variants'] }}</span>
+                                            </span>
+                                        @endif
                                         <p class="text-xs text-slate-400 font-semibold mt-0.5">@ Rp {{ number_format($item['price'], 0, ',', '.') }}</p>
                                     </div>
                                 </div>
@@ -263,7 +288,7 @@
                     </div>
 
                     <!-- Checkout Form (Data Pemesan, Metode Antar, Pembayaran) -->
-                    <form action="{{ route('customer.checkout') }}" method="POST" id="checkoutForm" @submit="if (isTimeCritical || isTimePassed) { $event.preventDefault(); return false; }" class="space-y-6">
+                    <form action="{{ route('customer.checkout') }}" method="POST" id="checkoutForm" @submit="if (isTenantClosed || isTimeCritical || isTimePassed || isAirsideVisitorBlocked) { $event.preventDefault(); return false; }" class="space-y-6">
                         @csrf
                         
                         @if ($errors->any())
@@ -289,11 +314,19 @@
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <!-- Ambil Sendiri -->
-                                <label class="relative flex flex-col items-center justify-center p-5 border-2 rounded-2xl cursor-pointer transition-all duration-200 text-center" :class="pickupMethod === 'ambil_sendiri' ? 'border-[#005ea2] bg-blue-50/40 shadow-sm' : 'border-slate-200 hover:bg-slate-50'">
-                                    <input type="radio" name="pickup_method" value="ambil_sendiri" class="sr-only" x-model="pickupMethod" {{ old('pickup_method', 'ambil_sendiri') === 'ambil_sendiri' ? 'checked' : '' }}>
+                                <label class="relative flex flex-col items-center justify-center p-5 border-2 rounded-2xl transition-all duration-200 text-center"
+                                       :class="(isTenantAirside && customerType === 'pengunjung')
+                                           ? 'border-rose-200 bg-rose-50/40 opacity-75 cursor-not-allowed'
+                                           : (pickupMethod === 'ambil_sendiri' ? 'border-[#005ea2] bg-blue-50/40 shadow-sm cursor-pointer' : 'border-slate-200 hover:bg-slate-50 cursor-pointer')">
+                                    <input type="radio" name="pickup_method" value="ambil_sendiri" class="sr-only" x-model="pickupMethod" {{ old('pickup_method', 'ambil_sendiri') === 'ambil_sendiri' ? 'checked' : '' }} :disabled="isTenantAirside && customerType === 'pengunjung'">
                                     <span class="text-3xl mb-2">🛍️</span>
                                     <span class="block text-sm font-black text-slate-800" :class="pickupMethod === 'ambil_sendiri' ? 'text-[#005ea2]' : ''">Ambil Sendiri di Counter</span>
-                                    <span class="block text-xs text-slate-500 font-medium mt-1">Ambil langsung di kasir restoran tanpa biaya tambahan</span>
+                                    <template x-if="!(isTenantAirside && customerType === 'pengunjung')">
+                                        <span class="block text-xs text-slate-500 font-medium mt-1">Ambil langsung di kasir restoran tanpa biaya tambahan</span>
+                                    </template>
+                                    <template x-if="isTenantAirside && customerType === 'pengunjung'">
+                                        <span class="block text-[11px] text-rose-600 font-bold mt-1 bg-rose-100/80 px-2.5 py-0.5 rounded-full">🔒 Area Boarding (Khusus Penumpang)</span>
+                                    </template>
                                     <div x-show="pickupMethod === 'ambil_sendiri'" class="absolute top-3 right-3 text-[#005ea2]" style="{{ old('pickup_method', 'ambil_sendiri') === 'ambil_sendiri' ? '' : 'display: none;' }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
                                     </div>
@@ -304,10 +337,10 @@
                                        :class="deliveryFee !== null ? (pickupMethod === 'diantar' ? 'border-[#005ea2] bg-blue-50/40 shadow-sm cursor-pointer' : 'border-slate-200 hover:bg-slate-50 cursor-pointer') : 'border-slate-100 bg-slate-50 opacity-60 cursor-not-allowed'">
                                     <input type="radio" name="pickup_method" value="diantar" class="sr-only" x-model="pickupMethod" {{ old('pickup_method') === 'diantar' ? 'checked' : '' }} :disabled="deliveryFee === null">
                                     <span class="text-3xl mb-2">🛵</span>
-                                    <span class="block text-sm font-black text-slate-800" :class="pickupMethod === 'diantar' ? 'text-[#005ea2]' : ''">Diantar Porter ke Gate</span>
+                                    <span class="block text-sm font-black text-slate-800" :class="pickupMethod === 'diantar' ? 'text-[#005ea2]' : ''">Diantar Porter ke Gate / Lobby</span>
                                     
                                     <template x-if="deliveryFee !== null">
-                                        <span class="block text-xs text-emerald-600 font-black mt-1">Antar ke ruang tunggu (+Rp <span x-text="deliveryFee.toLocaleString('id-ID')"></span>)</span>
+                                        <span class="block text-xs text-emerald-600 font-black mt-1">Antar ke titik lokasi (+Rp <span x-text="deliveryFee.toLocaleString('id-ID')"></span>)</span>
                                     </template>
                                     <template x-if="deliveryFee === null">
                                         <span class="block text-xs text-rose-500 font-bold mt-1 bg-rose-50 px-2.5 py-0.5 rounded-full">Layanan Belum Tersedia</span>
@@ -319,65 +352,77 @@
                                 </label>
                             </div>
 
-                            <!-- Info Lokasi Pengambilan (Muncul jika Ambil Sendiri) -->
-                            <div x-show="pickupMethod === 'ambil_sendiri'" class="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-xl bg-blue-50 text-[#005ea2] flex items-center justify-center shrink-0 border border-blue-100">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-xs font-black text-slate-800">{{ $tenant->name ?? 'Restoran' }}</span>
-                                            <span class="text-[10px] font-extrabold text-[#005ea2] bg-blue-100/70 px-2 py-0.5 rounded-md">
-                                                {{ $tenant->terminal ?? 'Terminal 1' }}
-                                            </span>
-                                        </div>
-                                        <p class="text-xs text-slate-500 font-medium">
-                                            {{ $tenant->floor_location ?? 'Area Keberangkatan Bandara Juanda' }}
-                                        </p>
+                            <!-- Info Singkat Lokasi Pengambilan (Muncul jika Ambil Sendiri) -->
+                            <div x-show="pickupMethod === 'ambil_sendiri'" class="mt-4 px-4 py-3 rounded-2xl border bg-slate-50 border-slate-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 animate-fade-in">
+                                <div class="flex items-center gap-2.5 text-xs">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#005ea2] shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" /></svg>
+                                    <div class="text-slate-600 font-medium">
+                                        <span>Ambil di kasir <strong class="text-slate-900">{{ $tenant->name ?? 'Restoran' }}</strong> ({{ $tenant->terminal ?? 'T1' }} • {{ $tenant->floor_location ?? 'Area Keberangkatan' }}).</span>
+                                        <span class="text-slate-500">Pastikan Anda berada di gedung terminal yang sama.</span>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 bg-white px-3 py-1.5 rounded-xl border border-slate-200/70 shrink-0">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <span>Khusus keberangkatan <strong>{{ $tenant->terminal ?? 'Terminal 1' }}</strong></span>
-                                </div>
+                                @if($tenant && $tenant->isAirside())
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200 shrink-0 self-start sm:self-auto">
+                                        <span>🎫 Wajib Boarding Pass {{ $tenant->terminal ?? 'T1' }}</span>
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-white text-slate-700 border border-slate-200 shrink-0 self-start sm:self-auto">
+                                        <span>🏢 Area Publik {{ $tenant->terminal ?? 'T1' }}</span>
+                                    </span>
+                                @endif
                             </div>
 
+                            <!-- Peringatan Blokir Jika Pengunjung Memilih Restoran Airside -->
+                            <div x-show="isAirsideVisitorBlocked" x-cloak class="mt-4 px-4 py-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 flex items-center gap-2.5 text-xs font-semibold animate-fade-in">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                <span>Gerai ini berada di <strong>Area Steril Boarding Gate (Airside)</strong> dan khusus melayani <strong>Penumpang Pesawat</strong>.</span>
+                            </div>
+
+                            @error('pickup_method')
+                                <p class="text-xs text-rose-600 font-bold mt-2 flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                    <span>{{ $message }}</span>
+                                </p>
+                            @enderror
+
                             <!-- Dropdown Lokasi Antar Porter (Muncul jika Diantar) -->
-                            <div x-show="pickupMethod === 'diantar'" class="mt-4 p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 animate-fade-in" style="display: none;">
+                            <div x-show="pickupMethod === 'diantar'" class="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-200/90 space-y-2.5 animate-fade-in" style="display: none;">
                                 @php
                                     $tenantTerminalNum = str_ireplace('t', '', (string)($tenant->terminal ?? '1'));
-                                    $tenantTerminalName = ($tenantTerminalNum === '2') ? 'Terminal 2 (Internasional & Garuda)' : 'Terminal 1 (Domestik)';
                                 @endphp
 
-                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1 border-b border-slate-200/60">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs font-black text-slate-800 uppercase tracking-wider">Lokasi Pengantaran Porter</span>
-                                        <span class="inline-flex items-center gap-1 text-[11px] font-extrabold text-[#005ea2] bg-blue-100/70 px-2.5 py-0.5 rounded-full">
-                                            <svg class="w-3 h-3 text-[#005ea2]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                            Gedung {{ $tenantTerminalName }}
+                                <div class="flex flex-wrap items-center justify-between gap-2">
+                                    <label class="text-xs font-extrabold text-slate-800">
+                                        Pilih Titik Pengantaran Porter
+                                    </label>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="inline-flex items-center gap-1 text-[11px] font-bold text-[#005ea2] bg-blue-50 px-2.5 py-0.5 rounded-md border border-blue-200/80">
+                                            <span>Terminal {{ $tenantTerminalNum }}</span>
+                                        </span>
+                                        <span class="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-md border {{ ($tenant && $tenant->isAirside()) ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200' }}">
+                                            <span>{{ ($tenant && $tenant->isAirside()) ? '🛫 Area Boarding Gate' : '🏢 Area Publik / Lobby' }}</span>
                                         </span>
                                     </div>
                                     <input type="hidden" name="delivery_terminal" value="{{ $tenantTerminalNum }}">
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-600 mb-1.5">Pilih Ruang Tunggu / Pintu Boarding Gate</label>
                                     <div class="relative">
                                         <select name="delivery_location_id" 
-                                                :disabled="deliveryLocations.length === 0" 
+                                                x-model="selectedDeliveryLocationId"
+                                                :disabled="filteredDeliveryLocations.length === 0" 
                                                 :required="pickupMethod === 'diantar'" 
-                                                class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:outline-none focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 disabled:bg-slate-100 disabled:opacity-60 transition-all">
-                                            <option value="" disabled selected>-- Pilih Titik Gate / Ruang Tunggu Antar --</option>
-                                            <template x-for="loc in deliveryLocations" :key="loc.id">
-                                                <option :value="loc.id" x-text="loc.name" :selected="loc.id == '{{ old('delivery_location_id') }}'"></option>
+                                                class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 disabled:bg-slate-100 disabled:opacity-60 transition-all">
+                                            <option value="" disabled>-- Pilih Titik Lokasi Pengantaran --</option>
+                                            <template x-for="loc in filteredDeliveryLocations" :key="loc.id">
+                                                <option :value="String(loc.id)" x-text="loc.name"></option>
                                             </template>
                                         </select>
                                     </div>
+                                    <p class="text-[11px] text-slate-500 font-medium mt-1.5">
+                                        <span x-show="isTenantAirside">Porter mengantar khusus di area <strong>Boarding Lounge (Gate)</strong> Terminal {{ $tenantTerminalNum }}.</span>
+                                        <span x-show="!isTenantAirside">Porter mengantar khusus ke titik <strong>Area Publik &amp; Lobby</strong> Terminal {{ $tenantTerminalNum }}.</span>
+                                    </p>
                                     @error('delivery_location_id')
                                         <p class="text-xs text-rose-600 font-bold mt-1.5 flex items-center gap-1">
                                             <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
@@ -400,21 +445,35 @@
                                 <label class="block text-xs font-bold text-slate-500 mb-2">Status Pemesan di Bandara</label>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <label class="relative flex items-center justify-center p-3.5 border-2 rounded-2xl cursor-pointer transition-all duration-200" :class="customerType === 'penumpang' ? 'border-[#005ea2] bg-blue-50/40 shadow-sm' : 'border-slate-200 hover:bg-slate-50'">
-                                        <input type="radio" name="customer_type" value="penumpang" class="sr-only" x-model="customerType" {{ old('customer_type', 'penumpang') === 'penumpang' ? 'checked' : '' }}>
+                                        <input type="radio" name="customer_type" value="penumpang" class="sr-only" x-model="customerType" @change="handleCustomerTypeChange()" {{ old('customer_type', 'penumpang') === 'penumpang' ? 'checked' : '' }}>
                                         <div class="text-center">
                                             <span class="block text-sm font-black text-slate-800" :class="customerType === 'penumpang' ? 'text-[#005ea2]' : ''">🛫 Penumpang Pesawat</span>
                                             <span class="block text-[11px] text-slate-400 font-semibold mt-0.5">Memiliki jadwal penerbangan</span>
                                         </div>
                                     </label>
                                     
-                                    <label class="relative flex items-center justify-center p-3.5 border-2 rounded-2xl cursor-pointer transition-all duration-200" :class="customerType === 'pengunjung' ? 'border-[#005ea2] bg-blue-50/40 shadow-sm' : 'border-slate-200 hover:bg-slate-50'">
-                                        <input type="radio" name="customer_type" value="pengunjung" class="sr-only" x-model="customerType" {{ old('customer_type') === 'pengunjung' ? 'checked' : '' }}>
+                                    <label class="relative flex items-center justify-center p-3.5 border-2 rounded-2xl transition-all duration-200"
+                                           :class="isTenantAirside
+                                               ? 'border-slate-200 bg-slate-100/80 opacity-65 cursor-not-allowed'
+                                               : (customerType === 'pengunjung' ? 'border-[#005ea2] bg-blue-50/40 shadow-sm cursor-pointer' : 'border-slate-200 hover:bg-slate-50 cursor-pointer')">
+                                        <input type="radio" name="customer_type" value="pengunjung" class="sr-only" x-model="customerType" @change="handleCustomerTypeChange()" {{ old('customer_type') === 'pengunjung' ? 'checked' : '' }} :disabled="isTenantAirside">
                                         <div class="text-center">
                                             <span class="block text-sm font-black text-slate-800" :class="customerType === 'pengunjung' ? 'text-[#005ea2]' : ''">🚶 Pengunjung / Staf Bandara</span>
-                                            <span class="block text-[11px] text-slate-400 font-semibold mt-0.5">Penjemput & masyarakat umum</span>
+                                            <template x-if="!isTenantAirside">
+                                                <span class="block text-[11px] text-slate-400 font-semibold mt-0.5">Penjemput & masyarakat umum</span>
+                                            </template>
+                                            <template x-if="isTenantAirside">
+                                                <span class="block text-[11px] text-rose-600 font-bold mt-0.5">Khusus Penumpang (Zona Airside)</span>
+                                            </template>
                                         </div>
                                     </label>
                                 </div>
+                                @error('customer_type')
+                                    <p class="text-xs text-rose-600 font-bold mt-1.5 flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                        <span>{{ $message }}</span>
+                                    </p>
+                                @enderror
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -509,15 +568,15 @@
                                     </div>
                                 </div>
 
-                                <!-- Critical Warning Boarding Time (< 15 menit) -->
+                                <!-- Critical Warning Boarding Time (< minBoardingMinutes) -->
                                 <div x-show="isTimeCritical && !isTimePassed" class="p-4 bg-rose-50 rounded-2xl border-2 border-rose-300 flex items-start space-x-3 shadow-sm animate-fade-in" style="display: none;">
                                     <div class="bg-rose-100 p-2 rounded-xl shrink-0 text-rose-600 mt-0.5 shadow-2xs">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                                     </div>
                                     <div>
-                                        <h5 class="text-xs font-black text-rose-900 uppercase tracking-wider">Perhatian: Waktu Boarding Sangat Dekat (&lt; 15 Menit)!</h5>
+                                        <h5 class="text-xs font-black text-rose-900 uppercase tracking-wider">Perhatian: Waktu Boarding Sangat Dekat (&lt; <span x-text="minBoardingMinutes">15</span> Menit)!</h5>
                                         <p class="text-xs text-rose-800 font-medium leading-relaxed mt-0.5">
-                                            Dapur membutuhkan estimasi penyiapan makanan 10–15 menit dan gerbang pesawat ditutup sebelum keberangkatan. Sistem tidak mengizinkan pemesanan dengan waktu boarding kurang dari 15 menit demi mencegah risiko tertinggal penerbangan.
+                                            Dapur membutuhkan waktu penyiapan makanan minimal <strong x-text="minBoardingMinutes">15</strong> menit dan gerbang pesawat ditutup sebelum keberangkatan. Sistem tidak mengizinkan pemesanan dengan waktu boarding kurang dari <span x-text="minBoardingMinutes">15</span> menit demi mencegah risiko tertinggal penerbangan.
                                         </p>
                                     </div>
                                 </div>
@@ -739,33 +798,45 @@
                         <div class="mt-6">
                             <button type="submit" 
                                     form="checkoutForm" 
-                                    :disabled="isTimeCritical || isTimePassed" 
+                                    :disabled="isTenantClosed || isTimeCritical || isTimePassed || isAirsideVisitorBlocked" 
                                     class="w-full text-white font-black py-4 px-6 rounded-2xl text-sm uppercase tracking-wider transition-all flex items-center justify-center space-x-2 relative overflow-hidden group shadow-lg"
-                                    :class="(isTimeCritical || isTimePassed) 
+                                    :class="(isTenantClosed || isTimeCritical || isTimePassed || isAirsideVisitorBlocked) 
                                         ? 'bg-rose-600/80 cursor-not-allowed opacity-75 shadow-none' 
                                         : 'bg-gradient-to-r from-[#003b66] to-[#005ea2] hover:from-[#002f54] hover:to-[#004a80] shadow-blue-500/25 active:scale-[0.98] cursor-pointer'"
-                                    :style="(isTimeCritical || isTimePassed) ? 'background-color: #e11d48;' : 'background: linear-gradient(to right, #003b66, #005ea2); background-color: #005ea2;'">
+                                    :style="(isTenantClosed || isTimeCritical || isTimePassed || isAirsideVisitorBlocked) ? 'background-color: #e11d48;' : 'background: linear-gradient(to right, #003b66, #005ea2); background-color: #005ea2;'">
                                 <span class="relative z-10 flex items-center justify-center">
-                                    <template x-if="!isTimeCritical && !isTimePassed">
+                                    <template x-if="!isTenantClosed && !isTimeCritical && !isTimePassed && !isAirsideVisitorBlocked">
                                         <span class="flex items-center">
                                             Pesan & Lanjut Bayar
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                                         </span>
                                     </template>
-                                    <template x-if="isTimePassed">
+                                    <template x-if="isTenantClosed">
+                                        <span class="flex items-center text-white">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            Restoran Sedang Tutup
+                                        </span>
+                                    </template>
+                                    <template x-if="!isTenantClosed && isAirsideVisitorBlocked">
+                                        <span class="flex items-center text-white">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                            Akses Zona Airside Terbatas
+                                        </span>
+                                    </template>
+                                    <template x-if="!isTenantClosed && isTimePassed && !isAirsideVisitorBlocked">
                                         <span class="flex items-center text-white">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                             Waktu Boarding Sudah Terlewat
                                         </span>
                                     </template>
-                                    <template x-if="isTimeCritical && !isTimePassed">
+                                    <template x-if="!isTenantClosed && isTimeCritical && !isTimePassed && !isAirsideVisitorBlocked">
                                         <span class="flex items-center text-white">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                                             Waktu Boarding Terlalu Dekat
                                         </span>
                                     </template>
                                 </span>
-                                <div x-show="!isTimeCritical && !isTimePassed" class="shine-effect"></div>
+                                <div x-show="!isTenantClosed && !isTimeCritical && !isTimePassed && !isAirsideVisitorBlocked" class="shine-effect"></div>
                             </button>
                         </div>
                     </div>
@@ -782,25 +853,37 @@
                 </div>
                 <button type="submit" 
                         form="checkoutForm" 
-                        :disabled="isTimeCritical || isTimePassed" 
+                        :disabled="isTenantClosed || isTimeCritical || isTimePassed || isAirsideVisitorBlocked" 
                         class="flex-1 text-white font-black py-3.5 px-4 rounded-2xl text-xs uppercase tracking-wider transition-all flex items-center justify-center space-x-1.5"
-                        :class="(isTimeCritical || isTimePassed) 
+                        :class="(isTenantClosed || isTimeCritical || isTimePassed || isAirsideVisitorBlocked) 
                             ? 'bg-rose-600/80 cursor-not-allowed opacity-75 shadow-none' 
                             : 'bg-gradient-to-r from-[#003b66] to-[#005ea2] shadow-md shadow-blue-500/20 active:scale-[0.98] cursor-pointer'"
-                        :style="(!isTimeCritical && !isTimePassed) ? 'background: linear-gradient(to right, #003b66, #005ea2); background-color: #005ea2;' : 'background-color: #e11d48;'">
-                    <template x-if="!isTimeCritical && !isTimePassed">
+                        :style="(!isTenantClosed && !isTimeCritical && !isTimePassed && !isAirsideVisitorBlocked) ? 'background: linear-gradient(to right, #003b66, #005ea2); background-color: #005ea2;' : 'background-color: #e11d48;'">
+                    <template x-if="!isTenantClosed && !isTimeCritical && !isTimePassed && !isAirsideVisitorBlocked">
                         <span class="flex items-center space-x-1.5">
                             <span>Lanjut Bayar</span>
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                         </span>
                     </template>
-                    <template x-if="isTimePassed">
+                    <template x-if="isTenantClosed">
+                        <span class="flex items-center space-x-1 text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <span class="truncate">Restoran Tutup</span>
+                        </span>
+                    </template>
+                    <template x-if="!isTenantClosed && isAirsideVisitorBlocked">
+                        <span class="flex items-center space-x-1 text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                            <span class="truncate">Akses Zona Airside Terbatas</span>
+                        </span>
+                    </template>
+                    <template x-if="!isTenantClosed && isTimePassed && !isAirsideVisitorBlocked">
                         <span class="flex items-center space-x-1 text-white">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                             <span class="truncate">Waktu Sudah Terlewat</span>
                         </span>
                     </template>
-                    <template x-if="isTimeCritical && !isTimePassed">
+                    <template x-if="!isTenantClosed && isTimeCritical && !isTimePassed && !isAirsideVisitorBlocked">
                         <span class="flex items-center space-x-1 text-white">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                             <span class="truncate">Waktu Boarding Terlalu Dekat</span>
@@ -943,17 +1026,21 @@
         function cartManager() {
             return {
                 items: @json((object)$cart),
+                isTenantAirside: {{ ($tenant && $tenant->isAirside()) ? 'true' : 'false' }},
+                isTenantClosed: {{ !$isTenantOpen ? 'true' : 'false' }},
                 customerType: '{{ old('customer_type', 'penumpang') }}', 
                 boardingTime: '{{ old('boarding_time', '') }}',
                 pickupMethod: '{{ old('pickup_method', 'ambil_sendiri') }}',
                 deliveryTerminal: '{{ old('delivery_terminal', str_ireplace('t', '', (string)($tenant->terminal ?? '1'))) }}',
                 deliveryLocations: [],
+                selectedDeliveryLocationId: '{{ old('delivery_location_id', '') }}',
                 deliveryFee: {{ ($tenant && !is_null($tenant->delivery_fee)) ? $tenant->delivery_fee : 'null' }},
                 paymentCategory: '{{ old('payment_method') ? (str_starts_with(old('payment_method'), 'transfer') ? 'transfer' : 'qris') : 'qris' }}',
                 selectedBank: '{{ old('payment_method') && str_starts_with(old('payment_method'), 'transfer_') ? str_replace('transfer_', '', old('payment_method')) : 'bca' }}',
                 orderNotes: '{{ old('notes', '') }}',
                 quickChips: [
                     { icon: '🧊', label: 'Kurangi Es' },
+                    { icon: '🍬', label: 'Kurangi Gula' },
                     { icon: '🌶️', label: 'Sambal Dipisah' },
                     { icon: '🍴', label: 'Tanpa Sendok Plastik' },
                     { icon: '🛍️', label: 'Bungkus Kabin' }
@@ -980,6 +1067,26 @@
 
                 init() {
                     this.fetchLocations();
+                    this.handleCustomerTypeChange();
+                },
+
+                handleCustomerTypeChange() {
+                    // Opsi A: Jika restoran berada di zona Airside, kunci pemesan wajib 'penumpang'
+                    if (this.isTenantAirside && this.customerType === 'pengunjung') {
+                        this.customerType = 'penumpang';
+                    }
+                },
+
+                get filteredDeliveryLocations() {
+                    // Opsi A: Porter tidak boleh lintas zona (Airside <-> Landside)
+                    return this.deliveryLocations.filter(loc => {
+                        const locIsAirside = Boolean(loc.is_airside) || String(loc.name).toLowerCase().includes('boarding lounge');
+                        return locIsAirside === Boolean(this.isTenantAirside);
+                    });
+                },
+
+                get isAirsideVisitorBlocked() {
+                    return this.isTenantAirside && this.customerType === 'pengunjung';
                 },
 
                 get itemsCount() {
@@ -1018,11 +1125,19 @@
                         this.deliveryLocations = [];
                         return;
                     }
-                    fetch(`/api/delivery-locations?terminal=${this.deliveryTerminal}`)
+                    const zoneParam = this.isTenantAirside ? 'Airside' : 'Landside';
+                    fetch(`/api/delivery-locations?terminal=${this.deliveryTerminal}&zone=${zoneParam}`)
                         .then(res => res.json())
                         .then(data => {
                             this.deliveryLocations = data;
                         });
+                },
+                get minBoardingMinutes() {
+                    const maxPrep = Object.values(this.items).reduce((max, item) => {
+                        const prep = parseInt(item.preparation_time || 15, 10);
+                        return (!isNaN(prep) && prep > max) ? prep : max;
+                    }, 15);
+                    return Math.max(15, maxPrep);
                 },
                 get boardingDiff() {
                     if (this.customerType !== 'penumpang' || !this.boardingTime) return null;
@@ -1042,12 +1157,15 @@
                         isCrossMidnight = true;
                     }
 
+                    const minReq = this.minBoardingMinutes;
+                    const warnReq = Math.max(30, minReq + 10);
+
                     return {
                         diff: diffInMinutes,
                         isCrossMidnight: isCrossMidnight,
                         isPassed: diffInMinutes < 0,
-                        isCritical: diffInMinutes >= 0 && diffInMinutes < 15,
-                        isWarning: diffInMinutes >= 15 && diffInMinutes < 30
+                        isCritical: diffInMinutes >= 0 && diffInMinutes < minReq,
+                        isWarning: diffInMinutes >= minReq && diffInMinutes < warnReq
                     };
                 },
                 get isTimeCritical() {

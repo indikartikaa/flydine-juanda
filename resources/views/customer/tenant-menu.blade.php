@@ -154,6 +154,17 @@
                             <span>{{ $tenant->terminal ?? 'T1' }} • {{ $tenant->floor_location ?? 'Area Komersial' }}</span>
                         </span>
 
+                        <!-- Zone Badge (Airside vs Landside) -->
+                        @if($tenant->isAirside())
+                            <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-400/20 backdrop-blur-md border border-amber-300/35 text-amber-100 shadow-sm">
+                                <span>🛫 Airside • Boarding Gate</span>
+                            </span>
+                        @else
+                            <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold bg-sky-400/20 backdrop-blur-md border border-sky-300/30 text-sky-100 shadow-sm">
+                                <span>🏢 Landside • Area Publik</span>
+                            </span>
+                        @endif
+
                         <!-- Category Badge -->
                         <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/15 backdrop-blur-md border border-white/20 text-blue-100 shadow-sm">
                             <span>🍽️ {{ $tenant->category ?? 'Fast Food & Restaurant' }}</span>
@@ -264,7 +275,40 @@
 
             @php
                 $isTenantOpen = (bool) ($tenant->isOpen() && $tenant->is_active);
+                $terminalCode = strtoupper($tenant->terminal ?? 'T1');
+                $terminalShortLabel = ($terminalCode === 'T2' || $terminalCode === '2') ? 'Terminal 2 (Internasional & Garuda)' : 'Terminal 1 (Domestik)';
             @endphp
+
+            <!-- Compact Strip Info Lokasi Terminal & Zona -->
+            <div class="mb-6 px-4 py-3 rounded-2xl border bg-white border-slate-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div class="flex flex-wrap items-center gap-2 text-xs">
+                    <span class="inline-flex items-center gap-1.5 font-extrabold text-slate-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#005ea2] shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" /></svg>
+                        <span>{{ $terminalShortLabel }}</span>
+                    </span>
+                    <span class="text-slate-300">•</span>
+                    <span class="font-bold text-slate-600">{{ $tenant->floor_location ?? 'Area Komersial' }}</span>
+                    @if($tenant->isAirside())
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200">
+                            <span>🛫 Zona Airside (Boarding Lounge)</span>
+                        </span>
+                    @else
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <span>🏢 Zona Landside (Area Publik)</span>
+                        </span>
+                    @endif
+                </div>
+
+                <div class="text-[11px] font-semibold flex items-center gap-1.5 {{ $tenant->isAirside() ? 'text-amber-700' : 'text-slate-500' }}">
+                    @if($tenant->isAirside())
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span>Pastikan di gedung <strong>{{ $terminalCode }}</strong> • Khusus <strong>Penumpang (Wajib Boarding Pass)</strong></span>
+                    @else
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span>Pastikan berada di gedung <strong>{{ $terminalCode }}</strong> • Bebas akses Penumpang &amp; Pengunjung</span>
+                    @endif
+                </div>
+            </div>
 
             @if(!$isTenantOpen)
             <!-- Prominent Warning Banner for Closed Tenant -->
@@ -303,7 +347,11 @@
                                 $productImageUrl = asset($product->image);
                             }
                         } else {
-                            if (file_exists(public_path('storage/' . $product->image)) || file_exists(storage_path('app/public/' . $product->image))) {
+                            if (
+                                file_exists(public_path('storage/' . $product->image)) ||
+                                file_exists(storage_path('app/public/' . $product->image)) ||
+                                \Illuminate\Support\Facades\Storage::disk('public')->exists($product->image)
+                            ) {
                                 $hasProductImage = true;
                                 $productImageUrl = asset('storage/' . $product->image);
                             }
@@ -371,11 +419,23 @@
                     </h3>
                     
                     @if($product->description)
-                        <p class="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed mb-4 flex-grow line-clamp-2">
+                        <p class="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed mb-3 flex-grow line-clamp-2">
                             {{ $product->description }}
                         </p>
                     @else
-                        <div class="flex-grow mb-4"></div>
+                        <div class="flex-grow mb-3"></div>
+                    @endif
+
+                    @php $productVariantGroups = $product->getNormalizedCustomizationGroups(); @endphp
+                    @if(!empty($productVariantGroups))
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            @foreach($productVariantGroups as $vGrp)
+                                <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-50 text-[#005ea2] border border-sky-100">
+                                    <span>✨</span>
+                                    <span>{{ $vGrp['label'] }}</span>
+                                </span>
+                            @endforeach
+                        </div>
                     @endif
 
                     <!-- Price & Action Button -->
@@ -397,7 +457,7 @@
                             </button>
                         @elseif($isAvailable)
                             <button type="button" 
-                                    onclick="addToCart({{ $product->id }}, {{ $tenant->id }}, this)" 
+                                    onclick="handleOrderButtonClick({{ $product->id }}, {{ $tenant->id }}, this, @js($product->name), @js(number_format($product->price, 0, ',', '.')), @js($productVariantGroups))" 
                                     aria-label="Tambah {{ $product->name }}" 
                                     class="add-to-cart-btn inline-flex items-center space-x-1.5 bg-[#005ea2] hover:bg-blue-700 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-md shadow-blue-500/20 active:scale-95 transition-all cursor-pointer group/btn">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover/btn:scale-110 transition-transform pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -448,6 +508,34 @@
 
     <!-- FlyDine Corporate Footer (Standard Component) -->
     <x-footer />
+
+    <!-- Modal Pilih Varian Menu (Muncul Hanya untuk Menu yang Memiliki Opsi Kustomisasi) -->
+    <div id="variant-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+                <div>
+                    <span class="text-[10px] font-black uppercase tracking-wider text-[#005ea2] bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md">Kustomisasi Pesanan</span>
+                    <h3 id="variant-modal-title" class="text-base font-black text-slate-900 mt-1 line-clamp-1">Pilih Varian Menu</h3>
+                    <p id="variant-modal-price" class="text-xs font-extrabold text-[#005ea2]">Rp 0</p>
+                </div>
+                <button type="button" onclick="closeVariantModal()" class="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <div id="variant-modal-body" class="p-5 overflow-y-auto space-y-4"></div>
+
+            <div class="px-5 py-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-end gap-2.5">
+                <button type="button" onclick="closeVariantModal()" class="px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs font-bold transition cursor-pointer">
+                    Batal
+                </button>
+                <button type="button" onclick="confirmVariantModal()" class="px-5 py-2.5 rounded-xl bg-[#005ea2] hover:bg-blue-700 text-white text-xs font-extrabold shadow-md shadow-blue-500/20 transition cursor-pointer flex items-center gap-1.5">
+                    <span>Tambah ke Pesanan</span>
+                    <span>&rarr;</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Toast Notification (Pesanan Ditambahkan) -->
     <div id="cart-toast" class="fixed bottom-6 right-6 z-50 transform translate-y-28 opacity-0 transition-all duration-500 ease-out pointer-events-none max-w-sm w-full px-4 sm:px-0">
@@ -534,7 +622,94 @@
             window.performMenuSearch('');
         };
 
-        function addToCart(productId, tenantId, btnElement = null, forceReplace = 0) {
+        let pendingOrderContext = null;
+
+        function handleOrderButtonClick(productId, tenantId, btnElement, productName, formattedPrice, variantGroups) {
+            if (!Array.isArray(variantGroups) || variantGroups.length === 0) {
+                addToCart(productId, tenantId, btnElement, 0, null);
+                return;
+            }
+
+            pendingOrderContext = {
+                productId: productId,
+                tenantId: tenantId,
+                btnElement: btnElement,
+                variantGroups: variantGroups,
+                selections: {}
+            };
+
+            const titleEl = document.getElementById('variant-modal-title');
+            const priceEl = document.getElementById('variant-modal-price');
+            const bodyEl = document.getElementById('variant-modal-body');
+
+            if (titleEl) titleEl.textContent = productName;
+            if (priceEl) priceEl.textContent = 'Rp ' + formattedPrice;
+
+            if (bodyEl) {
+                bodyEl.innerHTML = '';
+                variantGroups.forEach((grp, idx) => {
+                    if (!grp || !Array.isArray(grp.choices) || grp.choices.length === 0) return;
+
+                    const defaultChoice = grp.choices[0];
+                    pendingOrderContext.selections[idx] = defaultChoice;
+
+                    const groupDiv = document.createElement('div');
+                    const labelEl = document.createElement('label');
+                    labelEl.className = 'block text-xs font-black text-slate-700 uppercase tracking-wider mb-2';
+                    labelEl.textContent = `✨ ${grp.label}`;
+                    groupDiv.appendChild(labelEl);
+
+                    const choicesWrap = document.createElement('div');
+                    choicesWrap.className = 'flex flex-wrap gap-2';
+
+                    grp.choices.forEach(choice => {
+                        const pillBtn = document.createElement('button');
+                        pillBtn.type = 'button';
+                        pillBtn.setAttribute('data-opt-val', choice);
+                        const isDefault = choice === defaultChoice;
+                        pillBtn.className = isDefault
+                            ? 'px-3.5 py-2 rounded-xl text-xs font-extrabold border transition cursor-pointer bg-[#005ea2] text-white border-[#005ea2] shadow-xs'
+                            : 'px-3.5 py-2 rounded-xl text-xs font-bold border transition cursor-pointer bg-slate-50 text-slate-700 border-slate-200 hover:border-blue-300';
+                        pillBtn.textContent = choice;
+                        pillBtn.onclick = function() {
+                            pendingOrderContext.selections[idx] = choice;
+                            choicesWrap.querySelectorAll('button').forEach(b => {
+                                const active = b.getAttribute('data-opt-val') === choice;
+                                b.className = active
+                                    ? 'px-3.5 py-2 rounded-xl text-xs font-extrabold border transition cursor-pointer bg-[#005ea2] text-white border-[#005ea2] shadow-xs'
+                                    : 'px-3.5 py-2 rounded-xl text-xs font-bold border transition cursor-pointer bg-slate-50 text-slate-700 border-slate-200 hover:border-blue-300';
+                            });
+                        };
+                        choicesWrap.appendChild(pillBtn);
+                    });
+
+                    groupDiv.appendChild(choicesWrap);
+                    bodyEl.appendChild(groupDiv);
+                });
+            }
+
+            const modal = document.getElementById('variant-modal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeVariantModal() {
+            const modal = document.getElementById('variant-modal');
+            if (modal) modal.classList.add('hidden');
+            pendingOrderContext = null;
+        }
+
+        function confirmVariantModal() {
+            if (!pendingOrderContext) return;
+            const ctx = pendingOrderContext;
+            const chosenList = ctx.variantGroups
+                .map((_, idx) => ctx.selections[idx])
+                .filter(Boolean);
+            const variantsString = chosenList.join(' • ');
+            closeVariantModal();
+            addToCart(ctx.productId, ctx.tenantId, ctx.btnElement, 0, variantsString);
+        }
+
+        function addToCart(productId, tenantId, btnElement = null, forceReplace = 0, variants = null) {
             let originalContent = '';
             if (btnElement) {
                 originalContent = btnElement.innerHTML;
@@ -553,7 +728,8 @@
                 body: JSON.stringify({
                     product_id: productId,
                     tenant_id: tenantId,
-                    force_replace: forceReplace
+                    force_replace: forceReplace,
+                    variants: variants
                 })
             })
             .then(async response => {
@@ -566,7 +742,7 @@
                     }
                     if (response.status === 409 || data.error === 'conflict') {
                         if (confirm(data.message || 'Anda memiliki pesanan dari restoran lain. Ingin mengganti restoran?')) {
-                            addToCart(productId, tenantId, btnElement, 1);
+                            addToCart(productId, tenantId, btnElement, 1, variants);
                         }
                         return null;
                     }
@@ -584,7 +760,7 @@
 
                 if (data.error === 'conflict') {
                     if (confirm(data.message)) {
-                        addToCart(productId, tenantId, btnElement, 1);
+                        addToCart(productId, tenantId, btnElement, 1, variants);
                     }
                 } else if (data.success) {
                     // 1. Button Success Animation (Morph to green checkmark)

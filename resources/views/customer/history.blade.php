@@ -245,10 +245,17 @@
                         
                         <!-- Action Buttons -->
                         <div class="space-y-2.5 pt-2">
-                            <a href="{{ route('customer.receipt', ['order' => $order->order_code]) }}" class="w-full text-center bg-slate-50 hover:bg-slate-100 text-slate-700 font-black py-3 rounded-xl text-xs transition-colors border border-slate-200 shadow-sm flex items-center justify-center space-x-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                <span>Lihat Struk Digital Resmi</span>
-                            </a>
+                            <div class="flex gap-2">
+                                <a href="{{ route('customer.receipt', ['order' => $order->order_code]) }}" class="flex-1 text-center bg-slate-50 hover:bg-slate-100 text-slate-700 font-black py-3 px-3 rounded-xl text-xs transition-colors border border-slate-200 shadow-sm flex items-center justify-center space-x-1.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                    <span>Struk Digital</span>
+                                </a>
+                                @if($order->is_paid)
+                                <a href="{{ route('page.faq', ['order' => $order->order_code]) }}#hubungi-kami" class="text-center bg-white hover:bg-rose-50 text-rose-600 font-extrabold py-3 px-3.5 rounded-xl text-xs transition-colors border border-rose-200 flex items-center justify-center shrink-0" title="Laporkan Kendala Pesanan {{ $order->order_code }}">
+                                    <span>Bantuan</span>
+                                </a>
+                                @endif
+                            </div>
 
                             @if(!in_array($order->status, ['selesai', 'dibatalkan', 'ditolak']))
                             <a href="{{ route('customer.tracking', ['order' => $order->order_code]) }}" class="w-full text-center bg-gradient-to-r from-[#003b66] to-[#005ea2] hover:from-[#002f54] hover:to-[#004a80] text-white font-black py-3 rounded-xl text-xs transition-all shadow-md shadow-blue-500/20 flex items-center justify-center space-x-2" style="background: linear-gradient(to right, #003b66, #005ea2); background-color: #005ea2;">

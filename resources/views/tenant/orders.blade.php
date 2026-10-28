@@ -287,8 +287,13 @@
                                     </div>
                                 </template>
 
-                                <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
-                                    <span class="text-[11px] font-bold text-slate-400">Total Pembayaran:</span>
+                                <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-[11px] font-bold text-slate-400">Total:</span>
+                                        <span class="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border"
+                                              :class="order.is_paid ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'"
+                                              x-text="order.is_paid ? 'Lunas' : 'Belum Bayar'"></span>
+                                    </div>
                                     <span class="font-black text-slate-900" x-text="'Rp ' + Number(order.total_amount).toLocaleString('id-ID')"></span>
                                 </div>
                             </td>
@@ -333,9 +338,11 @@
                                     <template x-if="order.status === 'menunggu'">
                                         <div class="space-y-1.5 w-full">
                                             <button type="button" 
-                                                    @click="updateStatus(order.id, 'diproses')" 
-                                                    class="w-full bg-[#005ea2] hover:bg-[#004b82] active:scale-95 text-white py-2 px-3 rounded-xl text-xs font-black shadow-md shadow-blue-600/20 transition-all cursor-pointer">
-                                                Terima & Masak
+                                                    @click="if (order.is_paid) updateStatus(order.id, 'diproses')" 
+                                                    :disabled="!order.is_paid"
+                                                    :class="order.is_paid ? 'bg-[#005ea2] hover:bg-[#004b82] active:scale-95 text-white shadow-md shadow-blue-600/20 cursor-pointer' : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'"
+                                                    class="w-full py-2 px-3 rounded-xl text-xs font-black transition-all">
+                                                <span x-text="order.is_paid ? 'Terima & Masak' : 'Menunggu Bayar'"></span>
                                             </button>
                                             <button type="button" 
                                                     @click="updateStatus(order.id, 'ditolak')" 

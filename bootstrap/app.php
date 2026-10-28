@@ -14,12 +14,28 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpException $e, $request) {
+        $handleCsrfMismatch = function ($request) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Sesi halaman telah berakhir, silakan muat ulang halaman dan coba lagi.'
+                ], 419);
+            }
+
+            if ($request->is('logout')) {
+                return redirect()->route('login');
+            }
+
+            return redirect()->back()
+                ->withInput($request->except(['password', 'password_confirmation', '_token']))
+                ->with('error', 'Sesi halaman telah berakhir, silakan coba lagi.');
+        };
+
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpException $e, $request) use ($handleCsrfMismatch) {
             if ($e->getStatusCode() === 419) {
-                return redirect()->route('tenant.dashboard')->with('error', 'Sesi formulir telah disegarkan kembali. Silakan simpan pengaturan Anda.');
+                return $handleCsrfMismatch($request);
             }
         });
-        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, $request) {
-            return redirect()->route('tenant.dashboard')->with('error', 'Sesi formulir telah disegarkan kembali. Silakan simpan pengaturan Anda.');
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, $request) use ($handleCsrfMismatch) {
+            return $handleCsrfMismatch($request);
         });
     })->create();

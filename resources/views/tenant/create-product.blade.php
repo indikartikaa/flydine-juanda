@@ -210,6 +210,84 @@
                         </p>
                     </div>
 
+                    <!-- Opsi Varian & Kustomisasi Pelanggan (Fleksibel + Template Cepat) -->
+                    <div x-data="{
+                        groups: @js(old('variant_groups', [])),
+                        addPreset(label, choicesStr) {
+                            if (!this.groups.some(g => g.label.toLowerCase() === label.toLowerCase())) {
+                                this.groups.push({ label: label, choices: choicesStr });
+                            }
+                        },
+                        addCustom() {
+                            this.groups.push({ label: '', choices: '' });
+                        },
+                        removeGroup(idx) {
+                            this.groups.splice(idx, 1);
+                        }
+                    }" class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <input type="hidden" name="customization_options_submitted" value="1">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600">
+                                Varian & Kustomisasi Pelanggan (Opsional)
+                            </label>
+                            <button type="button"
+                                    @click="addCustom()"
+                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#005ea2] hover:bg-[#004b82] text-white text-[11px] font-bold transition cursor-pointer shadow-2xs">
+                                <span>+ Buat Varian Sendiri</span>
+                            </button>
+                        </div>
+
+                        <!-- Baris Chip Template Cepat -->
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <span class="text-[11px] font-bold text-slate-400 mr-1">Template Cepat:</span>
+                            @foreach(\App\Models\Product::CUSTOMIZATION_PRESETS as $optKey => $optMeta)
+                                <button type="button"
+                                        @click="addPreset('{{ $optMeta['label'] }}', '{{ implode(', ', $optMeta['choices']) }}')"
+                                        class="px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 hover:text-[#005ea2] text-[11px] font-bold text-slate-700 transition cursor-pointer">
+                                    + {{ $optMeta['icon'] }} {{ $optMeta['short'] }}
+                                </button>
+                            @endforeach
+                        </div>
+
+                        <!-- Daftar Grup Varian yang Aktif (Bisa Diedit Bebas) -->
+                        <div x-show="groups.length > 0" class="space-y-2.5 pt-1">
+                            <template x-for="(grp, idx) in groups" :key="idx">
+                                <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50/80 space-y-2.5">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="flex-1">
+                                            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nama Varian</label>
+                                            <input type="text"
+                                                   :name="`variant_groups[${idx}][label]`"
+                                                   x-model="grp.label"
+                                                   placeholder="Contoh: Pilihan Susu / Potongan Ayam"
+                                                   class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:border-[#005ea2]">
+                                        </div>
+                                        <button type="button"
+                                                @click="removeGroup(idx)"
+                                                class="mt-4 p-2 rounded-lg text-rose-500 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition cursor-pointer shrink-0"
+                                                title="Hapus varian ini">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="w-full">
+                                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Daftar Pilihan (Pisahkan dengan koma)</label>
+                                        <input type="text"
+                                               :name="`variant_groups[${idx}][choices]`"
+                                               x-model="grp.choices"
+                                               placeholder="Contoh: Fresh Milk, Oat Milk, Soy Milk"
+                                               class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none focus:border-[#005ea2]">
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <p class="text-[11px] font-semibold text-slate-400">
+                            Klik template di atas atau klik <strong>+ Buat Varian Sendiri</strong> untuk menambahkan pilihan kustomisasi pada menu ini. Kosongkan jika menu tidak memiliki varian.
+                        </p>
+                    </div>
+
                     <!-- Checkbox Status Aktif Langsung -->
                     <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/80">
                         <label class="flex items-start gap-3 cursor-pointer">

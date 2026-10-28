@@ -34,4 +34,13 @@ class DeliveryLocation extends Model
     {
         return $query->where('terminal', $terminal);
     }
+
+    /**
+     * Cek apakah titik pengantaran berada di zona Airside (Boarding Lounge / Ruang Tunggu Gate)
+     * yang wajib memiliki tiket/boarding pass.
+     */
+    public function isAirside(): bool
+    {
+        return stripos((string) $this->name, 'Boarding Lounge') !== false;
+    }
 }

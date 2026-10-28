@@ -80,8 +80,19 @@
 
             @if(session('success'))
                 <div class="mb-6 bg-emerald-100 border border-emerald-300 text-emerald-800 px-4 py-3 rounded-xl text-sm font-bold flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    {{ session('success') }}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="mb-6 bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 rounded-xl text-xs font-bold flex items-start gap-2.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-rose-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <div class="space-y-0.5">
+                        @foreach($errors->all() as $error)
+                            <p>{{ $error }}</p>
+                        @endforeach
+                    </div>
                 </div>
             @endif
 
@@ -90,32 +101,32 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-2">Nama Lengkap <span class="text-rose-500">*</span></label>
-                        <input type="text" name="reporter_name" required placeholder="Contoh: Budi Santoso" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all shadow-sm hover:border-blue-300">
+                        <input type="text" name="reporter_name" value="{{ old('reporter_name') }}" required placeholder="Contoh: Budi Santoso" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all shadow-sm hover:border-blue-300">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-2">No. WhatsApp <span class="text-rose-500">*</span></label>
-                        <input type="text" name="reporter_contact" required placeholder="Contoh: 08123456789" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all shadow-sm hover:border-blue-300">
+                        <input type="text" name="reporter_contact" value="{{ old('reporter_contact') }}" required placeholder="Contoh: 08123456789" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all shadow-sm hover:border-blue-300">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-2">ID Pesanan <span class="text-slate-400 font-normal">(Opsional)</span></label>
-                        <input type="text" name="order_code" value="{{ preg_replace('/[^A-Za-z0-9\-]/', '', (string) request('order', '')) }}" placeholder="Contoh: ORD-ABCDEF" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all shadow-sm hover:border-blue-300">
+                        <input type="text" name="order_code" value="{{ old('order_code', preg_replace('/[^A-Za-z0-9\-]/', '', (string) request('order', ''))) }}" placeholder="Contoh: ORD-ABCDEF" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all shadow-sm hover:border-blue-300">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-2">Kategori Masalah <span class="text-rose-500">*</span></label>
                         <select name="category" required class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all shadow-sm hover:border-blue-300 appearance-none">
-                            <option value="pesanan_salah" {{ request('order') ? 'selected' : '' }}>Pesanan Tidak Sesuai / Terlambat</option>
-                            <option value="status_tidak_update">Status Aplikasi Tidak Sesuai</option>
-                            <option value="lainnya" {{ !request('order') ? 'selected' : '' }}>Pertanyaan Umum / Saran / Lainnya</option>
+                            <option value="pesanan_salah" {{ old('category', request('order') ? 'pesanan_salah' : 'lainnya') === 'pesanan_salah' ? 'selected' : '' }}>Pesanan Tidak Sesuai / Terlambat</option>
+                            <option value="status_tidak_update" {{ old('category') === 'status_tidak_update' ? 'selected' : '' }}>Status Aplikasi Tidak Sesuai</option>
+                            <option value="lainnya" {{ old('category', request('order') ? 'pesanan_salah' : 'lainnya') === 'lainnya' ? 'selected' : '' }}>Pertanyaan Umum / Saran / Lainnya</option>
                         </select>
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-2">Pesan atau Detail Kendala <span class="text-rose-500">*</span></label>
-                    <textarea name="description" rows="4" required placeholder="Tuliskan secara detail apa yang bisa kami bantu..." class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all resize-none shadow-sm hover:border-blue-300"></textarea>
+                    <textarea name="description" rows="4" required placeholder="Tuliskan secara detail apa yang bisa kami bantu..." class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all resize-none shadow-sm hover:border-blue-300">{{ old('description') }}</textarea>
                 </div>
                 
                 <div class="pt-4">

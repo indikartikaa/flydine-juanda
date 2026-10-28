@@ -86,4 +86,12 @@ class Tenant extends Model
         }
         return $now >= $open && $now <= $close;
     }
+
+    /**
+     * Helper: Cek apakah tenant berada di zona Airside (Ruang Tunggu Boarding Gate / Wajib Boarding Pass)
+     */
+    public function isAirside(): bool
+    {
+        return strcasecmp(trim((string) $this->zone), 'Airside') === 0;
+    }
 }

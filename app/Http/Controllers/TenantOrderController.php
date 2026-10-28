@@ -8,11 +8,22 @@ use App\Models\Product;
 
 class TenantOrderController extends Controller
 {
+    private function ensureTenantStaff(): void
+    {
+        abort_unless(
+            auth()->check() &&
+            auth()->user()->role === 'tenant_staff' &&
+            !empty(auth()->user()->tenant_id),
+            403
+        );
+    }
+
     /**
      * Menampilkan Dasbor Tenant dengan Statistik.
      */
     public function dashboard()
     {
+        $this->ensureTenantStaff();
         $tenantId = auth()->user()->tenant_id;
 
         // Statistik Pesanan (Hari Ini atau yang masih aktif)
@@ -77,6 +88,7 @@ class TenantOrderController extends Controller
      */
     public function index(Request $request)
     {
+        $this->ensureTenantStaff();
         $tenantId = auth()->user()->tenant_id;
 
         $orders = Order::with(['orderItems', 'deliveryLocation', 'customer'])
@@ -94,6 +106,7 @@ class TenantOrderController extends Controller
      */
     public function history(Request $request)
     {
+        $this->ensureTenantStaff();
         $tenantId = auth()->user()->tenant_id;
 
         $query = Order::with(['orderItems', 'deliveryLocation', 'customer'])
@@ -158,8 +171,8 @@ class TenantOrderController extends Controller
      */
     public function updateStatus(Request $request, Order $order)
     {
-        // Pastikan order milik tenant ini
-        if ($order->tenant_id != auth()->user()->tenant_id) {
+        // Pastikan user adalah tenant_staff dan order milik tenant ini
+        if (!auth()->check() || auth()->user()->role !== 'tenant_staff' || $order->tenant_id != auth()->user()->tenant_id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -167,7 +180,34 @@ class TenantOrderController extends Controller
             'status' => 'required|in:diproses,siap,selesai,dibatalkan,ditolak'
         ]);
 
+        // Larang perubahan status ke diproses / siap / selesai jika pesanan belum dibayar (!is_paid)
+        if (in_array($request->status, ['diproses', 'siap', 'selesai']) && !$order->is_paid) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pesanan belum dibayar dan tidak dapat diproses oleh dapur.'
+            ], 422);
+        }
+
+        // State Machine: Kunci urutan transisi status pesanan secara berurutan
+        $allowedTransitions = [
+            'menunggu' => ['diproses', 'ditolak', 'dibatalkan'],
+            'diproses' => ['siap'],
+            'siap' => ['selesai'],
+            'selesai' => [],
+            'ditolak' => [],
+            'dibatalkan' => [],
+        ];
+
         $oldStatus = $order->status;
+        $allowedNext = $allowedTransitions[$oldStatus] ?? [];
+
+        if (!in_array($request->status, $allowedNext, true)) {
+            return response()->json([
+                'success' => false,
+                'message' => "Transisi status pesanan tidak diizinkan dari '{$oldStatus}' ke '{$request->status}'."
+            ], 422);
+        }
+
         $status = in_array($request->status, ['dibatalkan', 'ditolak']) ? 'dibatalkan' : $request->status;
         $order->status = $status;
         
@@ -206,6 +246,8 @@ class TenantOrderController extends Controller
      */
     public function updateHours(Request $request)
     {
+        $this->ensureTenantStaff();
+
         $request->validate([
             'opening_time' => 'nullable|date_format:H:i',
             'closing_time' => 'nullable|date_format:H:i'
@@ -226,6 +268,7 @@ class TenantOrderController extends Controller
 
     public function updateDelivery(Request $request)
     {
+        $this->ensureTenantStaff();
         $tenant = auth()->user()->tenant;
         
         if (!$tenant) {
@@ -252,7 +295,12 @@ class TenantOrderController extends Controller
      */
     public function updateProfile(Request $request)
     {
+        $this->ensureTenantStaff();
         $tenant = auth()->user()->tenant;
+
+        if (!$tenant) {
+            return redirect()->back()->with('error', 'Data tenant tidak ditemukan.');
+        }
         
         $request->validate([
             'phone' => 'nullable|string|max:20',
