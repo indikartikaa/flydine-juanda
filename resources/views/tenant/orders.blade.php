@@ -275,6 +275,18 @@
                                         </div>
                                     </template>
                                 </div>
+
+                                <!-- Catatan Khusus Pesanan untuk Dapur -->
+                                <template x-if="order.notes">
+                                    <div class="my-2.5 p-2.5 bg-amber-50/90 rounded-xl border border-amber-200/90 text-xs text-amber-900 flex items-start gap-2 shadow-2xs">
+                                        <span class="shrink-0 text-amber-600 font-bold text-sm">📝</span>
+                                        <div class="leading-snug min-w-0 flex-1">
+                                            <span class="font-black uppercase tracking-wider text-[10px] text-amber-800 block">Catatan Pelanggan:</span>
+                                            <span class="font-bold italic text-amber-950 break-words text-xs" x-text="order.notes"></span>
+                                        </div>
+                                    </div>
+                                </template>
+
                                 <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
                                     <span class="text-[11px] font-bold text-slate-400">Total Pembayaran:</span>
                                     <span class="font-black text-slate-900" x-text="'Rp ' + Number(order.total_amount).toLocaleString('id-ID')"></span>

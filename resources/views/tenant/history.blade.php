@@ -172,6 +172,7 @@
                         'gate' => $order->gate ?: '-',
                         'pickup' => $order->pickup_method === 'diantar' ? 'Porter Bandara (Diantar)' : 'Ambil di Gerai',
                         'payment' => $order->payment_method ?: 'QRIS',
+                        'notes' => $order->notes ?: null,
                         'ordered_at' => \Carbon\Carbon::parse($order->ordered_at)->format('d M Y, H:i') . ' WIB',
                         'completed_at' => $order->completed_at ? \Carbon\Carbon::parse($order->completed_at)->format('d M Y, H:i') . ' WIB' : '-',
                         'status' => $order->status,
@@ -368,6 +369,7 @@
                                 'gate' => $order->gate ?: '-',
                                 'pickup' => $order->pickup_method === 'diantar' ? 'Porter Bandara (Diantar)' : 'Ambil di Gerai',
                                 'payment' => $order->payment_method ?: 'QRIS',
+                                'notes' => $order->notes ?: null,
                                 'ordered_at' => \Carbon\Carbon::parse($order->ordered_at)->format('d M Y, H:i') . ' WIB',
                                 'completed_at' => $order->completed_at ? \Carbon\Carbon::parse($order->completed_at)->format('d M Y, H:i') . ' WIB' : '-',
                                 'status' => $order->status,
@@ -609,6 +611,14 @@
                             <span class="text-slate-400 font-medium">Metode Penyerahan</span>
                             <span class="font-bold text-purple-700" x-text="selectedOrder.pickup"></span>
                         </div>
+
+                        <!-- Catatan Pesanan Khusus -->
+                        <template x-if="selectedOrder.notes">
+                            <div class="p-2.5 bg-amber-50 rounded-xl border border-amber-200/80 text-xs text-amber-900">
+                                <span class="text-[10px] font-black uppercase tracking-wider text-amber-800 block mb-0.5">Catatan Pesanan:</span>
+                                <span class="font-bold italic text-amber-950" x-text="selectedOrder.notes"></span>
+                            </div>
+                        </template>
 
                         <!-- Daftar Item Menu -->
                         <div class="pt-3 border-t border-dashed border-slate-200">

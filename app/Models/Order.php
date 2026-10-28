@@ -17,6 +17,7 @@ class Order extends Model
         'flight_number',
         'gate',
         'boarding_time',
+        'notes',
         'status',
         'payment_method',
         'is_paid',
@@ -68,5 +69,26 @@ class Order extends Model
     public function deliveryLocation()
     {
         return $this->belongsTo(DeliveryLocation::class);
+    }
+
+    public function getPaymentMethodLabelAttribute(): string
+    {
+        return match ($this->payment_method) {
+            'qris' => 'QRIS Instant (GPN)',
+            'transfer_bca' => 'BCA Virtual Account',
+            'transfer_mandiri' => 'Mandiri Virtual Account',
+            'transfer_bri' => 'BRI Virtual Account (BRIVA)',
+            'transfer_bni' => 'BNI Virtual Account',
+            'transfer' => 'Transfer Bank Virtual Account',
+            default => strtoupper((string) ($this->payment_method ?? 'QRIS')),
+        };
+    }
+
+    public function getSelectedBankAttribute(): string
+    {
+        if (str_starts_with((string) $this->payment_method, 'transfer_')) {
+            return str_replace('transfer_', '', (string) $this->payment_method);
+        }
+        return 'bca';
     }
 }

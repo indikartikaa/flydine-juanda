@@ -31,6 +31,20 @@ class CustomerCatalogController extends Controller
                       $pq->where('name', 'like', '%' . $search . '%');
                   });
             });
+
+            // Prioritaskan relevansi pencarian:
+            // 1. Nama Restoran yang cocok (paling relevan)
+            // 2. Lokasi / Gate yang cocok
+            // 3. Menu yang cocok (restoran yang memiliki produk bernama cocok)
+            $escapedSearch = str_replace(['%', '_'], ['\%', '\_'], $search);
+            $query->orderByRaw("CASE 
+                WHEN LOWER(name) LIKE ? THEN 1
+                WHEN LOWER(floor_location) LIKE ? THEN 2
+                ELSE 3 
+            END ASC", [
+                '%' . strtolower($escapedSearch) . '%',
+                '%' . strtolower($escapedSearch) . '%'
+            ])->orderBy('name', 'asc');
         }
 
         // Filter by Terminal
@@ -132,6 +146,68 @@ class CustomerCatalogController extends Controller
     }
 
     // Fungsi untuk menampilkan halaman Pelacakan Pesanan
+    /**
+     * Passive Auto-Cancel Check:
+     * Jika pesanan masih berstatus 'menunggu', belum dibayar, dan melewati batas waktu auto_cancel_at,
+     * sistem secara instan mengubah statusnya menjadi 'dibatalkan' tanpa menunggu scheduler cron.
+     */
+    protected function checkAndApplyAutoCancel(Order $order): bool
+    {
+        if ($order->status === 'menunggu' && !$order->is_paid && $order->auto_cancel_at && now()->greaterThanOrEqualTo($order->auto_cancel_at)) {
+            $order->status = 'dibatalkan';
+            $order->save();
+
+            if (session('order_code') === $order->order_code) {
+                session()->forget('order_code');
+            }
+
+            // Kembalikan kuota stok produk jika DB trigger tidak aktif (misal di SQLite test)
+            if (!in_array(DB::getDriverName(), ['mysql', 'mariadb'])) {
+                foreach ($order->orderItems as $item) {
+                    if ($item->product_id) {
+                        Product::where('id', $item->product_id)->increment('stock', $item->quantity);
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Mendapatkan variasi format nomor HP Indonesia (08..., 628..., +628...).
+     * Memungkinkan customer mencari riwayat pesanan dengan format apapun.
+     */
+    protected function getPhoneVariations(string $phone): array
+    {
+        $clean = preg_replace('/[^0-9+]/', '', $phone);
+        if (empty($clean)) {
+            return [];
+        }
+
+        $digits = preg_replace('/[^0-9]/', '', $clean);
+        $variations = [$clean];
+
+        $core = null;
+        if (str_starts_with($digits, '628')) {
+            $core = substr($digits, 2);
+        } elseif (str_starts_with($digits, '08')) {
+            $core = substr($digits, 1);
+        } elseif (str_starts_with($digits, '8')) {
+            $core = $digits;
+        }
+
+        if ($core) {
+            $variations[] = '0' . $core;
+            $variations[] = '62' . $core;
+            $variations[] = '+62' . $core;
+        }
+
+        return array_values(array_unique(array_filter($variations)));
+    }
+
     public function tracking(Request $request)
     {
         $orderCode = $request->query('order') ?? session('order_code');
@@ -140,6 +216,9 @@ class CustomerCatalogController extends Controller
         }
 
         $order = Order::with(['orderItems.product', 'tenant', 'deliveryLocation', 'customer'])->where('order_code', $orderCode)->firstOrFail();
+
+        // Passive Auto-Cancel Check: jika waktu habis dan belum dibayar, batalkan instan
+        $this->checkAndApplyAutoCancel($order);
 
         // Jika pesanan telah selesai, dibatalkan, atau ditolak, hapus session order_code
         // agar tombol pulsing "LACAK" di navbar tidak terus muncul
@@ -158,6 +237,9 @@ class CustomerCatalogController extends Controller
         $order = Order::with(['orderItems.product', 'tenant', 'customer', 'deliveryLocation'])
             ->where('order_code', $orderCode)
             ->firstOrFail();
+
+        // Passive Auto-Cancel Check
+        $this->checkAndApplyAutoCancel($order);
 
         return view('customer.receipt', compact('order'));
     }
@@ -202,7 +284,10 @@ class CustomerCatalogController extends Controller
 
     public function checkStatus($orderCode)
     {
-        $order = Order::where('order_code', $orderCode)->firstOrFail();
+        $order = Order::with('orderItems')->where('order_code', $orderCode)->firstOrFail();
+
+        // Passive Auto-Cancel Check: batalkan instan jika waktu habis saat status di-poll
+        $this->checkAndApplyAutoCancel($order);
 
         if (in_array($order->status, ['selesai', 'dibatalkan', 'ditolak'])) {
             if (session('order_code') === $order->order_code) {
@@ -226,11 +311,17 @@ class CustomerCatalogController extends Controller
         if ($request->filled('phone_number')) {
             $searched = true;
             $cleanPhone = substr(preg_replace('/[^0-9+]/', '', (string) $request->phone_number), 0, 20);
-            $customer = !empty($cleanPhone) ? Customer::where('phone_number', $cleanPhone)->first() : null;
+            
+            $phoneVariations = $this->getPhoneVariations($cleanPhone);
+            
+            // Cari customer berdasarkan seluruh variasi nomor telepon (08..., 628..., +628...)
+            $customers = Customer::whereIn('phone_number', $phoneVariations)->get();
+            $customer = $customers->first();
 
-            if ($customer) {
+            if ($customers->isNotEmpty()) {
+                $customerIds = $customers->pluck('id')->toArray();
                 $orders = Order::with(['tenant', 'orderItems.product'])
-                    ->where('customer_id', $customer->id)
+                    ->whereIn('customer_id', $customerIds)
                     ->latest('ordered_at')
                     ->get();
             }
@@ -447,12 +538,57 @@ class CustomerCatalogController extends Controller
         $tenantId = reset($cart)['tenant_id'];
         $tenant = Tenant::findOrFail($tenantId);
 
+        // Validasi jam operasional tenant sebelum checkout
+        if (!$tenant->is_active || !$tenant->isOpen()) {
+            return redirect()->route('customer.cart')->with('error', "Mohon maaf, restoran '{$tenant->name}' saat ini sedang tutup dan tidak menerima pesanan.");
+        }
+
+        // Normalisasi nama pemesan (hapus spasi depan/belakang dan spasi ganda)
+        $cleanCustomerName = trim(preg_replace('/\s+/', ' ', (string) $request->customer_name));
+
+        // Normalisasi nomor penerbangan (auto-kapitalisasi & perapian spasi)
+        $cleanFlightNumber = $request->filled('flight_number')
+            ? strtoupper(trim(preg_replace('/\s+/', ' ', (string) $request->flight_number)))
+            : null;
+
+        // Normalisasi waktu boarding jika dikirim dalam format 12-jam AM/PM
+        $cleanBoardingTime = $request->boarding_time;
+        if ($request->customer_type === 'penumpang' && $request->filled('boarding_time')) {
+            try {
+                $cleanBoardingTime = \Carbon\Carbon::parse($request->boarding_time)->format('H:i');
+            } catch (\Throwable $e) {
+                // Biarkan nilai aslinya jika bukan format waktu valid agar ditangkap validator
+            }
+        }
+
+        // Sanitasi catatan khusus pesanan (maks 100 karakter)
+        $cleanNotes = $request->filled('notes')
+            ? trim(preg_replace('/\s+/', ' ', (string) $request->notes))
+            : null;
+
+        $request->merge([
+            'customer_name' => $cleanCustomerName,
+            'flight_number' => $cleanFlightNumber,
+            'boarding_time' => $cleanBoardingTime,
+            'notes' => $cleanNotes,
+        ]);
+
         $rules = [
-            'customer_name' => 'required|string|max:255',
-            'phone_number' => 'required|string|max:20',
+            'customer_name' => 'required|string|min:2|max:100',
+            'phone_number' => ['required', 'string', 'regex:/^(\+62|62|0)[0-9\- ]{8,18}$/'],
             'customer_type' => 'required|in:penumpang,pengunjung',
-            'payment_method' => 'required|in:qris,transfer',
+            'notes' => 'nullable|string|max:100',
+            'payment_method' => 'required|in:qris,transfer,transfer_bca,transfer_mandiri,transfer_bri,transfer_bni',
             'pickup_method' => 'required|in:ambil_sendiri,diantar',
+        ];
+
+        $customMessages = [
+            'customer_name.required' => 'Nama pemesan wajib diisi.',
+            'customer_name.min' => 'Nama pemesan minimal terdiri dari 2 karakter.',
+            'customer_name.max' => 'Nama pemesan maksimal 100 karakter.',
+            'phone_number.required' => 'Nomor WhatsApp / telepon aktif wajib diisi.',
+            'phone_number.regex' => 'Format nomor telepon tidak valid. Masukkan nomor ponsel aktif (contoh: 08123456789 atau +628123456789) dengan 9–15 digit angka.',
+            'notes.max' => 'Catatan pesanan maksimal 100 karakter.',
         ];
 
         // Validasi conditional untuk penumpang
@@ -467,9 +603,51 @@ class CustomerCatalogController extends Controller
             if (is_null($tenant->delivery_fee)) {
                 return redirect()->back()->withErrors(['Tenant ini tidak menyediakan layanan antar.']);
             }
+
+            // Validasi Integritas Terminal Antar Porter (Tidak Boleh Lintas Terminal)
+            $deliveryLocation = DeliveryLocation::find($request->delivery_location_id);
+            $tenantTerminalNum = str_ireplace('t', '', (string) $tenant->terminal);
+            $locTerminalNum = $deliveryLocation ? str_ireplace('t', '', (string) $deliveryLocation->terminal) : null;
+
+            if ($deliveryLocation && $tenantTerminalNum !== $locTerminalNum) {
+                return redirect()->back()->withInput()->withErrors([
+                    'delivery_location_id' => "Layanan antar porter hanya melayani area Terminal {$tenantTerminalNum}. Titik lokasi pengantaran tidak boleh berada di Terminal {$locTerminalNum} karena perbedaan gedung terminal bandara."
+                ]);
+            }
         }
 
-        $request->validate($rules);
+        $request->validate($rules, $customMessages);
+
+        // Validasi SLA Waktu Boarding untuk Penumpang (Minimal >= 15 menit dari sekarang)
+        $boardingDateTime = null;
+        if ($request->customer_type === 'penumpang') {
+            $boardingCarbon = \Carbon\Carbon::createFromFormat('H:i', $request->boarding_time);
+            $nowCarbon = now();
+            $boardingDateTime = $nowCarbon->copy()->setTime($boardingCarbon->hour, $boardingCarbon->minute, 0);
+
+            $diffMinutes = $nowCarbon->diffInMinutes($boardingDateTime, false);
+
+            // Skenario Penerbangan Dini Hari (Cross-Midnight):
+            // Jika jam boarding terlihat sudah lewat pada hari yang sama, tetapi jika dimajukan 1 hari (besok)
+            // selisihnya berada dalam rentang wajar pemesanan (antara 0 hingga 8 jam / 480 menit ke depan),
+            // maka ini adalah penerbangan dini hari berikutnya.
+            if ($diffMinutes < 0 && ($diffMinutes + 1440) >= 0 && ($diffMinutes + 1440) <= 480) {
+                $boardingDateTime->addDay();
+                $diffMinutes = $nowCarbon->diffInMinutes($boardingDateTime, false);
+            }
+
+            if ($diffMinutes < 0) {
+                return redirect()->back()->withInput()->withErrors([
+                    'boarding_time' => 'Jadwal waktu boarding yang Anda masukkan sudah terlewat dari waktu saat ini.'
+                ]);
+            }
+
+            if ($diffMinutes < 15) {
+                return redirect()->back()->withInput()->withErrors([
+                    'boarding_time' => 'Waktu boarding terlalu dekat (kurang dari 15 menit dari sekarang). Dapur membutuhkan waktu penyiapan makanan dan gerbang keberangkatan pesawat ditutup 15 menit sebelum lepas landas.'
+                ]);
+            }
+        }
 
         // Validasi ketersediaan dan stok produk terkini sebelum memproses checkout
         foreach ($cart as $item) {
@@ -492,8 +670,16 @@ class CustomerCatalogController extends Controller
 
         // Auto Create / Reuse Customer by Phone Number
         $phoneNumber = preg_replace('/[^0-9+]/', '', $request->phone_number); // Clean up phone number
+        $digitsOnly = preg_replace('/[^0-9]/', '', $phoneNumber);
+
+        if (strlen($digitsOnly) < 9 || strlen($digitsOnly) > 15) {
+            return redirect()->back()->withInput()->withErrors([
+                'phone_number' => 'Nomor telepon harus terdiri dari 9 sampai 15 digit angka.'
+            ]);
+        }
         
-        $customer = Customer::where('phone_number', $phoneNumber)->first();
+        $phoneVariations = $this->getPhoneVariations($phoneNumber);
+        $customer = Customer::whereIn('phone_number', $phoneVariations)->first();
         if ($customer) {
             // Validasi Blokir Awal
             if ($customer->is_blocked) {
@@ -529,7 +715,7 @@ class CustomerCatalogController extends Controller
         $fullBoardingTime = null;
 
         if ($request->customer_type === 'penumpang') {
-            $fullBoardingTime = \Carbon\Carbon::parse(date('Y-m-d') . ' ' . $request->boarding_time . ':00');
+            $fullBoardingTime = $boardingDateTime;
             // Jika boarding time lebih awal dari waktu pembatalan otomatis standar (15 menit),
             // batasi pembatalan tepat pada saat boarding time agar pelanggan tidak membayar setelah pesawat terbang.
             if ($fullBoardingTime->isBefore($autoCancelAt)) {
@@ -538,14 +724,19 @@ class CustomerCatalogController extends Controller
         }
         
         $order = DB::transaction(function () use ($tenantId, $customerId, $request, $fullBoardingTime, $deliveryFee, $autoCancelAt, $totalAmount, $cart) {
+            do {
+                $orderCode = 'ORD-' . strtoupper(Str::random(6));
+            } while (Order::where('order_code', $orderCode)->exists());
+
             $newOrder = Order::create([
-                'order_code' => 'ORD-' . strtoupper(Str::random(6)),
+                'order_code' => $orderCode,
                 'tenant_id' => $tenantId,
                 'customer_id' => $customerId,
                 'customer_name' => $request->customer_name,
                 'flight_number' => $request->customer_type === 'penumpang' ? strtoupper($request->flight_number) : null,
                 'gate' => null, // Gate manual dihapus dari form, gunakan delivery_location_id jika diantar
                 'boarding_time' => $fullBoardingTime,
+                'notes' => $request->notes,
                 'pickup_method' => $request->pickup_method,
                 'delivery_location_id' => $request->pickup_method === 'diantar' ? $request->delivery_location_id : null,
                 'delivery_fee' => $request->pickup_method === 'diantar' ? $deliveryFee : null,
@@ -592,7 +783,8 @@ class CustomerCatalogController extends Controller
         if (!$terminal) {
             return response()->json([]);
         }
-        $locations = DeliveryLocation::active()->byTerminal($terminal)->get(['id', 'name']);
+        $terminalNum = str_ireplace('t', '', (string) $terminal);
+        $locations = DeliveryLocation::active()->byTerminal($terminalNum)->get(['id', 'name']);
         return response()->json($locations);
     }
 

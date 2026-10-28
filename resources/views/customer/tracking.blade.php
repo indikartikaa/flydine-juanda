@@ -153,7 +153,7 @@
 
             <!-- Dynamic Live Status Pill -->
             <div>
-                @if(!$order->is_paid && in_array($order->payment_method, ['qris', 'transfer']) && $order->status === 'menunggu')
+                @if(!$order->is_paid && ($order->payment_method === 'qris' || str_starts_with((string)$order->payment_method, 'transfer')) && $order->status === 'menunggu')
                     <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 border border-amber-300 text-amber-900 text-xs font-black shadow-xs">
                         <span class="relative flex h-2.5 w-2.5">
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
@@ -189,7 +189,7 @@
             <!-- ========================================================================= -->
             <div class="lg:col-span-7 space-y-6">
 
-                @if(!$order->is_paid && in_array($order->payment_method, ['qris', 'transfer']) && $order->status === 'menunggu')
+                @if(!$order->is_paid && ($order->payment_method === 'qris' || str_starts_with((string)$order->payment_method, 'transfer')) && $order->status === 'menunggu')
                     <!-- ========================================== -->
                     <!-- TAMPILAN UNPAID: KARTU QRIS RESMI FINTECH  -->
                     <!-- ========================================== -->
@@ -272,22 +272,172 @@
                                 </div>
                             </div>
                         @else
-                            <!-- Transfer Bank Box -->
-                            <div class="bg-gradient-to-b from-slate-50/80 via-white to-slate-50/50 p-6 rounded-3xl border border-slate-200 shadow-sm max-w-sm mx-auto mb-6">
-                                <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
-                                    <span class="font-extrabold text-sm text-slate-800">Transfer Antar Bank</span>
-                                    <span class="text-xs font-black px-2.5 py-0.5 bg-blue-100 text-blue-800 rounded-lg">BCA</span>
+                            <!-- Transfer Bank / Virtual Account Module -->
+                            <div class="bg-gradient-to-b from-slate-50/80 via-white to-slate-50/50 p-6 sm:p-7 rounded-3xl border border-slate-200 shadow-sm max-w-md mx-auto mb-6"
+                                 x-data="{
+                                     activeBank: '{{ $order->selected_bank }}',
+                                     copyToast: false,
+                                     toastMsg: '',
+                                     openGuide: false,
+                                     banks: {
+                                         bca: {
+                                             name: 'BCA Virtual Account',
+                                             code: 'BCA',
+                                             va: '80012' + '{{ substr(preg_replace('/[^0-9]/', '', $order->customer->phone_number ?? '08123456789') ?: '8720192833', -8) }}',
+                                             color: 'text-blue-700 bg-blue-50 border-blue-200',
+                                             steps: [
+                                                 'Buka m-BCA > pilih menu m-Transfer > BCA Virtual Account.',
+                                                 'Masukkan Nomor Virtual Account di atas.',
+                                                 'Periksa nominal Rp {{ number_format($order->total_amount, 0, ',', '.') }} dan nama penerima, lalu selesaikan dengan PIN.'
+                                             ]
+                                         },
+                                         mandiri: {
+                                             name: 'Mandiri Virtual Account',
+                                             code: 'MANDIRI',
+                                             va: '88908' + '{{ substr(preg_replace('/[^0-9]/', '', $order->customer->phone_number ?? '08123456789') ?: '8720192833', -8) }}',
+                                             color: 'text-amber-700 bg-amber-50 border-amber-200',
+                                             steps: [
+                                                 'Buka Livin\' by Mandiri > pilih Bayar > Pembayaran Baru > Virtual Account.',
+                                                 'Masukkan Nomor Virtual Account di atas.',
+                                                 'Periksa rincian pesanan dan konfirmasi pembayaran dengan PIN Livin\'.'
+                                             ]
+                                         },
+                                         bri: {
+                                             name: 'BRI Virtual Account (BRIVA)',
+                                             code: 'BRIVA',
+                                             va: '12800' + '{{ substr(preg_replace('/[^0-9]/', '', $order->customer->phone_number ?? '08123456789') ?: '8720192833', -8) }}',
+                                             color: 'text-sky-700 bg-sky-50 border-sky-200',
+                                             steps: [
+                                                 'Buka BRImo > pilih Pembayaran > BRIVA.',
+                                                 'Masukkan Nomor BRIVA di atas.',
+                                                 'Periksa jumlah tagihan dan masukkan PIN BRImo Anda.'
+                                             ]
+                                         },
+                                         bni: {
+                                             name: 'BNI Virtual Account',
+                                             code: 'BNI',
+                                             va: '98888' + '{{ substr(preg_replace('/[^0-9]/', '', $order->customer->phone_number ?? '08123456789') ?: '8720192833', -8) }}',
+                                             color: 'text-teal-700 bg-teal-50 border-teal-200',
+                                             steps: [
+                                                 'Buka BNI Mobile Banking > pilih Transfer > Virtual Account Billing.',
+                                                 'Masukkan Nomor Virtual Account di atas.',
+                                                 'Periksa nominal pembayaran dan masukkan Password Transaksi Anda.'
+                                             ]
+                                         }
+                                     },
+                                     copy(text, msg) {
+                                         if (navigator.clipboard) {
+                                             navigator.clipboard.writeText(text);
+                                         }
+                                         this.toastMsg = msg;
+                                         this.copyToast = true;
+                                         setTimeout(() => this.copyToast = false, 2500);
+                                     }
+                                 }">
+                                
+                                <!-- Bank Switcher Tabs (Horizontal Segmented Control) -->
+                                <div class="mb-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-[11px] font-black uppercase tracking-wider text-slate-500">Pilih Bank Transfer:</span>
+                                        <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Bebas Biaya Admin</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 p-1.5 bg-slate-100 rounded-2xl border border-slate-200">
+                                        <button type="button" 
+                                                @click="activeBank = 'bca'"
+                                                class="flex-1 py-2 px-1 rounded-xl text-xs font-black transition-all duration-200 cursor-pointer text-center"
+                                                :class="activeBank === 'bca' ? 'bg-white text-blue-700 shadow-sm border border-slate-200/90 ring-1 ring-blue-500/20' : 'text-slate-500 hover:text-slate-800 hover:bg-white/60'">
+                                            BCA
+                                        </button>
+                                        <button type="button" 
+                                                @click="activeBank = 'mandiri'"
+                                                class="flex-1 py-2 px-1 rounded-xl text-xs font-black transition-all duration-200 cursor-pointer text-center"
+                                                :class="activeBank === 'mandiri' ? 'bg-white text-amber-700 shadow-sm border border-slate-200/90 ring-1 ring-amber-500/20' : 'text-slate-500 hover:text-slate-800 hover:bg-white/60'">
+                                            MANDIRI
+                                        </button>
+                                        <button type="button" 
+                                                @click="activeBank = 'bri'"
+                                                class="flex-1 py-2 px-1 rounded-xl text-xs font-black transition-all duration-200 cursor-pointer text-center"
+                                                :class="activeBank === 'bri' ? 'bg-white text-sky-700 shadow-sm border border-slate-200/90 ring-1 ring-sky-500/20' : 'text-slate-500 hover:text-slate-800 hover:bg-white/60'">
+                                            BRIVA
+                                        </button>
+                                        <button type="button" 
+                                                @click="activeBank = 'bni'"
+                                                class="flex-1 py-2 px-1 rounded-xl text-xs font-black transition-all duration-200 cursor-pointer text-center"
+                                                :class="activeBank === 'bni' ? 'bg-white text-teal-700 shadow-sm border border-slate-200/90 ring-1 ring-teal-500/20' : 'text-slate-500 hover:text-slate-800 hover:bg-white/60'">
+                                            BNI
+                                        </button>
+                                    </div>
                                 </div>
-                                <p class="text-xs text-slate-500 font-semibold mb-1">Nomor Rekening Tujuan:</p>
-                                <div class="flex items-center justify-between bg-white px-4 py-3 rounded-2xl border border-slate-200 mb-4 shadow-2xs">
-                                    <span class="font-mono font-black text-xl text-slate-900 tracking-wider">8720 1928 33</span>
-                                    <button type="button" onclick="navigator.clipboard.writeText('8720192833'); alert('Nomor Rekening BCA Berhasil Disalin!')" class="text-xs font-extrabold text-[#005ea2] hover:underline px-2.5 py-1 bg-blue-50 rounded-lg cursor-pointer">
+
+                                <!-- Active VA Box -->
+                                <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs mb-3 text-left transition-all duration-300">
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <span class="text-xs font-extrabold text-slate-700" x-text="banks[activeBank].name"></span>
+                                        <span class="text-[10px] font-black px-2 py-0.5 rounded-md border transition-colors duration-200" :class="banks[activeBank].color" x-text="banks[activeBank].code"></span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-400 font-medium mb-2.5">Nomor Virtual Account:</p>
+                                    
+                                    <div class="flex items-center justify-between bg-slate-50 px-3.5 py-2.5 rounded-xl border border-slate-200/80 mb-2.5">
+                                        <span class="font-mono font-black text-lg sm:text-xl text-slate-900 tracking-wider transition-all duration-200" x-text="banks[activeBank].va"></span>
+                                        <button type="button" 
+                                                @click="copy(banks[activeBank].va, 'Nomor ' + banks[activeBank].code + ' VA Berhasil Disalin!')"
+                                                class="text-xs font-black text-[#005ea2] hover:text-[#003b66] px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-lg cursor-pointer transition-colors shrink-0">
+                                            Salin
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                                        <span class="text-slate-400">Penerima Resmi:</span>
+                                        <span class="font-extrabold text-slate-700 text-right">FlyDine Juanda <span class="text-slate-400 font-normal">({{ $order->tenant->name }})</span></span>
+                                    </div>
+                                </div>
+
+                                <!-- Total Tagihan Box -->
+                                <div class="p-3.5 rounded-2xl bg-blue-50/70 border border-blue-100 flex items-center justify-between mb-3 text-left">
+                                    <div>
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Pembayaran:</span>
+                                        <span class="text-xl font-black text-[#005ea2]">
+                                            Rp {{ number_format($order->total_amount, 0, ',', '.') }}
+                                        </span>
+                                    </div>
+                                    <button type="button" 
+                                            @click="copy('{{ $order->total_amount }}', 'Nominal Tagihan Berhasil Disalin!')"
+                                            class="text-xs font-bold text-[#005ea2] bg-white px-3 py-1.5 rounded-xl border border-blue-200 shadow-2xs hover:bg-blue-50 cursor-pointer">
                                         Salin
                                     </button>
                                 </div>
-                                <div class="flex justify-between items-baseline pt-2 border-t border-slate-100 text-sm">
-                                    <span class="font-bold text-slate-600">Total Transfer:</span>
-                                    <span class="font-black text-xl text-[#005ea2]">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>
+
+                                <!-- Toast Notification for Copy -->
+                                <div x-show="copyToast" x-cloak x-transition class="p-2 mb-3 bg-emerald-500 text-white text-xs font-black rounded-xl text-center shadow-md animate-fade-in">
+                                    <span x-text="toastMsg"></span>
+                                </div>
+
+                                <!-- Accordion Petunjuk Cara Bayar dengan Smooth Transition -->
+                                <div class="text-left pt-2 border-t border-dashed border-slate-200">
+                                    <button type="button" 
+                                            @click="openGuide = !openGuide" 
+                                            class="flex items-center justify-between w-full text-xs font-black text-slate-700 hover:text-[#005ea2] cursor-pointer py-1.5 transition-colors">
+                                        <span>Petunjuk Pembayaran M-Banking</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform duration-300" :class="openGuide ? 'rotate-180 text-[#005ea2]' : 'text-slate-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </button>
+                                    <div x-show="openGuide" 
+                                         x-cloak 
+                                         x-transition:enter="transition ease-out duration-250" 
+                                         x-transition:enter-start="opacity-0 -translate-y-2" 
+                                         x-transition:enter-end="opacity-100 translate-y-0" 
+                                         x-transition:leave="transition ease-in duration-150" 
+                                         x-transition:leave-start="opacity-100 translate-y-0" 
+                                         x-transition:leave-end="opacity-0 -translate-y-2"
+                                         class="mt-2 text-[11px] text-slate-600 space-y-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200/90">
+                                        <template x-for="(step, idx) in banks[activeBank].steps" :key="idx">
+                                            <div class="flex items-start gap-2">
+                                                <span class="font-black text-[#005ea2] bg-blue-100/70 w-4 h-4 rounded-full flex items-center justify-center text-[10px] shrink-0 mt-0.5" x-text="idx + 1"></span>
+                                                <span class="leading-relaxed" x-text="step"></span>
+                                            </div>
+                                        </template>
+                                    </div>
                                 </div>
                             </div>
                         @endif
@@ -518,12 +668,20 @@
                                 </div>
                             </div>
 
-                            @if($order->gate || $order->boarding_time)
+                            @if($order->gate || $order->boarding_time || $order->deliveryLocation || $order->pickup_method)
                             <div class="grid grid-cols-2 gap-4 pb-2">
                                 <div>
-                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5">Pintu / Gate</span>
-                                    <span class="text-sm font-black text-slate-800 block">
-                                        {{ $order->gate ? (preg_match('/^gate\s*/i', trim($order->gate)) ? trim($order->gate) : 'Gate ' . trim($order->gate)) : '-' }}
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5">
+                                        {{ $order->pickup_method === 'diantar' ? 'Titik Antar / Gate' : 'Pintu / Gate' }}
+                                    </span>
+                                    <span class="text-sm font-black text-slate-800 block truncate">
+                                        @if($order->pickup_method === 'diantar' && $order->deliveryLocation)
+                                            {{ $order->deliveryLocation->name }}
+                                        @elseif($order->gate)
+                                            {{ preg_match('/^gate\s*/i', trim($order->gate)) ? trim($order->gate) : 'Gate ' . trim($order->gate) }}
+                                        @else
+                                            Ambil di Gerai Resto
+                                        @endif
                                     </span>
                                 </div>
                                 <div>
@@ -580,6 +738,17 @@
                                 </p>
                             @endif
                         </div>
+
+                        @if($order->notes)
+                        <div class="mt-3 pt-3 border-t border-slate-100">
+                            <span class="text-[10px] font-bold text-amber-700 uppercase tracking-widest block mb-1">
+                                📝 Catatan Khusus Pesanan
+                            </span>
+                            <p class="text-xs font-bold text-slate-800 bg-amber-50/80 p-2.5 rounded-xl border border-amber-200/70 italic">
+                                "{{ $order->notes }}"
+                            </p>
+                        </div>
+                        @endif
                     </div>
                 </div>
 
@@ -674,6 +843,9 @@
                     if (diff <= 0) {
                         this.timeLeft = '00:00 (Waktu Habis)';
                         clearInterval(this.interval);
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1200);
                         return;
                     }
                     const m = Math.floor(diff / 60000);

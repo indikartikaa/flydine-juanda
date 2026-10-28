@@ -4,9 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Keranjang & Checkout Pesanan - FlyDine Juanda</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>[x-cloak] { display: none !important; }</style>
+    <style>
+        [x-cloak] { display: none !important; }
+        /* Hilangkan spinner default browser pada input type number */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none !important;
+            margin: 0 !important;
+        }
+        input[type=number] {
+            -moz-appearance: textfield !important;
+        }
+    </style>
 </head>
 <body class="text-slate-800 min-h-screen selection:bg-[#005ea2] selection:text-white bg-slate-50/60 antialiased flex flex-col">
 
@@ -221,17 +231,20 @@
                                         
                                         <!-- Direct Editable Number Input -->
                                         <input type="number" 
+                                               inputmode="numeric"
                                                min="1" 
                                                max="99" 
                                                :value="items['{{ $id }}'] ? items['{{ $id }}'].quantity : {{ $item['quantity'] }}" 
                                                @change="
                                                    let val = parseInt($event.target.value, 10);
                                                    if (isNaN(val) || val < 1) val = 1;
+                                                   if (val > 99) val = 99;
+                                                   $event.target.value = val;
                                                    updateQuantity('{{ $id }}', 'set', val, $event.target);
                                                " 
                                                @keydown.enter.prevent="$event.target.blur()"
                                                :disabled="loadingItemId === '{{ $id }}'" 
-                                               class="w-12 h-7 text-center text-xs font-black text-slate-900 bg-white rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#005ea2] focus:border-[#005ea2] transition-all disabled:opacity-50"
+                                               class="w-14 h-7 text-center text-xs font-black text-slate-900 bg-white rounded-lg border border-slate-200 px-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus:outline-none focus:ring-2 focus:ring-[#005ea2] focus:border-[#005ea2] transition-all disabled:opacity-50"
                                                title="Ketik jumlah langsung (contoh: 10)">
                                         
                                         <!-- Increase Button (+) -->
@@ -250,7 +263,7 @@
                     </div>
 
                     <!-- Checkout Form (Data Pemesan, Metode Antar, Pembayaran) -->
-                    <form action="{{ route('customer.checkout') }}" method="POST" id="checkoutForm" class="space-y-6">
+                    <form action="{{ route('customer.checkout') }}" method="POST" id="checkoutForm" @submit="if (isTimeCritical || isTimePassed) { $event.preventDefault(); return false; }" class="space-y-6">
                         @csrf
                         
                         @if ($errors->any())
@@ -306,27 +319,71 @@
                                 </label>
                             </div>
 
-                            <!-- Dropdown Lokasi Antar Porter (Muncul jika Diantar) -->
-                            <div x-show="pickupMethod === 'diantar'" class="mt-6 p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-4 animate-fade-in" style="display: none;">
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-xs font-black text-slate-700 uppercase tracking-wider mb-2">Terminal Pengantaran</label>
-                                        <select x-model="deliveryTerminal" @change="fetchLocations" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:outline-none focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20">
-                                            <option value="" disabled selected>-- Pilih Terminal --</option>
-                                            <option value="1">Terminal 1 (Domestik)</option>
-                                            <option value="2">Terminal 2 (Internasional & Garuda)</option>
-                                        </select>
+                            <!-- Info Lokasi Pengambilan (Muncul jika Ambil Sendiri) -->
+                            <div x-show="pickupMethod === 'ambil_sendiri'" class="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-xl bg-blue-50 text-[#005ea2] flex items-center justify-center shrink-0 border border-blue-100">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                        </svg>
                                     </div>
-                                    
                                     <div>
-                                        <label class="block text-xs font-black text-slate-700 uppercase tracking-wider mb-2">Titik Lokasi Gate / Ruang Tunggu</label>
-                                        <select name="delivery_location_id" :disabled="deliveryLocations.length === 0" :required="pickupMethod === 'diantar'" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:outline-none focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 disabled:bg-slate-100 disabled:opacity-60">
-                                            <option value="" disabled selected>-- Pilih Gate Antar --</option>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs font-black text-slate-800">{{ $tenant->name ?? 'Restoran' }}</span>
+                                            <span class="text-[10px] font-extrabold text-[#005ea2] bg-blue-100/70 px-2 py-0.5 rounded-md">
+                                                {{ $tenant->terminal ?? 'Terminal 1' }}
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 font-medium">
+                                            {{ $tenant->floor_location ?? 'Area Keberangkatan Bandara Juanda' }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 bg-white px-3 py-1.5 rounded-xl border border-slate-200/70 shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span>Khusus keberangkatan <strong>{{ $tenant->terminal ?? 'Terminal 1' }}</strong></span>
+                                </div>
+                            </div>
+
+                            <!-- Dropdown Lokasi Antar Porter (Muncul jika Diantar) -->
+                            <div x-show="pickupMethod === 'diantar'" class="mt-4 p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 animate-fade-in" style="display: none;">
+                                @php
+                                    $tenantTerminalNum = str_ireplace('t', '', (string)($tenant->terminal ?? '1'));
+                                    $tenantTerminalName = ($tenantTerminalNum === '2') ? 'Terminal 2 (Internasional & Garuda)' : 'Terminal 1 (Domestik)';
+                                @endphp
+
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1 border-b border-slate-200/60">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-black text-slate-800 uppercase tracking-wider">Lokasi Pengantaran Porter</span>
+                                        <span class="inline-flex items-center gap-1 text-[11px] font-extrabold text-[#005ea2] bg-blue-100/70 px-2.5 py-0.5 rounded-full">
+                                            <svg class="w-3 h-3 text-[#005ea2]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                            Gedung {{ $tenantTerminalName }}
+                                        </span>
+                                    </div>
+                                    <input type="hidden" name="delivery_terminal" value="{{ $tenantTerminalNum }}">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1.5">Pilih Ruang Tunggu / Pintu Boarding Gate</label>
+                                    <div class="relative">
+                                        <select name="delivery_location_id" 
+                                                :disabled="deliveryLocations.length === 0" 
+                                                :required="pickupMethod === 'diantar'" 
+                                                class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:outline-none focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 disabled:bg-slate-100 disabled:opacity-60 transition-all">
+                                            <option value="" disabled selected>-- Pilih Titik Gate / Ruang Tunggu Antar --</option>
                                             <template x-for="loc in deliveryLocations" :key="loc.id">
-                                                <option :value="loc.id" x-text="loc.name"></option>
+                                                <option :value="loc.id" x-text="loc.name" :selected="loc.id == '{{ old('delivery_location_id') }}'"></option>
                                             </template>
                                         </select>
                                     </div>
+                                    @error('delivery_location_id')
+                                        <p class="text-xs text-rose-600 font-bold mt-1.5 flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                            <span>{{ $message }}</span>
+                                        </p>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
@@ -364,13 +421,34 @@
                                 <!-- Nama Pemesan -->
                                 <div>
                                     <label class="block text-xs font-black text-slate-700 uppercase tracking-wider mb-2" x-text="customerType === 'penumpang' ? 'Nama (Sesuai Tiket/Boarding Pass)' : 'Nama Lengkap'"></label>
-                                    <input type="text" name="customer_name" value="{{ old('customer_name') }}" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] outline-none transition-all placeholder:text-slate-400" placeholder="Contoh: Budi Santoso">
+                                    <input type="text" name="customer_name" value="{{ old('customer_name') }}" required minlength="2" maxlength="100" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] outline-none transition-all placeholder:text-slate-400" placeholder="Contoh: Budi Santoso">
+                                    @error('customer_name')
+                                        <p class="text-xs text-rose-600 font-bold mt-1.5 flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                            <span>{{ $message }}</span>
+                                        </p>
+                                    @enderror
                                 </div>
                                 
                                 <!-- No WhatsApp -->
                                 <div>
                                     <label class="block text-xs font-black text-slate-700 uppercase tracking-wider mb-2">No. WhatsApp / Telepon Aktif</label>
-                                    <input type="tel" name="phone_number" value="{{ old('phone_number') }}" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] outline-none transition-all placeholder:text-slate-400" placeholder="Contoh: 08123456789">
+                                    <input type="tel" 
+                                           name="phone_number" 
+                                           value="{{ old('phone_number') }}" 
+                                           required 
+                                           inputmode="tel" 
+                                           pattern="[0-9+ \-]{9,20}" 
+                                           minlength="9" 
+                                           maxlength="20" 
+                                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] outline-none transition-all placeholder:text-slate-400" 
+                                           placeholder="Contoh: 08123456789">
+                                    @error('phone_number')
+                                        <p class="text-xs text-rose-600 font-bold mt-1.5 flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                            <span>{{ $message }}</span>
+                                        </p>
+                                    @enderror
                                 </div>
                             </div>
 
@@ -379,25 +457,137 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-xs font-black text-slate-700 uppercase tracking-wider mb-2">No. Penerbangan (Flight Number)</label>
-                                        <input type="text" name="flight_number" value="{{ old('flight_number') }}" :required="customerType === 'penumpang'" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-black uppercase text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] outline-none transition-all placeholder:text-slate-400" placeholder="Contoh: GA-320 / JT-012">
+                                        <input type="text" 
+                                               name="flight_number" 
+                                               value="{{ old('flight_number') }}" 
+                                               :required="customerType === 'penumpang'" 
+                                               maxlength="15"
+                                               @input="$event.target.value = $event.target.value.toUpperCase()" 
+                                               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-black uppercase text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] outline-none transition-all placeholder:text-slate-400" 
+                                               placeholder="Contoh: GA-320 / JT-012">
+                                        @error('flight_number')
+                                            <p class="text-xs text-rose-600 font-bold mt-1.5 flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                                <span>{{ $message }}</span>
+                                            </p>
+                                        @enderror
                                     </div>
 
                                     <div>
                                         <label class="block text-xs font-black text-slate-700 uppercase tracking-wider mb-2">Jadwal Waktu Boarding</label>
                                         <input type="time" name="boarding_time" value="{{ old('boarding_time') }}" x-model="boardingTime" :required="customerType === 'penumpang'" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] outline-none transition-all">
+                                        <div class="mt-2 flex flex-wrap items-center justify-between gap-1 text-[11px] text-slate-500 font-medium">
+                                            <span>Format 24 jam WIB (sesuai tiket pesawat)</span>
+                                            <span x-show="boardingTime" class="font-bold text-[#005ea2] bg-sky-50 px-2.5 py-0.5 rounded-lg border border-sky-100 shadow-2xs" x-text="formatTimeDisplay(boardingTime)"></span>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- Soft Warning Boarding Time -->
-                                <div x-show="isTimeWarning" class="p-4 bg-rose-50 rounded-2xl border border-rose-200 flex items-start space-x-3 shadow-sm animate-fade-in" style="display: none;">
-                                    <div class="bg-rose-100 p-1.5 rounded-xl shrink-0 text-rose-600 mt-0.5">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                <!-- Info Penerbangan Dini Hari (Cross-Midnight: Besok Pagi) -->
+                                <div x-show="isCrossMidnight && !isTimeCritical" class="p-4 bg-sky-50 rounded-2xl border border-sky-200 flex items-start space-x-3 shadow-xs animate-fade-in" style="display: none;">
+                                    <div class="bg-sky-100 p-2 rounded-xl shrink-0 text-sky-700 mt-0.5">
+                                        <span class="text-base">🌙</span>
                                     </div>
-                                    <p class="text-xs text-rose-800 font-medium leading-relaxed">
-                                        Waktu boarding kurang dari <span class="font-extrabold">30 menit</span>! Mohon pastikan Anda mengambil pesanan secepatnya agar tidak mengganggu keberangkatan.
+                                    <div>
+                                        <h5 class="text-xs font-black text-sky-950 uppercase tracking-wider">Penerbangan Dini Hari (Besok)</h5>
+                                        <p class="text-xs text-sky-900 font-medium leading-relaxed mt-0.5">
+                                            Sistem mendeteksi jadwal boarding Anda tercatat untuk penerbangan dini hari esok hari (pukul <strong x-text="formatTimeDisplay(boardingTime) || (boardingTime + ' WIB')"></strong>). Pesanan Anda akan diproses tepat waktu sebelum jam keberangkatan.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Warning Waktu Boarding Sudah Terlewat -->
+                                <div x-show="isTimePassed" class="p-4 bg-rose-50 rounded-2xl border-2 border-rose-300 flex items-start space-x-3 shadow-sm animate-fade-in" style="display: none;">
+                                    <div class="bg-rose-100 p-2 rounded-xl shrink-0 text-rose-600 mt-0.5 shadow-2xs">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    </div>
+                                    <div>
+                                        <h5 class="text-xs font-black text-rose-900 uppercase tracking-wider">Perhatian: Waktu Boarding Sudah Terlewat!</h5>
+                                        <p class="text-xs text-rose-800 font-medium leading-relaxed mt-0.5">
+                                            Jadwal waktu boarding yang Anda masukkan sudah terlewat dari waktu saat ini. Harap periksa dan sesuaikan kembali jadwal penerbangan Anda.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Critical Warning Boarding Time (< 15 menit) -->
+                                <div x-show="isTimeCritical && !isTimePassed" class="p-4 bg-rose-50 rounded-2xl border-2 border-rose-300 flex items-start space-x-3 shadow-sm animate-fade-in" style="display: none;">
+                                    <div class="bg-rose-100 p-2 rounded-xl shrink-0 text-rose-600 mt-0.5 shadow-2xs">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                    </div>
+                                    <div>
+                                        <h5 class="text-xs font-black text-rose-900 uppercase tracking-wider">Perhatian: Waktu Boarding Sangat Dekat (&lt; 15 Menit)!</h5>
+                                        <p class="text-xs text-rose-800 font-medium leading-relaxed mt-0.5">
+                                            Dapur membutuhkan estimasi penyiapan makanan 10–15 menit dan gerbang pesawat ditutup sebelum keberangkatan. Sistem tidak mengizinkan pemesanan dengan waktu boarding kurang dari 15 menit demi mencegah risiko tertinggal penerbangan.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Soft Warning Boarding Time (15 - 30 menit) -->
+                                <div x-show="isTimeWarning && !isTimeCritical && !isTimePassed" class="p-4 bg-amber-50 rounded-2xl border border-amber-200 flex items-start space-x-3 shadow-sm animate-fade-in" style="display: none;">
+                                    <div class="bg-amber-100 p-1.5 rounded-xl shrink-0 text-amber-700 mt-0.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    </div>
+                                    <p class="text-xs text-amber-800 font-medium leading-relaxed">
+                                        Waktu boarding tersisa <span class="font-extrabold text-amber-900">kurang dari 30 menit</span>. Segera selesaikan transaksi agar pesanan Anda dapat langsung diproses prioritas oleh dapur restoran.
                                     </p>
                                 </div>
+
+                                @error('boarding_time')
+                                    <p class="text-xs text-rose-600 font-bold mt-1.5 flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                        <span>{{ $message }}</span>
+                                    </p>
+                                @enderror
                             </div>
+                        </div>
+
+                        <!-- Catatan Khusus Pesanan (Opsi 1: Quick Chips & Ringkas) -->
+                        <div class="bg-white p-5 sm:p-7 rounded-3xl border border-slate-200/80 shadow-sm">
+                            <div class="flex items-center justify-between mb-3.5">
+                                <div class="flex items-center space-x-2.5">
+                                    <span class="w-1.5 h-5 bg-[#8dc63f] rounded-full"></span>
+                                    <h3 class="text-sm font-black text-slate-900 uppercase tracking-wider">Catatan Pesanan (Opsional)</h3>
+                                </div>
+                                <span class="text-[11px] font-bold text-slate-400">
+                                    <span class="font-mono text-slate-700" x-text="100 - (orderNotes ? orderNotes.length : 0)">100</span> karakter tersisa
+                                </span>
+                            </div>
+
+                            <!-- Pilihan Chip Cepat (Quick Chips) -->
+                            <div class="mb-3">
+                                <span class="block text-[11px] font-bold text-slate-500 mb-2 uppercase tracking-wider">Pilihan Cepat (Klik untuk memilih):</span>
+                                <div class="flex flex-wrap gap-2">
+                                    <template x-for="chip in quickChips" :key="chip.label">
+                                        <button type="button" 
+                                                @click="toggleChip(chip.label)"
+                                                class="text-xs font-bold px-3 py-1.5 rounded-full border transition-all duration-150 cursor-pointer flex items-center gap-1.5 active:scale-95"
+                                                :class="orderNotes.includes(chip.label) 
+                                                    ? 'bg-emerald-50 text-emerald-800 border-emerald-300 ring-2 ring-emerald-500/20 shadow-xs' 
+                                                    : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 hover:border-slate-300'">
+                                            <span x-text="chip.icon"></span>
+                                            <span x-text="chip.label"></span>
+                                            <span x-show="orderNotes.includes(chip.label)" class="text-[10px] text-emerald-600 font-black">✓</span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Textarea Catatan -->
+                            <div>
+                                <textarea name="notes" 
+                                          x-model="orderNotes" 
+                                          maxlength="100" 
+                                          rows="2" 
+                                          placeholder="Contoh: Sambal dipisah, kurangi es, atau bungkus terpisah untuk kabin..." 
+                                          class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] outline-none transition-all placeholder:text-slate-400 placeholder:font-normal resize-none"></textarea>
+                            </div>
+
+                            @error('notes')
+                                <p class="text-xs text-rose-600 font-bold mt-1.5 flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                    <span>{{ $message }}</span>
+                                </p>
+                            @enderror
                         </div>
                         
                         <!-- Metode Pembayaran Card -->
@@ -407,10 +597,107 @@
                                 <h3 class="text-sm font-black text-slate-900 uppercase tracking-wider">Metode Pembayaran Online</h3>
                             </div>
 
-                            <select name="payment_method" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] outline-none transition-all">
-                                <option value="qris" selected>📱 QRIS Instant (BCA, Mandiri, BRI, GoPay, OVO, ShopeePay)</option>
-                                <option value="transfer">💳 Transfer Bank / Virtual Account</option>
-                            </select>
+                            <!-- Input tersembunyi yang dikirim ke backend -->
+                            <input type="hidden" name="payment_method" :value="paymentCategory === 'qris' ? 'qris' : ('transfer_' + selectedBank)">
+
+                            <!-- Pilihan Kategori Pembayaran -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-4">
+                                <!-- Opsi 1: QRIS Instant -->
+                                <button type="button" 
+                                        @click="paymentCategory = 'qris'"
+                                        class="p-4 rounded-2xl border-2 text-left transition-all duration-200 relative cursor-pointer group"
+                                        :class="paymentCategory === 'qris' ? 'border-[#005ea2] bg-blue-50/50 shadow-xs ring-2 ring-[#005ea2]/15' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                                    <div class="flex items-center justify-between mb-2.5">
+                                        <div class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 font-black text-xs flex items-center justify-center border border-rose-200">
+                                            QR
+                                        </div>
+                                        <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                                            Rekomendasi
+                                        </span>
+                                    </div>
+                                    <h4 class="font-black text-sm text-slate-900 mb-0.5 flex items-center gap-1.5">
+                                        <span>QRIS Instant</span>
+                                        <span x-show="paymentCategory === 'qris'" class="text-[#005ea2] text-xs">●</span>
+                                    </h4>
+                                    <p class="text-xs text-slate-500 font-medium leading-relaxed">
+                                        Scan 1 QR via BCA, Livin', BRImo, GoPay, OVO, ShopeePay, Dana.
+                                    </p>
+                                </button>
+
+                                <!-- Opsi 2: Transfer Virtual Account -->
+                                <button type="button" 
+                                        @click="paymentCategory = 'transfer'"
+                                        class="p-4 rounded-2xl border-2 text-left transition-all duration-200 relative cursor-pointer group"
+                                        :class="paymentCategory === 'transfer' ? 'border-[#005ea2] bg-blue-50/50 shadow-xs ring-2 ring-[#005ea2]/15' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                                    <div class="flex items-center justify-between mb-2.5">
+                                        <div class="w-8 h-8 rounded-xl bg-blue-50 text-[#005ea2] font-black text-xs flex items-center justify-center border border-blue-200">
+                                            VA
+                                        </div>
+                                        <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                                            Bebas Admin
+                                        </span>
+                                    </div>
+                                    <h4 class="font-black text-sm text-slate-900 mb-0.5 flex items-center gap-1.5">
+                                        <span>Transfer Virtual Account</span>
+                                        <span x-show="paymentCategory === 'transfer'" class="text-[#005ea2] text-xs">●</span>
+                                    </h4>
+                                    <p class="text-xs text-slate-500 font-medium leading-relaxed">
+                                        BCA, Mandiri, BRI, BNI dengan verifikasi otomatis 24 jam.
+                                    </p>
+                                </button>
+                            </div>
+
+                            <!-- Sub-pilihan Bank (Muncul saat Transfer VA dipilih) -->
+                            <div x-show="paymentCategory === 'transfer'" 
+                                 x-cloak 
+                                 x-transition:enter="transition ease-out duration-300" 
+                                 x-transition:enter-start="opacity-0 -translate-y-2" 
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 x-transition:leave="transition ease-in duration-150" 
+                                 x-transition:leave-start="opacity-100 translate-y-0" 
+                                 x-transition:leave-end="opacity-0 -translate-y-2"
+                                 class="mt-4 pt-4 border-t border-slate-100">
+                                <label class="block text-xs font-black uppercase tracking-wider text-slate-500 mb-2.5">
+                                    Pilih Bank Virtual Account Tujuan:
+                                </label>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                                    <!-- BCA -->
+                                    <button type="button" 
+                                            @click="selectedBank = 'bca'"
+                                            class="p-3 rounded-xl border text-center transition-all cursor-pointer relative"
+                                            :class="selectedBank === 'bca' ? 'border-blue-600 bg-blue-50/70 ring-2 ring-blue-500/20 text-blue-900 font-black' : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700 font-bold'">
+                                        <span class="block text-xs font-black text-blue-700">BCA</span>
+                                        <span class="text-[10px] text-slate-400 block mt-0.5">Virtual Account</span>
+                                    </button>
+
+                                    <!-- Mandiri -->
+                                    <button type="button" 
+                                            @click="selectedBank = 'mandiri'"
+                                            class="p-3 rounded-xl border text-center transition-all cursor-pointer relative"
+                                            :class="selectedBank === 'mandiri' ? 'border-amber-600 bg-amber-50/70 ring-2 ring-amber-500/20 text-amber-900 font-black' : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700 font-bold'">
+                                        <span class="block text-xs font-black text-amber-700">Mandiri</span>
+                                        <span class="text-[10px] text-slate-400 block mt-0.5">Livin' VA</span>
+                                    </button>
+
+                                    <!-- BRI -->
+                                    <button type="button" 
+                                            @click="selectedBank = 'bri'"
+                                            class="p-3 rounded-xl border text-center transition-all cursor-pointer relative"
+                                            :class="selectedBank === 'bri' ? 'border-sky-600 bg-sky-50/70 ring-2 ring-sky-500/20 text-sky-900 font-black' : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700 font-bold'">
+                                        <span class="block text-xs font-black text-sky-700">BRI</span>
+                                        <span class="text-[10px] text-slate-400 block mt-0.5">BRIVA</span>
+                                    </button>
+
+                                    <!-- BNI -->
+                                    <button type="button" 
+                                            @click="selectedBank = 'bni'"
+                                            class="p-3 rounded-xl border text-center transition-all cursor-pointer relative"
+                                            :class="selectedBank === 'bni' ? 'border-teal-600 bg-teal-50/70 ring-2 ring-teal-500/20 text-teal-900 font-black' : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700 font-bold'">
+                                        <span class="block text-xs font-black text-teal-700">BNI</span>
+                                        <span class="text-[10px] text-slate-400 block mt-0.5">Virtual Account</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -450,12 +737,35 @@
 
                         <!-- CTA Button on Desktop -->
                         <div class="mt-6">
-                            <button type="submit" form="checkoutForm" class="w-full bg-gradient-to-r from-[#003b66] to-[#005ea2] hover:from-[#002f54] hover:to-[#004a80] text-white font-black py-4 px-6 rounded-2xl text-sm uppercase tracking-wider transition-all shadow-lg shadow-blue-500/25 active:scale-[0.98] flex items-center justify-center space-x-2 relative overflow-hidden group" style="background: linear-gradient(to right, #003b66, #005ea2); background-color: #005ea2;">
+                            <button type="submit" 
+                                    form="checkoutForm" 
+                                    :disabled="isTimeCritical || isTimePassed" 
+                                    class="w-full text-white font-black py-4 px-6 rounded-2xl text-sm uppercase tracking-wider transition-all flex items-center justify-center space-x-2 relative overflow-hidden group shadow-lg"
+                                    :class="(isTimeCritical || isTimePassed) 
+                                        ? 'bg-rose-600/80 cursor-not-allowed opacity-75 shadow-none' 
+                                        : 'bg-gradient-to-r from-[#003b66] to-[#005ea2] hover:from-[#002f54] hover:to-[#004a80] shadow-blue-500/25 active:scale-[0.98] cursor-pointer'"
+                                    :style="(isTimeCritical || isTimePassed) ? 'background-color: #e11d48;' : 'background: linear-gradient(to right, #003b66, #005ea2); background-color: #005ea2;'">
                                 <span class="relative z-10 flex items-center justify-center">
-                                    Pesan & Lanjut Bayar
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                                    <template x-if="!isTimeCritical && !isTimePassed">
+                                        <span class="flex items-center">
+                                            Pesan & Lanjut Bayar
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                                        </span>
+                                    </template>
+                                    <template x-if="isTimePassed">
+                                        <span class="flex items-center text-white">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            Waktu Boarding Sudah Terlewat
+                                        </span>
+                                    </template>
+                                    <template x-if="isTimeCritical && !isTimePassed">
+                                        <span class="flex items-center text-white">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                            Waktu Boarding Terlalu Dekat
+                                        </span>
+                                    </template>
                                 </span>
-                                <div class="shine-effect"></div>
+                                <div x-show="!isTimeCritical && !isTimePassed" class="shine-effect"></div>
                             </button>
                         </div>
                     </div>
@@ -470,20 +780,42 @@
                     <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Bayar</p>
                     <p class="text-lg font-black text-[#005ea2] leading-tight">Rp <span x-text="formatNumber(grandTotal)">{{ number_format($total, 0, ',', '.') }}</span></p>
                 </div>
-                <button type="submit" form="checkoutForm" class="flex-1 bg-gradient-to-r from-[#003b66] to-[#005ea2] text-white font-black py-3.5 px-5 rounded-2xl text-xs uppercase tracking-wider shadow-md shadow-blue-500/20 active:scale-[0.98] flex items-center justify-center space-x-1.5" style="background: linear-gradient(to right, #003b66, #005ea2); background-color: #005ea2;">
-                    <span>Lanjut Bayar</span>
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                <button type="submit" 
+                        form="checkoutForm" 
+                        :disabled="isTimeCritical || isTimePassed" 
+                        class="flex-1 text-white font-black py-3.5 px-4 rounded-2xl text-xs uppercase tracking-wider transition-all flex items-center justify-center space-x-1.5"
+                        :class="(isTimeCritical || isTimePassed) 
+                            ? 'bg-rose-600/80 cursor-not-allowed opacity-75 shadow-none' 
+                            : 'bg-gradient-to-r from-[#003b66] to-[#005ea2] shadow-md shadow-blue-500/20 active:scale-[0.98] cursor-pointer'"
+                        :style="(!isTimeCritical && !isTimePassed) ? 'background: linear-gradient(to right, #003b66, #005ea2); background-color: #005ea2;' : 'background-color: #e11d48;'">
+                    <template x-if="!isTimeCritical && !isTimePassed">
+                        <span class="flex items-center space-x-1.5">
+                            <span>Lanjut Bayar</span>
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                        </span>
+                    </template>
+                    <template x-if="isTimePassed">
+                        <span class="flex items-center space-x-1 text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <span class="truncate">Waktu Sudah Terlewat</span>
+                        </span>
+                    </template>
+                    <template x-if="isTimeCritical && !isTimePassed">
+                        <span class="flex items-center space-x-1 text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                            <span class="truncate">Waktu Boarding Terlalu Dekat</span>
+                        </span>
+                    </template>
                 </button>
             </div>
         </div>
 
-        @else
-        <!-- Server-rendered Empty State (Wide & Beautiful on Desktop) -->
-        <div class="max-w-3xl mx-auto bg-white rounded-3xl p-8 sm:p-14 text-center border border-slate-200/80 shadow-sm animate-fade-up">
-            <div class="relative w-36 h-36 mx-auto mb-6 flex items-center justify-center">
+        <!-- Dynamic Empty State (When all items removed via JS in active session) -->
+        <div x-show="itemsCount === 0" x-cloak class="max-w-3xl mx-auto bg-white rounded-3xl p-5 sm:p-10 md:p-14 text-center border border-slate-200/80 shadow-sm animate-fade-up">
+            <div class="relative w-28 h-28 sm:w-36 sm:h-36 mx-auto mb-5 sm:mb-6 flex items-center justify-center">
                 <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-100/80 via-blue-50 to-indigo-50 border border-blue-200/50 shadow-inner"></div>
-                <div class="relative z-10 w-20 h-20 text-[#005ea2]/80 flex items-center justify-center">
-                    <svg class="w-16 h-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <div class="relative z-10 w-16 h-16 sm:w-20 sm:h-20 text-[#005ea2]/80 flex items-center justify-center">
+                    <svg class="w-12 h-12 sm:w-16 sm:h-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="9" cy="21" r="1"></circle>
                         <circle cx="20" cy="21" r="1"></circle>
                         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
@@ -495,29 +827,93 @@
                 <span>✈️ Bandara Internasional Juanda</span>
             </div>
 
-            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mb-2.5">Keranjang Belanja Anda Masih Kosong</h2>
-            <p class="text-slate-500 font-medium text-sm sm:text-base max-w-lg mx-auto mb-7 leading-relaxed">
-                Belum ada makanan yang dipilih. Nikmati kemudahan memesan dari 76 tenant restoran favorit di Terminal 1 & 2 Juanda tanpa antre!
+            <h2 class="text-xl sm:text-3xl font-black text-slate-900 mb-2">Keranjang Belanja Anda Kosong</h2>
+            <p class="text-slate-500 font-medium text-xs sm:text-base max-w-lg mx-auto mb-6 sm:mb-7 leading-relaxed">
+                Belum ada makanan yang dipilih. Jelajahi menu lezat dari 76 tenant restoran favorit di Terminal 1 & 2 Juanda tanpa antre!
             </p>
 
-            <a href="{{ route('customer.menu') }}" class="inline-flex items-center space-x-2 bg-gradient-to-r from-[#003b66] to-[#005ea2] hover:from-[#002f54] hover:to-[#004a80] text-white font-extrabold px-9 py-4 rounded-full text-sm sm:text-base shadow-xl shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all" style="background: linear-gradient(to right, #003b66, #005ea2); background-color: #005ea2;">
+            <a href="{{ route('customer.menu') }}" class="w-full sm:w-auto inline-flex items-center justify-center space-x-2 bg-gradient-to-r from-[#003b66] to-[#005ea2] hover:from-[#002f54] hover:to-[#004a80] text-white font-extrabold px-8 py-3.5 sm:px-9 sm:py-4 rounded-2xl sm:rounded-full text-sm sm:text-base shadow-xl shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all" style="background: linear-gradient(to right, #003b66, #005ea2); background-color: #005ea2;">
                 <span>Jelajahi Menu Restoran</span>
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
             </a>
 
-            <!-- Quick Category Discovery Pills -->
-            <div class="mt-10 pt-8 border-t border-slate-100">
-                <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Pilihan Kategori Favorit</p>
-                <div class="flex flex-wrap justify-center gap-2.5">
-                    <a href="{{ route('customer.menu', ['category' => 'cepat-saji']) }}" class="px-4 py-2 rounded-full bg-slate-50 hover:bg-blue-50 hover:text-[#005ea2] border border-slate-200 text-xs font-bold text-slate-700 transition-colors">🍔 Cepat Saji</a>
-                    <a href="{{ route('customer.menu', ['category' => 'minuman']) }}" class="px-4 py-2 rounded-full bg-slate-50 hover:bg-blue-50 hover:text-[#005ea2] border border-slate-200 text-xs font-bold text-slate-700 transition-colors">☕ Kopi & Minuman</a>
-                    <a href="{{ route('customer.menu', ['category' => 'roti-kue']) }}" class="px-4 py-2 rounded-full bg-slate-50 hover:bg-blue-50 hover:text-[#005ea2] border border-slate-200 text-xs font-bold text-slate-700 transition-colors">🥐 Roti & Pastry</a>
-                    <a href="{{ route('customer.menu', ['category' => 'makanan-berat']) }}" class="px-4 py-2 rounded-full bg-slate-50 hover:bg-blue-50 hover:text-[#005ea2] border border-slate-200 text-xs font-bold text-slate-700 transition-colors">🍛 Masakan Tradisional</a>
+            <!-- Quick Category Discovery Pills (Symmetrical 2x2 Grid on Mobile, Flow on Desktop) -->
+            <div class="mt-8 pt-6 border-t border-slate-100">
+                <p class="text-[11px] sm:text-xs font-black text-slate-400 uppercase tracking-widest mb-3.5">Pilihan Kategori Favorit</p>
+                <div class="grid grid-cols-2 sm:flex sm:flex-wrap sm:justify-center gap-2 sm:gap-2.5 max-w-sm sm:max-w-none mx-auto">
+                    <a href="{{ route('customer.menu', ['category' => 'cepat-saji']) }}" class="px-2.5 py-2.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-full bg-slate-50 hover:bg-blue-50 hover:text-[#005ea2] hover:border-blue-200 border border-slate-200/90 text-[11px] sm:text-xs font-bold text-slate-700 transition-all text-center flex items-center justify-center gap-1.5 shadow-2xs hover:shadow-xs active:scale-[0.98]">
+                        <span class="text-sm">🍔</span>
+                        <span class="truncate">Cepat Saji</span>
+                    </a>
+                    <a href="{{ route('customer.menu', ['category' => 'minuman']) }}" class="px-2.5 py-2.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-full bg-slate-50 hover:bg-blue-50 hover:text-[#005ea2] hover:border-blue-200 border border-slate-200/90 text-[11px] sm:text-xs font-bold text-slate-700 transition-all text-center flex items-center justify-center gap-1.5 shadow-2xs hover:shadow-xs active:scale-[0.98]">
+                        <span class="text-sm">☕</span>
+                        <span class="truncate">Kopi & Minuman</span>
+                    </a>
+                    <a href="{{ route('customer.menu', ['category' => 'roti-kue']) }}" class="px-2.5 py-2.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-full bg-slate-50 hover:bg-blue-50 hover:text-[#005ea2] hover:border-blue-200 border border-slate-200/90 text-[11px] sm:text-xs font-bold text-slate-700 transition-all text-center flex items-center justify-center gap-1.5 shadow-2xs hover:shadow-xs active:scale-[0.98]">
+                        <span class="text-sm">🥐</span>
+                        <span class="truncate">Roti & Pastry</span>
+                    </a>
+                    <a href="{{ route('customer.menu', ['category' => 'makanan-berat']) }}" class="px-2.5 py-2.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-full bg-slate-50 hover:bg-blue-50 hover:text-[#005ea2] hover:border-blue-200 border border-slate-200/90 text-[11px] sm:text-xs font-bold text-slate-700 transition-all text-center flex items-center justify-center gap-1.5 shadow-2xs hover:shadow-xs active:scale-[0.98]">
+                        <span class="text-sm">🍲</span>
+                        <span class="truncate">Tradisional</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        @else
+        <!-- Server-rendered Empty State (Wide & Beautiful on Desktop) -->
+        <div class="max-w-3xl mx-auto bg-white rounded-3xl p-5 sm:p-10 md:p-14 text-center border border-slate-200/80 shadow-sm animate-fade-up">
+            <div class="relative w-28 h-28 sm:w-36 sm:h-36 mx-auto mb-5 sm:mb-6 flex items-center justify-center">
+                <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-100/80 via-blue-50 to-indigo-50 border border-blue-200/50 shadow-inner"></div>
+                <div class="relative z-10 w-16 h-16 sm:w-20 sm:h-20 text-[#005ea2]/80 flex items-center justify-center">
+                    <svg class="w-12 h-12 sm:w-16 sm:h-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-blue-50 text-[#005ea2] text-xs font-bold mb-3 border border-blue-100">
+                <span>✈️ Bandara Internasional Juanda</span>
+            </div>
+
+            <h2 class="text-xl sm:text-3xl font-black text-slate-900 mb-2">Keranjang Belanja Anda Masih Kosong</h2>
+            <p class="text-slate-500 font-medium text-xs sm:text-base max-w-lg mx-auto mb-6 sm:mb-7 leading-relaxed">
+                Belum ada makanan yang dipilih. Nikmati kemudahan memesan dari 76 tenant restoran favorit di Terminal 1 & 2 Juanda tanpa antre!
+            </p>
+
+            <a href="{{ route('customer.menu') }}" class="w-full sm:w-auto inline-flex items-center justify-center space-x-2 bg-gradient-to-r from-[#003b66] to-[#005ea2] hover:from-[#002f54] hover:to-[#004a80] text-white font-extrabold px-8 py-3.5 sm:px-9 sm:py-4 rounded-2xl sm:rounded-full text-sm sm:text-base shadow-xl shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all" style="background: linear-gradient(to right, #003b66, #005ea2); background-color: #005ea2;">
+                <span>Jelajahi Menu Restoran</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+            </a>
+
+            <!-- Quick Category Discovery Pills (Symmetrical 2x2 Grid on Mobile, Flow on Desktop) -->
+            <div class="mt-8 pt-6 border-t border-slate-100">
+                <p class="text-[11px] sm:text-xs font-black text-slate-400 uppercase tracking-widest mb-3.5">Pilihan Kategori Favorit</p>
+                <div class="grid grid-cols-2 sm:flex sm:flex-wrap sm:justify-center gap-2 sm:gap-2.5 max-w-sm sm:max-w-none mx-auto">
+                    <a href="{{ route('customer.menu', ['category' => 'cepat-saji']) }}" class="px-2.5 py-2.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-full bg-slate-50 hover:bg-blue-50 hover:text-[#005ea2] hover:border-blue-200 border border-slate-200/90 text-[11px] sm:text-xs font-bold text-slate-700 transition-all text-center flex items-center justify-center gap-1.5 shadow-2xs hover:shadow-xs active:scale-[0.98]">
+                        <span class="text-sm">🍔</span>
+                        <span class="truncate">Cepat Saji</span>
+                    </a>
+                    <a href="{{ route('customer.menu', ['category' => 'minuman']) }}" class="px-2.5 py-2.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-full bg-slate-50 hover:bg-blue-50 hover:text-[#005ea2] hover:border-blue-200 border border-slate-200/90 text-[11px] sm:text-xs font-bold text-slate-700 transition-all text-center flex items-center justify-center gap-1.5 shadow-2xs hover:shadow-xs active:scale-[0.98]">
+                        <span class="text-sm">☕</span>
+                        <span class="truncate">Kopi & Minuman</span>
+                    </a>
+                    <a href="{{ route('customer.menu', ['category' => 'roti-kue']) }}" class="px-2.5 py-2.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-full bg-slate-50 hover:bg-blue-50 hover:text-[#005ea2] hover:border-blue-200 border border-slate-200/90 text-[11px] sm:text-xs font-bold text-slate-700 transition-all text-center flex items-center justify-center gap-1.5 shadow-2xs hover:shadow-xs active:scale-[0.98]">
+                        <span class="text-sm">🥐</span>
+                        <span class="truncate">Roti & Pastry</span>
+                    </a>
+                    <a href="{{ route('customer.menu', ['category' => 'makanan-berat']) }}" class="px-2.5 py-2.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-full bg-slate-50 hover:bg-blue-50 hover:text-[#005ea2] hover:border-blue-200 border border-slate-200/90 text-[11px] sm:text-xs font-bold text-slate-700 transition-all text-center flex items-center justify-center gap-1.5 shadow-2xs hover:shadow-xs active:scale-[0.98]">
+                        <span class="text-sm">🍲</span>
+                        <span class="truncate">Tradisional</span>
+                    </a>
                 </div>
             </div>
 
             <!-- 3 Highlights Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 pt-6 border-t border-slate-100 text-left">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4 mt-8 pt-6 border-t border-slate-100 text-left">
                 <div class="bg-slate-50/80 p-4 rounded-2xl border border-slate-100">
                     <span class="text-xl mb-1 block">⚡</span>
                     <h4 class="text-xs font-black text-slate-800">Pesan Cepat Tanpa Antre</h4>
@@ -537,34 +933,6 @@
         </div>
         @endif
 
-        <!-- Dynamic Empty State (When all items removed via JS) -->
-        <div x-show="itemsCount === 0" x-cloak class="max-w-3xl mx-auto bg-white rounded-3xl p-8 sm:p-14 text-center border border-slate-200/80 shadow-sm animate-fade-up">
-            <div class="relative w-36 h-36 mx-auto mb-6 flex items-center justify-center">
-                <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-100/80 via-blue-50 to-indigo-50 border border-blue-200/50 shadow-inner"></div>
-                <div class="relative z-10 w-20 h-20 text-[#005ea2]/80 flex items-center justify-center">
-                    <svg class="w-16 h-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="9" cy="21" r="1"></circle>
-                        <circle cx="20" cy="21" r="1"></circle>
-                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                    </svg>
-                </div>
-            </div>
-
-            <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-blue-50 text-[#005ea2] text-xs font-bold mb-3 border border-blue-100">
-                <span>✈️ Bandara Internasional Juanda</span>
-            </div>
-
-            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mb-2.5">Keranjang Belanja Anda Kosong</h2>
-            <p class="text-slate-500 font-medium text-sm sm:text-base max-w-lg mx-auto mb-7 leading-relaxed">
-                Belum ada makanan yang dipilih. Jelajahi menu lezat dari 76 tenant restoran favorit di Terminal 1 & 2 Juanda tanpa antre!
-            </p>
-
-            <a href="{{ route('customer.menu') }}" class="inline-flex items-center space-x-2 bg-gradient-to-r from-[#003b66] to-[#005ea2] hover:from-[#002f54] hover:to-[#004a80] text-white font-extrabold px-9 py-4 rounded-full text-sm sm:text-base shadow-xl shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all" style="background: linear-gradient(to right, #003b66, #005ea2); background-color: #005ea2;">
-                <span>Jelajahi Menu Restoran</span>
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-            </a>
-        </div>
-
     </main>
 
     <!-- Official FlyDine Corporate Footer -->
@@ -578,12 +946,41 @@
                 customerType: '{{ old('customer_type', 'penumpang') }}', 
                 boardingTime: '{{ old('boarding_time', '') }}',
                 pickupMethod: '{{ old('pickup_method', 'ambil_sendiri') }}',
-                deliveryTerminal: '{{ old('delivery_terminal', '') }}',
+                deliveryTerminal: '{{ old('delivery_terminal', str_ireplace('t', '', (string)($tenant->terminal ?? '1'))) }}',
                 deliveryLocations: [],
                 deliveryFee: {{ ($tenant && !is_null($tenant->delivery_fee)) ? $tenant->delivery_fee : 'null' }},
+                paymentCategory: '{{ old('payment_method') ? (str_starts_with(old('payment_method'), 'transfer') ? 'transfer' : 'qris') : 'qris' }}',
+                selectedBank: '{{ old('payment_method') && str_starts_with(old('payment_method'), 'transfer_') ? str_replace('transfer_', '', old('payment_method')) : 'bca' }}',
+                orderNotes: '{{ old('notes', '') }}',
+                quickChips: [
+                    { icon: '🧊', label: 'Kurangi Es' },
+                    { icon: '🌶️', label: 'Sambal Dipisah' },
+                    { icon: '🍴', label: 'Tanpa Sendok Plastik' },
+                    { icon: '🛍️', label: 'Bungkus Kabin' }
+                ],
                 loadingItemId: null,
                 isClearing: false,
                 errorMessage: '',
+
+                toggleChip(chipLabel) {
+                    let current = (this.orderNotes || '').trim();
+                    if (current.includes(chipLabel)) {
+                        current = current.replace(chipLabel, '')
+                            .replace(/,\s*,/g, ',')
+                            .replace(/^,\s*|,\s*$/g, '')
+                            .trim();
+                    } else {
+                        let toAppend = current.length > 0 ? `, ${chipLabel}` : chipLabel;
+                        if ((current.length + toAppend.length) <= 100) {
+                            current = current ? `${current}, ${chipLabel}` : chipLabel;
+                        }
+                    }
+                    this.orderNotes = current.slice(0, 100);
+                },
+
+                init() {
+                    this.fetchLocations();
+                },
 
                 get itemsCount() {
                     return Object.keys(this.items).length;
@@ -599,6 +996,23 @@
                 formatNumber(num) {
                     return Number(num).toLocaleString('id-ID');
                 },
+                formatTimeDisplay(timeStr) {
+                    if (!timeStr) return '';
+                    const parts = timeStr.split(':');
+                    if (parts.length < 2) return timeStr;
+                    const h = parseInt(parts[0], 10);
+                    const m = parts[1];
+                    if (isNaN(h)) return timeStr;
+                    const period = h >= 12 ? 'PM' : 'AM';
+                    const h12 = h % 12 === 0 ? 12 : h % 12;
+                    let desc = '';
+                    if (h >= 0 && h < 5) desc = 'Dini Hari';
+                    else if (h >= 5 && h < 11) desc = 'Pagi';
+                    else if (h >= 11 && h < 15) desc = 'Siang';
+                    else if (h >= 15 && h < 18) desc = 'Sore';
+                    else desc = 'Malam';
+                    return `${timeStr} WIB (${h12}:${m} ${period} • ${desc})`;
+                },
                 fetchLocations() {
                     if (!this.deliveryTerminal) {
                         this.deliveryLocations = [];
@@ -610,14 +1024,43 @@
                             this.deliveryLocations = data;
                         });
                 },
-                get isTimeWarning() {
-                    if (this.customerType !== 'penumpang' || !this.boardingTime) return false;
+                get boardingDiff() {
+                    if (this.customerType !== 'penumpang' || !this.boardingTime) return null;
                     const now = new Date();
                     const [hours, minutes] = this.boardingTime.split(':');
                     const boardTime = new Date();
-                    boardTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-                    const diffInMinutes = (boardTime - now) / 60000;
-                    return diffInMinutes >= 0 && diffInMinutes < 30;
+                    boardTime.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+
+                    let diffInMinutes = (boardTime - now) / 60000;
+                    let isCrossMidnight = false;
+
+                    // Skenario Cross-Midnight:
+                    // Jika selisih hari ini bernilai negatif, namun jika dimajukan 1 hari (besok)
+                    // berada dalam rentang wajar penyiapan makanan (antara 0 hingga 8 jam / 480 menit ke depan)
+                    if (diffInMinutes < 0 && (diffInMinutes + 1440) >= 0 && (diffInMinutes + 1440) <= 480) {
+                        diffInMinutes += 1440;
+                        isCrossMidnight = true;
+                    }
+
+                    return {
+                        diff: diffInMinutes,
+                        isCrossMidnight: isCrossMidnight,
+                        isPassed: diffInMinutes < 0,
+                        isCritical: diffInMinutes >= 0 && diffInMinutes < 15,
+                        isWarning: diffInMinutes >= 15 && diffInMinutes < 30
+                    };
+                },
+                get isTimeCritical() {
+                    return this.boardingDiff ? (this.boardingDiff.isCritical || this.boardingDiff.isPassed) : false;
+                },
+                get isTimeWarning() {
+                    return this.boardingDiff ? this.boardingDiff.isWarning : false;
+                },
+                get isTimePassed() {
+                    return this.boardingDiff ? this.boardingDiff.isPassed : false;
+                },
+                get isCrossMidnight() {
+                    return this.boardingDiff ? this.boardingDiff.isCrossMidnight : false;
                 },
                 updateQuantity(productId, action, newQty = null, inputElement = null) {
                     this.loadingItemId = productId;

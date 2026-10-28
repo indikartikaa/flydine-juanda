@@ -198,8 +198,8 @@
                     <!-- Search Input & Submit -->
                     <div class="pl-5 sm:pl-6 pr-2 py-2.5 sm:py-1.5 flex-[1.5] w-full flex items-center relative hover:bg-slate-50 rounded-full transition-colors group">
                         <div class="flex-grow">
-                            <label for="search_input" class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5 group-hover:text-slate-500 transition-colors" data-id="CARI RESTORAN" data-en="FIND RESTAURANT">CARI RESTORAN</label>
-                            <input id="search_input" name="search" value="{{ $safeSearch }}" type="text" placeholder="Ketik nama restoran..." class="w-full bg-transparent font-bold text-slate-800 focus:outline-none placeholder:text-slate-300 placeholder:font-medium truncate">
+                            <label for="search_input" class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5 group-hover:text-slate-500 transition-colors" data-id="CARI RESTO / MENU" data-en="FIND RESTO / MENU">CARI RESTO / MENU</label>
+                            <input id="search_input" name="search" value="{{ $safeSearch }}" type="text" placeholder="Ketik nama resto atau menu (misal: Aroma, Ayam, Kopi)..." class="w-full bg-transparent font-bold text-slate-800 focus:outline-none placeholder:text-slate-300 placeholder:font-medium truncate">
                         </div>
                         <button type="submit" class="bg-gradient-to-tr from-[#005ea2] to-blue-500 text-white p-3 sm:p-3.5 rounded-full hover:shadow-lg hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all ml-2 shrink-0 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -306,13 +306,42 @@
                                 {{ $tenant->products->count() }} Menu
                             </span>
                         </div>
-                        <h3 class="font-extrabold text-xl text-slate-800 tracking-tight group-hover:text-[#005ea2] transition-colors line-clamp-1 mb-5">{{ $tenant->name }}</h3>
+                        <h3 class="font-extrabold text-xl text-slate-800 tracking-tight group-hover:text-[#005ea2] transition-colors line-clamp-1 {{ request('search') && stripos($tenant->name, request('search')) === false ? 'mb-2' : 'mb-5' }}">{{ $tenant->name }}</h3>
                         
-                        <!-- Preview Menu (Dari Desain Asli) -->
+                        {{-- Badge jika hasil pencarian cocok karena nama menu (bukan nama restoran) --}}
+                        @if(request('search') && stripos($tenant->name, request('search')) === false)
+                            @php
+                                $searchTerm = trim(request('search'));
+                                $matchedProduct = $tenant->products->first(function($p) use ($searchTerm) {
+                                    return stripos($p->name, $searchTerm) !== false;
+                                });
+                            @endphp
+                            @if($matchedProduct)
+                                <div class="mb-4">
+                                    <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-800 bg-amber-50/90 border border-amber-200/90 px-2.5 py-1 rounded-lg shadow-2xs max-w-full">
+                                        <span class="shrink-0">🍽️</span>
+                                        <span class="truncate">Menu cocok: <strong class="text-amber-950 font-black">{{ \Illuminate\Support\Str::limit($matchedProduct->name, 28) }}</strong></span>
+                                    </span>
+                                </div>
+                            @endif
+                        @endif
+
+                        <!-- Preview Menu (Prioritaskan menu yang cocok jika ada pencarian) -->
                         <div class="space-y-3 mb-6 flex-grow">
-                            @forelse($tenant->products->take(3) as $product)
+                            @php
+                                $previewProducts = $tenant->products;
+                                if (request('search')) {
+                                    $st = trim(request('search'));
+                                    $previewProducts = $previewProducts->sortByDesc(function($p) use ($st) {
+                                        return stripos($p->name, $st) !== false ? 1 : 0;
+                                    });
+                                }
+                            @endphp
+                            @forelse($previewProducts->take(3) as $product)
                                 <div class="flex justify-between items-center text-sm">
-                                    <span class="text-slate-500 font-medium truncate pr-3">{{ $product->name }}</span>
+                                    <span class="text-slate-500 font-medium truncate pr-3 @if(request('search') && stripos($product->name, request('search')) !== false) text-[#005ea2] font-bold @endif">
+                                        {{ $product->name }}
+                                    </span>
                                     <span class="font-bold text-slate-800 whitespace-nowrap">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
                                 </div>
                             @empty

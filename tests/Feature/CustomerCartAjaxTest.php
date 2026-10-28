@@ -345,7 +345,7 @@ class CustomerCartAjaxTest extends TestCase
                 'phone_number' => '081234567890',
                 'customer_type' => 'penumpang',
                 'flight_number' => 'GA-123',
-                'boarding_time' => '18:30',
+                'boarding_time' => now()->addHours(2)->format('H:i'),
                 'pickup_method' => 'ambil_sendiri',
                 'payment_method' => 'qris',
             ]);
@@ -394,4 +394,276 @@ class CustomerCartAjaxTest extends TestCase
         $response->assertRedirect(route('customer.tracking', ['order' => 'ORD-PAYTEST']));
         $this->assertTrue($order->fresh()->is_paid);
     }
+
+    public function test_checkout_rejects_invalid_phone_number()
+    {
+        $cart = [
+            $this->productA->id => [
+                'id' => $this->productA->id,
+                'name' => $this->productA->name,
+                'price' => $this->productA->price,
+                'quantity' => 1,
+                'tenant_id' => $this->tenant->id,
+            ],
+        ];
+
+        // Test with letters
+        $responseLetters = $this->withSession(['cart' => $cart])
+            ->post(route('customer.checkout'), [
+                'customer_name' => 'Budi Tester',
+                'phone_number' => 'bukan_nomor',
+                'customer_type' => 'pengunjung',
+                'pickup_method' => 'ambil_sendiri',
+                'payment_method' => 'qris',
+            ]);
+        $responseLetters->assertSessionHasErrors('phone_number');
+
+        // Test with too short number
+        $responseShort = $this->withSession(['cart' => $cart])
+            ->post(route('customer.checkout'), [
+                'customer_name' => 'Budi Tester',
+                'phone_number' => '0812',
+                'customer_type' => 'pengunjung',
+                'pickup_method' => 'ambil_sendiri',
+                'payment_method' => 'qris',
+            ]);
+        $responseShort->assertSessionHasErrors('phone_number');
+    }
+
+    public function test_checkout_accepts_valid_formatted_phone_numbers()
+    {
+        $cart = [
+            $this->productA->id => [
+                'id' => $this->productA->id,
+                'name' => $this->productA->name,
+                'price' => $this->productA->price,
+                'quantity' => 1,
+                'tenant_id' => $this->tenant->id,
+            ],
+        ];
+
+        $response = $this->withSession(['cart' => $cart])
+            ->post(route('customer.checkout'), [
+                'customer_name' => 'Budi Valid Phone',
+                'phone_number' => '+62 812-3456-7890',
+                'customer_type' => 'pengunjung',
+                'pickup_method' => 'ambil_sendiri',
+                'payment_method' => 'qris',
+            ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('customers', [
+            'phone_number' => '+6281234567890',
+        ]);
+    }
+
+    public function test_passive_auto_cancel_triggers_instantly_on_tracking_and_status_poll()
+    {
+        $customer = \App\Models\Customer::create([
+            'phone_number' => '081234567899',
+            'name' => 'Expired Customer',
+            'total_orders' => 1,
+        ]);
+
+        $order = \App\Models\Order::create([
+            'order_code' => 'ORD-EXPTEST',
+            'tenant_id' => $this->tenant->id,
+            'customer_id' => $customer->id,
+            'customer_name' => 'Expired Customer',
+            'total_amount' => 35000,
+            'status' => 'menunggu',
+            'pickup_method' => 'ambil_sendiri',
+            'payment_method' => 'qris',
+            'is_paid' => false,
+            'auto_cancel_at' => now()->subMinutes(1), // Already expired!
+            'ordered_at' => now()->subMinutes(16),
+        ]);
+
+        \App\Models\OrderItem::create([
+            'order_id' => $order->id,
+            'product_id' => $this->productA->id,
+            'product_name_snapshot' => $this->productA->name,
+            'quantity' => 2,
+            'unit_price' => 17500,
+            'subtotal' => 35000,
+        ]);
+
+        // When polling status, it must auto-cancel instantly without cron!
+        $statusResponse = $this->get(route('customer.tracking.status', ['order' => 'ORD-EXPTEST']));
+        $statusResponse->assertOk();
+        $statusResponse->assertJson([
+            'status' => 'dibatalkan',
+            'is_paid' => false,
+        ]);
+
+        $this->assertEquals('dibatalkan', $order->fresh()->status);
+
+        // When visiting tracking page directly
+        $trackingResponse = $this->get(route('customer.tracking', ['order' => 'ORD-EXPTEST']));
+        $trackingResponse->assertOk();
+        $trackingResponse->assertSee('DIBATALKAN');
+    }
+
+    public function test_checkout_validates_and_trims_customer_name()
+    {
+        $cart = [
+            $this->productA->id => [
+                'id' => $this->productA->id,
+                'name' => $this->productA->name,
+                'price' => $this->productA->price,
+                'quantity' => 1,
+                'tenant_id' => $this->tenant->id,
+            ],
+        ];
+
+        // 1. Rejected if name is only whitespace
+        $resWhitespace = $this->withSession(['cart' => $cart])
+            ->post(route('customer.checkout'), [
+                'customer_name' => '   ',
+                'phone_number' => '081234567890',
+                'customer_type' => 'pengunjung',
+                'pickup_method' => 'ambil_sendiri',
+                'payment_method' => 'qris',
+            ]);
+        $resWhitespace->assertSessionHasErrors('customer_name');
+
+        // 2. Rejected if name is single character
+        $resSingle = $this->withSession(['cart' => $cart])
+            ->post(route('customer.checkout'), [
+                'customer_name' => ' A ',
+                'phone_number' => '081234567890',
+                'customer_type' => 'pengunjung',
+                'pickup_method' => 'ambil_sendiri',
+                'payment_method' => 'qris',
+            ]);
+        $resSingle->assertSessionHasErrors('customer_name');
+
+        // 3. Accepted and trimmed cleanly if valid
+        $resValid = $this->withSession(['cart' => $cart])
+            ->post(route('customer.checkout'), [
+                'customer_name' => '   Agus   Pratama   ',
+                'phone_number' => '081299112233',
+                'customer_type' => 'pengunjung',
+                'pickup_method' => 'ambil_sendiri',
+                'payment_method' => 'qris',
+            ]);
+        $resValid->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('customers', [
+            'name' => 'Agus Pratama',
+            'phone_number' => '081299112233',
+        ]);
+        $this->assertDatabaseHas('orders', [
+            'customer_name' => 'Agus Pratama',
+        ]);
+    }
+
+    public function test_checkout_normalizes_and_uppercases_flight_number(): void
+    {
+        $cart = [
+            $this->productA->id => [
+                'id' => $this->productA->id,
+                'name' => $this->productA->name,
+                'price' => $this->productA->price,
+                'quantity' => 1,
+                'tenant_id' => $this->tenant->id,
+            ],
+        ];
+
+        // Penumpang mengetik nomor penerbangan dengan huruf kecil dan spasi berlebih
+        $boardingTime = now()->addHours(2)->format('H:i');
+        $response = $this->withSession(['cart' => $cart])
+            ->post(route('customer.checkout'), [
+                'customer_name' => 'Budi Santoso',
+                'phone_number' => '081234567890',
+                'customer_type' => 'penumpang',
+                'flight_number' => '  ga 320  ',
+                'boarding_time' => $boardingTime,
+                'pickup_method' => 'ambil_sendiri',
+                'payment_method' => 'qris',
+            ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('orders', [
+            'customer_name' => 'Budi Santoso',
+            'flight_number' => 'GA 320',
+        ]);
+    }
+
+    public function test_checkout_saves_order_notes_and_quick_chips(): void
+    {
+        $cart = [
+            $this->productA->id => [
+                'id' => $this->productA->id,
+                'name' => $this->productA->name,
+                'price' => $this->productA->price,
+                'quantity' => 2,
+                'tenant_id' => $this->tenant->id,
+            ],
+        ];
+
+        $boardingTime = now()->addHours(2)->format('H:i');
+        $notesInput = '  Kurangi Es, Sambal Dipisah, Bungkus Kabin  ';
+
+        $response = $this->withSession(['cart' => $cart])
+            ->post(route('customer.checkout'), [
+                'customer_name' => 'Rina Kartika',
+                'phone_number' => '081234567890',
+                'customer_type' => 'penumpang',
+                'flight_number' => 'GA-188',
+                'boarding_time' => $boardingTime,
+                'notes' => $notesInput,
+                'pickup_method' => 'ambil_sendiri',
+                'payment_method' => 'qris',
+            ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('orders', [
+            'customer_name' => 'Rina Kartika',
+            'notes' => 'Kurangi Es, Sambal Dipisah, Bungkus Kabin',
+        ]);
+
+        $order = \App\Models\Order::where('customer_name', 'Rina Kartika')->latest()->first();
+
+        // Verifikasi struk pelanggan menampilkan catatan
+        $receiptResponse = $this->get(route('customer.receipt', $order->order_code));
+        $receiptResponse->assertStatus(200);
+        $receiptResponse->assertSee('Kurangi Es, Sambal Dipisah, Bungkus Kabin');
+
+        // Verifikasi layar tracking pelanggan menampilkan catatan
+        $trackingResponse = $this->get(route('customer.tracking', ['order' => $order->order_code]));
+        $trackingResponse->assertStatus(200);
+        $trackingResponse->assertSee('Kurangi Es, Sambal Dipisah, Bungkus Kabin');
+    }
+
+    public function test_checkout_rejects_notes_over_100_characters(): void
+    {
+        $cart = [
+            $this->productA->id => [
+                'id' => $this->productA->id,
+                'name' => $this->productA->name,
+                'price' => $this->productA->price,
+                'quantity' => 1,
+                'tenant_id' => $this->tenant->id,
+            ],
+        ];
+
+        $boardingTime = now()->addHours(2)->format('H:i');
+        $longNotes = str_repeat('Tolong sambalnya dipisah ya mas jangan pedas ', 3); // > 100 karakter
+
+        $response = $this->withSession(['cart' => $cart])
+            ->post(route('customer.checkout'), [
+                'customer_name' => 'Dewi Lestari',
+                'phone_number' => '081234567890',
+                'customer_type' => 'penumpang',
+                'flight_number' => 'JT-102',
+                'boarding_time' => $boardingTime,
+                'notes' => $longNotes,
+                'pickup_method' => 'ambil_sendiri',
+                'payment_method' => 'qris',
+            ]);
+
+        $response->assertSessionHasErrors(['notes']);
+        $this->assertStringContainsString('maksimal 100 karakter', session('errors')->first('notes'));
+    }
 }
+

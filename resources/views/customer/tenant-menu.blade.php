@@ -262,6 +262,31 @@
                 </div>
             </div>
 
+            @php
+                $isTenantOpen = (bool) ($tenant->isOpen() && $tenant->is_active);
+            @endphp
+
+            @if(!$isTenantOpen)
+            <!-- Prominent Warning Banner for Closed Tenant -->
+            <div class="mb-8 p-4 sm:p-5 rounded-2xl bg-amber-50 border border-amber-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-amber-900 shadow-xs">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 border border-amber-200">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <div>
+                        <h4 class="text-xs sm:text-sm font-black uppercase tracking-wider text-amber-950">Restoran Sedang Tutup Sementara</h4>
+                        <p class="text-xs text-amber-800 font-medium mt-0.5">
+                            Jam operasional: <strong>{{ substr($tenant->opening_time ?? '06:00', 0, 5) }} – {{ substr($tenant->closing_time ?? '22:00', 0, 5) }} WIB</strong>. Pemesanan menu ditutup sementara dan akan dibuka kembali saat jam operasional gerai.
+                        </p>
+                    </div>
+                </div>
+                <a href="{{ route('customer.menu') }}" class="shrink-0 text-xs font-bold text-amber-900 hover:text-white hover:bg-amber-800 bg-white px-4 py-2 rounded-xl border border-amber-300 shadow-2xs hover:shadow-xs transition-all inline-flex items-center justify-center gap-1.5 self-start sm:self-auto">
+                    <span>Lihat Restoran Lain</span>
+                    <span>&rarr;</span>
+                </a>
+            </div>
+            @endif
+
             <!-- Products Grid with Prepared Frame for Tenant Uploads -->
             <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
                 @forelse($tenant->products as $product)
@@ -357,10 +382,20 @@
                     <div class="flex items-center justify-between pt-3 border-t border-slate-100 mt-auto">
                         <div>
                             <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Harga</span>
-                            <span class="font-black text-lg sm:text-xl {{ $isAvailable ? 'text-[#005ea2]' : 'text-slate-400 line-through decoration-slate-300' }} tracking-tight">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                            <span class="font-black text-lg sm:text-xl {{ ($isAvailable && $isTenantOpen) ? 'text-[#005ea2]' : 'text-slate-400' }} tracking-tight">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
                         </div>
                         
-                        @if($isAvailable)
+                        @if(!$isTenantOpen)
+                            <button type="button" 
+                                    disabled 
+                                    class="inline-flex items-center space-x-1.5 font-bold text-xs px-3.5 py-2.5 rounded-xl cursor-not-allowed border shadow-none bg-slate-100 text-slate-500 border-slate-200"
+                                    title="Restoran sedang tutup dan tidak menerima pesanan saat ini">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span data-id="Resto Tutup" data-en="Closed">Resto Tutup</span>
+                            </button>
+                        @elseif($isAvailable)
                             <button type="button" 
                                     onclick="addToCart({{ $product->id }}, {{ $tenant->id }}, this)" 
                                     aria-label="Tambah {{ $product->name }}" 

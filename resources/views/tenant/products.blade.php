@@ -60,6 +60,7 @@
     $categoriesList = $productsData->pluck('category')->unique()->values()->all();
 @endphp
 
+@section('content')
 <div x-data="productCatalog()" class="space-y-6">
 
     <!-- ========================================================================= -->
