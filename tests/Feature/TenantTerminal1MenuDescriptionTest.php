@@ -51,8 +51,8 @@ class TenantTerminal1MenuDescriptionTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Potongan ayam goreng khas A&W');
         $response->assertSee('product-detail-modal', false);
+        $response->assertSee('product-detail-sheet', false);
         $response->assertSee('openProductDetailModal', false);
-        $response->assertSee('Lihat detail &amp; deskripsi lengkap', false);
 
         // 2. Verifikasi tampilan staf tenant di dashboard produk
         $staff = User::factory()->create([

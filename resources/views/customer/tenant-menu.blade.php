@@ -391,11 +391,6 @@
                     
                     <!-- Dedicated Inner Rounded Image Frame -->
                     <div class="h-48 sm:h-52 rounded-2xl overflow-hidden relative mb-4 bg-white border border-slate-100/80 flex items-center justify-center shrink-0">
-                        <!-- Subtle "Lihat Detail" indicator on hover -->
-                        <div class="absolute bottom-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-slate-900/80 backdrop-blur-xs text-white text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-md pointer-events-none z-20">
-                            <svg class="w-3 h-3 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                            <span>Lihat Detail</span>
-                        </div>
                         @if(!$isAvailable)
                             <!-- High-Contrast Out-of-Stock Center Overlay (Clean Frosted White Veil) -->
                             <div class="absolute inset-0 z-30 flex flex-col items-center justify-center p-3 text-center rounded-2xl" style="background-color: rgba(255, 255, 255, 0.72); backdrop-filter: blur(1px);">
@@ -448,15 +443,9 @@
                     </h3>
                     
                     @if($product->description)
-                        <p class="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed mb-1.5 flex-grow line-clamp-2">
+                        <p class="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed mb-3 flex-grow line-clamp-2">
                             {{ $product->description }}
                         </p>
-                        <div class="mb-3">
-                            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-[#005ea2] group-hover:underline transition-colors">
-                                <span>Lihat detail &amp; deskripsi lengkap</span>
-                                <svg class="w-3 h-3 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
-                            </span>
-                        </div>
                     @else
                         <div class="flex-grow mb-3"></div>
                     @endif
@@ -546,88 +535,104 @@
     <!-- FlyDine Corporate Footer (Standard Component) -->
     <x-footer />
 
-    <!-- Modal Detail Menu Lengkap (Popup Informasi & Foto Produk Utuh) -->
+    <!-- Modal Detail Menu Lengkap (Modern Bottom Sheet Drawer dengan Frosted Glass Blur) -->
     <div id="product-detail-modal" 
-         class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/65 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 transition-all"
+         class="hidden fixed inset-0 z-50 flex items-end justify-center transition-opacity duration-300 opacity-0"
+         style="background-color: rgba(15, 23, 42, 0.65); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);"
          tabindex="-1"
          aria-modal="true"
          role="dialog"
          aria-labelledby="detail-modal-title">
-        <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] relative animate-in fade-in zoom-in-95 duration-200"
+        
+        <!-- Bottom Sheet Container (Slides up smoothly from bottom) -->
+        <div id="product-detail-sheet" 
+             class="bg-white rounded-t-[2.25rem] sm:rounded-t-[2.5rem] max-w-2xl w-full shadow-2xl border-t border-x border-slate-200/80 overflow-hidden flex flex-col max-h-[90vh] sm:max-h-[85vh] relative transform transition-transform duration-300 ease-out translate-y-full"
              onclick="event.stopPropagation()">
-            <!-- Modal Header (Clean Top Bar) -->
-            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 sticky top-0 z-10 backdrop-blur-xs">
-                <div class="flex items-center space-x-2">
-                    <span id="detail-modal-category" class="text-[11px] font-black uppercase tracking-wider text-[#005ea2] bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-lg">Kategori</span>
-                    <span id="detail-modal-prep" class="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200/70 px-2 py-0.5 rounded-lg inline-flex items-center gap-1">
-                        <svg class="w-3 h-3 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span id="detail-modal-prep-text">10 menit</span>
-                    </span>
-                </div>
+            
+            <!-- Top Drag Handle & Quick Close Bar -->
+            <div class="pt-3 pb-2.5 px-6 flex flex-col items-center border-b border-slate-100 bg-slate-50/70 shrink-0">
                 <button type="button" 
                         onclick="closeProductDetailModal()" 
-                        class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition cursor-pointer" 
-                        aria-label="Tutup detail produk">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
+                        class="w-12 h-1.5 bg-slate-300 hover:bg-slate-400 rounded-full transition-colors mb-2 cursor-pointer"
+                        aria-label="Tutup jendela"></button>
+                <div class="w-full flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span id="detail-modal-category" class="text-[11px] font-black uppercase tracking-wider text-[#005ea2] bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-lg">Kategori</span>
+                        <span id="detail-modal-prep" class="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200/70 px-2 py-0.5 rounded-lg inline-flex items-center gap-1">
+                            <svg class="w-3 h-3 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span id="detail-modal-prep-text">10 menit</span>
+                        </span>
+                    </div>
+                    <button type="button" 
+                            onclick="closeProductDetailModal()" 
+                            class="p-1.5 rounded-full bg-slate-200/70 hover:bg-slate-300 text-slate-500 hover:text-slate-800 transition cursor-pointer" 
+                            aria-label="Tutup detail produk">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
             </div>
 
-            <!-- Modal Content (Scrollable) -->
-            <div class="p-6 overflow-y-auto space-y-5">
-                <!-- Large Image Frame -->
-                <div class="h-60 sm:h-72 rounded-2xl overflow-hidden relative bg-white border border-slate-200/80 flex items-center justify-center p-3">
-                    <img id="detail-modal-img" 
-                         src="" 
-                         alt="" 
-                         class="w-full h-full object-contain rounded-xl transition-all duration-300">
-                    <div id="detail-modal-fallback" class="hidden w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100/70 text-slate-300">
-                        <div class="w-14 h-14 rounded-2xl bg-white shadow-xs border border-slate-200/60 flex items-center justify-center text-slate-300">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
+            <!-- Scrollable Content Body -->
+            <div class="p-5 sm:p-6 overflow-y-auto space-y-4">
+                <!-- Side-by-Side on desktop / Stacked on mobile -->
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-5 items-start">
+                    <!-- Image Frame -->
+                    <div class="sm:col-span-5 h-56 sm:h-64 rounded-2xl overflow-hidden relative bg-gradient-to-b from-slate-50 to-slate-100/70 border border-slate-200/80 flex items-center justify-center p-3 shadow-inner shrink-0">
+                        <img id="detail-modal-img" 
+                             src="" 
+                             alt="" 
+                             class="w-full h-full object-contain rounded-xl hover:scale-105 transition-transform duration-300">
+                        <div id="detail-modal-fallback" class="hidden w-full h-full flex flex-col items-center justify-center text-slate-300">
+                            <div class="w-14 h-14 rounded-2xl bg-white shadow-xs border border-slate-200/60 flex items-center justify-center text-slate-300">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <span class="text-[11px] font-semibold text-slate-400 mt-2 uppercase tracking-wider">Foto Belum Ditambahkan</span>
                         </div>
-                        <span class="text-[11px] font-semibold text-slate-400 mt-2 uppercase tracking-wider">Foto Belum Ditambahkan</span>
                     </div>
-                </div>
 
-                <!-- Product Full Title & Stock Pill -->
-                <div>
-                    <h2 id="detail-modal-title" class="text-xl sm:text-2xl font-black text-slate-900 leading-snug tracking-tight"></h2>
-                    <div class="mt-2.5">
-                        <span id="detail-modal-status-pill" class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold"></span>
+                    <!-- Right Column: Title, Stock, & Description Box -->
+                    <div class="sm:col-span-7 flex flex-col justify-between space-y-3">
+                        <div>
+                            <h2 id="detail-modal-title" class="text-xl sm:text-2xl font-black text-slate-900 leading-snug tracking-tight"></h2>
+                            <div class="mt-2">
+                                <span id="detail-modal-status-pill" class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold"></span>
+                            </div>
+                        </div>
+
+                        <!-- Description Box -->
+                        <div class="bg-blue-50/40 rounded-2xl p-4 border border-blue-100/70">
+                            <span class="block text-[11px] font-black uppercase tracking-wider text-[#005ea2] mb-1.5 flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-[#005ea2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span>Deskripsi Lengkap Menu</span>
+                            </span>
+                            <p id="detail-modal-desc" class="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed whitespace-pre-line"></p>
+                        </div>
                     </div>
-                </div>
-
-                <!-- Full Description Block -->
-                <div class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-100">
-                    <span class="block text-[11px] font-black uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1.5">
-                        <svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span>Deskripsi Lengkap Menu</span>
-                    </span>
-                    <p id="detail-modal-desc" class="text-sm sm:text-base text-slate-700 font-medium leading-relaxed whitespace-pre-line"></p>
                 </div>
 
                 <!-- Variant Groups Preview if Available -->
-                <div id="detail-modal-variants-wrap" class="hidden">
-                    <span class="block text-[11px] font-black uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
+                <div id="detail-modal-variants-wrap" class="hidden pt-2 border-t border-slate-100">
+                    <span class="block text-[11px] font-black uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1.5">
                         <span>✨</span>
                         <span>Opsi Kustomisasi / Varian Tersedia</span>
                     </span>
                     <div id="detail-modal-variants-list" class="flex flex-wrap gap-1.5"></div>
-                    <p class="text-[11px] text-slate-400 mt-1.5 italic">* Anda dapat menentukan pilihan varian saat menekan tombol Pesan Menu Ini.</p>
+                    <p class="text-[11px] text-slate-400 mt-1.5 italic">* Pilihan varian dapat ditentukan saat menekan tombol Pesan Menu Ini.</p>
                 </div>
             </div>
 
-            <!-- Modal Footer (Price + Order Action) -->
-            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/80 flex items-center justify-between gap-3">
+            <!-- Sticky Bottom Sheet Footer -->
+            <div class="px-6 py-4 border-t border-slate-100 bg-white/95 backdrop-blur-md flex items-center justify-between gap-4 shrink-0">
                 <div>
                     <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Harga Menu</span>
-                    <span id="detail-modal-price" class="text-xl sm:text-2xl font-black text-[#005ea2] tracking-tight">Rp 0</span>
+                    <span id="detail-modal-price" class="text-2xl font-black text-[#005ea2] tracking-tight">Rp 0</span>
                 </div>
                 <div class="flex items-center gap-2">
                     <button type="button" 
                             onclick="closeProductDetailModal()" 
-                            class="px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-600 text-xs font-bold transition cursor-pointer">
+                            class="px-4 py-3 rounded-2xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-600 text-xs font-bold transition cursor-pointer">
                         Tutup
                     </button>
                     <div id="detail-modal-order-btn-wrap">
@@ -639,7 +644,7 @@
     </div>
 
     <!-- Modal Pilih Varian Menu (Muncul Hanya untuk Menu yang Memiliki Opsi Kustomisasi) -->
-    <div id="variant-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div id="variant-modal" class="hidden fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 transition-all" style="background-color: rgba(15, 23, 42, 0.65); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);">
         <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
             <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
                 <div>
@@ -839,14 +844,14 @@
                 orderBtnWrap.innerHTML = '';
                 if (!data.is_tenant_open) {
                     orderBtnWrap.innerHTML = `
-                        <button type="button" disabled class="inline-flex items-center space-x-1.5 font-bold text-xs px-4 py-2.5 rounded-xl cursor-not-allowed bg-slate-100 text-slate-400 border border-slate-200">
+                        <button type="button" disabled class="inline-flex items-center space-x-1.5 font-bold text-xs px-4 py-3 rounded-2xl cursor-not-allowed bg-slate-100 text-slate-400 border border-slate-200">
                             <span>Resto Tutup</span>
                         </button>
                     `;
                 } else if (data.is_available) {
                     const btn = document.createElement('button');
                     btn.type = 'button';
-                    btn.className = 'inline-flex items-center space-x-1.5 bg-[#005ea2] hover:bg-blue-700 text-white font-extrabold text-xs px-5 py-2.5 rounded-xl shadow-md shadow-blue-500/20 active:scale-95 transition-all cursor-pointer';
+                    btn.className = 'inline-flex items-center space-x-2 bg-[#005ea2] hover:bg-blue-700 text-white font-extrabold text-sm px-6 py-3 rounded-2xl shadow-lg shadow-blue-500/25 active:scale-95 transition-all cursor-pointer';
                     btn.innerHTML = `
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
@@ -868,26 +873,47 @@
                     orderBtnWrap.appendChild(btn);
                 } else {
                     orderBtnWrap.innerHTML = `
-                        <button type="button" disabled class="inline-flex items-center space-x-1.5 font-black text-xs px-4 py-2.5 rounded-xl cursor-not-allowed bg-rose-50 text-rose-600 border border-rose-200">
+                        <button type="button" disabled class="inline-flex items-center space-x-1.5 font-black text-xs px-4 py-3 rounded-2xl cursor-not-allowed bg-rose-50 text-rose-600 border border-rose-200">
                             <span>Stok Habis</span>
                         </button>
                     `;
                 }
             }
 
-            if (modal) {
+            if (modal && sheet) {
                 modal.classList.remove('hidden');
                 document.body.classList.add('overflow-hidden');
+                requestAnimationFrame(() => {
+                    modal.classList.remove('opacity-0');
+                    modal.classList.add('opacity-100');
+                    sheet.classList.remove('translate-y-full');
+                    sheet.classList.add('translate-y-0');
+                });
             }
         }
 
+        let isDetailModalAnimating = false;
+
         function closeProductDetailModal() {
+            if (isDetailModalAnimating) return;
             const modal = document.getElementById('product-detail-modal');
-            if (modal) {
+            const sheet = document.getElementById('product-detail-sheet');
+            if (!modal || modal.classList.contains('hidden')) return;
+
+            isDetailModalAnimating = true;
+            if (sheet) {
+                sheet.classList.remove('translate-y-0');
+                sheet.classList.add('translate-y-full');
+            }
+            modal.classList.remove('opacity-100');
+            modal.classList.add('opacity-0');
+
+            setTimeout(() => {
                 modal.classList.add('hidden');
                 document.body.classList.remove('overflow-hidden');
-            }
-            activeProductDetailData = null;
+                activeProductDetailData = null;
+                isDetailModalAnimating = false;
+            }, 300);
         }
 
         // Close detail modal on Escape key or outside click
