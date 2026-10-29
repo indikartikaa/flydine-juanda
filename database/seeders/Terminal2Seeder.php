@@ -569,6 +569,13 @@ class Terminal2Seeder extends Seeder
                 }
             }
 
+            // Lengkapi seluruh deskripsi pelanggan dan catatan dapur internal Terminal 2
+            $migrationFile = database_path('migrations/2026_10_29_160000_seed_terminal2_menu_descriptions.php');
+            if (file_exists($migrationFile)) {
+                $descMigration = require $migrationFile;
+                $descMigration->up();
+            }
+
             $this->command->info("Terminal 2 Seeding Berhasil: {$totalTenants} Tenant dan {$totalProducts} Menu dimasukkan!");
         });
     }

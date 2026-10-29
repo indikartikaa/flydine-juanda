@@ -5407,6 +5407,13 @@ class Terminal1Seeder extends Seeder
                 }
             }
 
+            // Lengkapi seluruh deskripsi pelanggan dan catatan dapur internal Terminal 1
+            $migrationFile = database_path('migrations/2026_10_29_163000_seed_terminal1_menu_descriptions.php');
+            if (file_exists($migrationFile)) {
+                $descMigration = require $migrationFile;
+                $descMigration->up();
+            }
+
             $this->command->info("Terminal 1 Seeding Berhasil: {$totalTenants} Tenant dan {$totalProducts} Menu dimasukkan!");
         });
     }
