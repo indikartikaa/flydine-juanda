@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>FlyDine - Juanda International Airport</title>
     <!-- Vite Local Assets (Tailwind CSS, Alpine.js, & Animations) -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -10,86 +10,90 @@
 
 <body class="text-slate-800 flex flex-col min-h-screen selection:bg-[#005ea2] selection:text-white relative" x-data="{ mobileMenuOpen: false, lang: 'id' }">
 
-    <!-- Header / Navigation -->
-    <header class="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm transition-all duration-300">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16 sm:h-20">
-                <!-- Logo & Location -->
-                <a href="{{ route('customer.menu') }}" class="group cursor-pointer">
-                    <img src="{{ asset('images/logo-flydine.png') }}" alt="FlyDine Juanda Airport" class="w-40 sm:w-48 object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-sm">
+    <!-- Fullscreen Mobile & Desktop Splash Screen (Harmonis Juanda Airport) -->
+    <x-splash-screen />
+
+    <!-- Header / Navigation (Juanda International Airport Official Header) -->
+    <header class="fixed top-0 inset-x-0 z-50 bg-white border-b border-slate-200/80 shadow-xs">
+        <div class="w-full flex items-center justify-between h-16 sm:h-20 pl-0 pr-4 sm:pr-6 lg:pr-8">
+            <!-- Logo & Co-Branding (Juanda InJourney & FlyDine) - Nempel di pojok kiri -->
+            <x-navbar-brand />
+
+            <!-- Desktop Nav -->
+            <div class="hidden md:flex items-center space-x-6">
+                <div class="bg-slate-100/80 p-1 rounded-full flex items-center">
+                    <button @click="lang = 'id'; changeLanguage('id')" :class="lang === 'id' ? 'bg-white text-[#005ea2] shadow-xs' : 'text-slate-500 hover:text-slate-700'" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all">ID</button>
+                    <button @click="lang = 'en'; changeLanguage('en')" :class="lang === 'en' ? 'bg-white text-[#005ea2] shadow-xs' : 'text-slate-500 hover:text-slate-700'" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all">EN</button>
+                </div>
+                
+                <a href="{{ route('customer.cart') }}" class="flex items-center space-x-2 text-sm font-bold text-slate-600 hover:text-[#005ea2] transition-colors group">
+                    <div class="relative">
+                        @if(session('cart') && count(session('cart')) > 0)
+                            <span class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-xs">{{ count(session('cart')) }}</span>
+                        @endif
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                    </div>
+                    <span data-id="PESANAN" data-en="CART">PESANAN</span>
                 </a>
 
-                <!-- Desktop Nav -->
-                <div class="hidden md:flex items-center space-x-6">
-                    <div class="bg-slate-100/80 p-1 rounded-full flex items-center">
-                        <button @click="lang = 'id'; changeLanguage('id')" :class="lang === 'id' ? 'bg-white text-[#005ea2] shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all">ID</button>
-                        <button @click="lang = 'en'; changeLanguage('en')" :class="lang === 'en' ? 'bg-white text-[#005ea2] shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all">EN</button>
+                <a href="{{ route('customer.history') }}" class="flex items-center space-x-2 text-sm font-bold text-slate-600 hover:text-[#005ea2] transition-colors group">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                    <span data-id="RIWAYAT" data-en="HISTORY">RIWAYAT</span>
+                </a>
+
+                @if(session('order_code'))
+                <a href="{{ route('customer.tracking', ['order' => session('order_code')]) }}" class="flex items-center space-x-2 text-sm font-bold text-amber-500 hover:text-amber-600 transition-colors group bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200 shadow-xs">
+                    <div class="relative">
+                        <span class="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full animate-ping"></span>
+                        <span class="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                     </div>
-                    
-                    <a href="{{ route('customer.cart') }}" class="flex items-center space-x-2 text-sm font-bold text-slate-600 hover:text-[#005ea2] transition-colors group">
-                        <div class="relative">
-                            @if(session('cart') && count(session('cart')) > 0)
-                                <span class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ count(session('cart')) }}</span>
-                            @endif
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                        </div>
-                        <span data-id="PESANAN" data-en="CART">PESANAN</span>
-                    </a>
+                    <span data-id="LACAK" data-en="TRACK">LACAK</span>
+                </a>
+                @endif
 
-                    <a href="{{ route('customer.history') }}" class="flex items-center space-x-2 text-sm font-bold text-slate-600 hover:text-[#005ea2] transition-colors group">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                        <span data-id="RIWAYAT" data-en="HISTORY">RIWAYAT</span>
-                    </a>
-
-                    @if(session('order_code'))
-                    <a href="{{ route('customer.tracking', ['order' => session('order_code')]) }}" class="flex items-center space-x-2 text-sm font-bold text-amber-500 hover:text-amber-600 transition-colors group bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200 shadow-sm">
-                        <div class="relative">
-                            <span class="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full animate-ping"></span>
-                            <span class="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full"></span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                        </div>
-                        <span data-id="LACAK" data-en="TRACK">LACAK</span>
-                    </a>
-                    @endif
-
-                    <div class="h-6 w-px bg-slate-200"></div>
-                    <a href="{{ route('login') }}" class="flex items-center space-x-2 text-sm font-bold text-slate-600 hover:text-[#005ea2] transition-colors group">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
-                        <span data-id="PORTAL LOGIN" data-en="PORTAL LOGIN">PORTAL LOGIN</span>
-                    </a>
-                </div>
-
-                <!-- Mobile Menu Button -->
-                <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
-                    <svg x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-                    <svg x-show="mobileMenuOpen" x-cloak xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
+                <div class="h-6 w-px bg-slate-200"></div>
+                <a href="{{ route('login') }}" class="flex items-center space-x-2 text-sm font-bold text-slate-600 hover:text-[#005ea2] transition-colors group">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+                    <span data-id="PORTAL LOGIN" data-en="PORTAL LOGIN">PORTAL LOGIN</span>
+                </a>
             </div>
-            
-            <!-- Mobile Menu Dropdown -->
-            <div x-show="mobileMenuOpen" x-collapse class="md:hidden border-t border-slate-100 bg-white">
-                <div class="py-4 space-y-4 px-2">
-                    <div class="bg-slate-50 p-1.5 rounded-full flex items-center w-max mx-auto mb-4">
-                        <button @click="lang = 'id'; changeLanguage('id')" :class="lang === 'id' ? 'bg-white text-[#005ea2] shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-6 py-2 rounded-full text-xs font-bold transition-all">ID</button>
-                        <button @click="lang = 'en'; changeLanguage('en')" :class="lang === 'en' ? 'bg-white text-[#005ea2] shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-6 py-2 rounded-full text-xs font-bold transition-all">EN</button>
-                    </div>
-                    
-                    <a href="{{ route('customer.cart') }}" class="flex items-center justify-center space-x-2 text-sm font-bold text-slate-700 bg-slate-50 py-3 rounded-xl hover:bg-slate-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                        <span data-id="PESANAN SAYA" data-en="MY CART">PESANAN SAYA</span>
-                    </a>
-                    
-                    <a href="{{ route('login') }}" class="flex items-center justify-center space-x-2 text-sm font-bold text-white bg-[#005ea2] py-3 rounded-xl hover:bg-blue-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
-                        <span data-id="PORTAL LOGIN TENANT" data-en="TENANT LOGIN PORTAL">PORTAL LOGIN TENANT</span>
-                    </a>
+
+            <!-- Mobile Menu Button -->
+            <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors focus:outline-none" aria-label="Menu navigasi">
+                <svg x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                <svg x-show="mobileMenuOpen" x-cloak xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+        
+        <!-- Mobile Menu Dropdown -->
+        <div x-show="mobileMenuOpen" x-collapse class="md:hidden border-t border-slate-100 bg-white">
+            <div class="py-4 space-y-3 px-4">
+                <div class="bg-slate-50 p-1.5 rounded-full flex items-center w-max mx-auto mb-4 border border-slate-200/80">
+                    <button @click="lang = 'id'; changeLanguage('id')" :class="lang === 'id' ? 'bg-white text-[#005ea2] shadow-xs' : 'text-slate-500 hover:text-slate-700'" class="px-6 py-2 rounded-full text-xs font-bold transition-all">ID</button>
+                    <button @click="lang = 'en'; changeLanguage('en')" :class="lang === 'en' ? 'bg-white text-[#005ea2] shadow-xs' : 'text-slate-500 hover:text-slate-700'" class="px-6 py-2 rounded-full text-xs font-bold transition-all">EN</button>
                 </div>
+                
+                <a href="{{ route('customer.cart') }}" class="flex items-center justify-center space-x-2 text-sm font-bold text-slate-700 bg-slate-50 py-3 rounded-xl hover:bg-slate-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                    <span data-id="PESANAN SAYA" data-en="MY CART">PESANAN SAYA</span>
+                </a>
+
+                <a href="{{ route('customer.history') }}" class="flex items-center justify-center space-x-2 text-sm font-bold text-slate-700 bg-slate-50 py-3 rounded-xl hover:bg-slate-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                    <span data-id="RIWAYAT" data-en="HISTORY">RIWAYAT PESANAN</span>
+                </a>
+                
+                <a href="{{ route('login') }}" class="flex items-center justify-center space-x-2 text-sm font-bold text-white bg-[#005ea2] py-3 rounded-xl hover:bg-blue-700 transition-colors shadow-xs">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+                    <span data-id="PORTAL LOGIN TENANT" data-en="TENANT LOGIN PORTAL">PORTAL LOGIN TENANT</span>
+                </a>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="flex-grow flex flex-col relative isolate">
+    <main class="flex-grow flex flex-col relative isolate pt-16 sm:pt-20">
         
         <!-- HD Hero Background (Foto Bandara Juanda + Gradient Biru FlyDine) -->
         <div class="absolute top-0 inset-x-0 h-[360px] md:h-[430px] overflow-hidden pointer-events-none z-0">
@@ -536,7 +540,9 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </main>
 
-            <x-footer />
+    <x-footer />
 </body>
 </html>

@@ -27,15 +27,13 @@
     <aside class="fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-200/80 flex flex-col h-full shadow-2xl transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0 lg:static lg:w-64 lg:shadow-sm shrink-0"
            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
         
-        <!-- Logo Area & Mobile Close Button (Presisi Sejajar Header Utama h-20) -->
-        <div class="h-20 flex items-center justify-between px-6 border-b border-slate-200/80 shrink-0">
-            <a href="{{ url('/tenant/dashboard') }}" class="flex items-center group w-full justify-center">
-                <img src="{{ asset('images/logo-flydine.png') }}" alt="FlyDine Logo" class="w-44 sm:w-48 object-contain group-hover:scale-105 transition-transform drop-shadow-sm">
-            </a>
+        <!-- Logo Area Co-Branding (Juanda & FlyDine) -->
+        <div class="h-20 flex items-center justify-between pl-0 pr-4 border-b border-slate-200/80 shrink-0 overflow-hidden">
+            <x-navbar-brand :href="url('/tenant/dashboard')" sidebar />
             <!-- Mobile Close Button -->
             <button type="button" 
                     @click="sidebarOpen = false" 
-                    class="lg:hidden p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                    class="lg:hidden p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition cursor-pointer shrink-0"
                     aria-label="Tutup Menu">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

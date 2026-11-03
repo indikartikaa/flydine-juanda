@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Struk Digital Resmi - {{ $order->order_code }} - FlyDine Juanda</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style nonce="{{ $cspNonce ?? '' }}">
@@ -119,47 +119,46 @@
 </head>
 <body class="text-slate-800 min-h-screen selection:bg-[#005ea2] selection:text-white bg-slate-50/70 antialiased flex flex-col">
 
-    <!-- Top Navigation Header (Desktop & Mobile, Hidden in Print) -->
-    <header class="no-print sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16 sm:h-20">
-                <!-- Logo & Brand -->
-                <div class="flex items-center space-x-4">
-                    <a href="{{ route('customer.menu') }}" class="group flex items-center">
-                        <img src="{{ asset('images/logo-flydine.png') }}" alt="FlyDine Juanda" class="w-36 sm:w-44 object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-xs">
-                    </a>
-                    <div class="hidden md:block h-6 w-px bg-slate-200"></div>
-                    <span class="hidden md:inline-flex items-center text-xs font-extrabold text-slate-500 uppercase tracking-wider">
-                        Struk Transaksi Resmi
-                    </span>
-                </div>
+    <!-- Fullscreen Mobile & Desktop Splash Screen (Harmonis Juanda Airport) -->
+    <x-splash-screen />
 
-                <!-- Action Nav -->
-                <div class="flex items-center space-x-2 sm:space-x-3">
-                    <a href="{{ route('customer.history', ['phone_number' => $order->customer->phone_number ?? '']) }}" 
-                       class="inline-flex items-center space-x-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-[#005ea2] hover:bg-slate-100 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
-                        </svg>
-                        <span class="hidden sm:inline">Riwayat Pesanan</span>
-                        <span class="sm:hidden">Kembali</span>
-                    </a>
+    <!-- Top Navigation Header (Juanda International Airport Official Header) -->
+    <header class="no-print fixed top-0 inset-x-0 z-40 bg-white border-b border-slate-200/80 shadow-xs">
+        <div class="w-full flex items-center justify-between h-16 sm:h-20 pl-0 pr-4 sm:pr-6 lg:pr-8">
+            <!-- Logo & Brand (Juanda InJourney & FlyDine) - Nempel di pojok kiri -->
+            <div class="h-full flex items-center space-x-4">
+                <x-navbar-brand />
+                <div class="hidden lg:block h-6 w-px bg-slate-200"></div>
+                <span class="hidden lg:inline-flex items-center text-xs font-extrabold text-slate-500 uppercase tracking-wider">
+                    Struk Transaksi Resmi
+                </span>
+            </div>
 
-                    <button type="button" 
-                            onclick="window.print()" 
-                            class="inline-flex items-center space-x-2 bg-[#005ea2] hover:bg-blue-700 text-white px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-md shadow-blue-500/20 active:scale-95 transition-all cursor-pointer">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                        </svg>
-                        <span>Cetak / PDF</span>
-                    </button>
-                </div>
+            <!-- Action Nav -->
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <a href="{{ route('customer.history', ['phone_number' => $order->customer->phone_number ?? '']) }}" 
+                   class="inline-flex items-center space-x-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-[#005ea2] hover:bg-slate-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    <span class="hidden sm:inline">Riwayat Pesanan</span>
+                    <span class="sm:hidden">Kembali</span>
+                </a>
+
+                <button type="button" 
+                        onclick="window.print()" 
+                        class="inline-flex items-center space-x-2 bg-[#005ea2] hover:bg-blue-700 text-white px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-sm active:scale-95 transition-all cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    <span>Cetak / PDF</span>
+                </button>
             </div>
         </div>
     </header>
 
     <!-- Main Content Container -->
-    <main class="flex-grow max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <main class="flex-grow max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-6 sm:pb-8">
         
         <!-- Desktop 2-Column Responsive Layout -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">

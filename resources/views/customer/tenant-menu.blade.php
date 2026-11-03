@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $tenant->name }} - FlyDine</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -10,94 +10,94 @@
 
 <body class="text-slate-800 flex flex-col min-h-screen selection:bg-[#005ea2] selection:text-white relative" x-data="{ mobileMenuOpen: false, lang: 'id' }">
 
-    <!-- Header / Navigation (Consistent with Catalog, Cart, & History) -->
-    <header class="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm transition-all duration-300">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16 sm:h-20">
-                <!-- Logo & Location -->
-                <a href="{{ route('customer.menu') }}" class="group cursor-pointer">
-                    <img src="{{ asset('images/logo-flydine.png') }}" alt="FlyDine Juanda Airport" class="w-40 sm:w-48 object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-sm">
+    <!-- Fullscreen Mobile & Desktop Splash Screen (Harmonis Juanda Airport) -->
+    <x-splash-screen />
+
+    <!-- Header / Navigation (Juanda International Airport Official Header) -->
+    <header class="fixed top-0 inset-x-0 z-50 bg-white border-b border-slate-200/80 shadow-xs">
+        <div class="w-full flex items-center justify-between h-16 sm:h-20 pl-0 pr-4 sm:pr-6 lg:pr-8">
+            <!-- Logo & Co-Branding (Juanda InJourney & FlyDine) - Nempel di pojok kiri -->
+            <x-navbar-brand />
+
+            <!-- Desktop Nav -->
+            <div class="hidden md:flex items-center space-x-6">
+                <div class="bg-slate-100/80 p-1 rounded-full flex items-center">
+                    <button type="button" @click="lang = 'id'; changeLanguage('id')" :class="lang === 'id' ? 'bg-white text-[#005ea2] shadow-xs' : 'text-slate-500 hover:text-slate-700'" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all">ID</button>
+                    <button type="button" @click="lang = 'en'; changeLanguage('en')" :class="lang === 'en' ? 'bg-white text-[#005ea2] shadow-xs' : 'text-slate-500 hover:text-slate-700'" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all">EN</button>
+                </div>
+                
+                <a href="{{ route('customer.cart') }}" class="flex items-center space-x-2 text-sm font-bold text-slate-600 hover:text-[#005ea2] transition-colors group">
+                    <div class="relative" id="cart-icon-container">
+                        <span id="cart-badge" class="{{ (session('cart') && count(session('cart')) > 0) ? 'flex' : 'hidden' }} absolute -top-1.5 -right-1.5 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full items-center justify-center transition-all duration-300 shadow-xs">
+                            {{ session('cart') ? count(session('cart')) : 0 }}
+                        </span>
+                        <svg id="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                    </div>
+                    <span data-id="PESANAN" data-en="CART">PESANAN</span>
                 </a>
 
-                <!-- Desktop Nav -->
-                <div class="hidden md:flex items-center space-x-6">
-                    <div class="bg-slate-100/80 p-1 rounded-full flex items-center">
-                        <button type="button" @click="lang = 'id'; changeLanguage('id')" :class="lang === 'id' ? 'bg-white text-[#005ea2] shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all">ID</button>
-                        <button type="button" @click="lang = 'en'; changeLanguage('en')" :class="lang === 'en' ? 'bg-white text-[#005ea2] shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all">EN</button>
+                <a href="{{ route('customer.history') }}" class="flex items-center space-x-2 text-sm font-bold text-slate-600 hover:text-[#005ea2] transition-colors group">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                    <span data-id="RIWAYAT" data-en="HISTORY">RIWAYAT</span>
+                </a>
+
+                @if(session('order_code'))
+                <a href="{{ route('customer.tracking', ['order' => session('order_code')]) }}" class="flex items-center space-x-2 text-sm font-bold text-amber-500 hover:text-amber-600 transition-colors group bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200 shadow-xs">
+                    <div class="relative">
+                        <span class="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full animate-ping"></span>
+                        <span class="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                     </div>
-                    
-                    <a href="{{ route('customer.cart') }}" class="flex items-center space-x-2 text-sm font-bold text-slate-600 hover:text-[#005ea2] transition-colors group">
-                        <div class="relative" id="cart-icon-container">
-                            <span id="cart-badge" class="{{ (session('cart') && count(session('cart')) > 0) ? 'flex' : 'hidden' }} absolute -top-1.5 -right-1.5 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full items-center justify-center transition-all duration-300">
-                                {{ session('cart') ? count(session('cart')) : 0 }}
-                            </span>
-                            <svg id="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                        </div>
-                        <span data-id="PESANAN" data-en="CART">PESANAN</span>
-                    </a>
+                    <span data-id="LACAK" data-en="TRACK">LACAK</span>
+                </a>
+                @endif
 
-                    <a href="{{ route('customer.history') }}" class="flex items-center space-x-2 text-sm font-bold text-slate-600 hover:text-[#005ea2] transition-colors group">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                        <span data-id="RIWAYAT" data-en="HISTORY">RIWAYAT</span>
-                    </a>
+                <div class="h-6 w-px bg-slate-200"></div>
+                <a href="{{ route('login') }}" class="flex items-center space-x-2 text-sm font-bold text-slate-600 hover:text-[#005ea2] transition-colors group">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover:translate-x-0.5 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+                    <span data-id="PORTAL LOGIN" data-en="PORTAL LOGIN">PORTAL LOGIN</span>
+                </a>
+            </div>
 
-                    @if(session('order_code'))
-                    <a href="{{ route('customer.tracking', ['order' => session('order_code')]) }}" class="flex items-center space-x-2 text-sm font-bold text-amber-500 hover:text-amber-600 transition-colors group bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200 shadow-sm">
-                        <div class="relative">
-                            <span class="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full animate-ping"></span>
-                            <span class="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full"></span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                        </div>
-                        <span data-id="LACAK" data-en="TRACK">LACAK</span>
-                    </a>
-                    @endif
-
-                    <div class="h-6 w-px bg-slate-200"></div>
-                    <a href="{{ route('login') }}" class="flex items-center space-x-2 text-sm font-bold text-slate-600 hover:text-[#005ea2] transition-colors group">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover:translate-x-0.5 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
-                        <span data-id="PORTAL LOGIN" data-en="PORTAL LOGIN">PORTAL LOGIN</span>
-                    </a>
+            <!-- Mobile Menu Button -->
+            <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors focus:outline-none" aria-label="Menu navigasi">
+                <svg x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                <svg x-show="mobileMenuOpen" x-cloak xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+        
+        <!-- Mobile Menu Dropdown -->
+        <div x-show="mobileMenuOpen" x-cloak class="md:hidden border-t border-slate-100 bg-white">
+            <div class="py-4 space-y-3 px-4">
+                <div class="bg-slate-50 p-1.5 rounded-full flex items-center w-max mx-auto mb-3 border border-slate-200/80">
+                    <button type="button" @click="lang = 'id'; changeLanguage('id')" :class="lang === 'id' ? 'bg-white text-[#005ea2] shadow-xs' : 'text-slate-500 hover:text-slate-700'" class="px-5 py-1.5 rounded-full text-xs font-bold transition-all">ID</button>
+                    <button type="button" @click="lang = 'en'; changeLanguage('en')" :class="lang === 'en' ? 'bg-white text-[#005ea2] shadow-xs' : 'text-slate-500 hover:text-slate-700'" class="px-5 py-1.5 rounded-full text-xs font-bold transition-all">EN</button>
                 </div>
 
-                <!-- Mobile Menu Button -->
-                <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
-                    <svg x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-                    <svg x-show="mobileMenuOpen" x-cloak xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-            </div>
-            
-            <!-- Mobile Menu Dropdown -->
-            <div x-show="mobileMenuOpen" x-cloak class="md:hidden border-t border-slate-100 bg-white">
-                <div class="py-4 space-y-3 px-2">
-                    <div class="bg-slate-50 p-1.5 rounded-full flex items-center w-max mx-auto mb-3">
-                        <button type="button" @click="lang = 'id'; changeLanguage('id')" :class="lang === 'id' ? 'bg-white text-[#005ea2] shadow-sm' : 'text-slate-500'" class="px-5 py-1.5 rounded-full text-xs font-bold transition-all">ID</button>
-                        <button type="button" @click="lang = 'en'; changeLanguage('en')" :class="lang === 'en' ? 'bg-white text-[#005ea2] shadow-sm' : 'text-slate-500'" class="px-5 py-1.5 rounded-full text-xs font-bold transition-all">EN</button>
+                <a href="{{ route('customer.menu') }}" class="flex items-center space-x-2 text-sm font-bold text-slate-700 bg-slate-50 py-3 px-4 rounded-xl hover:bg-slate-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                    <span>KATALOG RESTORAN</span>
+                </a>
+                
+                <a href="{{ route('customer.cart') }}" class="flex items-center space-x-2 text-sm font-bold text-slate-700 bg-slate-50 py-3 px-4 rounded-xl hover:bg-slate-100 transition-colors">
+                    <div class="relative">
+                        <span id="mobile-cart-badge" class="{{ (session('cart') && count(session('cart')) > 0) ? 'flex' : 'hidden' }} absolute -top-1.5 -right-1.5 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full items-center justify-center transition-all duration-300 shadow-xs">
+                            {{ session('cart') ? count(session('cart')) : 0 }}
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                     </div>
+                    <span data-id="PESANAN SAYA" data-en="MY CART">PESANAN SAYA</span>
+                </a>
 
-                    <a href="{{ route('customer.menu') }}" class="flex items-center space-x-2 text-sm font-bold text-slate-700 bg-slate-50 py-3 px-4 rounded-xl hover:bg-slate-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-                        <span>KATALOG RESTORAN</span>
-                    </a>
-                    
-                    <a href="{{ route('customer.cart') }}" class="flex items-center space-x-2 text-sm font-bold text-slate-700 bg-slate-50 py-3 px-4 rounded-xl hover:bg-slate-100">
-                        <div class="relative">
-                            <span id="mobile-cart-badge" class="{{ (session('cart') && count(session('cart')) > 0) ? 'flex' : 'hidden' }} absolute -top-1.5 -right-1.5 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full items-center justify-center transition-all duration-300">
-                                {{ session('cart') ? count(session('cart')) : 0 }}
-                            </span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                        </div>
-                        <span data-id="PESANAN SAYA" data-en="MY CART">PESANAN SAYA</span>
-                    </a>
-
-                    <a href="{{ route('customer.history') }}" class="flex items-center space-x-2 text-sm font-bold text-slate-700 bg-slate-50 py-3 px-4 rounded-xl hover:bg-slate-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                        <span>RIWAYAT & LACAK</span>
-                    </a>
-                    
-                    <a href="{{ route('login') }}" class="flex items-center justify-center space-x-2 text-sm font-bold text-white bg-[#005ea2] py-3 rounded-xl hover:bg-blue-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
-                        <span data-id="PORTAL LOGIN TENANT" data-en="TENANT LOGIN PORTAL">PORTAL LOGIN TENANT</span>
-                    </a>
+                <a href="{{ route('customer.history') }}" class="flex items-center space-x-2 text-sm font-bold text-slate-700 bg-slate-50 py-3 px-4 rounded-xl hover:bg-slate-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                    <span>RIWAYAT & LACAK</span>
+                </a>
+                
+                <a href="{{ route('login') }}" class="flex items-center justify-center space-x-2 text-sm font-bold text-white bg-[#005ea2] py-3 rounded-xl hover:bg-blue-700 shadow-xs">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+                    <span data-id="PORTAL LOGIN TENANT" data-en="TENANT LOGIN PORTAL">PORTAL LOGIN TENANT</span>
+                </a>
 
                     <!-- Other Links -->
                     <div class="pt-3 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs font-semibold text-slate-600">
@@ -114,7 +114,7 @@
     </header>
 
     <!-- Grand Tenant Hero Showcase -->
-    <section class="relative bg-gradient-to-br from-[#072540] via-[#004a80] to-[#005ea2] text-white py-10 sm:py-14 overflow-hidden shadow-inner" style="background: linear-gradient(135deg, #072540 0%, #004a80 50%, #005ea2 100%);">
+    <section class="pt-24 sm:pt-28 relative bg-gradient-to-br from-[#072540] via-[#004a80] to-[#005ea2] text-white pb-10 sm:pb-14 overflow-hidden shadow-inner" style="background: linear-gradient(135deg, #072540 0%, #004a80 50%, #005ea2 100%);">
         <!-- Ambient Glow Elements -->
         <div class="absolute -top-24 -right-24 w-96 h-96 bg-sky-400/20 rounded-full blur-3xl pointer-events-none"></div>
         <div class="absolute -bottom-20 -left-20 w-80 h-80 bg-[#8dc63f]/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -331,6 +331,10 @@
             </div>
             @endif
 
+            @php
+                $productsCatalogMap = [];
+            @endphp
+
             <!-- Products Grid with Prepared Frame for Tenant Uploads -->
             <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
                 @forelse($tenant->products as $product)
@@ -377,17 +381,18 @@
                         'variant_groups' => $productVariantGroups,
                         'is_tenant_open' => (bool) $isTenantOpen,
                     ];
+                    $productsCatalogMap[$product->id] = $productDetailData;
                 @endphp
                 <div class="menu-item-card bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all duration-300 p-5 sm:p-6 flex flex-col group relative overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#005ea2]/50 {{ !$isAvailable ? 'opacity-85 bg-slate-50/40' : '' }}"
-                     onclick="openProductDetailModal({{ json_encode($productDetailData) }})"
+                     onclick="openProductDetailModalById({{ $product->id }})"
                      tabindex="0"
                      role="button"
                      aria-label="Lihat detail menu {{ $product->name }}"
-                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); openProductDetailModal({{ json_encode($productDetailData) }});}"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); openProductDetailModalById({{ $product->id }});}"
                      data-name="{{ strtolower($product->name) }}"
                      data-desc="{{ strtolower($product->description ?? '') }}"
                      data-category="{{ strtolower($product->category ?? '') }}"
-                     title="Klik untuk melihat foto dan deskripsi lengkap {{ $product->name }}">
+                     title="Klik untuk melihat detail {{ $product->name }}">
                     
                     <!-- Dedicated Inner Rounded Image Frame -->
                     <div class="h-48 sm:h-52 rounded-2xl overflow-hidden relative mb-4 bg-white border border-slate-100/80 flex items-center justify-center shrink-0">
@@ -535,96 +540,70 @@
     <!-- FlyDine Corporate Footer (Standard Component) -->
     <x-footer />
 
-    <!-- Modal Detail Menu Lengkap (Modern Bottom Sheet Drawer dengan Frosted Glass Blur) -->
+    <!-- Modal Detail Menu Lengkap (Minimalist Floating Drawer dengan Sudut Melengkung & Frosted Blur) -->
     <div id="product-detail-modal" 
-         class="hidden fixed inset-0 z-50 flex items-end justify-center transition-opacity duration-300 opacity-0"
+         class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-5 transition-opacity duration-300 opacity-0"
          style="background-color: rgba(15, 23, 42, 0.65); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);"
          tabindex="-1"
          aria-modal="true"
          role="dialog"
          aria-labelledby="detail-modal-title">
         
-        <!-- Bottom Sheet Container (Slides up smoothly from bottom) -->
+        <!-- Sheet Card (Sudut Melengkung Nyata 32px) -->
         <div id="product-detail-sheet" 
-             class="bg-white rounded-t-[2.25rem] sm:rounded-t-[2.5rem] max-w-2xl w-full shadow-2xl border-t border-x border-slate-200/80 overflow-hidden flex flex-col max-h-[90vh] sm:max-h-[85vh] relative transform transition-transform duration-300 ease-out translate-y-full"
+             class="bg-white max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[88vh] relative transform transition-all duration-300 ease-out translate-y-8 sm:translate-y-6"
+             style="border-radius: 32px; -webkit-border-radius: 32px;"
              onclick="event.stopPropagation()">
             
-            <!-- Top Drag Handle & Quick Close Bar -->
-            <div class="pt-3 pb-2.5 px-6 flex flex-col items-center border-b border-slate-100 bg-slate-50/70 shrink-0">
+            <!-- Top Drag Handle & Close Button -->
+            <div class="pt-3.5 pb-2 px-6 flex items-center justify-between border-b border-slate-100/80 bg-white shrink-0">
+                <div class="w-8"></div>
+                <div class="w-12 h-1.5 bg-slate-300 rounded-full"></div>
                 <button type="button" 
                         onclick="closeProductDetailModal()" 
-                        class="w-12 h-1.5 bg-slate-300 hover:bg-slate-400 rounded-full transition-colors mb-2 cursor-pointer"
-                        aria-label="Tutup jendela"></button>
-                <div class="w-full flex items-center justify-between">
-                    <div class="flex items-center space-x-2">
-                        <span id="detail-modal-category" class="text-[11px] font-black uppercase tracking-wider text-[#005ea2] bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-lg">Kategori</span>
-                        <span id="detail-modal-prep" class="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200/70 px-2 py-0.5 rounded-lg inline-flex items-center gap-1">
-                            <svg class="w-3 h-3 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <span id="detail-modal-prep-text">10 menit</span>
-                        </span>
-                    </div>
-                    <button type="button" 
-                            onclick="closeProductDetailModal()" 
-                            class="p-1.5 rounded-full bg-slate-200/70 hover:bg-slate-300 text-slate-500 hover:text-slate-800 transition cursor-pointer" 
-                            aria-label="Tutup detail produk">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                </div>
+                        class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer" 
+                        aria-label="Tutup detail produk">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
             </div>
 
-            <!-- Scrollable Content Body -->
-            <div class="p-5 sm:p-6 overflow-y-auto space-y-4">
-                <!-- Side-by-Side on desktop / Stacked on mobile -->
-                <div class="grid grid-cols-1 sm:grid-cols-12 gap-5 items-start">
-                    <!-- Image Frame -->
-                    <div class="sm:col-span-5 h-56 sm:h-64 rounded-2xl overflow-hidden relative bg-gradient-to-b from-slate-50 to-slate-100/70 border border-slate-200/80 flex items-center justify-center p-3 shadow-inner shrink-0">
-                        <img id="detail-modal-img" 
-                             src="" 
-                             alt="" 
-                             class="w-full h-full object-contain rounded-xl hover:scale-105 transition-transform duration-300">
-                        <div id="detail-modal-fallback" class="hidden w-full h-full flex flex-col items-center justify-center text-slate-300">
-                            <div class="w-14 h-14 rounded-2xl bg-white shadow-xs border border-slate-200/60 flex items-center justify-center text-slate-300">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                            <span class="text-[11px] font-semibold text-slate-400 mt-2 uppercase tracking-wider">Foto Belum Ditambahkan</span>
+            <!-- Scrollable Content Body (Minimalis & Bersih) -->
+            <div class="p-6 overflow-y-auto space-y-4">
+                <!-- Large Image Frame -->
+                <div class="h-60 sm:h-64 rounded-2xl overflow-hidden relative bg-slate-50 border border-slate-100 flex items-center justify-center p-3 shrink-0">
+                    <img id="detail-modal-img" 
+                         src="" 
+                         alt="" 
+                         class="w-full h-full object-contain rounded-xl hover:scale-105 transition-transform duration-300">
+                    <div id="detail-modal-fallback" class="hidden w-full h-full flex flex-col items-center justify-center text-slate-300">
+                        <div class="w-14 h-14 rounded-2xl bg-white shadow-xs border border-slate-200/60 flex items-center justify-center text-slate-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
                         </div>
-                    </div>
-
-                    <!-- Right Column: Title, Stock, & Description Box -->
-                    <div class="sm:col-span-7 flex flex-col justify-between space-y-3">
-                        <div>
-                            <h2 id="detail-modal-title" class="text-xl sm:text-2xl font-black text-slate-900 leading-snug tracking-tight"></h2>
-                            <div class="mt-2">
-                                <span id="detail-modal-status-pill" class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold"></span>
-                            </div>
-                        </div>
-
-                        <!-- Description Box -->
-                        <div class="bg-blue-50/40 rounded-2xl p-4 border border-blue-100/70">
-                            <span class="block text-[11px] font-black uppercase tracking-wider text-[#005ea2] mb-1.5 flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5 text-[#005ea2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                <span>Deskripsi Lengkap Menu</span>
-                            </span>
-                            <p id="detail-modal-desc" class="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed whitespace-pre-line"></p>
-                        </div>
+                        <span class="text-[11px] font-semibold text-slate-400 mt-2 uppercase tracking-wider">Foto Belum Ditambahkan</span>
                     </div>
                 </div>
+
+                <!-- Product Full Title -->
+                <div>
+                    <h2 id="detail-modal-title" class="text-xl sm:text-2xl font-black text-slate-900 leading-snug tracking-tight"></h2>
+                </div>
+
+                <!-- Product Description Text (Direct, Clean, No Heavy Header) -->
+                <p id="detail-modal-desc" class="text-sm sm:text-base text-slate-600 font-normal leading-relaxed whitespace-pre-line"></p>
 
                 <!-- Variant Groups Preview if Available -->
-                <div id="detail-modal-variants-wrap" class="hidden pt-2 border-t border-slate-100">
-                    <span class="block text-[11px] font-black uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1.5">
-                        <span>✨</span>
-                        <span>Opsi Kustomisasi / Varian Tersedia</span>
+                <div id="detail-modal-variants-wrap" class="hidden pt-3 border-t border-slate-100">
+                    <span class="block text-[11px] font-black uppercase tracking-wider text-slate-400 mb-2">
+                        Pilihan Kustomisasi:
                     </span>
                     <div id="detail-modal-variants-list" class="flex flex-wrap gap-1.5"></div>
-                    <p class="text-[11px] text-slate-400 mt-1.5 italic">* Pilihan varian dapat ditentukan saat menekan tombol Pesan Menu Ini.</p>
                 </div>
             </div>
 
-            <!-- Sticky Bottom Sheet Footer -->
-            <div class="px-6 py-4 border-t border-slate-100 bg-white/95 backdrop-blur-md flex items-center justify-between gap-4 shrink-0">
+            <!-- Sticky Bottom Footer (Price + Order Action) -->
+            <div class="px-6 py-4 border-t border-slate-100 bg-white flex items-center justify-between gap-4 shrink-0">
                 <div>
                     <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Harga Menu</span>
                     <span id="detail-modal-price" class="text-2xl font-black text-[#005ea2] tracking-tight">Rp 0</span>
@@ -638,6 +617,10 @@
                     <div id="detail-modal-order-btn-wrap">
                         <!-- Dynamic Order Button or Closed / Sold Out Badge -->
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
                 </div>
             </div>
         </div>
@@ -757,40 +740,35 @@
         };
 
         // Modal Detail Menu Engine
+        const productsCatalog = @json($productsCatalogMap);
         let activeProductDetailData = null;
+        let isDetailModalAnimating = false;
 
-        function openProductDetailModal(data) {
+        window.openProductDetailModalById = function(productId) {
+            if (!productsCatalog || !productsCatalog[productId]) return;
+            window.openProductDetailModal(productsCatalog[productId]);
+        };
+
+        window.openProductDetailModal = function(data) {
             if (!data) return;
             activeProductDetailData = data;
 
             const modal = document.getElementById('product-detail-modal');
+            const sheet = document.getElementById('product-detail-sheet');
             const titleEl = document.getElementById('detail-modal-title');
             const descEl = document.getElementById('detail-modal-desc');
-            const categoryEl = document.getElementById('detail-modal-category');
-            const prepWrap = document.getElementById('detail-modal-prep');
-            const prepText = document.getElementById('detail-modal-prep-text');
             const priceEl = document.getElementById('detail-modal-price');
             const imgEl = document.getElementById('detail-modal-img');
             const fallbackEl = document.getElementById('detail-modal-fallback');
-            const statusPill = document.getElementById('detail-modal-status-pill');
             const variantsWrap = document.getElementById('detail-modal-variants-wrap');
             const variantsList = document.getElementById('detail-modal-variants-list');
             const orderBtnWrap = document.getElementById('detail-modal-order-btn-wrap');
 
+            if (!modal || !sheet) return;
+
             if (titleEl) titleEl.textContent = data.name || '';
             if (descEl) descEl.textContent = data.description || 'Deskripsi menu belum tersedia.';
-            if (categoryEl) categoryEl.textContent = data.category || 'Menu';
             if (priceEl) priceEl.textContent = 'Rp ' + data.formatted_price;
-
-            // Preparation Time
-            if (prepWrap && prepText) {
-                if (data.preparation_time > 0) {
-                    prepText.textContent = `${data.preparation_time} menit`;
-                    prepWrap.classList.remove('hidden');
-                } else {
-                    prepWrap.classList.add('hidden');
-                }
-            }
 
             // Image handling
             if (imgEl && fallbackEl) {
@@ -806,20 +784,6 @@
                 } else {
                     imgEl.style.display = 'none';
                     fallbackEl.classList.remove('hidden');
-                }
-            }
-
-            // Status Pill
-            if (statusPill) {
-                if (!data.is_available) {
-                    statusPill.className = 'inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-600 border border-rose-200';
-                    statusPill.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-500"></span><span>Stok Habis</span>';
-                } else if (data.is_low_stock) {
-                    statusPill.className = 'inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200';
-                    statusPill.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500"></span><span>Sisa ${data.stock} porsi</span>`;
-                } else {
-                    statusPill.className = 'inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
-                    statusPill.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500"></span><span>Tersedia & Siap Dipesan</span>';
                 }
             }
 
@@ -860,7 +824,7 @@
                     `;
                     btn.onclick = function() {
                         const targetData = activeProductDetailData;
-                        closeProductDetailModal();
+                        window.closeProductDetailModal();
                         handleOrderButtonClick(
                             targetData.id,
                             targetData.tenant_id,
@@ -880,21 +844,19 @@
                 }
             }
 
-            if (modal && sheet) {
-                modal.classList.remove('hidden');
-                document.body.classList.add('overflow-hidden');
-                requestAnimationFrame(() => {
-                    modal.classList.remove('opacity-0');
-                    modal.classList.add('opacity-100');
-                    sheet.classList.remove('translate-y-full');
-                    sheet.classList.add('translate-y-0');
-                });
-            }
-        }
+            modal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
 
-        let isDetailModalAnimating = false;
+            // Force layout reflow before triggering CSS transitions
+            void sheet.offsetHeight;
 
-        function closeProductDetailModal() {
+            modal.classList.remove('opacity-0');
+            modal.classList.add('opacity-100');
+            sheet.classList.remove('translate-y-8', 'sm:translate-y-6', 'opacity-0');
+            sheet.classList.add('translate-y-0', 'opacity-100');
+        };
+
+        window.closeProductDetailModal = function() {
             if (isDetailModalAnimating) return;
             const modal = document.getElementById('product-detail-modal');
             const sheet = document.getElementById('product-detail-sheet');
@@ -902,8 +864,8 @@
 
             isDetailModalAnimating = true;
             if (sheet) {
-                sheet.classList.remove('translate-y-0');
-                sheet.classList.add('translate-y-full');
+                sheet.classList.remove('translate-y-0', 'opacity-100');
+                sheet.classList.add('translate-y-8', 'sm:translate-y-6', 'opacity-0');
             }
             modal.classList.remove('opacity-100');
             modal.classList.add('opacity-0');
@@ -914,6 +876,14 @@
                 activeProductDetailData = null;
                 isDetailModalAnimating = false;
             }, 300);
+        };
+
+        function openProductDetailModal(data) {
+            window.openProductDetailModal(data);
+        }
+
+        function closeProductDetailModal() {
+            window.closeProductDetailModal();
         }
 
         // Close detail modal on Escape key or outside click
