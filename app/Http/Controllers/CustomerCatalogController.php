@@ -711,6 +711,9 @@ class CustomerCatalogController extends Controller
             'phone_number.required' => 'Nomor WhatsApp / telepon aktif wajib diisi.',
             'phone_number.regex' => 'Format nomor telepon tidak valid. Masukkan nomor ponsel aktif (contoh: 08123456789 atau +628123456789) dengan 9–15 digit angka.',
             'notes.max' => 'Catatan pesanan maksimal 100 karakter.',
+            'flight_number.required' => 'Nomor penerbangan wajib diisi untuk penumpang pesawat.',
+            'boarding_time.required' => 'Waktu boarding wajib diisi untuk penumpang pesawat.',
+            'boarding_time.date_format' => 'Format waktu boarding tidak valid (gunakan format JJ:MM, contoh: 14:30).',
         ];
 
         // Validasi conditional untuk penumpang
@@ -795,8 +798,8 @@ class CustomerCatalogController extends Controller
         // Validasi SLA Waktu Boarding untuk Penumpang (Minimal >= max(15, preparation_time) menit dari sekarang)
         $boardingDateTime = null;
         if ($request->customer_type === 'penumpang') {
-            $boardingCarbon = \Carbon\Carbon::createFromFormat('H:i', $request->boarding_time);
-            $nowCarbon = now();
+            $nowCarbon = now()->setTimezone('Asia/Jakarta');
+            $boardingCarbon = \Carbon\Carbon::createFromFormat('H:i', $request->boarding_time, 'Asia/Jakarta');
             $boardingDateTime = $nowCarbon->copy()->setTime($boardingCarbon->hour, $boardingCarbon->minute, 0);
 
             $diffMinutes = $nowCarbon->diffInMinutes($boardingDateTime, false);
@@ -805,12 +808,12 @@ class CustomerCatalogController extends Controller
             // Jika jam boarding terlihat sudah lewat pada hari yang sama, tetapi jika dimajukan 1 hari (besok)
             // selisihnya berada dalam rentang wajar pemesanan (antara 0 hingga 8 jam / 480 menit ke depan),
             // maka ini adalah penerbangan dini hari berikutnya.
-            if ($diffMinutes < 0 && ($diffMinutes + 1440) >= 0 && ($diffMinutes + 1440) <= 480) {
+            if (($diffMinutes < 0 || $boardingDateTime->isBefore($nowCarbon)) && ($diffMinutes + 1440) >= 0 && ($diffMinutes + 1440) <= 480) {
                 $boardingDateTime->addDay();
                 $diffMinutes = $nowCarbon->diffInMinutes($boardingDateTime, false);
             }
 
-            if ($diffMinutes < 0) {
+            if ($diffMinutes < 0 || $boardingDateTime->isBefore($nowCarbon)) {
                 return redirect()->back()->withInput()->withErrors([
                     'boarding_time' => 'Jadwal waktu boarding yang Anda masukkan sudah terlewat dari waktu saat ini.'
                 ]);
@@ -901,7 +904,8 @@ class CustomerCatalogController extends Controller
             $fullBoardingTime = $boardingDateTime;
             // Jika boarding time lebih awal dari waktu pembatalan otomatis standar (15 menit),
             // batasi pembatalan tepat pada saat boarding time agar pelanggan tidak membayar setelah pesawat terbang.
-            if ($fullBoardingTime->isBefore($autoCancelAt)) {
+            // Pastikan auto_cancel_at tidak pernah berada di masa lalu (DEF-002 Guard).
+            if ($fullBoardingTime && $fullBoardingTime->isBefore($autoCancelAt) && $fullBoardingTime->isAfter(now())) {
                 $autoCancelAt = $fullBoardingTime;
             }
         }

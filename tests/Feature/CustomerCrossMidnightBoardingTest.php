@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use App\Models\Tenant;
 use App\Models\Product;
+use App\Models\Order;
 
 class CustomerCrossMidnightBoardingTest extends TestCase
 {
@@ -41,6 +42,15 @@ class CustomerCrossMidnightBoardingTest extends TestCase
         ]);
     }
 
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+        parent::tearDown();
+    }
+
+    /**
+     * Skenario 1: Lintas tengah malam valid (boarding esok dini hari dalam jendela 8 jam) diterima.
+     */
     public function test_cross_midnight_flight_is_accepted_when_boarding_next_day(): void
     {
         // Simulasi waktu saat ini: Pukul 23:40 malam tanggal 27 Oktober
@@ -74,10 +84,11 @@ class CustomerCrossMidnightBoardingTest extends TestCase
             'flight_number' => 'GA-888',
             'boarding_time' => '2026-10-28 01:15:00', // Tercatat tanggal esok hari
         ]);
-
-        Carbon::setTestNow(); // Reset time
     }
 
+    /**
+     * Skenario 2: Lintas tengah malam terlalu dekat (< 15 menit) ditolak karena SLA persiapan dapur.
+     */
     public function test_cross_midnight_flight_under_15_minutes_is_rejected(): void
     {
         // Simulasi waktu saat ini: Pukul 23:55 malam (5 menit sebelum tengah malam)
@@ -107,10 +118,11 @@ class CustomerCrossMidnightBoardingTest extends TestCase
 
         $response->assertSessionHasErrors(['boarding_time']);
         $this->assertStringContainsString('Waktu boarding terlalu dekat', session('errors')->first('boarding_time'));
-
-        Carbon::setTestNow();
     }
 
+    /**
+     * Skenario 3: Waktu boarding yang sudah lewat (lampau) ditolak (Verifikasi DEF-002 / TC-AUTO-04).
+     */
     public function test_past_boarding_time_is_rejected(): void
     {
         // Simulasi siang hari pukul 14:00
@@ -155,7 +167,106 @@ class CustomerCrossMidnightBoardingTest extends TestCase
 
         $responseMorning->assertSessionHasErrors(['boarding_time']);
         $this->assertStringContainsString('sudah terlewat', session('errors')->first('boarding_time'));
+    }
 
-        Carbon::setTestNow();
+    /**
+     * Skenario 4: Boarding time valid (>= 15 menit) diterima dan auto_cancel_at tidak pernah jatuh di masa lalu (DEF-002).
+     */
+    public function test_valid_boarding_time_is_accepted_and_auto_cancel_at_is_always_in_future(): void
+    {
+        $testNow = Carbon::parse('2026-10-27 10:00:00');
+        Carbon::setTestNow($testNow);
+
+        $cart = [
+            $this->product->id => [
+                'id' => $this->product->id,
+                'name' => $this->product->name,
+                'price' => $this->product->price,
+                'quantity' => 1,
+                'tenant_id' => $this->tenant->id,
+            ],
+        ];
+
+        // Penumpang memasukkan boarding tepat 20 menit dari sekarang (10:20)
+        $response = $this->withSession(['cart' => $cart])
+            ->post(route('customer.checkout'), [
+                'customer_name' => 'Andi Penumpang',
+                'phone_number' => '081234567890',
+                'customer_type' => 'penumpang',
+                'flight_number' => 'ID-6500',
+                'boarding_time' => '10:20',
+                'pickup_method' => 'ambil_sendiri',
+                'payment_method' => 'qris',
+            ]);
+
+        $response->assertSessionHasNoErrors();
+
+        $order = Order::where('customer_name', 'Andi Penumpang')->first();
+        $this->assertNotNull($order);
+        $this->assertEquals('2026-10-27 10:20:00', $order->boarding_time->format('Y-m-d H:i:s'));
+        $this->assertTrue($order->auto_cancel_at->isAfter($testNow), 'auto_cancel_at harus berada di masa depan.');
+        $this->assertEquals('menunggu', $order->status);
+    }
+
+    /**
+     * Skenario 5: Validasi wajib isi boarding_time untuk penumpang (TC-EP-04).
+     */
+    public function test_passenger_must_provide_boarding_time(): void
+    {
+        $cart = [
+            $this->product->id => [
+                'id' => $this->product->id,
+                'name' => $this->product->name,
+                'price' => $this->product->price,
+                'quantity' => 1,
+                'tenant_id' => $this->tenant->id,
+            ],
+        ];
+
+        $response = $this->withSession(['cart' => $cart])
+            ->post(route('customer.checkout'), [
+                'customer_name' => 'Budi Tanpa Boarding',
+                'phone_number' => '081234567890',
+                'customer_type' => 'penumpang',
+                'flight_number' => 'GA-123',
+                'boarding_time' => '', // Dikosongkan
+                'pickup_method' => 'ambil_sendiri',
+                'payment_method' => 'qris',
+            ]);
+
+        $response->assertSessionHasErrors(['boarding_time']);
+        $this->assertStringContainsString('wajib diisi', session('errors')->first('boarding_time'));
+    }
+
+    /**
+     * Skenario 6: Pengunjung umum tidak diwajibkan mengisi boarding_time (TC-EP-03).
+     */
+    public function test_visitor_does_not_require_boarding_time(): void
+    {
+        $cart = [
+            $this->product->id => [
+                'id' => $this->product->id,
+                'name' => $this->product->name,
+                'price' => $this->product->price,
+                'quantity' => 1,
+                'tenant_id' => $this->tenant->id,
+            ],
+        ];
+
+        $response = $this->withSession(['cart' => $cart])
+            ->post(route('customer.checkout'), [
+                'customer_name' => 'Candra Pengunjung',
+                'phone_number' => '081234567890',
+                'customer_type' => 'pengunjung',
+                'pickup_method' => 'ambil_sendiri',
+                'payment_method' => 'qris',
+            ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('orders', [
+            'customer_name' => 'Candra Pengunjung',
+            'flight_number' => null,
+            'boarding_time' => null,
+        ]);
     }
 }
