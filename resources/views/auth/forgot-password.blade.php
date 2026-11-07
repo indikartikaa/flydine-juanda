@@ -58,6 +58,17 @@
     {{-- RIGHT --}}
     <section class="w-full lg:w-[41%] min-h-screen flex items-center justify-center p-6 relative z-10 lg:bg-[#f8fafc]">
 
+        <!-- Tombol Kembali ke Login -->
+        <a href="{{ route('login') }}" 
+           class="absolute top-4 left-4 sm:top-8 sm:left-8 flex items-center gap-2 px-3.5 py-1.5 rounded-lg shadow-sm hover:shadow transition-all z-20 font-bold text-xs group"
+           style="background-color: #ffffff !important; color: #005ea2 !important; border: 1px solid #cbd5e1 !important;"
+           title="Kembali ke Login">
+            <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" style="color: #005ea2 !important;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            <span data-i18n="backShort" style="color: #005ea2 !important;">Kembali</span>
+        </a>
+
         <!-- Tombol Bahasa -->
         <div class="absolute top-4 right-4 sm:top-8 sm:right-8 flex bg-white/30 backdrop-blur-md p-1 rounded-lg border border-white/40 shadow-sm z-20">
             <button id="btn-id" type="button" onclick="setLanguage('id')" class="px-3 py-1.5 rounded-md text-xs font-bold bg-white text-[#005ea2] shadow-sm transition-all">ID</button>
@@ -102,8 +113,15 @@
                         </label>
                         <input id="email" type="email" name="email" value="{{ old('email') }}" 
                                data-placeholder="emailPlaceholder" placeholder="contoh@flydine.com" required autofocus autocomplete="email"
-                               class="input-flydine shadow-inner">
-                        <x-input-error :messages="$errors->get('email')" class="mt-2 text-xs text-red-300" />
+                               class="input-flydine shadow-inner @error('email') !border-rose-400 !ring-2 !ring-rose-400/50 @enderror">
+                        @error('email')
+                            <div class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-white bg-rose-600/90 border border-rose-400/50 px-3 py-1.5 rounded-lg shadow-sm">
+                                <svg class="w-3.5 h-3.5 text-rose-200 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>{{ $message }}</span>
+                            </div>
+                        @enderror
                     </div>
 
                     <!-- Tombol (Putih, teks Biru) -->
@@ -147,6 +165,7 @@ const translations = {
         emailPlaceholder: 'contoh@flydine.com',
         submit: 'KIRIM LINK RESET',
         back: 'Kembali ke Login',
+        backShort: 'Kembali',
         successMessage: 'Link reset kata sandi telah dikirim ke email Anda.'
     },
 
@@ -164,6 +183,7 @@ const translations = {
         emailPlaceholder: 'example@flydine.com',
         submit: 'SEND RESET LINK',
         back: 'Back to Login',
+        backShort: 'Back',
         successMessage: 'The password reset link has been sent to your email.'
     }
 };

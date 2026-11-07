@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use App\Models\Order;
+use App\Models\ActivityLog;
 use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 
@@ -52,12 +53,21 @@ class AdminFraudController extends Controller
             ->where('blocked_at', '>=', now()->subDays(7))
             ->count();
 
+        // 10 Log Audit Aktivitas Deteksi Fraud & Pembatalan Terkini (TC-ORD-08)
+        $recent_fraud_logs = ActivityLog::whereIn('action', [
+            'ORDER_CANCELLED',
+            'CUSTOMER_BLOCKED',
+            'CUSTOMER_UNBLOCKED',
+            'ACTIVE_ORDER_LIMIT_REACHED'
+        ])->latest()->take(10)->get();
+
         return view('admin.fraud-monitoring', compact(
             'customers',
             'total_blocked',
             'total_active',
             'total_cancelled_orders',
-            'recent_blocked_7d'
+            'recent_blocked_7d',
+            'recent_fraud_logs'
         ));
     }
 

@@ -183,6 +183,18 @@ class AdminController extends Controller
             'contract_start' => 'nullable|date',
             'contract_end' => 'nullable|date|after_or_equal:contract_start',
             'email' => 'required|email|unique:users,email',
+        ], [
+            'email.unique' => 'Email PIC ini sudah terdaftar. Silakan gunakan alamat email lain.',
+            'email.required' => 'Email login PIC wajib diisi.',
+            'email.email' => 'Format email PIC tidak valid.',
+            'tenant_code.unique' => 'Kode tenant ini sudah digunakan oleh tenant lain.',
+            'tenant_code.required' => 'Kode tenant wajib diisi.',
+            'name.required' => 'Nama brand atau outlet wajib diisi.',
+            'terminal.required' => 'Terminal wajib dipilih.',
+            'zone.required' => 'Area zona wajib dipilih.',
+            'floor_location.required' => 'Detail ruang atau lantai wajib diisi.',
+            'category.required' => 'Kategori F&B wajib dipilih.',
+            'contract_end.after_or_equal' => 'Tanggal akhir kontrak harus sama atau setelah tanggal mulai kontrak.',
         ]);
 
         \Illuminate\Support\Facades\DB::transaction(function () use ($validated) {
@@ -226,6 +238,15 @@ class AdminController extends Controller
             'category' => 'required|string|max:255',
             'contract_start' => 'nullable|date',
             'contract_end' => 'nullable|date|after_or_equal:contract_start',
+        ], [
+            'tenant_code.unique' => 'Kode tenant ini sudah digunakan oleh tenant lain.',
+            'tenant_code.required' => 'Kode tenant wajib diisi.',
+            'name.required' => 'Nama brand atau outlet wajib diisi.',
+            'terminal.required' => 'Terminal wajib dipilih.',
+            'zone.required' => 'Area zona wajib dipilih.',
+            'floor_location.required' => 'Detail ruang atau lantai wajib diisi.',
+            'category.required' => 'Kategori F&B wajib dipilih.',
+            'contract_end.after_or_equal' => 'Tanggal akhir kontrak harus sama atau setelah tanggal mulai kontrak.',
         ]);
 
         $tenant->update($validated);

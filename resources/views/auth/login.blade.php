@@ -63,6 +63,17 @@
          ========================================== --}}
     <section class="w-full lg:w-[41%] min-h-screen flex items-center justify-center p-6 relative z-10 lg:bg-[#f8fafc]">
 
+        <!-- Tombol Kembali ke Halaman Utama -->
+        <a href="{{ route('customer.menu') }}" 
+           class="absolute top-4 left-4 sm:top-8 sm:left-8 flex items-center gap-2 px-3.5 py-1.5 rounded-lg shadow-sm hover:shadow transition-all z-20 font-bold text-xs group"
+           style="background-color: #ffffff !important; color: #005ea2 !important; border: 1px solid #cbd5e1 !important;"
+           title="Kembali ke Halaman Utama">
+            <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" style="color: #005ea2 !important;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            <span data-i18n="backToHome" style="color: #005ea2 !important;">Halaman Utama</span>
+        </a>
+
         <!-- Tombol Bahasa (Responsif: Turun sedikit di mobile agar tidak tertutup logo) -->
         <div class="absolute top-4 right-4 sm:top-8 sm:right-8 flex bg-white/30 backdrop-blur-md p-1 rounded-lg border border-white/40 shadow-sm z-20">
             <button id="btn-id" type="button" onclick="setLanguage('id')" class="px-3 py-1.5 rounded-md text-xs font-bold bg-white text-[#005ea2] shadow-sm transition-all">ID</button>
@@ -116,9 +127,17 @@
                             Email / Kode Tenant
                         </label>
                         <input id="email" type="text" name="email" value="{{ old('email') }}" 
+                               data-placeholder="emailPlaceholder"
                                placeholder="Email atau Kode Tenant (Contoh: FB-T1-02-01)" required autofocus autocomplete="username"
-                               class="input-flydine shadow-inner">
-                        <x-input-error :messages="$errors->get('email')" class="mt-2 text-xs text-red-300" />
+                               class="input-flydine shadow-inner @error('email') !border-rose-400 !ring-2 !ring-rose-400/50 @enderror">
+                        @error('email')
+                            <div class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-white bg-rose-600/90 border border-rose-400/50 px-3 py-1.5 rounded-lg shadow-sm">
+                                <svg class="w-3.5 h-3.5 text-rose-200 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>{{ $message }}</span>
+                            </div>
+                        @enderror
                     </div>
 
                     <div>
@@ -128,14 +147,21 @@
                         <div class="relative">
                             <input id="password" type="password" name="password" 
                                    data-placeholder="passwordPlaceholder" placeholder="Enter your password" required autocomplete="current-password"
-                                   class="input-flydine shadow-inner pr-12">
+                                   class="input-flydine shadow-inner pr-12 @error('password') !border-rose-400 !ring-2 !ring-rose-400/50 @enderror">
                             
                             <!-- Eye Icon -->
                             <button type="button" onclick="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                             </button>
                         </div>
-                        <x-input-error :messages="$errors->get('password')" class="mt-2 text-xs text-red-300" />
+                        @error('password')
+                            <div class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-white bg-rose-600/90 border border-rose-400/50 px-3 py-1.5 rounded-lg shadow-sm">
+                                <svg class="w-3.5 h-3.5 text-rose-200 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>{{ $message }}</span>
+                            </div>
+                        @enderror
                     </div>
 
                     <div class="flex items-center justify-between pt-1">
@@ -187,7 +213,11 @@ const translations = {
         remember: 'Ingat saya',
         forgot: 'Lupa Sandi?',
         login: 'Masuk',
-        resetSuccess: 'Kata sandi berhasil diubah. Silakan login kembali.'
+        resetSuccess: 'Kata sandi berhasil diubah. Silakan login kembali.',
+        loginFailedTitle: 'Login Gagal / Akses Ditolak',
+        emailPlaceholder: 'Email atau Kode Tenant (Contoh: FB-T1-02-01)',
+        backToHome: 'Halaman Utama',
+        backToHomeLong: 'Kembali ke Halaman Utama'
     },
     en: {
         headline: 'Smart Food Ordering for Juanda International Airport',
@@ -201,7 +231,11 @@ const translations = {
         remember: 'Remember me',
         forgot: 'Forgot Password?',
         login: 'Login',
-        resetSuccess: 'Password changed successfully. Please login again.'
+        resetSuccess: 'Password changed successfully. Please login again.',
+        loginFailedTitle: 'Login Failed / Access Denied',
+        emailPlaceholder: 'Email or Tenant Code (e.g. FB-T1-02-01)',
+        backToHome: 'Home',
+        backToHomeLong: 'Back to Home Page'
     }
 };
 

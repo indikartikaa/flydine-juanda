@@ -322,6 +322,73 @@
 
     </div>
 
+    <!-- Log Audit & Aktivitas Deteksi Fraud Terkini (TC-ORD-08 Audit Trail) -->
+    <div class="bg-white rounded-2xl shadow-2xs border border-slate-200/90 overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                <h3 class="font-black text-slate-900 text-sm tracking-tight">Audit Trail dan Log Aktivitas Deteksi Fraud Terkini</h3>
+            </div>
+            <span class="text-[11px] font-bold text-slate-400">10 Catatan Terakhir</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider font-black">
+                        <th class="px-5 py-3">Waktu</th>
+                        <th class="px-5 py-3">Aktivitas / Event</th>
+                        <th class="px-5 py-3">Keterangan Deteksi</th>
+                        <th class="px-5 py-3 text-right">IP Address</th>
+                    </tr>
+                </thead>
+                <tbody class="text-xs divide-y divide-slate-100 font-medium">
+                    @forelse($recent_fraud_logs as $log)
+                    <tr class="hover:bg-slate-50/70 transition-colors">
+                        <td class="px-5 py-3 whitespace-nowrap text-slate-500 font-mono text-[11px]">
+                            {{ $log->created_at->format('d M H:i:s') }}
+                            <span class="text-slate-400 text-[10px] block">({{ $log->created_at->diffForHumans() }})</span>
+                        </td>
+                        <td class="px-5 py-3 whitespace-nowrap">
+                            @if($log->action === 'ORDER_CANCELLED')
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                    Batal Pesanan
+                                </span>
+                            @elseif($log->action === 'CUSTOMER_BLOCKED')
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                    Akun Diblokir
+                                </span>
+                            @elseif($log->action === 'CUSTOMER_UNBLOCKED')
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    Buka Blokir
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700">
+                                    {{ $log->action }}
+                                </span>
+                            @endif
+                        </td>
+                        <td class="px-5 py-3 text-slate-700">
+                            {{ $log->description }}
+                        </td>
+                        <td class="px-5 py-3 text-right font-mono text-[11px] text-slate-400 whitespace-nowrap">
+                            {{ $log->ip_address ?? '127.0.0.1' }}
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="4" class="px-5 py-6 text-center text-slate-400 text-xs">
+                            Belum ada aktivitas pembatalan atau deteksi fraud yang tercatat.
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- ========================================================================= -->
     <!-- MODAL KONFIRMASI: BUKA BLOKIR AKUN PELANGGAN (FULL FROSTED GLASS BLUR)    -->
     <!-- ========================================================================= -->

@@ -109,4 +109,27 @@ class TenantManagementTest extends TestCase
             'is_active' => false,
         ]);
     }
+
+    public function test_admin_ops_cannot_create_tenant_with_duplicate_pic_email(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin_ops']);
+        User::factory()->create(['email' => 'duplicate@flydine.com']);
+
+        $response = $this->actingAs($admin)->from(route('admin.tenants.index'))->post(route('admin.tenants.store'), [
+            'name' => 'Outlet Duplikat',
+            'company_name' => 'PT Duplikat',
+            'tenant_code' => 'T1-DUPLIKAT',
+            'email' => 'duplicate@flydine.com',
+            'category' => 'Beverages & Coffee',
+            'terminal' => 'T1',
+            'zone' => 'Airside',
+            'floor_location' => 'Lantai 2',
+        ]);
+
+        $response->assertRedirect(route('admin.tenants.index'));
+        $response->assertSessionHasErrors(['email' => 'Email PIC ini sudah terdaftar. Silakan gunakan alamat email lain.']);
+        $this->assertDatabaseMissing('tenants', [
+            'tenant_code' => 'T1-DUPLIKAT',
+        ]);
+    }
 }

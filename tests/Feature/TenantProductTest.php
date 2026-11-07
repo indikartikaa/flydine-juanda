@@ -179,4 +179,85 @@ class TenantProductTest extends TestCase
         $product->refresh();
         $this->assertEquals(7, $product->stock);
     }
+
+    public function test_tenant_staff_can_delete_product_successfully_tc_kat_03(): void
+    {
+        [$tenant, $user] = $this->createTenantStaff();
+
+        $product = Product::create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Menu Siap Hapus',
+            'category' => 'Snack',
+            'price' => 20000,
+            'stock' => 10,
+            'is_available' => true,
+        ]);
+
+        $response = $this->actingAs($user)->delete(route('tenant.products.destroy', $product));
+
+        $response->assertRedirect(route('tenant.products'));
+        $response->assertSessionHas('success');
+
+        $this->assertSoftDeleted('products', [
+            'id' => $product->id,
+        ]);
+
+        // Pastikan tidak ada produk aktif lagi di katalog tenant
+        $this->assertEquals(0, Product::where('tenant_id', $tenant->id)->count());
+    }
+
+    public function test_tenant_staff_can_delete_product_with_existing_orders_without_query_exception(): void
+    {
+        [$tenant, $user] = $this->createTenantStaff();
+
+        $product = Product::create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Produk Dengan Pesanan',
+            'category' => 'Snack',
+            'price' => 25000,
+            'stock' => 10,
+            'is_available' => true,
+        ]);
+
+        $customer = \App\Models\Customer::create([
+            'name' => 'Tester Customer',
+            'phone_number' => '081234567890',
+        ]);
+
+        $order = \App\Models\Order::create([
+            'tenant_id' => $tenant->id,
+            'customer_id' => $customer->id,
+            'order_code' => 'ORD-TEST-KAT-03',
+            'customer_name' => 'Tester Customer',
+            'status' => 'selesai',
+            'auto_cancel_at' => now()->addMinutes(30),
+            'ordered_at' => now(),
+            'total_amount' => 25000,
+        ]);
+
+        \App\Models\OrderItem::create([
+            'order_id' => $order->id,
+            'product_id' => $product->id,
+            'product_name_snapshot' => $product->name,
+            'quantity' => 1,
+            'unit_price' => 25000,
+            'subtotal' => 25000,
+        ]);
+
+        // Hapus produk yang memiliki relasi order_items (tidak boleh memicu QueryException)
+        $response = $this->actingAs($user)->delete(route('tenant.products.destroy', $product));
+
+        $response->assertRedirect(route('tenant.products'));
+        $response->assertSessionHas('success');
+
+        $this->assertSoftDeleted('products', [
+            'id' => $product->id,
+        ]);
+
+        // Relasi order_items tetap aman
+        $this->assertDatabaseHas('order_items', [
+            'order_id' => $order->id,
+            'product_id' => $product->id,
+        ]);
+    }
 }

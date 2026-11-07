@@ -555,6 +555,33 @@ class CustomerCartAjaxTest extends TestCase
         $this->assertDatabaseHas('orders', [
             'customer_name' => 'Agus Pratama',
         ]);
+
+        // 4. TC-BVA-16: Accepted if name is exactly 100 characters
+        $name100 = str_repeat('A', 100);
+        $res100 = $this->withSession(['cart' => $cart])
+            ->post(route('customer.checkout'), [
+                'customer_name' => $name100,
+                'phone_number' => '081299112244',
+                'customer_type' => 'pengunjung',
+                'pickup_method' => 'ambil_sendiri',
+                'payment_method' => 'qris',
+            ]);
+        $res100->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('orders', [
+            'customer_name' => $name100,
+        ]);
+
+        // 5. TC-BVA-17: Rejected with validation error if name is 101 characters (not error 500)
+        $name101 = str_repeat('B', 101);
+        $res101 = $this->withSession(['cart' => $cart])
+            ->post(route('customer.checkout'), [
+                'customer_name' => $name101,
+                'phone_number' => '081299112255',
+                'customer_type' => 'pengunjung',
+                'pickup_method' => 'ambil_sendiri',
+                'payment_method' => 'qris',
+            ]);
+        $res101->assertSessionHasErrors(['customer_name' => 'Nama pemesan maksimal 100 karakter.']);
     }
 
     public function test_checkout_normalizes_and_uppercases_flight_number(): void

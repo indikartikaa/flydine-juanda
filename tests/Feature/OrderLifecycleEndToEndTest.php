@@ -239,6 +239,14 @@ class OrderLifecycleEndToEndTest extends TestCase
         $this->assertEquals('dibatalkan', $order->fresh()->status);
         // Stok harus kembali utuh menjadi 20
         $this->assertEquals(20, $this->product->fresh()->stock);
+
+        // TC-ORD-08: Pembatalan tercatat pada activity_logs untuk deteksi fraud, is_blocked tetap 0 karena baru 1 kali
+        $this->assertDatabaseHas('activity_logs', [
+            'action' => 'ORDER_CANCELLED',
+            'table_name' => 'orders',
+            'record_id' => $order->id,
+        ]);
+        $this->assertFalse((bool) $order->customer->fresh()->is_blocked);
     }
 
     /**

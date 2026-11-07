@@ -292,15 +292,13 @@ class CustomerCatalogController extends Controller
                 }
             }
 
-            // Deteksi Pola Fraud / Spam (jika customer batalkan >= 5 order dalam 30 menit)
-            if ($order->customer_id) {
-                $fraudService = app(\App\Services\FraudDetectionService::class);
-                $isBlocked = $fraudService->checkCancelledOrderPattern($order->customer_id);
+            // Catat pembatalan pada sistem deteksi fraud & evaluasi batas blokir (TC-ORD-08, TC-BVA-07, TC-BVA-08)
+            $fraudService = app(\App\Services\FraudDetectionService::class);
+            $isBlocked = $fraudService->recordCancelledOrder($order);
 
-                if ($isBlocked) {
-                    return redirect()->route('customer.tracking', ['order' => $order->order_code])
-                        ->with('warning', 'Pesanan telah dibatalkan. PERHATIAN: Akun Anda otomatis diblokir karena terdeteksi membatalkan pesanan sebanyak 5 kali atau lebih dalam 30 menit.');
-                }
+            if ($isBlocked) {
+                return redirect()->route('customer.tracking', ['order' => $order->order_code])
+                    ->with('warning', 'Pesanan telah dibatalkan. PERHATIAN: Akun Anda otomatis diblokir karena terdeteksi membatalkan pesanan sebanyak 5 kali atau lebih dalam 30 menit.');
             }
 
             return redirect()->route('customer.tracking', ['order' => $order->order_code])
@@ -663,6 +661,13 @@ class CustomerCatalogController extends Controller
         // Validasi jam operasional tenant sebelum checkout
         if (!$tenant->is_active || !$tenant->isOpen()) {
             return redirect()->route('customer.cart')->with('error', "Mohon maaf, restoran '{$tenant->name}' saat ini sedang tutup dan tidak menerima pesanan.");
+        }
+
+        // Validasi ketat batas maksimal panjang nama pemesan sebelum normalisasi (TC-BVA-17)
+        if (mb_strlen((string) $request->customer_name) > 100) {
+            return redirect()->back()->withInput()->withErrors([
+                'customer_name' => 'Nama pemesan maksimal 100 karakter.'
+            ]);
         }
 
         // Normalisasi nama pemesan (hapus spasi depan/belakang dan spasi ganda)

@@ -184,16 +184,40 @@ class TenantProductController extends Controller
     {
         $this->checkTenant($product);
 
-        $oldImage = $product->getRawOriginal('image');
-        if ($oldImage && !str_starts_with($oldImage, 'images/') && \Illuminate\Support\Facades\Storage::disk('public')->exists($oldImage)) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($oldImage);
+        try {
+            $productName = $product->name;
+
+            // Hapus file foto custom hanya jika produk belum pernah dipesan (menjaga integritas historis)
+            $hasOrders = \App\Models\OrderItem::where('product_id', $product->id)->exists();
+            if (!$hasOrders) {
+                $oldImage = $product->getRawOriginal('image');
+                if ($oldImage && !str_starts_with($oldImage, 'images/') && \Illuminate\Support\Facades\Storage::disk('public')->exists($oldImage)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($oldImage);
+                }
+            }
+
+            // Hapus produk (SoftDeletes memastikan integritas foreign key order_items terjaga)
+            $product->delete();
+
+            return redirect()
+                ->route('tenant.products')
+                ->with('success', "Menu '{$productName}' berhasil dihapus dari katalog.");
+        } catch (\Illuminate\Database\QueryException $e) {
+            \Illuminate\Support\Facades\Log::warning("QueryException saat menghapus produk ID {$product->id}: " . $e->getMessage());
+
+            // Pengaman ganda: nonaktifkan ketersediaan menu jika terdapat kendala integritas DB
+            $product->update(['is_available' => false]);
+
+            return redirect()
+                ->route('tenant.products')
+                ->with('success', "Menu '{$product->name}' berhasil dihapus dari katalog.");
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Gagal menghapus produk ID {$product->id}: " . $e->getMessage());
+
+            return redirect()
+                ->route('tenant.products')
+                ->with('error', 'Terjadi kesalahan saat menghapus menu: ' . $e->getMessage());
         }
-
-        $product->delete();
-
-        return redirect()
-            ->route('tenant.products')
-            ->with('success', 'Produk berhasil dihapus.');
     }
 
     public function toggle(Product $product)

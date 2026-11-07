@@ -497,8 +497,23 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <!-- Nama Pemesan -->
                                 <div>
-                                    <label class="block text-xs font-black text-slate-700 uppercase tracking-wider mb-2" x-text="customerType === 'penumpang' ? 'Nama (Sesuai Tiket/Boarding Pass)' : 'Nama Lengkap'"></label>
-                                    <input type="text" name="customer_name" value="{{ old('customer_name') }}" required minlength="2" maxlength="100" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] outline-none transition-all placeholder:text-slate-400" placeholder="Contoh: Budi Santoso">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <label class="block text-xs font-black text-slate-700 uppercase tracking-wider" x-text="customerType === 'penumpang' ? 'Nama (Sesuai Tiket/Boarding Pass)' : 'Nama Lengkap'"></label>
+                                        <span class="text-[11px] font-bold text-slate-400 font-mono">
+                                            <span :class="(customerName && customerName.length >= 100) ? 'text-amber-600 font-black' : 'text-slate-700'" x-text="customerName ? customerName.length : 0"></span>/100
+                                        </span>
+                                    </div>
+                                    <input type="text" 
+                                           name="customer_name" 
+                                           value="{{ old('customer_name') }}" 
+                                           x-model="customerName"
+                                           @input="if ($event.target.value.length > 100) $event.target.value = $event.target.value.slice(0, 100); customerName = $event.target.value"
+                                           required 
+                                           minlength="2" 
+                                           maxlength="100" 
+                                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] outline-none transition-all placeholder:text-slate-400" 
+                                           placeholder="Contoh: Budi Santoso">
+                                    <p class="text-[11px] text-slate-400 font-medium mt-1">Maksimal penulisan 100 karakter.</p>
                                     @error('customer_name')
                                         <p class="text-xs text-rose-600 font-bold mt-1.5 flex items-center gap-1">
                                             <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
@@ -605,7 +620,7 @@
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                     </div>
                                     <p class="text-xs text-amber-800 font-medium leading-relaxed">
-                                        Waktu boarding tersisa <span class="font-extrabold text-amber-900">kurang dari 30 menit</span>. Segera selesaikan transaksi agar pesanan Anda dapat langsung diproses prioritas oleh dapur restoran.
+                                        Waktu boarding tersisa <span class="font-extrabold text-amber-900">kurang dari 30 menit, tidak ada refund</span> jika pesanan terlambat diambil. Segera selesaikan transaksi agar pesanan Anda dapat langsung diproses prioritas oleh dapur restoran.
                                     </p>
                                 </div>
 
@@ -1183,6 +1198,7 @@
                 isTenantAirside: {{ ($tenant && $tenant->isAirside()) ? 'true' : 'false' }},
                 isTenantClosed: {{ !$isTenantOpenSafe ? 'true' : 'false' }},
                 customerType: '{{ old('customer_type', 'penumpang') }}', 
+                customerName: '{{ addslashes(old('customer_name', '')) }}',
                 boardingTime: '{{ old('boarding_time', '') }}',
                 pickupMethod: '{{ old('pickup_method', 'ambil_sendiri') }}',
                 deliveryTerminal: '{{ old('delivery_terminal', str_ireplace('t', '', (string)($tenant->terminal ?? '1'))) }}',

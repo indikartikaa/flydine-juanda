@@ -1,7 +1,12 @@
 @props(['messages'])
 
 @if ($messages)
-    <ul {{ $attributes->merge(['class' => 'text-sm text-red-600 space-y-1']) }}>
+    @php
+        $customClass = $attributes->get('class', '');
+        $hasTextColor = (bool) preg_match('/text-(red|rose|amber|yellow|white|slate|gray|blue|emerald)-\d+/', $customClass) || str_contains($customClass, 'text-white');
+        $colorClass = $hasTextColor ? '' : 'text-rose-600';
+    @endphp
+    <ul {{ $attributes->merge(['class' => 'text-xs font-medium space-y-1 ' . $colorClass]) }}>
         @foreach ((array) $messages as $message)
             <li>{{ $message }}</li>
         @endforeach

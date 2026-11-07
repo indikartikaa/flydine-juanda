@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('name', 120);
             $table->decimal('price', 12, 2);
             $table->boolean('is_available')->default(true);
+            $table->softDeletes();
             $table->timestamps();
 
             $table->index(['tenant_id', 'is_available']);
