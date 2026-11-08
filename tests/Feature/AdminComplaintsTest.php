@@ -161,4 +161,112 @@ class AdminComplaintsTest extends TestCase
         ]);
         $this->assertNotNull($complaint->fresh()->resolved_at);
     }
+
+    public function test_tc_comp_03_admin_handles_complaint_and_updates_dashboard_and_customer_tracking(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin_ops']);
+
+        $tenant = Tenant::create([
+            'name' => 'A&W Restaurant T1',
+            'tenant_code' => 'T1-AW',
+            'terminal' => 'T1',
+            'zone' => 'Landside',
+            'floor_location' => 'Lantai 1',
+            'category' => 'Fast Food',
+            'is_active' => true,
+        ]);
+
+        $customer = Customer::create([
+            'name' => 'Budi Santoso',
+            'phone_number' => '081234567890',
+        ]);
+
+        $order = Order::create([
+            'order_code' => 'ORD-COMP-003',
+            'tenant_id' => $tenant->id,
+            'customer_id' => $customer->id,
+            'customer_name' => 'Budi Santoso',
+            'customer_phone' => '081234567890',
+            'total_amount' => 55000,
+            'is_paid' => true,
+            'status' => 'selesai',
+            'ordered_at' => now()->subHour(),
+            'auto_cancel_at' => now()->subMinutes(30),
+        ]);
+
+        $complaint = Complaint::create([
+            'complaint_code' => 'CMP-TEST-003',
+            'order_id' => $order->id,
+            'reporter_name' => 'Budi Santoso',
+            'reporter_contact' => '081234567890',
+            'category' => 'pesanan_salah',
+            'description' => 'Ayam goreng kurang renyah dan saus tertinggal',
+            'status' => 'open',
+        ]);
+
+        // 1. Awal: Dashboard admin mencatat 1 open complaint
+        $dashResponse = $this->actingAs($admin)->get(route('admin.dashboard'));
+        $dashResponse->assertStatus(200);
+        $dashResponse->assertViewHas('open_complaints', 1);
+        $dashResponse->assertViewHas('in_progress_complaints', 0);
+
+        // 2. Admin ubah status ke in_progress
+        $progressResponse = $this->actingAs($admin)->post(route('admin.complaints.status', $complaint->id), [
+            'status' => 'in_progress'
+        ]);
+        $progressResponse->assertRedirect();
+        
+        $complaint->refresh();
+        $this->assertEquals('in_progress', $complaint->status);
+        $this->assertEquals($admin->id, $complaint->handled_by_user_id);
+        $this->assertNull($complaint->resolved_at);
+
+        // Dashboard admin kini mencatat 0 open dan 1 in_progress
+        $dashResponse2 = $this->actingAs($admin)->get(route('admin.dashboard'));
+        $dashResponse2->assertViewHas('open_complaints', 0);
+        $dashResponse2->assertViewHas('in_progress_complaints', 1);
+
+        // 3. Admin ubah status ke resolved
+        $resolvedResponse = $this->actingAs($admin)->post(route('admin.complaints.status', $complaint->id), [
+            'status' => 'resolved'
+        ]);
+        $resolvedResponse->assertRedirect();
+
+        $complaint->refresh();
+        $this->assertEquals('resolved', $complaint->status);
+        $this->assertEquals($admin->id, $complaint->handled_by_user_id);
+        $this->assertNotNull($complaint->resolved_at);
+
+        // Dashboard admin kini mencatat 0 open dan 0 in_progress
+        $dashResponse3 = $this->actingAs($admin)->get(route('admin.dashboard'));
+        $dashResponse3->assertViewHas('open_complaints', 0);
+        $dashResponse3->assertViewHas('in_progress_complaints', 0);
+
+        // 4. Verifikasi sisi pelanggan: API live tracking komplain
+        $apiTrackResponse = $this->getJson(route('api.complaint.track', ['query' => 'CMP-TEST-003']));
+        $apiTrackResponse->assertStatus(200);
+        $apiTrackResponse->assertJson([
+            'found' => true,
+            'complaint_code' => 'CMP-TEST-003',
+            'status' => 'resolved',
+            'status_label' => 'Selesai Ditangani',
+            'order_code' => 'ORD-COMP-003',
+        ]);
+
+        // Verifikasi sisi pelanggan: tracking komplain via nomor WhatsApp
+        $apiPhoneResponse = $this->getJson(route('api.complaint.track', ['query' => '081234567890']));
+        $apiPhoneResponse->assertStatus(200);
+        $apiPhoneResponse->assertJson(['found' => true, 'complaint_code' => 'CMP-TEST-003']);
+
+        // Verifikasi halaman FAQ dengan tiket
+        $faqResponse = $this->get(route('page.faq', ['ticket' => 'CMP-TEST-003']));
+        $faqResponse->assertStatus(200);
+        $faqResponse->assertSee('CMP-TEST-003');
+
+        // Verifikasi halaman order tracking menampilkan status komplain
+        $trackOrderResponse = $this->get(route('customer.tracking', ['order' => 'ORD-COMP-003']));
+        $trackOrderResponse->assertStatus(200);
+        $trackOrderResponse->assertSee('CMP-TEST-003');
+        $trackOrderResponse->assertSee('Selesai Ditangani');
+    }
 }

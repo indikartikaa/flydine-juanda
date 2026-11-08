@@ -18,6 +18,7 @@ class Customer extends Model
         'is_blocked',
         'blocked_reason',
         'blocked_at',
+        'unblocked_at',
     ];
 
     protected $casts = [
@@ -26,6 +27,7 @@ class Customer extends Model
         'total_orders' => 'integer',
         'is_blocked' => 'boolean',
         'blocked_at' => 'datetime',
+        'unblocked_at' => 'datetime',
     ];
 
     /**

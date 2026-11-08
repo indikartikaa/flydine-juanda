@@ -514,6 +514,12 @@
                                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#005ea2]/20 focus:border-[#005ea2] outline-none transition-all placeholder:text-slate-400" 
                                            placeholder="Contoh: Budi Santoso">
                                     <p class="text-[11px] text-slate-400 font-medium mt-1">Maksimal penulisan 100 karakter.</p>
+                                    <template x-if="autoFilledName">
+                                        <p class="text-[11px] text-emerald-600 font-bold mt-1.5 flex items-center gap-1 animate-fade-in">
+                                            <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                            <span>Nomor terdaftar: Nama pemesan otomatis terisi sesuai riwayat Anda.</span>
+                                        </p>
+                                    </template>
                                     @error('customer_name')
                                         <p class="text-xs text-rose-600 font-bold mt-1.5 flex items-center gap-1">
                                             <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
@@ -528,6 +534,9 @@
                                     <input type="tel" 
                                            name="phone_number" 
                                            value="{{ old('phone_number') }}" 
+                                           x-model="phoneNumber"
+                                           @input.debounce.500ms="lookupCustomerByPhone()"
+                                           @blur="lookupCustomerByPhone()"
                                            required 
                                            inputmode="tel" 
                                            pattern="[0-9+ \-]{9,20}" 
@@ -1199,6 +1208,9 @@
                 isTenantClosed: {{ !$isTenantOpenSafe ? 'true' : 'false' }},
                 customerType: '{{ old('customer_type', 'penumpang') }}', 
                 customerName: '{{ addslashes(old('customer_name', '')) }}',
+                phoneNumber: '{{ addslashes(old('phone_number', '')) }}',
+                autoFilledName: false,
+                isLookingUpPhone: false,
                 boardingTime: '{{ old('boarding_time', '') }}',
                 pickupMethod: '{{ old('pickup_method', 'ambil_sendiri') }}',
                 deliveryTerminal: '{{ old('delivery_terminal', str_ireplace('t', '', (string)($tenant->terminal ?? '1'))) }}',
@@ -1218,6 +1230,32 @@
                 loadingItemId: null,
                 isClearing: false,
                 errorMessage: '',
+
+                lookupCustomerByPhone() {
+                    const raw = (this.phoneNumber || '').trim();
+                    const digits = raw.replace(/[^0-9]/g, '');
+                    if (digits.length < 9) {
+                        this.autoFilledName = false;
+                        return;
+                    }
+                    this.isLookingUpPhone = true;
+                    fetch('{{ route('api.customer.lookup') }}?phone=' + encodeURIComponent(raw))
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data && data.exists && data.name) {
+                                this.customerName = data.name;
+                                this.autoFilledName = true;
+                            } else {
+                                this.autoFilledName = false;
+                            }
+                        })
+                        .catch(() => {
+                            this.autoFilledName = false;
+                        })
+                        .finally(() => {
+                            this.isLookingUpPhone = false;
+                        });
+                },
 
                 toggleChip(chipLabel) {
                     let current = (this.orderNotes || '').trim();

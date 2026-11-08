@@ -82,6 +82,7 @@ class AdminFraudController extends Controller
             'is_blocked' => false,
             'blocked_reason' => null,
             'blocked_at' => null,
+            'unblocked_at' => now(),
         ]);
 
         $logger->log(

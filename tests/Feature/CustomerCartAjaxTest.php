@@ -692,5 +692,78 @@ class CustomerCartAjaxTest extends TestCase
         $response->assertSessionHasErrors(['notes']);
         $this->assertStringContainsString('maksimal 100 karakter', session('errors')->first('notes'));
     }
+
+    public function test_checkout_rejects_different_name_for_existing_phone_number(): void
+    {
+        // 1. Pelanggan pertama kali memesan dengan nama Budi Santoso
+        \App\Models\Customer::create([
+            'name' => 'Budi Santoso',
+            'phone_number' => '081234567899',
+            'first_order_at' => now(),
+            'last_order_at' => now(),
+            'total_orders' => 1,
+        ]);
+
+        $cart = [
+            $this->productA->id => [
+                'id' => $this->productA->id,
+                'name' => $this->productA->name,
+                'price' => $this->productA->price,
+                'quantity' => 1,
+                'tenant_id' => $this->tenant->id,
+            ],
+        ];
+
+        // 2. Mencoba memesan dengan nomor HP yang sama tapi nama berbeda (Eko Prasetyo) -> Harus ditolak
+        $response = $this->withSession(['cart' => $cart])
+            ->post(route('customer.checkout'), [
+                'customer_name' => 'Eko Prasetyo',
+                'phone_number' => '081234567899',
+                'customer_type' => 'pengunjung',
+                'pickup_method' => 'ambil_sendiri',
+                'payment_method' => 'qris',
+            ]);
+
+        $response->assertSessionHasErrors(['customer_name']);
+        $this->assertStringContainsString('sudah terdaftar atas nama', session('errors')->first('customer_name'));
+
+        // 3. Memesan dengan nama yang sama (meski case berbeda 'budi santoso') -> Harus diterima
+        $responseValid = $this->withSession(['cart' => $cart])
+            ->post(route('customer.checkout'), [
+                'customer_name' => 'budi santoso',
+                'phone_number' => '081234567899',
+                'customer_type' => 'pengunjung',
+                'pickup_method' => 'ambil_sendiri',
+                'payment_method' => 'qris',
+            ]);
+
+        $responseValid->assertSessionHasNoErrors();
+    }
+
+    public function test_api_customer_lookup_returns_customer_data_for_autofill(): void
+    {
+        \App\Models\Customer::create([
+            'name' => 'Siti Nurhaliza',
+            'phone_number' => '+6281233445566',
+            'first_order_at' => now(),
+            'last_order_at' => now(),
+            'total_orders' => 1,
+        ]);
+
+        // Cari dengan format lokal 081233445566
+        $resFound = $this->getJson(route('api.customer.lookup', ['phone' => '081233445566']));
+        $resFound->assertOk();
+        $resFound->assertJson([
+            'exists' => true,
+            'name' => 'Siti Nurhaliza',
+        ]);
+
+        // Cari dengan nomor yang belum pernah pesan
+        $resNotFound = $this->getJson(route('api.customer.lookup', ['phone' => '089999999999']));
+        $resNotFound->assertOk();
+        $resNotFound->assertJson([
+            'exists' => false,
+        ]);
+    }
 }
 

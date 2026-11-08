@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Customer;
 use App\Models\DeliveryLocation;
+use App\Models\Complaint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -244,7 +245,7 @@ class CustomerCatalogController extends Controller
             return redirect()->route('customer.menu');
         }
 
-        $order = Order::with(['orderItems.product', 'tenant', 'deliveryLocation', 'customer'])->where('order_code', $orderCode)->firstOrFail();
+        $order = Order::with(['orderItems.product', 'tenant', 'deliveryLocation', 'customer', 'complaints'])->where('order_code', $orderCode)->firstOrFail();
 
         // Passive Auto-Cancel Check: jika waktu habis dan belum dibayar, batalkan instan
         $this->checkAndApplyAutoCancel($order);
@@ -305,6 +306,13 @@ class CustomerCatalogController extends Controller
                 ->with('success', 'Pesanan Anda telah berhasil dibatalkan.');
         }
 
+        if (request()->wantsJson() || request()->isJson() || request()->ajax()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pesanan ini sudah tidak dapat dibatalkan.'
+            ], 422);
+        }
+
         return redirect()->route('customer.tracking', ['order' => $order->order_code])
             ->with('error', 'Pesanan ini sudah tidak dapat dibatalkan.');
     }
@@ -347,7 +355,7 @@ class CustomerCatalogController extends Controller
 
             if ($customers->isNotEmpty()) {
                 $customerIds = $customers->pluck('id')->toArray();
-                $orders = Order::with(['tenant', 'orderItems.product'])
+                $orders = Order::with(['tenant', 'orderItems.product', 'complaints'])
                     ->whereIn('customer_id', $customerIds)
                     ->latest('ordered_at')
                     ->get();
@@ -859,6 +867,13 @@ class CustomerCatalogController extends Controller
                 return redirect()->route('customer.menu')->with('error', 'Nomor HP Anda sementara diblokir karena terdeteksi aktivitas mencurigakan.');
             }
 
+            // Validasi Integritas: Nomor telepon terdaftar tidak boleh memesan dengan nama berbeda
+            if (!empty($customer->name) && strcasecmp(trim($customer->name), trim($cleanCustomerName)) !== 0) {
+                return redirect()->back()->withInput()->withErrors([
+                    'customer_name' => "Nomor telepon ini sudah terdaftar atas nama '{$customer->name}'. Harap gunakan nama tersebut atau periksa kembali nomor telepon Anda."
+                ]);
+            }
+
             // Deteksi Pola Fraud / Spam
             $fraudService = app(\App\Services\FraudDetectionService::class);
             if ($fraudService->checkCancelledOrderPattern($customer->id)) {
@@ -1008,6 +1023,130 @@ class CustomerCatalogController extends Controller
         return response()->json($locations);
     }
 
+    /**
+     * Endpoint Lookup Customer berdasarkan Nomor Telepon untuk fitur Auto-Fill Nama
+     * Mencegah duplikasi data dan nama berbeda pada nomor yang sama.
+     */
+    public function lookupCustomer(Request $request)
+    {
+        $phone = $request->query('phone');
+        if (empty($phone)) {
+            return response()->json(['exists' => false]);
+        }
+
+        $phoneNumber = preg_replace('/[^0-9+]/', '', (string) $phone);
+        $phoneVariations = $this->getPhoneVariations($phoneNumber);
+
+        $customer = Customer::whereIn('phone_number', $phoneVariations)->first();
+
+        if ($customer && !empty($customer->name)) {
+            return response()->json([
+                'exists' => true,
+                'name' => $customer->name,
+                'is_blocked' => (bool) $customer->is_blocked,
+            ]);
+        }
+
+        return response()->json(['exists' => false]);
+    }
+
+    /**
+     * Endpoint Halaman FAQ & Lacak Komplain Mandiri Pelanggan
+     */
+    public function faq(Request $request)
+    {
+        $trackedComplaint = null;
+        $trackQuery = trim((string) $request->query('ticket', session('complaint_ticket', $request->query('track_query', ''))));
+
+        if (!empty($trackQuery)) {
+            $trackedComplaint = Complaint::with(['order.tenant'])
+                ->where('complaint_code', $trackQuery)
+                ->first();
+
+            if (!$trackedComplaint) {
+                $phoneVariations = $this->getPhoneVariations($trackQuery);
+                $trackedComplaint = Complaint::with(['order.tenant'])
+                    ->whereIn('reporter_contact', $phoneVariations)
+                    ->latest()
+                    ->first();
+            }
+        }
+
+        $statusLabels = [
+            'open' => 'Menunggu Respon',
+            'in_progress' => 'Sedang Diproses Tim Operasional',
+            'resolved' => 'Selesai Ditangani',
+            'closed' => 'Ditutup'
+        ];
+
+        $trackedData = $trackedComplaint ? [
+            'complaint_code' => $trackedComplaint->complaint_code,
+            'category' => $trackedComplaint->category,
+            'status' => $trackedComplaint->status,
+            'status_label' => $statusLabels[$trackedComplaint->status] ?? ucfirst($trackedComplaint->status),
+            'order_code' => $trackedComplaint->order ? $trackedComplaint->order->order_code : null,
+            'tenant_name' => $trackedComplaint->order && $trackedComplaint->order->tenant ? $trackedComplaint->order->tenant->name : null,
+            'description' => $trackedComplaint->description,
+            'created_at' => $trackedComplaint->created_at->format('d M Y, H:i') . ' WIB',
+            'resolved_at' => $trackedComplaint->resolved_at ? $trackedComplaint->resolved_at->format('d M Y, H:i') . ' WIB' : null,
+        ] : null;
+
+        return view('customer.pages.faq', compact('trackedComplaint', 'trackQuery', 'trackedData'));
+    }
+
+    /**
+     * Endpoint API Live Lookup Status Komplain Pelanggan
+     */
+    public function trackComplaint(Request $request)
+    {
+        $query = trim((string) $request->query('query', $request->query('ticket', '')));
+        if (empty($query)) {
+            return response()->json([
+                'found' => false, 
+                'message' => 'Harap masukkan nomor tiket (CMP-...) atau nomor WhatsApp pelapor.'
+            ]);
+        }
+
+        $complaint = Complaint::with(['order.tenant'])
+            ->where('complaint_code', $query)
+            ->first();
+
+        if (!$complaint) {
+            $phoneVariations = $this->getPhoneVariations($query);
+            $complaint = Complaint::with(['order.tenant'])
+                ->whereIn('reporter_contact', $phoneVariations)
+                ->latest()
+                ->first();
+        }
+
+        if (!$complaint) {
+            return response()->json([
+                'found' => false, 
+                'message' => 'Tiket komplain tidak ditemukan. Periksa kembali nomor tiket atau kontak WhatsApp Anda.'
+            ]);
+        }
+
+        $statusLabels = [
+            'open' => 'Menunggu Respon',
+            'in_progress' => 'Sedang Diproses Tim Operasional',
+            'resolved' => 'Selesai Ditangani',
+            'closed' => 'Ditutup'
+        ];
+
+        return response()->json([
+            'found' => true,
+            'complaint_code' => $complaint->complaint_code,
+            'category' => $complaint->category,
+            'status' => $complaint->status,
+            'status_label' => $statusLabels[$complaint->status] ?? ucfirst($complaint->status),
+            'order_code' => $complaint->order ? $complaint->order->order_code : null,
+            'tenant_name' => $complaint->order && $complaint->order->tenant ? $complaint->order->tenant->name : null,
+            'description' => $complaint->description,
+            'created_at' => $complaint->created_at->format('d M Y, H:i') . ' WIB',
+            'resolved_at' => $complaint->resolved_at ? $complaint->resolved_at->format('d M Y, H:i') . ' WIB' : null,
+        ]);
+    }
+
     public function storeComplaint(Request $request)
     {
         $request->validate([
@@ -1036,33 +1175,71 @@ class CustomerCatalogController extends Controller
 
                 // 2. Verifikasi status pembayaran: hanya pesanan yang sudah dibayar lunas (is_paid = true) yang dapat dilaporkan
                 if (!$order->is_paid) {
+                    if ($request->wantsJson() || $request->isJson() || $request->ajax()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Laporan kendala pesanan hanya dapat diajukan untuk pesanan yang sudah dibayar lunas.',
+                            'errors' => ['order_code' => ['Laporan kendala pesanan hanya dapat diajukan untuk pesanan yang sudah dibayar lunas.']]
+                        ], 422);
+                    }
                     return redirect()->back()->withInput()->withErrors([
                         'order_code' => 'Laporan kendala pesanan hanya dapat diajukan untuk pesanan yang sudah dibayar lunas.'
+                    ]);
+                }
+
+                // 3. TC-COMP-02: Verifikasi status pesanan: hanya pesanan yang sudah selesai (selesai) yang dapat dilaporkan
+                if ($order->status !== 'selesai') {
+                    $statusLabel = match ($order->status) {
+                        'diproses' => 'sedang diproses / dimasak di dapur',
+                        'siap' => 'sudah siap diambil / diantar',
+                        'menunggu' => 'masih menunggu konfirmasi',
+                        'dibatalkan' => 'telah dibatalkan',
+                        'ditolak' => 'telah ditolak',
+                        default => $order->status
+                    };
+                    $msg = "Komplain tidak diizinkan. Pesanan masih berstatus '{$statusLabel}'. Pengajuan komplain hanya dapat dilakukan setelah pesanan selesai.";
+                    if ($request->wantsJson() || $request->isJson() || $request->ajax()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => $msg,
+                            'errors' => ['order_code' => [$msg]]
+                        ], 422);
+                    }
+                    return redirect()->back()->withInput()->withErrors([
+                        'order_code' => $msg
                     ]);
                 }
 
                 $orderId = $order->id;
             }
         } elseif (in_array($request->category, ['pesanan_salah', 'status_tidak_update'])) {
-            // Jika order_code dikosongkan namun memilih kategori masalah pesanan, cari otomatis pesanan lunas terbaru dari nomor WA pelapor
+            // Jika order_code dikosongkan namun memilih kategori masalah pesanan, cari otomatis pesanan selesai terbaru dari nomor WA pelapor
             $customerIds = !empty($reporterVariations)
                 ? Customer::whereIn('phone_number', $reporterVariations)->pluck('id')->all()
                 : [];
 
-            $latestPaidOrder = !empty($customerIds)
-                ? Order::whereIn('customer_id', $customerIds)->where('is_paid', true)->latest('ordered_at')->first()
+            $latestCompletedOrder = !empty($customerIds)
+                ? Order::whereIn('customer_id', $customerIds)->where('is_paid', true)->where('status', 'selesai')->latest('ordered_at')->first()
                 : null;
 
-            if (!$latestPaidOrder) {
+            if (!$latestCompletedOrder) {
+                $msg = 'Tidak ditemukan riwayat pesanan selesai pada nomor WhatsApp tersebut. Pengajuan komplain kendala pesanan hanya dapat dilakukan untuk pesanan yang telah selesai.';
+                if ($request->wantsJson() || $request->isJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $msg,
+                        'errors' => ['order_code' => [$msg]]
+                    ], 422);
+                }
                 return redirect()->back()->withInput()->withErrors([
-                    'order_code' => 'Tidak ditemukan riwayat pesanan lunas pada nomor WhatsApp tersebut. Silakan cek ID Pesanan (ORD-...) Anda di menu Riwayat, atau pilih kategori Pertanyaan Umum / Saran.'
+                    'order_code' => $msg
                 ]);
             }
 
-            $orderId = $latestPaidOrder->id;
+            $orderId = $latestCompletedOrder->id;
         }
 
-        \App\Models\Complaint::create([
+        $complaint = \App\Models\Complaint::create([
             'complaint_code' => 'CMP-' . strtoupper(Str::random(6)),
             'order_id' => $orderId,
             'reporter_name' => $request->reporter_name,
@@ -1072,6 +1249,16 @@ class CustomerCatalogController extends Controller
             'status' => 'open'
         ]);
 
-        return redirect()->route('page.faq')->with('success', 'Pesan Anda berhasil dikirim! Tim Support kami akan menghubungi Anda melalui WhatsApp secepatnya.');
+        if ($request->wantsJson() || $request->isJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Laporan Anda berhasil dikirim dengan Nomor Tiket: {$complaint->complaint_code}. Tim Support kami akan menghubungi Anda melalui WhatsApp secepatnya.",
+                'complaint_code' => $complaint->complaint_code,
+            ]);
+        }
+
+        return redirect()->route('page.faq')
+            ->with('success', "Laporan Anda berhasil dikirim dengan Nomor Tiket: {$complaint->complaint_code}. Anda dapat memantau status tindak lanjut komplain ini di bawah.")
+            ->with('complaint_ticket', $complaint->complaint_code);
     }
 }

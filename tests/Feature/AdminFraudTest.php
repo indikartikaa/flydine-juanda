@@ -5,8 +5,10 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\Tenant;
+use App\Models\Product;
 use App\Models\Order;
 use App\Models\Customer;
+use App\Models\DeliveryLocation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class AdminFraudTest extends TestCase
@@ -232,5 +234,101 @@ class AdminFraudTest extends TestCase
         $adminResponse->assertSee('Audit Trail dan Log Aktivitas Deteksi Fraud Terkini');
         $adminResponse->assertSee('Batal Pesanan');
         $adminResponse->assertSee('Akun Diblokir');
+    }
+
+    public function test_tc_frd_03_customer_can_checkout_successfully_after_admin_unblocks(): void
+    {
+        $tenant = Tenant::create([
+            'name' => 'Burger King Juanda T1',
+            'tenant_code' => 'T1-BK',
+            'terminal' => 'T1',
+            'zone' => 'Landside',
+            'floor_location' => 'Lantai 1',
+            'category' => 'Fast Food',
+            'is_active' => true,
+        ]);
+
+        $product = Product::create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Whopper Jr',
+            'price' => 45000,
+            'stock' => 10,
+            'is_available' => true,
+        ]);
+
+        $customer = Customer::create([
+            'name' => 'Ahmad Dani',
+            'phone_number' => '081299998888',
+            'is_blocked' => true,
+            'blocked_reason' => 'Terdeteksi 5 order dibatalkan dalam 30 menit',
+            'blocked_at' => now()->subMinutes(10),
+        ]);
+
+        // Simulasikan 5 pesanan dibatalkan dalam 30 menit terakhir
+        for ($i = 1; $i <= 5; $i++) {
+            Order::create([
+                'order_code' => "ORD-CANCEL-{$i}",
+                'tenant_id' => $tenant->id,
+                'customer_id' => $customer->id,
+                'customer_name' => $customer->name,
+                'customer_phone' => $customer->phone_number,
+                'total_amount' => 45000,
+                'is_paid' => false,
+                'status' => 'dibatalkan',
+                'ordered_at' => now()->subMinutes(15),
+                'auto_cancel_at' => now()->subMinutes(5),
+                'updated_at' => now()->subMinutes(10),
+            ]);
+        }
+
+        $cartData = [
+            $product->id => [
+                'id' => $product->id,
+                'tenant_id' => $tenant->id,
+                'name' => $product->name,
+                'price' => $product->price,
+                'quantity' => 1,
+            ]
+        ];
+
+        // 1. Saat customer masih terblokir, checkout DITOLAK
+        $blockedCheckout = $this->withSession(['cart' => $cartData])->post(route('customer.checkout'), [
+            'tenant_id' => $tenant->id,
+            'customer_name' => 'Ahmad Dani',
+            'phone_number' => '081299998888',
+            'customer_type' => 'pengunjung',
+            'pickup_method' => 'ambil_sendiri',
+            'payment_method' => 'qris',
+        ]);
+        $blockedCheckout->assertRedirect(route('customer.menu'));
+        $blockedCheckout->assertSessionHas('error');
+
+        // 2. Admin membuka Fraud Monitoring dan melakukan Unblock manual
+        $admin = User::factory()->create(['role' => 'admin_ops']);
+        $unblockResponse = $this->actingAs($admin)->post(route('admin.fraud.unblock', $customer->id));
+        $unblockResponse->assertRedirect();
+
+        $freshCustomer = $customer->fresh();
+        $this->assertFalse((bool) $freshCustomer->is_blocked);
+        $this->assertNotNull($freshCustomer->unblocked_at);
+
+        // 3. Customer mencoba checkout lagi: SEKARANG BERHASIL dan tidak lagi diblokir otomatis
+        $unblockedCheckout = $this->withSession(['cart' => $cartData])->post(route('customer.checkout'), [
+            'tenant_id' => $tenant->id,
+            'customer_name' => 'Ahmad Dani',
+            'phone_number' => '081299998888',
+            'customer_type' => 'pengunjung',
+            'pickup_method' => 'ambil_sendiri',
+            'payment_method' => 'qris',
+        ]);
+
+        $unblockedCheckout->assertRedirect();
+        $freshCustomer2 = $customer->fresh();
+        $this->assertFalse((bool) $freshCustomer2->is_blocked);
+        $this->assertDatabaseHas('orders', [
+            'customer_id' => $customer->id,
+            'status' => 'menunggu',
+            'total_amount' => 45000,
+        ]);
     }
 }

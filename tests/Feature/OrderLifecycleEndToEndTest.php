@@ -792,11 +792,27 @@ class OrderLifecycleEndToEndTest extends TestCase
 
         $emptyCodeNoPaidResponse->assertSessionHasErrors('order_code');
 
-        // 3. Setelah pesanan dibayar lunas (is_paid = true) dan menggunakan nomor HP yang cocok (termasuk variasi +628...) -> Berhasil
+        // Simulasi pembayaran lunas
         $this->post(route('customer.simulate_payment'), [
             'order_code' => $order->order_code,
         ]);
 
+        // 2c. TC-COMP-02: Pesanan sudah dibayar lunas tapi berstatus 'diproses' (belum selesai) -> Ditolak
+        $order->update(['status' => 'diproses']);
+        $inProcessComplaint = $this->post(route('customer.complaint'), [
+            'order_code' => $order->order_code,
+            'reporter_name' => 'Sari Pelanggan Asli',
+            'reporter_contact' => '081233445566',
+            'category' => 'pesanan_salah',
+            'description' => 'Mencoba komplain saat pesanan masih diproses di dapur',
+        ]);
+        $inProcessComplaint->assertSessionHasErrors('order_code');
+        $this->assertDatabaseMissing('complaints', [
+            'order_id' => $order->id,
+        ]);
+
+        // 3. Setelah pesanan berstatus 'selesai' -> Berhasil diajukan komplain (TC-COMP-01)
+        $order->update(['status' => 'selesai']);
         $validComplaintResponse = $this->post(route('customer.complaint'), [
             'order_code' => $order->order_code,
             'reporter_name' => 'Sari Pelanggan Asli',

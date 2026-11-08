@@ -22,10 +22,12 @@ Route::get('/history', [CustomerCatalogController::class, 'history'])->name('cus
 Route::post('/tracking/{order}/cancel', [CustomerCatalogController::class, 'cancelOrder'])->name('customer.tracking.cancel');
 Route::post('/faq/complaint', [CustomerCatalogController::class, 'storeComplaint'])->name('customer.complaint');
 Route::get('/api/delivery-locations', [CustomerCatalogController::class, 'getDeliveryLocations'])->name('api.delivery-locations');
+Route::get('/api/customer-lookup', [CustomerCatalogController::class, 'lookupCustomer'])->name('api.customer.lookup');
+Route::get('/api/complaint-track', [CustomerCatalogController::class, 'trackComplaint'])->name('api.complaint.track');
 
-/* Static Pages */
+/* Static & Info Pages */
 Route::view('/cara-pesan', 'customer.pages.cara-pesan')->name('page.cara-pesan');
-Route::view('/faq', 'customer.pages.faq')->name('page.faq');
+Route::get('/faq', [CustomerCatalogController::class, 'faq'])->name('page.faq');
 Route::view('/syarat-ketentuan', 'customer.pages.terms')->name('page.terms');
 Route::view('/kebijakan-privasi', 'customer.pages.privacy')->name('page.privacy');
 Route::view('/daftar-tenant', 'customer.pages.daftar-tenant')->name('page.daftar-tenant');

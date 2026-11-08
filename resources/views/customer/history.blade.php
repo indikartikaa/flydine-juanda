@@ -242,6 +242,33 @@
                             </div>
                         </div>
                         
+                        @if($order->complaints->isNotEmpty())
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                            @foreach($order->complaints as $c)
+                            @php
+                                $cStyle = match($c->status) {
+                                    'open' => 'bg-rose-50 text-rose-700 border-rose-200',
+                                    'in_progress' => 'bg-blue-50 text-blue-700 border-blue-200',
+                                    'resolved' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                                    'closed' => 'bg-slate-100 text-slate-700 border-slate-200',
+                                    default => 'bg-slate-50 text-slate-700 border-slate-200'
+                                };
+                                $cText = match($c->status) {
+                                    'open' => 'Menunggu Respon',
+                                    'in_progress' => 'Sedang Diproses',
+                                    'resolved' => 'Selesai Ditangani',
+                                    'closed' => 'Ditutup',
+                                    default => ucfirst($c->status)
+                                };
+                            @endphp
+                            <a href="{{ route('page.faq', ['ticket' => $c->complaint_code]) }}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border text-[11px] font-bold {{ $cStyle }} hover:opacity-80 transition" title="Lihat status komplain {{ $c->complaint_code }}">
+                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span>Tiket {{ $c->complaint_code }}: {{ $cText }}</span>
+                            </a>
+                            @endforeach
+                        </div>
+                        @endif
+
                         <!-- Action Buttons -->
                         <div class="space-y-2.5 pt-2">
                             <div class="flex gap-2">

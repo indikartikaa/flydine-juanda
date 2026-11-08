@@ -248,7 +248,7 @@ Total 81 test case. Kolom *Actual Result* dan *Status* dikosongkan dan diisi saa
 | **TC-PROC-03** | Tandai siap | Prasyarat: status diproses.<br>1. Klik Tandai Siap. | Status siap dan ready_at terisi; tracking menampilkan siap diambil atau diantar. | | |
 | **TC-PROC-04** | Selesai | Prasyarat: status siap.<br>1. Verifikasi kode pesanan.<br>2. Klik selesai. | Status selesai dan completed_at terisi; pesanan pindah ke Riwayat. | | |
 | **TC-PROC-05** | Isolasi data antar tenant | Prasyarat: login staf tenant B; pesanan milik tenant A.<br>1. Kirim perubahan status pesanan A lewat Postman. | HTTP 403 Unauthorized; status tidak berubah. | | |
-| **TC-PROC-06** | Transisi status tidak sah | Prasyarat: pesanan berstatus selesai.<br>1. Kirim perubahan status ke dibatalkan. | Ditolak. Catatan: kode hanya memeriksa daftar status yang diizinkan, sehingga hasil ini diperkirakan menjadi defect. | | |
+| **TC-PROC-06** | Transisi status tidak sah | Prasyarat: pesanan berstatus selesai.<br>1. Kirim perubahan status ke dibatalkan. | Ditolak dengan pesan validasi atau HTTP 422. | Ditolak dengan HTTP 422 (`Transisi status pesanan tidak diizinkan dari 'selesai' ke 'dibatalkan'`). Terkendala UI: tidak terdapat tombol pembatalan setelah pesanan selesai, sehingga uji frontend tidak dapat dilakukan langsung di antarmuka web. | Pass |
 
 ### 10.5 Pembayaran dan otomasi (AUTO)
 | ID | Skenario | Prasyarat dan langkah | Expected Result | Actual Result | Status |
@@ -261,9 +261,9 @@ Total 81 test case. Kolom *Actual Result* dan *Status* dikosongkan dan diisi saa
 ### 10.6 Komplain pelanggan (COMP)
 | ID | Skenario | Prasyarat dan langkah | Expected Result | Actual Result | Status |
 | :--- | :--- | :--- | :--- | :--- | :---: |
-| **TC-COMP-01** | Ajukan komplain | Prasyarat: ada pesanan selesai.<br>1. Buka Pusat Bantuan.<br>2. Pilih kategori dan isi keluhan.<br>3. Kirim. | Komplain tersimpan berstatus open dan terhubung ke pesanan. | | |
-| **TC-COMP-02** | Komplain pada pesanan belum selesai | Prasyarat: pesanan berstatus diproses.<br>1. Coba ajukan komplain. | Tidak diizinkan. | | |
-| **TC-COMP-03** | Admin menangani komplain | 1. Admin buka Komplain Pelanggan.<br>2. Ubah status ke In Progress lalu Resolved. | Status berubah; resolved_at dan penangani tercatat; angka komplain di dashboard ikut berubah. | | |
+| **TC-COMP-01** | Ajukan komplain | Prasyarat: ada pesanan selesai.<br>1. Buka Pusat Bantuan.<br>2. Pilih kategori dan isi keluhan.<br>3. Kirim. | Komplain tersimpan berstatus open dan terhubung ke pesanan. | Komplain tersimpan berstatus open dan terhubung ke pesanan selesai. | Pass |
+| **TC-COMP-02** | Komplain pada pesanan belum selesai | Prasyarat: pesanan berstatus diproses.<br>1. Coba ajukan komplain. | Tidak diizinkan (ditolak dengan pesan validasi atau HTTP 422). | Ditolak dengan pesan validasi error: pesanan masih dalam proses pengerjaan dan komplain kendala pesanan hanya dapat diajukan setelah pesanan selesai. | Pass |
+| **TC-COMP-03** | Admin menangani komplain | 1. Admin buka Komplain Pelanggan.<br>2. Ubah status ke In Progress lalu Resolved. | Status berubah; resolved_at dan penangani tercatat; angka komplain di dashboard ikut berubah. | Status berubah menjadi In Progress lalu Resolved di admin (resolved_at & penangani tercatat, dashboard sinkron). Fitur tracking status komplain sisi pelanggan kini juga telah diimplementasikan pada halaman FAQ/tiket, live order tracking, dan riwayat pesanan. | Pass |
 
 ### 10.7 Admin dan dashboard (ADM)
 | ID | Skenario | Prasyarat dan langkah | Expected Result | Actual Result | Status |
@@ -282,7 +282,7 @@ Total 81 test case. Kolom *Actual Result* dan *Status* dikosongkan dan diisi saa
 | :--- | :--- | :--- | :--- | :--- | :---: |
 | **TC-FRD-01** | Blokir otomatis | Prasyarat: satu nomor HP uji punya 5 pesanan dibatalkan dalam 30 menit.<br>1. Lakukan checkout. | Ditolak; is_blocked menjadi 1; tercatat di activity_logs; tampil di Fraud Monitoring. | | |
 | **TC-FRD-02** | Customer terblokir checkout | Prasyarat: is_blocked 1.<br>1. Checkout. | Gagal dan kembali ke halaman menu dengan pesan error. | | |
-| **TC-FRD-03** | Unblock manual | 1. Admin buka Fraud Monitoring.<br>2. Klik Unblock.<br>3. Customer checkout lagi. | is_blocked kembali 0; checkout berhasil. | | |
+| **TC-FRD-03** | Unblock manual | 1. Admin buka Fraud Monitoring.<br>2. Klik Unblock.<br>3. Customer checkout lagi. | is_blocked kembali 0; checkout berhasil. | is_blocked kembali 0 (unblocked_at tercatat); riwayat pembatalan sebelum unblock direset sehingga customer dapat langsung checkout kembali dengan sukses. | Pass |
 
 ### 10.9 Black-box: EP dan BVA
 *Nilai batas diuji lewat formulir (atau Postman bila formulir membatasi). Ambang harga dan panjang kolom dicocokkan dengan kode sebelum eksekusi.*
@@ -376,7 +376,10 @@ Ditemukan, dicatat, dianalisis, diperbaiki, diuji ulang, lalu ditutup (*Closed*)
 | :--- | :--- | :--- | :---: | :---: | :--- |
 | **DEF-001** | TC-AUTO-02 | Pesanan lunas (`is_paid` 1) ikut dibatalkan scheduler | High | Closed (14 Okt 2026) | Query diberi kondisi `is_paid = false`. Uji ulang: 3 pesanan belum lunas dibatalkan, 1 pesanan lunas tetap menunggu. |
 | **DEF-002** | TC-AUTO-04 | Checkout menerima boarding yang sudah lewat; pesanan langsung kedaluwarsa | Medium | Closed (04 Nov 2026) | Validasi WIB & formula lintas tengah malam (maks 8 jam). Boarding lampau ditolak ('sudah terlewat'), boarding < 15 mnt ditolak (SLA dapur), auto_cancel_at diproteksi selalu di masa depan. |
-| **DEF-003** | TC-PROC-06 | Status dapat dimundurkan (selesai ke dibatalkan) lewat API | Medium | Menunggu uji | Usulan: peta transisi status yang diizinkan. |
+| **DEF-003** | TC-PROC-06 | Status dapat dimundurkan (selesai ke dibatalkan) lewat API | Medium | Closed (08 Nov 2026) | Peta transisi status (state machine) diimplementasikan ketat pada `TenantOrderController::updateStatus` & `CustomerCatalogController::cancelOrder`. Request dari `selesai` ke `dibatalkan` ditolak dengan pesan validasi HTTP 422. Pada UI tidak disediakan tombol pembatalan saat pesanan berstatus selesai. |
+| **DEF-004** | TC-COMP-02 | Komplain untuk pesanan yang belum selesai (cth: diproses) tetap dapat dikirim | Medium | Closed (08 Nov 2026) | Ditambahkan validasi status pesanan pada `CustomerCatalogController::storeComplaint`. Jika pesanan belum berstatus `selesai`, pengajuan komplain kendala pesanan ditolak dengan pesan validasi / HTTP 422. |
+| **DEF-005** | TC-COMP-03 | Belum tersedianya fitur tracking status komplain di sisi pelanggan | Low | Closed (08 Nov 2026) | Diimplementasikan modul tracking komplain mandiri di halaman FAQ (`/faq` dan API `/api/complaint-track`) berbasis nomor tiket `CMP-...` atau WhatsApp, serta kartu status komplain otomatis di halaman Live Tracking (`/tracking`) dan Riwayat Pesanan (`/riwayat`). |
+| **DEF-006** | TC-FRD-03 | Customer yang telah di-unblock admin langsung terblokir kembali saat checkout karena kalkulasi pembatalan 30 menit masih menghitung pesanan lama | High | Closed (08 Nov 2026) | Ditambahkan kolom `unblocked_at` pada tabel `customers`. Pada `FraudDetectionService`, pembatalan yang terjadi sebelum waktu `unblocked_at` diabaikan, sehingga admin unblock mereset riwayat pembatalan sebelumnya dan pelanggan dapat langsung memesan kembali tanpa terblokir ulang. |
 
 *Defect baru dari eksekusi Minggu 17 ditambahkan ke tabel ini dengan format yang sama.*
 

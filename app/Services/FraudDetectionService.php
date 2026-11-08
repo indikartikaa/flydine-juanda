@@ -28,10 +28,16 @@ class FraudDetectionService
         $cancelledOrders = 1;
 
         if ($customerId) {
-            $cancelledOrders = Order::where('customer_id', $customerId)
+            $customer = Customer::find($customerId);
+            $query = Order::where('customer_id', $customerId)
                 ->where('status', 'dibatalkan')
-                ->where('updated_at', '>=', Carbon::now()->subMinutes(30))
-                ->count();
+                ->where('updated_at', '>=', Carbon::now()->subMinutes(30));
+
+            if ($customer && $customer->unblocked_at) {
+                $query->where('updated_at', '>', $customer->unblocked_at);
+            }
+
+            $cancelledOrders = $query->count();
         }
 
         // Catat aktivitas pembatalan ke activity_logs untuk pemantauan deteksi fraud
@@ -60,87 +66,74 @@ class FraudDetectionService
      */
     public function checkCancelledOrderPattern($customerId): bool
     {
+        $customer = Customer::find($customerId);
+        if (!$customer) {
+            return false;
+        }
 
-        $cancelledOrders = Order::where('customer_id', $customerId)
-
+        $query = Order::where('customer_id', $customerId)
             ->where('status', 'dibatalkan')
-
             ->where(
                 'updated_at',
                 '>=',
                 Carbon::now()->subMinutes(30)
-            )
+            );
 
-            ->count();
+        if ($customer->unblocked_at) {
+            $query->where('updated_at', '>', $customer->unblocked_at);
+        } else {
+            $lastUnblock = \App\Models\ActivityLog::where('action', 'CUSTOMER_UNBLOCKED')
+                ->where('table_name', 'customers')
+                ->where('record_id', $customerId)
+                ->latest()
+                ->first();
+            if ($lastUnblock) {
+                $query->where('updated_at', '>', $lastUnblock->created_at);
+            }
+        }
 
-
+        $cancelledOrders = $query->count();
 
         if ($cancelledOrders >= 5) {
-
-
             $this->blockCustomer(
                 $customerId,
                 $cancelledOrders
             );
-
-
             return true;
-
         }
 
-
         return false;
-
     }
-
-
 
     /**
      * Blokir customer otomatis
      */
     protected function blockCustomer($customerId, $cancelledOrders): void
     {
-
         $customer = Customer::find($customerId);
-
 
         if (!$customer) {
             return;
         }
-
 
         // Hindari update berulang
         if ($customer->is_blocked) {
             return;
         }
 
-
-
         $customer->update([
-
             'is_blocked' => true,
-
-            'blocked_reason' =>
-                "Terdeteksi {$cancelledOrders} order dibatalkan dalam 30 menit",
-
+            'blocked_reason' => "Terdeteksi {$cancelledOrders} order dibatalkan dalam 30 menit",
             'blocked_at' => now(),
-
+            'unblocked_at' => null,
         ]);
 
-
-
         $this->logger->log(
-
             'CUSTOMER_BLOCKED',
-
             'customers',
-
             $customerId,
-
             "Customer otomatis diblokir karena {$cancelledOrders} order dibatalkan dalam 30 menit"
-
         );
-
     }
 
 }

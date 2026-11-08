@@ -796,6 +796,48 @@
                                 Rp {{ number_format($order->total_amount, 0, ',', '.') }}
                             </span>
                         </div>
+                        
+                        @if($order->complaints->isNotEmpty())
+                        <!-- Customer Complaint Status on Order -->
+                        <div class="mt-4 p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                    <span class="text-xs font-black uppercase tracking-wider text-slate-800">Status Komplain Pesanan</span>
+                                </div>
+                                <a href="{{ route('page.faq', ['ticket' => $order->complaints->last()->complaint_code]) }}" class="text-[11px] font-bold text-[#005ea2] hover:underline flex items-center gap-0.5">
+                                    <span>Pusat Bantuan</span>
+                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                                </a>
+                            </div>
+                            <div class="space-y-2">
+                                @foreach($order->complaints as $c)
+                                @php
+                                    $cBadge = match($c->status) {
+                                        'open' => ['bg-rose-50 text-rose-700 border-rose-200', 'Menunggu Respon', 'bg-rose-500 animate-pulse'],
+                                        'in_progress' => ['bg-blue-50 text-blue-700 border-blue-200', 'Sedang Diproses Operasional', 'bg-blue-500 animate-ping'],
+                                        'resolved' => ['bg-emerald-50 text-emerald-700 border-emerald-200', 'Selesai Ditangani', 'bg-emerald-500'],
+                                        'closed' => ['bg-slate-100 text-slate-700 border-slate-200', 'Ditutup', 'bg-slate-500'],
+                                        default => ['bg-slate-50 text-slate-700 border-slate-200', ucfirst($c->status), 'bg-slate-400']
+                                    };
+                                @endphp
+                                <div class="bg-white p-3 rounded-xl border border-amber-100/90 shadow-2xs space-y-1">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-mono text-xs font-black text-slate-900">{{ $c->complaint_code }}</span>
+                                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[10px] font-black {{ $cBadge[0] }}">
+                                            <span class="w-1.5 h-1.5 rounded-full {{ $cBadge[2] }}"></span>
+                                            {{ $cBadge[1] }}
+                                        </span>
+                                    </div>
+                                    <p class="text-xs text-slate-600 font-medium italic line-clamp-2">&ldquo;{{ $c->description }}&rdquo;</p>
+                                    @if($c->resolved_at)
+                                    <p class="text-[10px] text-emerald-600 font-bold mt-1">✓ Diselesaikan pada {{ $c->resolved_at->format('d M Y, H:i') }} WIB</p>
+                                    @endif
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
                     </div>
 
                     <!-- Quick Actions Buttons -->

@@ -13,7 +13,7 @@
                 </h1>
                 
                 <p class="text-slate-600 text-sm sm:text-base lg:text-lg leading-relaxed font-normal">
-                    Temukan panduan cepat seputar pemesanan mandiri, integrasi waktu boarding, pembayaran QRIS, hingga layanan pengaduan kendala di Bandara Internasional Juanda.
+                    Temukan panduan cepat seputar pemesanan mandiri, integrasi waktu boarding, pembayaran QRIS, hingga layanan pelacakan tiket pengaduan di Bandara Internasional Juanda.
                 </p>
             </div>
 
@@ -76,7 +76,8 @@
             <a href="#pemesanan" @click="activeSection = 'pemesanan'" :class="activeSection === 'pemesanan' ? 'bg-[#005ea2] text-white' : 'bg-slate-100 text-slate-600'" class="px-3 py-1.5 rounded-xl transition-colors">2. Pemesanan</a>
             <a href="#boarding" @click="activeSection = 'boarding'" :class="activeSection === 'boarding' ? 'bg-[#005ea2] text-white' : 'bg-slate-100 text-slate-600'" class="px-3 py-1.5 rounded-xl transition-colors">3. Boarding</a>
             <a href="#pengambilan" @click="activeSection = 'pengambilan'" :class="activeSection === 'pengambilan' ? 'bg-[#005ea2] text-white' : 'bg-slate-100 text-slate-600'" class="px-3 py-1.5 rounded-xl transition-colors">4. Pengambilan</a>
-            <a href="#hubungi-kami" @click="activeSection = 'hubungi-kami'" :class="activeSection === 'hubungi-kami' ? 'bg-[#005ea2] text-white' : 'bg-slate-100 text-slate-600'" class="px-3 py-1.5 rounded-xl transition-colors">5. Kontak CS</a>
+            <a href="#lacak-tiket" @click="activeSection = 'lacak-tiket'" :class="activeSection === 'lacak-tiket' ? 'bg-[#005ea2] text-white' : 'bg-slate-100 text-slate-600'" class="px-3 py-1.5 rounded-xl transition-colors">5. Lacak Tiket</a>
+            <a href="#hubungi-kami" @click="activeSection = 'hubungi-kami'" :class="activeSection === 'hubungi-kami' ? 'bg-[#005ea2] text-white' : 'bg-slate-100 text-slate-600'" class="px-3 py-1.5 rounded-xl transition-colors">6. Kontak CS</a>
         </div>
     </div>
 
@@ -123,13 +124,36 @@
                         <svg class="w-3.5 h-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                     </a>
 
+                    <a href="#lacak-tiket" @click="activeSection = 'lacak-tiket'" 
+                       :class="activeSection === 'lacak-tiket' ? 'bg-blue-50 text-[#005ea2] font-bold border-l-2 border-[#005ea2]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'"
+                       class="flex items-center justify-between px-3.5 py-2.5 rounded-r-xl transition-all">
+                        <span>05. Lacak Status Komplain</span>
+                        <svg class="w-3.5 h-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                    </a>
+
                     <a href="#hubungi-kami" @click="activeSection = 'hubungi-kami'" 
                        :class="activeSection === 'hubungi-kami' ? 'bg-blue-50 text-[#005ea2] font-bold border-l-2 border-[#005ea2]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'"
                        class="flex items-center justify-between px-3.5 py-2.5 rounded-r-xl transition-all">
-                        <span>05. Formulir Pengaduan CS</span>
+                        <span>06. Formulir Pengaduan CS</span>
                         <svg class="w-3.5 h-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                     </a>
                 </nav>
+            </div>
+
+            <!-- Sticky Support Banner -->
+            <div class="bg-gradient-to-br from-[#09131f] to-[#005ea2] rounded-3xl p-6 text-white shadow-md relative overflow-hidden">
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
+                <div class="relative z-10">
+                    <span class="text-[10px] font-black uppercase tracking-wider text-blue-200 block mb-1">Dukungan Penumpang</span>
+                    <h4 class="text-base font-black leading-tight mb-2">Butuh Bantuan Mendesak?</h4>
+                    <p class="text-xs text-blue-100/90 leading-relaxed font-normal mb-4">
+                        Jika waktu boarding Anda tersisa kurang dari 20 menit dan memerlukan klarifikasi pesanan, segera hubungi Helpdesk Resmi Bandara.
+                    </p>
+                    <a href="#hubungi-kami" class="inline-flex items-center text-xs font-bold text-amber-300 hover:text-amber-200 transition-colors">
+                        <span>Kirim laporan kendala</span>
+                        <svg class="w-3.5 h-3.5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                    </a>
+                </div>
             </div>
 
         </aside>
@@ -165,7 +189,7 @@
                             Apakah saya wajib membuat akun untuk memesan makanan?
                         </h3>
                         <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                            Tidak wajib. FlyDine didesain ramah penumpang transit sehingga Anda dapat langsung memesan sebagai tamu (guest) cukup dengan memasukkan nama pemesan dan nomor penerbangan.
+                            Tidak wajib. FlyDine didesain ramah penumpang transit sehingga Anda dapat langsung memesan sebagai tamu (guest) cukup dengan memasukkan nama pemesan dan nomor telepon Anda.
                         </p>
                     </div>
 
@@ -223,15 +247,15 @@
                 </div>
             </section>
 
-            <!-- 03. WAKTU BOARDING & PENERBANGAN -->
+            <!-- 03. BOARDING & JADWAL PESAWAT -->
             <section id="boarding" class="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs scroll-mt-28">
                 <div class="flex items-center justify-between mb-5 pb-3.5 border-b border-slate-100">
                     <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-black text-xs">
+                        <div class="w-8 h-8 rounded-xl bg-blue-50 text-[#005ea2] flex items-center justify-center font-black text-xs">
                             03
                         </div>
                         <h2 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
-                            Waktu Boarding &amp; Penerbangan
+                            Waktu Boarding &amp; Keselamatan Penerbangan
                         </h2>
                     </div>
                 </div>
@@ -239,28 +263,19 @@
                 <div class="space-y-3.5">
                     <div class="p-5 rounded-2xl border border-slate-100 bg-slate-50/60">
                         <h3 class="font-bold text-slate-900 text-sm mb-1.5">
-                            Mengapa saya harus memasukkan nomor penerbangan dan waktu boarding?
+                            Mengapa sistem meminta waktu boarding saya saat checkout?
                         </h3>
                         <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                            Data nomor penerbangan disinkronkan secara aman dengan sistem jadwal bandara. Dapur restoran memprioritaskan antrean masak penumpang yang waktu boarding-nya lebih awal agar Anda tidak terlambat menuju gerbang keberangkatan.
+                            Ini adalah fitur keselamatan eksklusif FlyDine Juanda. Sistem secara otomatis mencocokkan waktu persiapan makanan dengan jam boarding Anda. Jika waktu tersisa kurang dari batas minimal dapur (15 menit), pesanan akan ditolak otomatis agar Anda tidak tertinggal penerbangan.
                         </p>
                     </div>
 
                     <div class="p-5 rounded-2xl border border-slate-100 bg-slate-50/60">
                         <h3 class="font-bold text-slate-900 text-sm mb-1.5">
-                            Bagaimana jika waktu boarding saya sudah sangat dekat?
+                            Bagaimana jika penerbangan saya mengalami delay / penundaan?
                         </h3>
                         <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                            Sistem secara cerdas mendeteksi waktu tersisa. Apabila sisa waktu menuju boarding terlalu singkat (kurang dari estimasi penyiapan menu), sistem akan mencegah pemesanan demi menjaga keselamatan jadwal terbang Anda.
-                        </p>
-                    </div>
-
-                    <div class="p-5 rounded-2xl border border-slate-100 bg-slate-50/60">
-                        <h3 class="font-bold text-slate-900 text-sm mb-1.5">
-                            Bagaimana jika penerbangan saya mengalami perubahan jadwal (delay)?
-                        </h3>
-                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                            Karena terhubung dengan sistem bandara, dapur akan menyesuaikan estimasi persiapan makanan Anda. Anda tetap dapat mengambil pesanan Anda di gerai restoran terkait pada hari yang sama.
+                            Dapur tetap menyiapkan pesanan sesuai jadwal checkout awal Anda. Anda tetap dapat mengambil hidangan di gerai terkait sebelum naik pesawat.
                         </p>
                     </div>
                 </div>
@@ -285,7 +300,7 @@
                             Bagaimana cara mengambil pesanan di gerai restoran?
                         </h3>
                         <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                            Saat status pesanan di layar Anda berubah menjadi "Siap Diambil", kunjungi konter restoran yang Anda tuju dan tunjukkan kode pesanan 4-digit atau bukti nota digital kepada kasir/staf gerai.
+                            Saat status pesanan di layar Anda berubah menjadi "Siap Diambil", kunjungi konter restoran yang Anda tuju dan tunjukkan kode pesanan atau bukti nota digital kepada kasir/staf gerai.
                         </p>
                     </div>
 
@@ -300,12 +315,142 @@
                 </div>
             </section>
 
-            <!-- 05. FORMULIR PENGADUAN & HUBUNGI KAMI -->
+            <!-- 05. LACAK STATUS KOMPLAIN PELANGGAN (TC-COMP-03) -->
+            <section id="lacak-tiket" x-data="complaintTracker()" class="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs scroll-mt-28 space-y-6">
+                <div class="flex items-center justify-between pb-3.5 border-b border-slate-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-xl bg-blue-50 text-[#005ea2] flex items-center justify-center font-black text-xs">
+                            05
+                        </div>
+                        <h2 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                            Lacak Status Tiket Pengaduan
+                        </h2>
+                    </div>
+                </div>
+
+                <p class="text-xs sm:text-sm text-slate-500 font-medium">
+                    Masukkan Nomor Tiket (misal: <strong class="text-slate-800">CMP-XXXXXX</strong>) atau Nomor WhatsApp untuk melacak progres penyelesaian masalah Anda secara transparan.
+                </p>
+
+                <!-- Search Box -->
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <div class="relative flex-1">
+                        <input type="text" 
+                               x-model="searchQuery" 
+                               @keydown.enter.prevent="searchTicket()"
+                               placeholder="Masukkan Nomor Tiket (CMP-...) atau No. WhatsApp"
+                               class="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all">
+                        <svg class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                    <button type="button" 
+                            @click="searchTicket()" 
+                            :disabled="isLoading"
+                            class="bg-[#005ea2] hover:bg-[#004a82] active:scale-95 text-white font-extrabold px-6 py-3.5 rounded-2xl text-xs sm:text-sm transition-all shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60">
+                        <span x-show="!isLoading">Lacak Status</span>
+                        <span x-show="isLoading" class="flex items-center gap-2" style="display:none;">
+                            <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                            Mencari...
+                        </span>
+                    </button>
+                </div>
+
+                <!-- Error Message -->
+                <div x-show="errorMessage" x-cloak class="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold flex items-center gap-2">
+                    <svg class="w-4 h-4 shrink-0 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span x-text="errorMessage"></span>
+                </div>
+
+                <!-- Ticket Result Card -->
+                <div x-show="ticketData" x-cloak class="bg-gradient-to-br from-slate-50 to-blue-50/40 rounded-2xl p-5 sm:p-6 border border-slate-200/80 space-y-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200/60 gap-3">
+                        <div>
+                            <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Nomor Tiket Komplain</span>
+                            <div class="flex items-center gap-2 mt-0.5">
+                                <span class="font-mono text-lg font-black text-slate-900" x-text="ticketData ? ticketData.complaint_code : ''"></span>
+                                <template x-if="ticketData && ticketData.order_code">
+                                    <span class="text-xs font-bold text-slate-500 bg-white px-2 py-0.5 rounded-md border border-slate-200" x-text="'Pesanan: ' + ticketData.order_code"></span>
+                                </template>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <!-- Badge Status -->
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-black shadow-2xs"
+                                 :class="{
+                                     'bg-rose-50 text-rose-700 border-rose-200': ticketData && ticketData.status === 'open',
+                                     'bg-blue-50 text-blue-700 border-blue-200': ticketData && ticketData.status === 'in_progress',
+                                     'bg-emerald-50 text-emerald-700 border-emerald-200': ticketData && (ticketData.status === 'resolved' || ticketData.status === 'closed')
+                                 }">
+                                <span class="w-2 h-2 rounded-full"
+                                      :class="{
+                                          'bg-rose-500 animate-pulse': ticketData && ticketData.status === 'open',
+                                          'bg-blue-500 animate-ping': ticketData && ticketData.status === 'in_progress',
+                                          'bg-emerald-500': ticketData && (ticketData.status === 'resolved' || ticketData.status === 'closed')
+                                      }"></span>
+                                <span x-text="ticketData ? ticketData.status_label : ''"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Stepper Lifecycle -->
+                    <div>
+                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 block mb-3">Alur Penanganan Komplain</span>
+                        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                            <!-- Step 1: Open -->
+                            <div class="p-3 rounded-xl border transition-all"
+                                 :class="ticketData ? 'bg-white border-blue-200 shadow-2xs' : 'bg-slate-100 border-slate-200 opacity-50'">
+                                <div class="w-6 h-6 rounded-full mx-auto mb-1 flex items-center justify-center font-black text-[11px] bg-blue-600 text-white">1</div>
+                                <div class="font-extrabold text-slate-800 text-[11px]">Diterima</div>
+                                <div class="text-[10px] text-slate-400 font-medium">Tiket Tercatat</div>
+                            </div>
+
+                            <!-- Step 2: In Progress -->
+                            <div class="p-3 rounded-xl border transition-all"
+                                 :class="ticketData && (ticketData.status === 'in_progress' || ticketData.status === 'resolved' || ticketData.status === 'closed') ? 'bg-white border-blue-300 shadow-2xs' : 'bg-slate-100/60 border-slate-200 opacity-50'">
+                                <div class="w-6 h-6 rounded-full mx-auto mb-1 flex items-center justify-center font-black text-[11px]"
+                                     :class="ticketData && (ticketData.status === 'in_progress' || ticketData.status === 'resolved' || ticketData.status === 'closed') ? 'bg-[#005ea2] text-white' : 'bg-slate-200 text-slate-500'">2</div>
+                                <div class="font-extrabold text-slate-800 text-[11px]">Investigasi</div>
+                                <div class="text-[10px] text-slate-400 font-medium">Koordinasi Tenant</div>
+                            </div>
+
+                            <!-- Step 3: Resolved -->
+                            <div class="p-3 rounded-xl border transition-all"
+                                 :class="ticketData && (ticketData.status === 'resolved' || ticketData.status === 'closed') ? 'bg-white border-emerald-300 shadow-2xs' : 'bg-slate-100/60 border-slate-200 opacity-50'">
+                                <div class="w-6 h-6 rounded-full mx-auto mb-1 flex items-center justify-center font-black text-[11px]"
+                                     :class="ticketData && (ticketData.status === 'resolved' || ticketData.status === 'closed') ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-500'">3</div>
+                                <div class="font-extrabold text-slate-800 text-[11px]">Selesai</div>
+                                <div class="text-[10px] text-slate-400 font-medium">Solusi Diberikan</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Details -->
+                    <div class="bg-white rounded-xl p-4 border border-slate-200/70 space-y-2 text-xs">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between text-slate-500 gap-1">
+                            <span>Waktu Laporan: <strong class="text-slate-700 font-bold" x-text="ticketData ? ticketData.created_at : ''"></strong></span>
+                            <template x-if="ticketData && ticketData.resolved_at">
+                                <span class="text-emerald-700 font-bold">Waktu Penyelesaian: <strong x-text="ticketData.resolved_at"></strong></span>
+                            </template>
+                        </div>
+                        <template x-if="ticketData && ticketData.tenant_name">
+                            <div class="text-slate-600">Restoran / Tenant Terkait: <strong class="text-slate-800 font-bold" x-text="ticketData.tenant_name"></strong></div>
+                        </template>
+                        <div class="pt-2 border-t border-slate-100">
+                            <span class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Rincian Keluhan:</span>
+                            <p class="text-slate-700 font-medium italic" x-text="'&ldquo;' + (ticketData ? ticketData.description : '') + '&rdquo;'"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 06. FORMULIR PENGADUAN & HUBUNGI KAMI -->
             <section id="hubungi-kami" class="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs scroll-mt-28">
                 <div class="flex items-center justify-between mb-5 pb-3.5 border-b border-slate-100">
                     <div class="flex items-center space-x-3">
                         <div class="w-8 h-8 rounded-xl bg-blue-50 text-[#005ea2] flex items-center justify-center font-black text-xs">
-                            05
+                            06
                         </div>
                         <h2 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
                             Kirim Laporan / Hubungi Kami
@@ -385,4 +530,50 @@
         </main>
     </div>
 </div>
+
+<script>
+function complaintTracker() {
+    return {
+        searchQuery: '{{ addslashes(request('ticket', session('complaint_ticket', $trackQuery ?? ''))) }}',
+        isLoading: false,
+        errorMessage: '',
+        ticketData: @json($trackedData ?? null),
+
+        init() {
+            if (this.searchQuery && !this.ticketData) {
+                this.searchTicket();
+            }
+        },
+
+        searchTicket() {
+            const q = (this.searchQuery || '').trim();
+            if (!q) {
+                this.errorMessage = 'Silakan masukkan nomor tiket atau nomor WhatsApp Anda.';
+                return;
+            }
+            this.isLoading = true;
+            this.errorMessage = '';
+            
+            fetch('{{ route('api.complaint.track') }}?query=' + encodeURIComponent(q))
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.found) {
+                        this.ticketData = data;
+                        this.errorMessage = '';
+                    } else {
+                        this.ticketData = null;
+                        this.errorMessage = data.message || 'Tiket komplain tidak ditemukan. Periksa kembali nomor tiket atau kontak Anda.';
+                    }
+                })
+                .catch(() => {
+                    this.ticketData = null;
+                    this.errorMessage = 'Terjadi kendala jaringan saat mencari tiket. Silakan coba sesaat lagi.';
+                })
+                .finally(() => {
+                    this.isLoading = false;
+                });
+        }
+    };
+}
+</script>
 @endsection
