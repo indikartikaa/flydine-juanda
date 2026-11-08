@@ -56,12 +56,13 @@
 
                 <!-- Other Links -->
                 <div class="pt-4 mt-4 border-t border-slate-100 grid grid-cols-2 gap-3 text-slate-600">
-                    <a href="{{ route('page.cara-pesan') }}" class="text-xs font-semibold hover:text-[#005ea2]">Cara Pesan</a>
-                    <a href="{{ route('page.faq') }}" class="text-xs font-semibold hover:text-[#005ea2]">Pusat Bantuan</a>
-                    <a href="{{ route('page.terms') }}" class="text-xs font-semibold hover:text-[#005ea2]">Syarat & Ketentuan</a>
-                    <a href="{{ route('page.privacy') }}" class="text-xs font-semibold hover:text-[#005ea2]">Kebijakan Privasi</a>
-                    <a href="{{ route('page.daftar-tenant') }}" class="text-xs font-semibold hover:text-[#005ea2]">Daftar Tenant</a>
-                    <a href="{{ route('page.promosi') }}" class="text-xs font-semibold hover:text-sky-200">Promosi</a>
+                    <a href="{{ route('page.cara-pesan') }}" class="text-xs font-semibold hover:text-[#005ea2] {{ request()->routeIs('page.cara-pesan') ? 'text-[#005ea2] font-bold' : '' }}">Cara Pesan</a>
+                    <a href="{{ route('page.faq') }}" class="text-xs font-semibold hover:text-[#005ea2] {{ request()->routeIs('page.faq') ? 'text-[#005ea2] font-bold' : '' }}">Pusat Bantuan</a>
+                    <a href="{{ route('page.terms') }}" class="text-xs font-semibold hover:text-[#005ea2] {{ request()->routeIs('page.terms') ? 'text-[#005ea2] font-bold' : '' }}">Syarat & Ketentuan</a>
+                    <a href="{{ route('page.privacy') }}" class="text-xs font-semibold hover:text-[#005ea2] {{ request()->routeIs('page.privacy') ? 'text-[#005ea2] font-bold' : '' }}">Kebijakan Privasi</a>
+                    <a href="{{ route('page.daftar-tenant') }}" class="text-xs font-semibold hover:text-[#005ea2] {{ request()->routeIs('page.daftar-tenant') ? 'text-[#005ea2] font-bold' : '' }}">Daftar Tenant</a>
+                    <a href="{{ route('page.promosi') }}" class="text-xs font-semibold hover:text-[#005ea2] {{ request()->routeIs('page.promosi') ? 'text-[#005ea2] font-bold' : '' }}">Promosi</a>
+                    <a href="{{ route('page.karir') }}" class="text-xs font-semibold hover:text-[#005ea2] {{ request()->routeIs('page.karir') ? 'text-[#005ea2] font-bold' : '' }}">Karir & Korporat</a>
                 </div>
             </div>
         </div>
@@ -75,7 +76,7 @@
         <div class="absolute -top-24 -right-24 w-96 h-96 bg-[#005ea2]/5 rounded-full blur-3xl"></div>
         <div class="absolute top-12 -left-24 w-72 h-72 bg-[#8dc63f]/10 rounded-full blur-3xl"></div>
         
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
             <a href="{{ route('customer.menu') }}" class="inline-flex items-center space-x-2 text-slate-500 hover:text-[#005ea2] transition-colors mb-6 font-bold text-sm bg-white hover:bg-slate-100 border border-slate-200 px-4 py-2 rounded-full w-fit shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                 <span>Kembali ke Beranda</span>
@@ -90,7 +91,7 @@
     </div>
 
     <!-- Main Content -->
-    <main class="flex-grow flex flex-col relative container mx-auto px-4 sm:px-6 lg:px-8 -mt-8 mb-16">
+    <main class="flex-grow flex flex-col relative container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl -mt-8 mb-16">
         @yield('content')
     </main>
 

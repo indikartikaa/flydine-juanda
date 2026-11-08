@@ -44,11 +44,11 @@
                 <div class="lg:col-span-2">
                     <h4 class="font-bold text-sm text-slate-800 mb-5 uppercase tracking-wider">Layanan Pelanggan</h4>
                     <ul class="space-y-3 text-sm font-medium text-slate-500">
-                        <li><a href="{{ route('customer.history') }}" class="hover:text-[#005ea2] transition-colors">Riwayat Pesanan</a></li>
-                        <li><a href="{{ route('page.cara-pesan') }}" class="hover:text-[#005ea2] transition-colors">Cara Pesan</a></li>
-                        <li><a href="{{ route('page.faq') }}" class="hover:text-[#005ea2] transition-colors">Pusat Bantuan (FAQ)</a></li>
-                        <li><a href="{{ route('page.terms') }}" class="hover:text-[#005ea2] transition-colors">Syarat & Ketentuan</a></li>
-                        <li><a href="{{ route('page.privacy') }}" class="hover:text-[#005ea2] transition-colors">Kebijakan Privasi</a></li>
+                        <li><a href="{{ route('customer.history') }}" class="hover:text-[#005ea2] transition-colors {{ request()->routeIs('customer.history') ? 'text-[#005ea2] font-bold' : '' }}">Riwayat Pesanan</a></li>
+                        <li><a href="{{ route('page.cara-pesan') }}" class="hover:text-[#005ea2] transition-colors {{ request()->routeIs('page.cara-pesan') ? 'text-[#005ea2] font-bold' : '' }}">Cara Pesan</a></li>
+                        <li><a href="{{ route('page.faq') }}" class="hover:text-[#005ea2] transition-colors {{ request()->routeIs('page.faq') ? 'text-[#005ea2] font-bold' : '' }}">Pusat Bantuan (FAQ)</a></li>
+                        <li><a href="{{ route('page.terms') }}" class="hover:text-[#005ea2] transition-colors {{ request()->routeIs('page.terms') ? 'text-[#005ea2] font-bold' : '' }}">Syarat & Ketentuan</a></li>
+                        <li><a href="{{ route('page.privacy') }}" class="hover:text-[#005ea2] transition-colors {{ request()->routeIs('page.privacy') ? 'text-[#005ea2] font-bold' : '' }}">Kebijakan Privasi</a></li>
                     </ul>
                 </div>
 
@@ -56,13 +56,13 @@
                 <div class="lg:col-span-2">
                     <h4 class="font-bold text-sm text-slate-800 mb-5 uppercase tracking-wider">Kemitraan</h4>
                     <ul class="space-y-3 text-sm font-medium text-slate-500">
-                        <li><a href="{{ route('page.daftar-tenant') }}" class="hover:text-[#005ea2] transition-colors">Daftar Menjadi Tenant</a></li>
-                        <li><a href="{{ route('login') }}" class="hover:text-[#005ea2] transition-colors flex items-center group">
+                        <li><a href="{{ route('page.daftar-tenant') }}" class="hover:text-[#005ea2] transition-colors {{ request()->routeIs('page.daftar-tenant') ? 'text-[#005ea2] font-bold' : '' }}">Daftar Menjadi Tenant</a></li>
+                        <li><a href="{{ route('login') }}" class="hover:text-[#005ea2] transition-colors flex items-center group {{ request()->routeIs('login') ? 'text-[#005ea2] font-bold' : '' }}">
                             <span class="group-hover:mr-1 transition-all">Portal Login Tenant</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" /></svg>
                         </a></li>
-                        <li><a href="{{ route('page.promosi') }}" class="hover:text-[#005ea2] transition-colors">Promosi Kolaborasi</a></li>
-                        <li><a href="https://juanda-airport.com" target="_blank" rel="noopener noreferrer" class="hover:text-[#005ea2] transition-colors">Karir & Korporat</a></li>
+                        <li><a href="{{ route('page.promosi') }}" class="hover:text-[#005ea2] transition-colors {{ request()->routeIs('page.promosi') ? 'text-[#005ea2] font-bold' : '' }}">Promosi Kolaborasi</a></li>
+                        <li><a href="{{ route('page.karir') }}" class="hover:text-[#005ea2] transition-colors {{ request()->routeIs('page.karir') ? 'text-[#005ea2] font-bold' : '' }}">Karir & Korporat</a></li>
                     </ul>
                 </div>
                 

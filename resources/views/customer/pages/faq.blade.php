@@ -3,33 +3,35 @@
 @section('title', 'Pusat Bantuan (FAQ)')
 
 @section('page_header')
-
-
-    <div class="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10 w-full max-w-5xl mx-auto">
-        <div class="text-center md:text-left md:max-w-xl">
-            <div class="inline-flex items-center space-x-2 bg-white border border-slate-200 px-4 py-1.5 rounded-full mb-6 shadow-sm">
-                <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_#3b82f6]"></span>
-                <span class="text-[10px] font-extrabold text-slate-700 tracking-widest uppercase">Support Center</span>
-            </div>
-            
-            <h1 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight mb-4 text-slate-900 leading-tight">
-                Pusat Bantuan
-            </h1>
-            <p class="text-slate-500 text-sm sm:text-base leading-relaxed font-medium max-w-lg mx-auto md:mx-0">
-                Temukan jawaban untuk pertanyaan yang sering diajukan seputar layanan pemesanan makanan FlyDine di Bandara Juanda.
-            </p>
-        </div>
-        
-        <div class="hidden md:flex justify-center items-center relative w-48 h-48 animate-float">
-            <div class="absolute inset-0 bg-[#005ea2] blur-3xl opacity-20 rounded-full scale-110"></div>
-            
-            <div class="relative w-32 h-32 bg-white border border-slate-100 rounded-3xl shadow-[0_16px_32px_rgba(0,0,0,0.05)] flex items-center justify-center rotate-6 hover:rotate-0 transition-transform duration-500 cursor-default">
-                <svg class="w-14 h-14 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                </svg>
+    <!-- Header Lebar Penuh (Widescreen Juanda Airport Standard) -->
+    <div class="w-full max-w-7xl mx-auto">
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-2">
+            <!-- Left Header Content -->
+            <div class="max-w-3xl">
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-900 leading-tight mb-4">
+                    Pusat Bantuan &amp; FAQ
+                </h1>
                 
-                <div class="absolute -top-3 -right-3 w-8 h-8 bg-amber-400 rounded-xl flex items-center justify-center shadow-lg animate-pulse">
-                    <span class="text-white text-lg font-black">?</span>
+                <p class="text-slate-600 text-sm sm:text-base lg:text-lg leading-relaxed font-normal">
+                    Temukan panduan cepat seputar pemesanan mandiri, integrasi waktu boarding, pembayaran QRIS, hingga layanan pengaduan kendala di Bandara Internasional Juanda.
+                </p>
+            </div>
+
+            <!-- Right Header Quick Highlights (Stat Strip) -->
+            <div class="grid grid-cols-3 gap-2 sm:gap-3 lg:w-96 shrink-0">
+                <div class="bg-white/90 backdrop-blur-xs border border-slate-200/90 rounded-2xl p-3.5 text-center shadow-xs">
+                    <div class="text-xs sm:text-sm font-black text-[#005ea2] mb-0.5">CS Siaga</div>
+                    <div class="text-[10px] sm:text-xs text-slate-500 font-medium">Bantuan cepat</div>
+                </div>
+
+                <div class="bg-white/90 backdrop-blur-xs border border-slate-200/90 rounded-2xl p-3.5 text-center shadow-xs">
+                    <div class="text-xs sm:text-sm font-black text-amber-600 mb-0.5">Boarding</div>
+                    <div class="text-[10px] sm:text-xs text-slate-500 font-medium">Sinkron antrean</div>
+                </div>
+
+                <div class="bg-white/90 backdrop-blur-xs border border-slate-200/90 rounded-2xl p-3.5 text-center shadow-xs">
+                    <div class="text-xs sm:text-sm font-black text-emerald-600 mb-0.5">QRIS</div>
+                    <div class="text-[10px] sm:text-xs text-slate-500 font-medium">Bayar instan</div>
                 </div>
             </div>
         </div>
@@ -37,106 +39,350 @@
 @endsection
 
 @section('content')
-<div class="bg-white p-6 sm:p-10 md:p-12 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 w-full max-w-4xl mx-auto -mt-8 sm:-mt-12 relative z-20 mb-16 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500">
-    
-    <div class="space-y-6 text-slate-600 mb-12">
-        <h3 class="text-xl font-extrabold text-slate-800 mb-6 flex items-center">
-            <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center mr-3 text-[#005ea2]">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-            </div>
-            Pertanyaan Populer
-        </h3>
+<div class="w-full max-w-7xl mx-auto -mt-6 sm:-mt-10 relative z-20 mb-20"
+     x-data="{
+        activeSection: 'umum',
+        init() {
+            const updateActive = () => {
+                const sections = document.querySelectorAll('section[id]');
+                const scrollPos = window.scrollY + 180;
+                
+                if ((window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 80)) {
+                    if (sections.length > 0) {
+                        this.activeSection = sections[sections.length - 1].getAttribute('id');
+                        return;
+                    }
+                }
 
-        <!-- FAQ Item 1 -->
-        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100 hover:shadow-md hover:border-blue-200 transition-all duration-300">
-            <h4 class="text-lg font-bold text-[#005ea2] mb-2">T: Apa itu FlyDine?</h4>
-            <p class="text-sm font-medium leading-relaxed">J: FlyDine adalah platform pemesanan makanan digital pertama di Bandara Internasional Juanda yang memungkinkan penumpang memesan makanan dari <em>boarding lounge</em> tanpa harus mengantre di kasir tenant.</p>
-        </div>
+                sections.forEach(sec => {
+                    const top = sec.offsetTop;
+                    const height = sec.offsetHeight;
+                    const id = sec.getAttribute('id');
+                    if (scrollPos >= top && scrollPos < top + height) {
+                        this.activeSection = id;
+                    }
+                });
+            };
+            window.addEventListener('scroll', updateActive, { passive: true });
+            updateActive();
+        }
+     }">
 
-        <!-- FAQ Item 2 -->
-        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100 hover:shadow-md hover:border-blue-200 transition-all duration-300">
-            <h4 class="text-lg font-bold text-[#005ea2] mb-2">T: Bagaimana jika waktu boarding saya sudah sangat dekat?</h4>
-            <p class="text-sm font-medium leading-relaxed">J: Sistem cerdas kami akan mendeteksi waktu boarding yang Anda masukkan. Jika waktu tersisa kurang dari 15 menit, pesanan akan ditolak secara otomatis untuk mencegah Anda tertinggal pesawat.</p>
-        </div>
-
-        <!-- FAQ Item 3 -->
-        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100 hover:shadow-md hover:border-blue-200 transition-all duration-300">
-            <h4 class="text-lg font-bold text-[#005ea2] mb-2">T: Saya sudah memesan, tapi ingin menambah makanan dari restoran lain?</h4>
-            <p class="text-sm font-medium leading-relaxed">J: Selesaikan terlebih dahulu pesanan di keranjang Anda saat ini. Setelah pembayaran berhasil, Anda dapat membuat pesanan baru untuk restoran yang berbeda.</p>
+    <!-- MOBILE QUICK NAV PILL (Navigasi cepat di layar HP dengan Auto Highlight) -->
+    <div class="lg:hidden sticky top-16 z-30 bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl shadow-sm mb-6 p-2">
+        <div class="flex items-center space-x-2 overflow-x-auto scrollbar-hide text-xs font-semibold whitespace-nowrap px-1 py-1">
+            <span class="text-slate-400 font-bold uppercase text-[10px] pl-1">Menu:</span>
+            <a href="#umum" @click="activeSection = 'umum'" :class="activeSection === 'umum' ? 'bg-[#005ea2] text-white' : 'bg-slate-100 text-slate-600'" class="px-3 py-1.5 rounded-xl transition-colors">1. Umum</a>
+            <a href="#pemesanan" @click="activeSection = 'pemesanan'" :class="activeSection === 'pemesanan' ? 'bg-[#005ea2] text-white' : 'bg-slate-100 text-slate-600'" class="px-3 py-1.5 rounded-xl transition-colors">2. Pemesanan</a>
+            <a href="#boarding" @click="activeSection = 'boarding'" :class="activeSection === 'boarding' ? 'bg-[#005ea2] text-white' : 'bg-slate-100 text-slate-600'" class="px-3 py-1.5 rounded-xl transition-colors">3. Boarding</a>
+            <a href="#pengambilan" @click="activeSection = 'pengambilan'" :class="activeSection === 'pengambilan' ? 'bg-[#005ea2] text-white' : 'bg-slate-100 text-slate-600'" class="px-3 py-1.5 rounded-xl transition-colors">4. Pengambilan</a>
+            <a href="#hubungi-kami" @click="activeSection = 'hubungi-kami'" :class="activeSection === 'hubungi-kami' ? 'bg-[#005ea2] text-white' : 'bg-slate-100 text-slate-600'" class="px-3 py-1.5 rounded-xl transition-colors">5. Kontak CS</a>
         </div>
     </div>
 
-    <!-- Universal Help Center Form -->
-    <div id="hubungi-kami" class="bg-blue-50/50 p-6 md:p-8 rounded-[1.5rem] border border-blue-100 relative overflow-hidden group">
-        <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-100 rounded-full opacity-50 blur-xl group-hover:scale-110 transition-transform duration-700"></div>
-        <div class="relative z-10">
-            <div class="mb-8">
-                <h3 class="text-xl font-extrabold text-[#005ea2] tracking-tight mb-3 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" /></svg>
-                    Hubungi Kami / Kirim Laporan
-                </h3>
-                <p class="text-sm text-slate-500 font-medium leading-relaxed">Tim Support FlyDine siap membantu Anda. Silakan isi form di bawah ini dan kami akan segera menghubungi Anda kembali melalui WhatsApp.</p>
+    <!-- WIDESCREEN DESKTOP DUAL-COLUMN WORKSPACE (Full di Laptop, Rapi di HP) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- LEFT COLUMN: STICKY DESKTOP SIDEBAR WITH SCROLLSPY HIGHLIGHT -->
+        <aside class="hidden lg:block lg:col-span-4 sticky top-24 space-y-5">
+            
+            <div class="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-xs">
+                <div class="flex items-center space-x-2.5 pb-4 mb-3 border-b border-slate-100 text-slate-800">
+                    <svg class="w-4 h-4 text-[#005ea2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-xs font-black tracking-wider uppercase">Kategori Bantuan</span>
+                </div>
+
+                <nav class="space-y-1.5 text-xs font-semibold">
+                    <a href="#umum" @click="activeSection = 'umum'" 
+                       :class="activeSection === 'umum' ? 'bg-blue-50 text-[#005ea2] font-bold border-l-2 border-[#005ea2]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'"
+                       class="flex items-center justify-between px-3.5 py-2.5 rounded-r-xl transition-all">
+                        <span>01. Pertanyaan Umum</span>
+                        <svg class="w-3.5 h-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                    </a>
+
+                    <a href="#pemesanan" @click="activeSection = 'pemesanan'" 
+                       :class="activeSection === 'pemesanan' ? 'bg-blue-50 text-[#005ea2] font-bold border-l-2 border-[#005ea2]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'"
+                       class="flex items-center justify-between px-3.5 py-2.5 rounded-r-xl transition-all">
+                        <span>02. Pemesanan &amp; Pembayaran</span>
+                        <svg class="w-3.5 h-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                    </a>
+
+                    <a href="#boarding" @click="activeSection = 'boarding'" 
+                       :class="activeSection === 'boarding' ? 'bg-blue-50 text-[#005ea2] font-bold border-l-2 border-[#005ea2]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'"
+                       class="flex items-center justify-between px-3.5 py-2.5 rounded-r-xl transition-all">
+                        <span>03. Waktu Boarding &amp; Pesawat</span>
+                        <svg class="w-3.5 h-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                    </a>
+
+                    <a href="#pengambilan" @click="activeSection = 'pengambilan'" 
+                       :class="activeSection === 'pengambilan' ? 'bg-blue-50 text-[#005ea2] font-bold border-l-2 border-[#005ea2]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'"
+                       class="flex items-center justify-between px-3.5 py-2.5 rounded-r-xl transition-all">
+                        <span>04. Pengambilan di Gerai</span>
+                        <svg class="w-3.5 h-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                    </a>
+
+                    <a href="#hubungi-kami" @click="activeSection = 'hubungi-kami'" 
+                       :class="activeSection === 'hubungi-kami' ? 'bg-blue-50 text-[#005ea2] font-bold border-l-2 border-[#005ea2]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'"
+                       class="flex items-center justify-between px-3.5 py-2.5 rounded-r-xl transition-all">
+                        <span>05. Formulir Pengaduan CS</span>
+                        <svg class="w-3.5 h-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                    </a>
+                </nav>
             </div>
 
-            @if(session('success'))
-                <div class="mb-6 bg-emerald-100 border border-emerald-300 text-emerald-800 px-4 py-3 rounded-xl text-sm font-bold flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    <span>{{ session('success') }}</span>
-                </div>
-            @endif
+        </aside>
 
-            @if($errors->any())
-                <div class="mb-6 bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 rounded-xl text-xs font-bold flex items-start gap-2.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-rose-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    <div class="space-y-0.5">
-                        @foreach($errors->all() as $error)
-                            <p>{{ $error }}</p>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
+        <!-- RIGHT COLUMN: FULL-WIDTH CONTENT CARDS -->
+        <main class="lg:col-span-8 space-y-6">
 
-            <form action="{{ route('customer.complaint') }}" method="POST" class="space-y-5">
-                @csrf
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-2">Nama Lengkap <span class="text-rose-500">*</span></label>
-                        <input type="text" name="reporter_name" value="{{ old('reporter_name') }}" required placeholder="Contoh: Budi Santoso" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all shadow-sm hover:border-blue-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-2">No. WhatsApp <span class="text-rose-500">*</span></label>
-                        <input type="text" name="reporter_contact" value="{{ old('reporter_contact') }}" required placeholder="Contoh: 08123456789" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all shadow-sm hover:border-blue-300">
+            <!-- 01. PERTANYAAN UMUM -->
+            <section id="umum" class="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs scroll-mt-28">
+                <div class="flex items-center justify-between mb-5 pb-3.5 border-b border-slate-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-xl bg-blue-50 text-[#005ea2] flex items-center justify-center font-black text-xs">
+                            01
+                        </div>
+                        <h2 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                            Pertanyaan Umum
+                        </h2>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-2">ID Pesanan <span class="text-slate-400 font-normal">(Opsional)</span></label>
-                        <input type="text" name="order_code" value="{{ old('order_code', preg_replace('/[^A-Za-z0-9\-]/', '', (string) request('order', ''))) }}" placeholder="Contoh: ORD-ABCDEF" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all shadow-sm hover:border-blue-300">
+                <div class="space-y-3.5">
+                    <div class="p-5 rounded-2xl border border-slate-100 bg-slate-50/60">
+                        <h3 class="font-bold text-slate-900 text-sm mb-1.5">
+                            Apa itu FlyDine dan bagaimana cara kerjanya di Bandara Juanda?
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            FlyDine adalah platform pemesanan makanan digital resmi di Bandara Internasional Juanda (Terminal 1 &amp; Terminal 2). Anda dapat melihat menu restoran bandara, memesan, dan membayar langsung dari ruang tunggu (boarding lounge), lalu mengambil pesanan saat makanan selesai tanpa perlu mengantre di kasir gerai.
+                        </p>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-2">Kategori Masalah <span class="text-rose-500">*</span></label>
-                        <select name="category" required class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all shadow-sm hover:border-blue-300 appearance-none">
-                            <option value="pesanan_salah" {{ old('category', request('order') ? 'pesanan_salah' : 'lainnya') === 'pesanan_salah' ? 'selected' : '' }}>Pesanan Tidak Sesuai / Terlambat</option>
-                            <option value="status_tidak_update" {{ old('category') === 'status_tidak_update' ? 'selected' : '' }}>Status Aplikasi Tidak Sesuai</option>
-                            <option value="lainnya" {{ old('category', request('order') ? 'pesanan_salah' : 'lainnya') === 'lainnya' ? 'selected' : '' }}>Pertanyaan Umum / Saran / Lainnya</option>
-                        </select>
+
+                    <div class="p-5 rounded-2xl border border-slate-100 bg-slate-50/60">
+                        <h3 class="font-bold text-slate-900 text-sm mb-1.5">
+                            Apakah saya wajib membuat akun untuk memesan makanan?
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Tidak wajib. FlyDine didesain ramah penumpang transit sehingga Anda dapat langsung memesan sebagai tamu (guest) cukup dengan memasukkan nama pemesan dan nomor penerbangan.
+                        </p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl border border-slate-100 bg-slate-50/60">
+                        <h3 class="font-bold text-slate-900 text-sm mb-1.5">
+                            Di mana saja restoran yang melayani pesanan FlyDine?
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Seluruh gerai makanan dan minuman resmi yang berada di concourse dan area ruang tunggu keberangkatan Terminal 1 (Domestik) dan Terminal 2 (Internasional &amp; Domestik) Bandara Internasional Juanda.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 02. PEMESANAN & PEMBAYARAN -->
+            <section id="pemesanan" class="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs scroll-mt-28">
+                <div class="flex items-center justify-between mb-5 pb-3.5 border-b border-slate-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-xl bg-blue-50 text-[#005ea2] flex items-center justify-center font-black text-xs">
+                            02
+                        </div>
+                        <h2 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                            Pemesanan &amp; Pembayaran QRIS
+                        </h2>
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-2">Pesan atau Detail Kendala <span class="text-rose-500">*</span></label>
-                    <textarea name="description" rows="4" required placeholder="Tuliskan secara detail apa yang bisa kami bantu..." class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all resize-none shadow-sm hover:border-blue-300">{{ old('description') }}</textarea>
+                <div class="space-y-3.5">
+                    <div class="p-5 rounded-2xl border border-slate-100 bg-slate-50/60">
+                        <h3 class="font-bold text-slate-900 text-sm mb-1.5">
+                            Metode pembayaran apa saja yang dapat digunakan?
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Kami mendukung QRIS nasional yang dapat dibayar melalui seluruh aplikasi e-wallet (GoPay, OVO, Dana, ShopeePay) serta aplikasi perbankan (BCA, Mandiri, BRI, BNI, dan bank lainnya). Pembayaran terkonfirmasi otomatis dalam hitungan detik.
+                        </p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl border border-slate-100 bg-slate-50/60">
+                        <h3 class="font-bold text-slate-900 text-sm mb-1.5">
+                            Bisakah memesan dari dua restoran berbeda sekaligus?
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Setiap satu transaksi pemesanan berlaku untuk satu restoran terpilih agar alur penyiapan dapur fokus dan makanan siap bersamaan. Anda dapat memesan dari restoran lain setelah menyelesaikan transaksi pertama.
+                        </p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl border border-slate-100 bg-slate-50/60">
+                        <h3 class="font-bold text-slate-900 text-sm mb-1.5">
+                            Apakah harga di FlyDine ada biaya tambahan tersembunyi?
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Tidak ada. Harga yang tertera pada katalog sudah bersifat final dan sudah mencakup pajak restoran resmi (PB1) di kawasan Bandara Internasional Juanda.
+                        </p>
+                    </div>
                 </div>
-                
-                <div class="pt-4">
-                    <button type="submit" class="bg-[#005ea2] hover:bg-[#004a82] text-white font-extrabold py-3.5 px-8 rounded-xl text-sm transition-all shadow-lg shadow-blue-500/30 w-full sm:w-auto flex items-center justify-center group/btn">
-                        Kirim Pesan Sekarang
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2 group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                    </button>
+            </section>
+
+            <!-- 03. WAKTU BOARDING & PENERBANGAN -->
+            <section id="boarding" class="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs scroll-mt-28">
+                <div class="flex items-center justify-between mb-5 pb-3.5 border-b border-slate-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-black text-xs">
+                            03
+                        </div>
+                        <h2 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                            Waktu Boarding &amp; Penerbangan
+                        </h2>
+                    </div>
                 </div>
-            </form>
-        </div>
+
+                <div class="space-y-3.5">
+                    <div class="p-5 rounded-2xl border border-slate-100 bg-slate-50/60">
+                        <h3 class="font-bold text-slate-900 text-sm mb-1.5">
+                            Mengapa saya harus memasukkan nomor penerbangan dan waktu boarding?
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Data nomor penerbangan disinkronkan secara aman dengan sistem jadwal bandara. Dapur restoran memprioritaskan antrean masak penumpang yang waktu boarding-nya lebih awal agar Anda tidak terlambat menuju gerbang keberangkatan.
+                        </p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl border border-slate-100 bg-slate-50/60">
+                        <h3 class="font-bold text-slate-900 text-sm mb-1.5">
+                            Bagaimana jika waktu boarding saya sudah sangat dekat?
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Sistem secara cerdas mendeteksi waktu tersisa. Apabila sisa waktu menuju boarding terlalu singkat (kurang dari estimasi penyiapan menu), sistem akan mencegah pemesanan demi menjaga keselamatan jadwal terbang Anda.
+                        </p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl border border-slate-100 bg-slate-50/60">
+                        <h3 class="font-bold text-slate-900 text-sm mb-1.5">
+                            Bagaimana jika penerbangan saya mengalami perubahan jadwal (delay)?
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Karena terhubung dengan sistem bandara, dapur akan menyesuaikan estimasi persiapan makanan Anda. Anda tetap dapat mengambil pesanan Anda di gerai restoran terkait pada hari yang sama.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 04. PENGAMBILAN DI GERAI -->
+            <section id="pengambilan" class="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs scroll-mt-28">
+                <div class="flex items-center justify-between mb-5 pb-3.5 border-b border-slate-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-xl bg-blue-50 text-[#005ea2] flex items-center justify-center font-black text-xs">
+                            04
+                        </div>
+                        <h2 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                            Pengambilan Pesanan di Gerai
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="space-y-3.5">
+                    <div class="p-5 rounded-2xl border border-slate-100 bg-slate-50/60">
+                        <h3 class="font-bold text-slate-900 text-sm mb-1.5">
+                            Bagaimana cara mengambil pesanan di gerai restoran?
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Saat status pesanan di layar Anda berubah menjadi "Siap Diambil", kunjungi konter restoran yang Anda tuju dan tunjukkan kode pesanan 4-digit atau bukti nota digital kepada kasir/staf gerai.
+                        </p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl border border-slate-100 bg-slate-50/60">
+                        <h3 class="font-bold text-slate-900 text-sm mb-1.5">
+                            Bisakah pesanan dibatalkan jika saya terburu-buru masuk gate?
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Pesanan yang telah dibayar dan statusnya telah diproses dapur restoran tidak dapat dibatalkan atau di-refund karena hidangan telah diracik khusus untuk Anda.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 05. FORMULIR PENGADUAN & HUBUNGI KAMI -->
+            <section id="hubungi-kami" class="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs scroll-mt-28">
+                <div class="flex items-center justify-between mb-5 pb-3.5 border-b border-slate-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-xl bg-blue-50 text-[#005ea2] flex items-center justify-center font-black text-xs">
+                            05
+                        </div>
+                        <h2 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                            Kirim Laporan / Hubungi Kami
+                        </h2>
+                    </div>
+                </div>
+
+                <p class="text-sm text-slate-600 leading-relaxed font-normal mb-6">
+                    Mengalami kendala pada pesanan Anda di Bandara Juanda? Tim Support FlyDine siap membantu. Silakan lengkapi formulir di bawah ini dan kami akan segera menindaklanjutinya:
+                </p>
+
+                <!-- Feedback Notifications -->
+                @if(session('success'))
+                    <div class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold flex items-center gap-2.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span>{{ session('success') }}</span>
+                    </div>
+                @endif
+
+                @if($errors->any())
+                    <div class="mb-6 bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 rounded-2xl text-xs font-bold flex items-start gap-2.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-rose-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <div class="space-y-0.5">
+                            @foreach($errors->all() as $error)
+                                <p>{{ $error }}</p>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Form -->
+                <form action="{{ route('customer.complaint') }}" method="POST" class="space-y-5">
+                    @csrf
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-2">Nama Lengkap <span class="text-rose-500">*</span></label>
+                            <input type="text" name="reporter_name" value="{{ old('reporter_name') }}" required placeholder="Contoh: Budi Santoso" class="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-3 text-sm font-medium focus:bg-white focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-2">No. WhatsApp <span class="text-rose-500">*</span></label>
+                            <input type="text" name="reporter_contact" value="{{ old('reporter_contact') }}" required placeholder="Contoh: 08123456789" class="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-3 text-sm font-medium focus:bg-white focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-2">ID Pesanan <span class="text-slate-400 font-normal">(Opsional)</span></label>
+                            <input type="text" name="order_code" value="{{ old('order_code', preg_replace('/[^A-Za-z0-9\-]/', '', (string) request('order', ''))) }}" placeholder="Contoh: ORD-ABCDEF" class="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-3 text-sm font-medium focus:bg-white focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-2">Kategori Masalah <span class="text-rose-500">*</span></label>
+                            <select name="category" required class="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-3 text-sm font-medium focus:bg-white focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all appearance-none">
+                                <option value="pesanan_salah" {{ old('category', request('order') ? 'pesanan_salah' : 'lainnya') === 'pesanan_salah' ? 'selected' : '' }}>Pesanan Tidak Sesuai / Terlambat</option>
+                                <option value="status_tidak_update" {{ old('category') === 'status_tidak_update' ? 'selected' : '' }}>Status Aplikasi Tidak Sesuai</option>
+                                <option value="lainnya" {{ old('category', request('order') ? 'pesanan_salah' : 'lainnya') === 'lainnya' ? 'selected' : '' }}>Pertanyaan Umum / Saran / Lainnya</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-2">Pesan atau Detail Kendala <span class="text-rose-500">*</span></label>
+                        <textarea name="description" rows="4" required placeholder="Tuliskan secara jelas apa yang bisa kami bantu..." class="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-3 text-sm font-medium focus:bg-white focus:border-[#005ea2] focus:ring-2 focus:ring-blue-500/20 outline-none transition-all resize-none">{{ old('description') }}</textarea>
+                    </div>
+                    
+                    <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <button type="submit" class="bg-[#005ea2] hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl text-sm transition-all shadow-xs w-full sm:w-auto flex items-center justify-center space-x-2">
+                            <span>Kirim Laporan</span>
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                        </button>
+                        <span class="text-xs text-slate-500 text-center sm:text-right">
+                            Email darurat: <a href="mailto:support@flydine.co.id" class="text-[#005ea2] font-semibold hover:underline">support@flydine.co.id</a>
+                        </span>
+                    </div>
+                </form>
+            </section>
+
+        </main>
     </div>
 </div>
 @endsection

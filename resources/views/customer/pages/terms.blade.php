@@ -1,36 +1,37 @@
 @extends('customer.pages.layout')
 
 @section('title', 'Syarat & Ketentuan')
- 
+
 @section('page_header')
-
-
-
-    <div class="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10 w-full max-w-5xl mx-auto">
-        <div class="text-center md:text-left md:max-w-xl">
-            <div class="inline-flex items-center space-x-2 bg-white border border-slate-200 px-4 py-1.5 rounded-full mb-6 shadow-sm">
-                <span class="w-2 h-2 rounded-full bg-[#005ea2] animate-pulse shadow-[0_0_8px_#005ea2]"></span>
-                <span class="text-[10px] font-extrabold text-slate-700 tracking-widest uppercase">Kebijakan Layanan</span>
-            </div>
-            
-            <h1 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight mb-4 text-slate-900 leading-tight">
-                Syarat & Ketentuan
-            </h1>
-            <p class="text-slate-500 text-sm sm:text-base leading-relaxed font-medium max-w-lg mx-auto md:mx-0">
-                Pahami syarat dan ketentuan operasional yang berlaku untuk setiap transaksi di platform pemesanan FlyDine Bandara Juanda.
-            </p>
-        </div>
-        
-        <div class="hidden md:flex justify-center items-center relative w-48 h-48 animate-float">
-            <div class="absolute inset-0 bg-[#005ea2] blur-3xl opacity-20 rounded-full scale-110"></div>
-            
-            <div class="relative w-32 h-32 bg-white border border-slate-100 rounded-3xl shadow-[0_16px_32px_rgba(0,0,0,0.05)] flex items-center justify-center rotate-6 hover:rotate-0 transition-transform duration-500 cursor-default">
-                <svg class="w-14 h-14 text-[#005ea2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+    <!-- Header Lebar Penuh (Widescreen Juanda Airport Standard) -->
+    <div class="w-full max-w-7xl mx-auto">
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-2">
+            <!-- Left Header Content -->
+            <div class="max-w-3xl">
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-900 leading-tight mb-4">
+                    Syarat &amp; Ketentuan
+                </h1>
                 
-                <div class="absolute -top-3 -right-3 w-8 h-8 bg-[#8dc63f] rounded-xl flex items-center justify-center shadow-lg animate-pulse">
-                    <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>
+                <p class="text-slate-600 text-sm sm:text-base lg:text-lg leading-relaxed font-normal">
+                    Pahami ketentuan operasional dan pedoman pemesanan makanan serta minuman di seluruh gerai mitra FlyDine di Terminal 1 dan Terminal 2 Bandara Internasional Juanda demi kelancaran perjalanan Anda.
+                </p>
+            </div>
+
+            <!-- Right Header Quick Highlights (Stat Strip) -->
+            <div class="grid grid-cols-3 gap-2 sm:gap-3 lg:w-96 shrink-0">
+                <div class="bg-white/90 backdrop-blur-xs border border-slate-200/90 rounded-2xl p-3.5 text-center shadow-xs">
+                    <div class="text-xs sm:text-sm font-black text-[#005ea2] mb-0.5">Harga Final</div>
+                    <div class="text-[10px] sm:text-xs text-slate-500 font-medium">Termasuk PB1</div>
+                </div>
+
+                <div class="bg-white/90 backdrop-blur-xs border border-slate-200/90 rounded-2xl p-3.5 text-center shadow-xs">
+                    <div class="text-xs sm:text-sm font-black text-amber-600 mb-0.5">Boarding</div>
+                    <div class="text-[10px] sm:text-xs text-slate-500 font-medium">Sinkron antrean</div>
+                </div>
+
+                <div class="bg-white/90 backdrop-blur-xs border border-slate-200/90 rounded-2xl p-3.5 text-center shadow-xs">
+                    <div class="text-xs sm:text-sm font-black text-slate-800 mb-0.5">Non-Refund</div>
+                    <div class="text-[10px] sm:text-xs text-slate-500 font-medium">Saat diproses</div>
                 </div>
             </div>
         </div>
@@ -38,57 +39,330 @@
 @endsection
 
 @section('content')
-<div class="bg-white p-6 sm:p-10 md:p-12 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 w-full max-w-4xl mx-auto -mt-8 sm:-mt-12 relative z-20 mb-16 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500">
-    
-    <div class="prose prose-slate max-w-none">
-        <p class="text-slate-500 font-medium leading-relaxed text-base sm:text-lg mb-8">
-            Dengan menggunakan layanan FlyDine, pengguna secara otomatis menyetujui seluruh ketentuan operasional berikut. Harap baca dengan saksama demi kelancaran pesanan penerbangan Anda.
-        </p>
+<div class="w-full max-w-7xl mx-auto -mt-6 sm:-mt-10 relative z-20 mb-20" 
+     x-data="{ 
+        activeSection: 'platform-perantara',
+        init() {
+            const updateActive = () => {
+                const sections = document.querySelectorAll('section[id]');
+                const scrollPos = window.scrollY + 180;
+                
+                if ((window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 80)) {
+                    if (sections.length > 0) {
+                        this.activeSection = sections[sections.length - 1].getAttribute('id');
+                        return;
+                    }
+                }
 
-        <!-- Rule Block 1 -->
-        <div class="flex items-start space-x-4 mb-6 p-5 rounded-2xl hover:bg-slate-50 transition-colors">
-            <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-[#005ea2] flex-shrink-0 mt-1">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            </div>
-            <div>
-                <h4 class="font-bold text-slate-800 text-lg mb-2">Platform Perantara</h4>
-                <p class="text-sm font-medium text-slate-500 leading-relaxed">FlyDine murni bertindak sebagai platform perantara pemesanan digital antara Anda (penumpang) dan pihak restoran (Tenant). Layanan persiapan dan kualitas makanan sepenuhnya merupakan tanggung jawab pihak restoran yang Anda pilih.</p>
-            </div>
+                sections.forEach(sec => {
+                    const top = sec.offsetTop;
+                    const height = sec.offsetHeight;
+                    const id = sec.getAttribute('id');
+                    if (scrollPos >= top && scrollPos < top + height) {
+                        this.activeSection = id;
+                    }
+                });
+            };
+            window.addEventListener('scroll', updateActive, { passive: true });
+            updateActive();
+        }
+     }">
+
+    <!-- MOBILE QUICK NAV PILL (Navigasi cepat di layar HP) -->
+    <div class="lg:hidden sticky top-16 z-30 bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl shadow-sm mb-6 p-2">
+        <div class="flex items-center space-x-2 overflow-x-auto scrollbar-hide text-xs font-semibold whitespace-nowrap px-1 py-1">
+            <span class="text-slate-400 font-bold uppercase text-[10px] pl-1">Menu:</span>
+            <a href="#platform-perantara" @click="activeSection = 'platform-perantara'" :class="activeSection === 'platform-perantara' ? 'bg-[#005ea2] text-white' : 'bg-slate-100 text-slate-600'" class="px-3 py-1.5 rounded-xl transition-colors">1. Perantara</a>
+            <a href="#waktu-boarding" @click="activeSection = 'waktu-boarding'" :class="activeSection === 'waktu-boarding' ? 'bg-[#005ea2] text-white' : 'bg-slate-100 text-slate-600'" class="px-3 py-1.5 rounded-xl transition-colors">2. Jadwal Boarding</a>
+            <a href="#transparansi-harga" @click="activeSection = 'transparansi-harga'" :class="activeSection === 'transparansi-harga' ? 'bg-[#005ea2] text-white' : 'bg-slate-100 text-slate-600'" class="px-3 py-1.5 rounded-xl transition-colors">3. Harga &amp; Bayar</a>
+            <a href="#kebijakan-pembatalan" @click="activeSection = 'kebijakan-pembatalan'" :class="activeSection === 'kebijakan-pembatalan' ? 'bg-[#005ea2] text-white' : 'bg-slate-100 text-slate-600'" class="px-3 py-1.5 rounded-xl transition-colors">4. Pembatalan</a>
+            <a href="#pengambilan-pesanan" @click="activeSection = 'pengambilan-pesanan'" :class="activeSection === 'pengambilan-pesanan' ? 'bg-[#005ea2] text-white' : 'bg-slate-100 text-slate-600'" class="px-3 py-1.5 rounded-xl transition-colors">5. Pengambilan</a>
+            <a href="#batasan-tanggung-jawab" @click="activeSection = 'batasan-tanggung-jawab'" :class="activeSection === 'batasan-tanggung-jawab' ? 'bg-[#005ea2] text-white' : 'bg-slate-100 text-slate-600'" class="px-3 py-1.5 rounded-xl transition-colors">6. Batasan</a>
         </div>
+    </div>
 
-        <!-- Rule Block 2 -->
-        <div class="flex items-start space-x-4 mb-6 p-5 rounded-2xl hover:bg-slate-50 transition-colors">
-            <div class="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center text-rose-500 flex-shrink-0 mt-1">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            </div>
-            <div>
-                <h4 class="font-bold text-slate-800 text-lg mb-2">Risiko Keterlambatan Boarding</h4>
-                <p class="text-sm font-medium text-slate-500 leading-relaxed">Sistem kami didesain untuk mencegah pesanan jika waktu sudah mepet. Namun, <strong>setiap keterlambatan pengambilan pesanan yang mengakibatkan Anda tertinggal jadwal penerbangan sepenuhnya merupakan tanggung jawab Anda sebagai pengguna</strong>. Harap perhatikan waktu Boarding Anda dengan baik.</p>
-            </div>
-        </div>
+    <!-- WIDESCREEN DESKTOP DUAL-COLUMN WORKSPACE (Full di Laptop, Rapi di HP) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- LEFT COLUMN: STICKY DESKTOP SIDEBAR -->
+        <aside class="hidden lg:block lg:col-span-4 sticky top-24 space-y-5">
+            
+            <!-- Daftar Navigasi Ketentuan -->
+            <div class="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-xs">
+                <div class="flex items-center space-x-2.5 pb-4 mb-3 border-b border-slate-100 text-slate-800">
+                    <svg class="w-4 h-4 text-[#005ea2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span class="text-xs font-black tracking-wider uppercase">Daftar Isi Ketentuan</span>
+                </div>
 
-        <!-- Rule Block 3 -->
-        <div class="flex items-start space-x-4 mb-6 p-5 rounded-2xl hover:bg-slate-50 transition-colors">
-            <div class="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 flex-shrink-0 mt-1">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
-            </div>
-            <div>
-                <h4 class="font-bold text-slate-800 text-lg mb-2">Kebijakan Pembatalan & Pengembalian Dana</h4>
-                <p class="text-sm font-medium text-slate-500 leading-relaxed">Pesanan yang telah berhasil dibayar (melalui QRIS/Transfer) dan statusnya berubah menjadi "Sedang Diproses" oleh dapur restoran <strong>tidak dapat dibatalkan atau di-refund</strong> (dikembalikan dananya) dengan alasan apapun.</p>
-            </div>
-        </div>
+                <nav class="space-y-1.5 text-xs font-semibold">
+                    <a href="#platform-perantara" @click="activeSection = 'platform-perantara'" 
+                       :class="activeSection === 'platform-perantara' ? 'bg-blue-50 text-[#005ea2] font-bold border-l-2 border-[#005ea2]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'"
+                       class="flex items-center justify-between px-3.5 py-2.5 rounded-r-xl transition-all">
+                        <span>01. Platform Perantara Layanan</span>
+                        <svg class="w-3.5 h-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                    </a>
 
-        <!-- Rule Block 4 -->
-        <div class="flex items-start space-x-4 mb-6 p-5 rounded-2xl hover:bg-slate-50 transition-colors">
-            <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500 flex-shrink-0 mt-1">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            </div>
-            <div>
-                <h4 class="font-bold text-slate-800 text-lg mb-2">Transparansi Harga</h4>
-                <p class="text-sm font-medium text-slate-500 leading-relaxed">Harga yang tertera pada direktori menu FlyDine sudah bersifat final (termasuk pajak restoran) sesuai ketentuan yang berlaku di wilayah Bandara Internasional Juanda.</p>
-            </div>
-        </div>
+                    <a href="#waktu-boarding" @click="activeSection = 'waktu-boarding'" 
+                       :class="activeSection === 'waktu-boarding' ? 'bg-blue-50 text-[#005ea2] font-bold border-l-2 border-[#005ea2]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'"
+                       class="flex items-center justify-between px-3.5 py-2.5 rounded-r-xl transition-all">
+                        <span>02. Jadwal &amp; Waktu Boarding</span>
+                        <svg class="w-3.5 h-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                    </a>
 
+                    <a href="#transparansi-harga" @click="activeSection = 'transparansi-harga'" 
+                       :class="activeSection === 'transparansi-harga' ? 'bg-blue-50 text-[#005ea2] font-bold border-l-2 border-[#005ea2]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'"
+                       class="flex items-center justify-between px-3.5 py-2.5 rounded-r-xl transition-all">
+                        <span>03. Transparansi Harga &amp; Pembayaran</span>
+                        <svg class="w-3.5 h-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                    </a>
+
+                    <a href="#kebijakan-pembatalan" @click="activeSection = 'kebijakan-pembatalan'" 
+                       :class="activeSection === 'kebijakan-pembatalan' ? 'bg-blue-50 text-[#005ea2] font-bold border-l-2 border-[#005ea2]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'"
+                       class="flex items-center justify-between px-3.5 py-2.5 rounded-r-xl transition-all">
+                        <span>04. Kebijakan Pembatalan &amp; Refund</span>
+                        <svg class="w-3.5 h-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                    </a>
+
+                    <a href="#pengambilan-pesanan" @click="activeSection = 'pengambilan-pesanan'" 
+                       :class="activeSection === 'pengambilan-pesanan' ? 'bg-blue-50 text-[#005ea2] font-bold border-l-2 border-[#005ea2]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'"
+                       class="flex items-center justify-between px-3.5 py-2.5 rounded-r-xl transition-all">
+                        <span>05. Prosedur Pengambilan di Gerai</span>
+                        <svg class="w-3.5 h-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                    </a>
+
+                    <a href="#batasan-tanggung-jawab" @click="activeSection = 'batasan-tanggung-jawab'" 
+                       :class="activeSection === 'batasan-tanggung-jawab' ? 'bg-blue-50 text-[#005ea2] font-bold border-l-2 border-[#005ea2]' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'"
+                       class="flex items-center justify-between px-3.5 py-2.5 rounded-r-xl transition-all">
+                        <span>06. Batasan Tanggung Jawab</span>
+                        <svg class="w-3.5 h-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                    </a>
+                </nav>
+            </div>
+
+        </aside>
+
+        <!-- RIGHT COLUMN: FULL-WIDTH CONTENT CARDS -->
+        <main class="lg:col-span-8 space-y-6">
+
+            <!-- 01. PLATFORM PERANTARA LAYANAN -->
+            <section id="platform-perantara" class="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs scroll-mt-28">
+                <div class="flex items-center justify-between mb-5 pb-3.5 border-b border-slate-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-xl bg-blue-50 text-[#005ea2] flex items-center justify-center font-black text-xs">
+                            01
+                        </div>
+                        <h2 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                            Platform Perantara Layanan
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="space-y-4 text-sm text-slate-600 leading-relaxed font-normal">
+                    <p>
+                        FlyDine bertindak murni sebagai platform teknologi perantara pemesanan digital mandiri antara pengguna (penumpang atau pengunjung) dan mitra restoran/tenant resmi di Bandara Internasional Juanda.
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                            <h3 class="font-bold text-slate-900 text-sm mb-1">Peran FlyDine</h3>
+                            <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                                Memfasilitasi katalog menu digital, estimasi antrean dapur, pemrosesan pembayaran QRIS resmi, dan pelacakan status pesanan secara waktu nyata.
+                            </p>
+                        </div>
+
+                        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                            <h3 class="font-bold text-slate-900 text-sm mb-1">Tanggung Jawab Restoran</h3>
+                            <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                                Persiapan hidangan, mutu rasa, ketersediaan porsi, higienitas kemasan, dan penyerahan makanan di konter sepenuhnya dikelola oleh pihak restoran (tenant).
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 02. JADWAL & WAKTU BOARDING -->
+            <section id="waktu-boarding" class="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs scroll-mt-28">
+                <div class="flex items-center justify-between mb-5 pb-3.5 border-b border-slate-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-xl bg-blue-50 text-[#005ea2] flex items-center justify-center font-black text-xs">
+                            02
+                        </div>
+                        <h2 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                            Jadwal Penerbangan &amp; Waktu Boarding
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="space-y-4 text-sm text-slate-600 leading-relaxed font-normal">
+                    <p>
+                        Operasional FlyDine dirancang khusus untuk lingkungan bandara guna meminimalkan risiko keterlambatan penumpang:
+                    </p>
+
+                    <div class="space-y-3.5">
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+                            <strong class="text-slate-900 font-bold block mb-1">Akurasi Input Penerbangan</strong>
+                            <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                                Pengguna wajib memasukkan nomor penerbangan dan jam boarding yang benar agar sistem dapat menyelaraskan antrean pesanan di dapur tenant.
+                            </p>
+                        </div>
+
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+                            <strong class="text-slate-900 font-bold block mb-1">Tanggung Jawab Menuju Pintu Keberangkatan</strong>
+                            <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                                Sistem FlyDine memberikan estimasi waktu persiapan makanan. Namun, <strong>setiap keterlambatan pengambilan makanan yang mengakibatkan penumpang tertinggal penerbangan sepenuhnya merupakan tanggung jawab pribadi pengguna</strong>. Harap selalu perhatikan pengumuman boarding maskapai Anda.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 03. TRANSPARANSI HARGA & PEMBAYARAN -->
+            <section id="transparansi-harga" class="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs scroll-mt-28">
+                <div class="flex items-center justify-between mb-5 pb-3.5 border-b border-slate-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-xl bg-blue-50 text-[#005ea2] flex items-center justify-center font-black text-xs">
+                            03
+                        </div>
+                        <h2 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                            Transparansi Harga &amp; Sistem Pembayaran
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="space-y-4 text-sm text-slate-600 leading-relaxed font-normal">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                            <h3 class="font-bold text-slate-900 text-sm mb-1">Harga Final Termasuk Pajak</h3>
+                            <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                                Seluruh harga yang tertera pada katalog menu FlyDine merupakan harga final (sudah mencakup pajak restoran PB1) sesuai ketentuan yang berlaku di Bandara Juanda.
+                            </p>
+                        </div>
+
+                        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                            <h3 class="font-bold text-slate-900 text-sm mb-1">Pembayaran Non-Tunai Resmi</h3>
+                            <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                                Pembayaran diselesaikan langsung saat pemesanan menggunakan QRIS atau gerbang pembayaran resmi untuk memangkas waktu antre di kasir restoran.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 04. KEBIJAKAN PEMBATALAN & REFUND -->
+            <section id="kebijakan-pembatalan" class="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs scroll-mt-28">
+                <div class="flex items-center justify-between mb-5 pb-3.5 border-b border-slate-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-black text-xs">
+                            04
+                        </div>
+                        <h2 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                            Kebijakan Pembatalan &amp; Pengembalian Dana
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="space-y-4 text-sm text-slate-600 leading-relaxed font-normal">
+                    <p>
+                        Demi menjaga kelancaran operasional dapur cepat saji di bandara:
+                    </p>
+
+                    <div class="p-5 rounded-2xl bg-amber-50/60 border border-amber-200/80">
+                        <strong class="text-slate-900 font-bold block mb-1">Ketentuan Non-Refund</strong>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Pesanan yang telah berhasil dibayar dan statusnya telah berubah menjadi <strong>"Sedang Disiapkan / Diproses"</strong> oleh dapur restoran <strong>tidak dapat dibatalkan atau dikembalikan dananya (non-refundable)</strong> dengan alasan apapun, termasuk jika pengguna memutuskan membatalkan perjalanan.
+                        </p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                        <strong class="text-slate-900 font-bold block mb-1">Pengecualian Pembatalan oleh Pihak Tenant</strong>
+                        <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                            Apabila menu yang dipesan mendadak habis atau dapur tenant mengalami kendala teknis sebelum pesanan mulai dimasak, pesanan akan dibatalkan otomatis dan dana akan dikembalikan penuh.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 05. PROSEDUR PENGAMBILAN DI GERAI -->
+            <section id="pengambilan-pesanan" class="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs scroll-mt-28">
+                <div class="flex items-center justify-between mb-5 pb-3.5 border-b border-slate-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-xl bg-blue-50 text-[#005ea2] flex items-center justify-center font-black text-xs">
+                            05
+                        </div>
+                        <h2 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                            Prosedur Pengambilan Pesanan di Gerai
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="space-y-4 text-sm text-slate-600 leading-relaxed font-normal">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                            <h3 class="font-bold text-slate-900 text-sm mb-1">Verifikasi Kode Pengambilan</h3>
+                            <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                                Pengguna cukup menunjukkan nomor nota atau kode pengambilan 4-digit di layar ponsel kepada staf kasir/konter gerai untuk mengambil hidangan.
+                            </p>
+                        </div>
+
+                        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                            <h3 class="font-bold text-slate-900 text-sm mb-1">Batas Waktu Pengambilan</h3>
+                            <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                                Makanan yang telah siap akan disimpan di area pengambilan gerai hingga batas jam operasional gerai pada hari yang sama.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 06. BATASAN TANGGUNG JAWAB OPERASIONAL -->
+            <section id="batasan-tanggung-jawab" class="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs scroll-mt-28">
+                <div class="flex items-center justify-between mb-5 pb-3.5 border-b border-slate-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-xl bg-blue-50 text-[#005ea2] flex items-center justify-center font-black text-xs">
+                            06
+                        </div>
+                        <h2 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                            Batasan Tanggung Jawab Operasional
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="space-y-4 text-sm text-slate-600 leading-relaxed font-normal">
+                    <p>
+                        FlyDine dibebaskan dari segala bentuk tuntutan kerugian akibat:
+                    </p>
+
+                    <ul class="space-y-2.5 text-xs sm:text-sm text-slate-600">
+                        <li class="flex items-start space-x-2.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#005ea2] mt-2 shrink-0"></span>
+                            <span>Keterlambatan penumpang menuju boarding gate akibat kelalaian pribadi dalam memperkirakan waktu perjalanan antar terminal/gate.</span>
+                        </li>
+                        <li class="flex items-start space-x-2.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#005ea2] mt-2 shrink-0"></span>
+                            <span>Perubahan jadwal mendadak oleh maskapai penerbangan atau pengalihan gate oleh otoritas bandara di luar kendali sistem FlyDine.</span>
+                        </li>
+                        <li class="flex items-start space-x-2.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#005ea2] mt-2 shrink-0"></span>
+                            <span>Reaksi alergi atau ketidaksesuaian selera rasa makanan yang sepenuhnya merupakan ranah racikan masing-masing pihak restoran.</span>
+                        </li>
+                    </ul>
+
+                    <!-- Bottom Action -->
+                    <div class="mt-8 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <p class="text-xs text-slate-500 text-center sm:text-left">
+                            Butuh bantuan seputar pesanan Anda? Hubungi <a href="mailto:support@flydine.co.id" class="text-[#005ea2] font-semibold hover:underline">support@flydine.co.id</a>
+                        </p>
+                        <a href="{{ route('customer.menu') }}" class="inline-flex items-center space-x-2 bg-[#005ea2] hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-5 py-2.5 rounded-xl transition-colors shadow-xs">
+                            <span>Mulai Pesan</span>
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+        </main>
     </div>
 </div>
 @endsection
