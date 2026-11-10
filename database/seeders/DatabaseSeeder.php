@@ -21,10 +21,7 @@ class DatabaseSeeder extends Seeder
             TenantPhotoSeeder::class, // Mapping foto tenant otomatis
             ProductPhotoSeeder::class, // Mapping foto produk otomatis
             UserSeeder::class,       // Akun Admin Ops & Staff cadangan
-            ProductSeeder::class,    // dummy
-            CustomerSeeder::class,   // dummy
-            // OrderSeeder::class,      // dummy (order_items dibuat sekaligus di sini)
-            // ComplaintSeeder::class,  // dummy
+            CustomerSeeder::class,   // Data awal pelanggan
         ]);
     }
 }

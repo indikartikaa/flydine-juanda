@@ -1,59 +1,127 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# FlyDine — Sistem Pre-Order & Antrean Digital Kuliner Bandara Internasional Juanda
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=flat-square&logo=laravel&logoColor=white)
+![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=flat-square&logo=php&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.x-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+![Alpine.js](https://img.shields.io/badge/Alpine.js-3.x-8BC0D0?style=flat-square&logo=alpinedotjs&logoColor=black)
+![MySQL](https://img.shields.io/badge/MySQL-8.0%2B-4479A1?style=flat-square&logo=mysql&logoColor=white)
+![Pest](https://img.shields.io/badge/Tested_with-Pest_%2F_PHPUnit-F28D1A?style=flat-square)
 
-## About Laravel
+**FlyDine** adalah platform web *pre-order* makanan dan manajemen antrean digital terpusat untuk ekosistem *Food & Beverage (F&B)* di **Bandar Udara Internasional Juanda Surabaya (Terminal 1 & Terminal 2)**. Sistem ini dirancang untuk memangkas waktu tunggu fisik penumpang sebelum *boarding*, mempermudah operasional dapur mitra *tenant*, serta menyediakan dasbor pemantauan kinerja layanan (*Service Level Agreement*) bagi manajemen bandara.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Fitur Utama
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 1. Modul Pelanggan (Penumpang & Pengunjung)
+- **Katalog Multi-Terminal & Zonasi Keamanan:** Eksplorasi menu dari 76 gerai F&B di Terminal 1 dan Terminal 2 dengan pemisahan otomatis area *Landside* (publik) dan *Airside* (ruang tunggu *boarding*).
+- **Keranjang Belanja Asinkronus (AJAX):** Penambahan dan penyesuaian porsi menu secara *real-time* tanpa memuat ulang halaman, dilengkapi validasi satu restoran per transaksi (*Single-Tenant Cart Guard*).
+- **Validasi Jadwal Penerbangan (*Boarding Guard*):** Memastikan sisa waktu menuju jam *boarding* mencukupi durasi penyiapan makanan ($\ge \max(15\text{ menit}, \text{waktu masak menu})$) untuk mencegah risiko tertinggal pesawat.
+- **Opsi Pengambilan Fleksibel:** Mendukung pengambilan mandiri di konter (*Self Pick-up*) maupun pengantaran oleh *porter* ke titik *Gate* keberangkatan dalam terminal dan zona keamanan yang sama.
+- **Pelacakan Status *Real-Time* & *E-Receipt*:** Pemantauan progres pesanan mulai dari pembayaran, proses masak di dapur, hingga siap diambil, lengkap dengan struk digital ber-QR Code.
+- **Pusat Bantuan & Tiket Komplain:** Pengajuan dan pelacakan status keluhan pesanan (`CMP-XXXXXX`) secara mandiri menggunakan kode pesanan atau nomor WhatsApp.
 
-## Learning Laravel
+### 2. Modul Mitra Restoran (*Tenant Staff*)
+- **Manajemen Antrean Dapur *Real-Time*:** Pembaruan pesanan masuk secara otomatis (*live polling*) dengan urutan transisi status terkunci (*State Machine*: `menunggu` $\rightarrow$ `diproses` $\rightarrow$ `siap` $\rightarrow$ `selesai`).
+- **Katalog & Stok Harian Mandiri:** Pengelolaan ketersediaan menu, kuota stok porsi harian, estimasi waktu masak (*preparation time*), serta jam buka/tutup operasional gerai.
+- **Rekapitulasi & Riwayat Transaksi:** Pemantauan omset harian dan riwayat penyelesaian pesanan per gerai secara terisolasi (*Multi-Tenant Isolation*).
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### 3. Modul Admin Operasional & Eksekutif Bandara (*Admin Ops*)
+- **Executive Dashboard (SIE):** Visualisasi *Key Performance Indicators (KPI)* utama bandara meliputi volume pesanan harian, rasio okupansi *tenant*, distribusi jam sibuk (*Peak Hours*), dan kepatuhan SLA ($\le 15$ menit) berbasis `Chart.js`.
+- **Analitik Multidimensi (*Drill-Down*) & Simulasi *What-If*:** Pembedahan data transaksi lintas dimensi serta kalkulator simulasi kapasitas dapur saat lonjakan trafik penumpang.
+- **Otomatisasi ETL & Ekspor Laporan:** Agregasi data harian otomatis ke tabel ringkasan (`daily_tenant_summaries`) serta ekspor laporan resmi ke format **PDF** dan **Excel (`.xls`)**.
+- **CRM, *Helpdesk* Komplain, & *Fraud Monitoring*:** Segmentasi loyalitas pelanggan, penanganan tiket keluhan, log audit aktivitas terpusat (`activity_logs`), serta deteksi otomatis pola pembatalan berulang (*spam order*).
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## Teknologi yang Digunakan
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- **Backend:** PHP 8.2+, Laravel 12.x
+- **Frontend:** Blade Templating Engine, Tailwind CSS 3.x, Alpine.js 3.x, Vite
+- **Visualisasi & Dokumen:** Chart.js 4.x, Barryvdh Laravel DomPDF
+- **Database:** MySQL 8.0+ / MariaDB (dilengkapi *Native SQL Triggers*, *Stored Procedure*, & *Composite Indexes*)
+- **Pengujian:** Pest PHP / PHPUnit
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Prasyarat (*Requirements*)
 
-## Contributing
+Sebelum menjalankan proyek ini di lingkungan lokal, pastikan perangkat telah terpasang:
+- **PHP** >= 8.2 (dengan ekstensi `pdo_mysql`, `mbstring`, `gd`, `xml`, `ctype`, `json`)
+- **Composer** >= 2.x
+- **Node.js** >= 18.x & **NPM**
+- **MySQL** >= 8.0 atau **MariaDB** >= 10.6 (dapat menggunakan Laragon / XAMPP)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## Cara Instalasi & Penggunaan
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 1. Kloning Repositori & Pasang Dependensi
+```bash
+git clone <url-repositori-anda> flydine-juanda
+cd flydine-juanda
 
-## Security Vulnerabilities
+composer install
+npm install
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 2. Konfigurasi Variabel Lingkungan (*Environment Variables*)
+Salin berkas `.env.example` menjadi `.env` lalu buat *application key*:
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-## License
+Sesuaikan konfigurasi koneksi basis data di dalam berkas `.env`:
+```env
+APP_NAME="FlyDine Juanda"
+APP_URL=http://127.0.0.1:8000
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=flydine_juanda
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+### 3. Migrasi Basis Data & *Data Seeding*
+Jalankan perintah migrasi beserta *seeder* untuk membuat struktur tabel, memasang *SQL Triggers & Stored Procedure*, serta mengisi data 76 *tenant* dan katalog menu Terminal 1 & 2:
+```bash
+php artisan migrate --seed
+```
+
+*(Opsional)* Untuk menjalankan agregasi laporan ETL harian atau membatalkan pesanan kedaluwarsa secara manual:
+```bash
+php artisan app:run-daily-etl
+php artisan orders:cancel-expired
+```
+
+### 4. Kompilasi Aset & Menjalankan Server
+```bash
+npm run build
+php artisan serve
+```
+Akses aplikasi melalui peramban di alamat: `http://127.0.0.1:8000`
+
+### 5. Akun Demo Pengujian (Hasil *Seeder*)
+| Peran Pengguna | Email Login | Kata Sandi | Hak Akses Utama |
+| :--- | :--- | :--- | :--- |
+| **Admin Operasional** | `admin.ops@flydine.test` | `password` | Dashboard Eksekutif, Analitik Drill-Down & What-If, Manajemen Tenant, Komplain, & Fraud Monitoring |
+| **Staf Mitra Tenant** | `staff.aw-fb-t1-01-01@flydine.test` | `juanda123` | Dashboard Dapur, Pemrosesan Antrean Pesanan, & Manajemen Stok Menu |
+| **Pelanggan (Publik)** | *(Tanpa Login)* | — | Pemesanan langsung dari halaman beranda `/` |
+
+### 6. Menjalankan Pengujian Otomatis (*Automated Testing*)
+```bash
+php artisan test
+```
+
+---
+
+## Kontributor & Lisensi
+
+- **Tim Pengembang:**
+  - **Masyito Indi Kartika** (Program Studi Sistem Informasi)
+  - **Dhidan Fachriza Zakaria** (Program Studi Sistem Informasi)
+- **Mitra Proyek Magang:** PT Angkasa Pura Indonesia — Kantor Regional IV Bandar Udara Internasional Juanda Surabaya (*Airport Technology Department*)
+- **Lisensi:** Proyek ini dikembangkan untuk keperluan implementasi sistem dan akademik di lingkungan PT Angkasa Pura Indonesia. Berbasis kerangka kerja Laravel di bawah lisensi [MIT License](https://opensource.org/licenses/MIT).
