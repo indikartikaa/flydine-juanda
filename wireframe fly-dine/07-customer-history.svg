@@ -127,7 +127,7 @@
 
     <!-- ==================== KARTU 1 (ORDER AKTIF - SEDANG DIANTAR PORTER) ==================== -->
     <g transform="translate(0, 0)">
-      <rect width="580" height="340" rx="24" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+      <rect width="580" height="350" rx="24" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
 
       <!-- Header Card: Restoran & Status Badge -->
       <g transform="translate(24, 24)">
@@ -188,9 +188,9 @@
       </g>
     </g>
 
-    <!-- ==================== KARTU 2 (ORDER SELESAI) ==================== -->
+    <!-- ==================== KARTU 2 (ORDER SELESAI & TIKET KOMPLAIN) ==================== -->
     <g transform="translate(620, 0)">
-      <rect width="580" height="340" rx="24" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+      <rect width="580" height="350" rx="24" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
 
       <!-- Header Card: Restoran & Status Selesai -->
       <g transform="translate(24, 24)">
@@ -213,21 +213,29 @@
       <line x1="24" y1="88" x2="556" y2="88" stroke="#E4E4E7" stroke-width="1.5" />
 
       <!-- Rincian Item Pesanan -->
-      <g transform="translate(24, 106)">
+      <g transform="translate(24, 102)">
         <g transform="translate(0, 0)">
           <line x1="0" y1="8" x2="240" y2="8" stroke="#27272A" stroke-width="5" stroke-linecap="round" />
           <line x1="430" y1="8" x2="532" y2="8" stroke="#52525B" stroke-width="4.5" stroke-linecap="round" />
         </g>
-        <g transform="translate(0, 28)">
+        <g transform="translate(0, 24)">
           <line x1="0" y1="8" x2="200" y2="8" stroke="#27272A" stroke-width="5" stroke-linecap="round" />
           <line x1="430" y1="8" x2="532" y2="8" stroke="#52525B" stroke-width="4.5" stroke-linecap="round" />
         </g>
+
+        <!-- Complaint Status Pill (TC-COMP-03 Tracking) -->
+        <g transform="translate(0, 48)">
+          <rect width="280" height="24" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.2" />
+          <circle cx="12" cy="12" r="3" fill="#D97706" />
+          <line x1="22" y1="12" x2="110" y2="12" stroke="#92400E" stroke-width="3" stroke-linecap="round" />
+          <line x1="120" y1="12" x2="265" y2="12" stroke="#B45309" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="2 2" />
+        </g>
       </g>
 
-      <line x1="24" y1="184" x2="556" y2="184" stroke="#E4E4E7" stroke-width="1.5" />
+      <line x1="24" y1="190" x2="556" y2="190" stroke="#E4E4E7" stroke-width="1.5" />
 
       <!-- Total Biaya & Metode Ambil -->
-      <g transform="translate(24, 202)">
+      <g transform="translate(24, 206)">
         <line x1="0" y1="10" x2="130" y2="10" stroke="#71717A" stroke-width="4" stroke-linecap="round" />
         <line x1="0" y1="28" x2="150" y2="28" stroke="#18181B" stroke-width="8" stroke-linecap="round" />
         <g transform="translate(300, 10)">
@@ -237,7 +245,7 @@
       </g>
 
       <!-- Action Buttons Bawah: Struk & Ulasan -->
-      <g transform="translate(24, 266)">
+      <g transform="translate(24, 276)">
         <!-- Tombol Struk Digital -->
         <rect width="260" height="46" rx="14" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
         <line x1="40" y1="23" x2="220" y2="23" stroke="#27272A" stroke-width="5" stroke-linecap="round" />
