@@ -1,224 +1,306 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 1520" width="540" height="1520" style="background:#F8FAFC; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1560" width="1440" height="1560" style="background:#F8FAFC; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
 
   <!-- ========================================================================= -->
   <!-- WIREFRAME PERSIS: STRUK DIGITAL RESMI (/receipt/{order})                  -->
-  <!-- Murni Kotak-Kotak Struktur (Skeleton Wireframe - Tanpa Browser Frame)     -->
+  <!-- Murni Kotak-Kotak Struktur (Skeleton Wireframe - Widescreen Dual Column)  -->
   <!-- Mengikuti: resources/views/customer/receipt.blade.php                     -->
   <!-- ========================================================================= -->
 
-  <!-- 1. TOP APP BAR (receipt.blade.php baris 16-31) -->
-  <g id="Top-AppBar">
-    <rect x="0" y="0" width="540" height="68" fill="#27272A" />
+  <!-- 1. TOP NAVBAR (receipt.blade.php baris 126-158) -->
+  <g id="Top-Navbar">
+    <rect x="0" y="0" width="1440" height="76" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
 
-    <!-- Tombol Back [<] -->
-    <g transform="translate(20, 16)">
-      <circle cx="18" cy="18" r="18" fill="#3F3F46" />
-      <path d="M21 12 L15 18 L21 24" stroke="#FFFFFF" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- A. Kiri: Logo Brand & Divider "Struk Transaksi Resmi" -->
+    <g transform="translate(60, 18)">
+      <rect width="160" height="40" rx="6" fill="#F4F4F5" stroke="#27272A" stroke-width="1.8" />
+      <line x1="0" y1="0" x2="160" y2="40" stroke="#71717A" stroke-width="1.5" />
+      <line x1="160" y1="0" x2="0" y2="40" stroke="#71717A" stroke-width="1.5" />
+
+      <!-- Vertical Divider -->
+      <line x1="180" y1="8" x2="180" y2="32" stroke="#E4E4E7" stroke-width="1.5" />
+      <!-- Text: Struk Transaksi Resmi -->
+      <line x1="200" y1="20" x2="340" y2="20" stroke="#71717A" stroke-width="4.5" stroke-linecap="round" />
     </g>
 
-    <!-- Title Struk Digital & FlyDine Juanda -->
-    <g transform="translate(68, 20)">
-      <line x1="0" y1="10" x2="110" y2="10" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" />
-      <line x1="0" y1="24" x2="160" y2="24" stroke="#A1A1AA" stroke-width="3.5" stroke-linecap="round" />
-    </g>
+    <!-- B. Kanan: Tombol Kembali ke Riwayat & Tombol Cetak / PDF -->
+    <g transform="translate(1080, 20)">
+      <!-- Link: Riwayat Pesanan -->
+      <g transform="translate(0, 0)">
+        <rect width="130" height="36" rx="10" fill="#FFFFFF" stroke="#D4D4D8" stroke-width="1.2" />
+        <path d="M20 18 L26 12 M20 18 L26 24" stroke="#27272A" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+        <line x1="36" y1="18" x2="114" y2="18" stroke="#27272A" stroke-width="4" stroke-linecap="round" />
+      </g>
 
-    <!-- Tombol Cetak / PDF (baris 27-30) -->
-    <g transform="translate(400, 16)">
-      <rect width="116" height="36" rx="10" fill="#3F3F46" stroke="#52525B" stroke-width="1.5" />
-      <rect x="12" y="10" width="16" height="16" rx="2" fill="none" stroke="#FFFFFF" stroke-width="1.5" />
-      <line x1="16" y1="14" x2="24" y2="14" stroke="#FFFFFF" stroke-width="1.5" />
-      <line x1="36" y1="18" x2="100" y2="18" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" />
+      <!-- Tombol: Cetak / PDF -->
+      <g transform="translate(144, 0)">
+        <rect width="126" height="36" rx="10" fill="#27272A" stroke="#18181B" stroke-width="1.5" />
+        <rect x="16" y="10" width="16" height="16" rx="3" fill="none" stroke="#FFFFFF" stroke-width="1.5" />
+        <line x1="20" y1="14" x2="28" y2="14" stroke="#FFFFFF" stroke-width="1.5" />
+        <line x1="42" y1="18" x2="108" y2="18" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" />
+      </g>
     </g>
   </g>
 
-  <!-- 2. RESI DIGITAL UTAMA (RECEIPT CARD) (baris 34-220) -->
-  <g id="Receipt-Body" transform="translate(24, 92)">
-    <rect width="492" height="1340" rx="24" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+  <!-- ========================================================================= -->
+  <!-- 2. TWO-COLUMN LAYOUT (GRID 12 COLS: LEFT 7.5 COLS, RIGHT 4.5 COLS)        -->
+  <!-- ========================================================================= -->
+  <g id="Main-Receipt-Container" transform="translate(100, 106)">
 
-    <!-- A. Header Resi (baris 37-46) -->
-    <g transform="translate(20, 30)">
-      <!-- Logo FlyDine -->
-      <line x1="156" y1="14" x2="280" y2="14" stroke="#18181B" stroke-width="8" stroke-linecap="round" />
-      <circle cx="288" cy="14" r="3.5" fill="#27272A" />
+    <!-- ========================================================================= -->
+    <!-- KOLOM KIRI (740px): KARTU DOKUMEN STRUK DIGITAL RESMI (baris 167-376)    -->
+    <!-- ========================================================================= -->
+    <g id="Left-Column-Receipt">
+      <rect width="740" height="1300" rx="28" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
 
-      <!-- Subtitle Bandara -->
-      <line x1="106" y1="34" x2="346" y2="34" stroke="#71717A" stroke-width="3" stroke-linecap="round" />
+      <!-- Top Colored Accent Bar (baris 171) -->
+      <path d="M0 28 C0 12.5 12.5 0 28 0 L712 0 C727.5 0 740 12.5 740 28 L740 38 L0 38 Z" fill="#27272A" />
 
-      <!-- Tenant Name & Floor -->
-      <line x1="136" y1="64" x2="316" y2="64" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
-      <line x1="166" y1="80" x2="286" y2="80" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+      <g transform="translate(48, 64)">
+
+        <!-- A. HEADER STRUK RESMI (baris 176-188) -->
+        <g id="Receipt-Header" transform="translate(0, 0)">
+          <!-- Logo Brand FlyDine -->
+          <line x1="250" y1="12" x2="390" y2="12" stroke="#18181B" stroke-width="8" stroke-linecap="round" />
+          <line x1="160" y1="32" x2="484" y2="32" stroke="#A1A1AA" stroke-width="3" stroke-linecap="round" />
+
+          <!-- Tenant Info Box -->
+          <g transform="translate(120, 52)">
+            <rect width="404" height="64" rx="14" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1.2" />
+            <line x1="80" y1="24" x2="324" y2="24" stroke="#18181B" stroke-width="5.5" stroke-linecap="round" />
+            <line x1="60" y1="42" x2="344" y2="42" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+          </g>
+        </g>
+
+        <!-- Divider Dashed -->
+        <line x1="0" y1="140" x2="644" y2="140" stroke="#E4E4E7" stroke-width="1.5" stroke-dasharray="4 4" />
+
+        <!-- B. METADATA TRANSAKSI (baris 191-238) -->
+        <g id="Receipt-Metadata" transform="translate(0, 160)">
+          <!-- Row 1: No. Pesanan & Badge Code -->
+          <g transform="translate(0, 0)">
+            <line x1="0" y1="12" x2="100" y2="12" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+            <g transform="translate(470, 0)">
+              <rect width="174" height="26" rx="6" fill="#F4F4F5" stroke="#27272A" stroke-width="1" />
+              <line x1="14" y1="13" x2="160" y2="13" stroke="#18181B" stroke-width="4.5" stroke-linecap="round" />
+            </g>
+          </g>
+
+          <!-- Row 2: Waktu Transaksi -->
+          <g transform="translate(0, 36)">
+            <line x1="0" y1="12" x2="120" y2="12" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+            <line x1="460" y1="12" x2="644" y2="12" stroke="#18181B" stroke-width="4.5" stroke-linecap="round" />
+          </g>
+
+          <!-- Row 3: Status Pembayaran (LUNAS) -->
+          <g transform="translate(0, 72)">
+            <line x1="0" y1="12" x2="140" y2="12" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+            <g transform="translate(540, 0)">
+              <rect width="104" height="24" rx="12" fill="#F4F4F5" stroke="#27272A" stroke-width="1.2" />
+              <circle cx="16" cy="12" r="3.5" fill="#27272A" />
+              <line x1="26" y1="12" x2="90" y2="12" stroke="#27272A" stroke-width="3.5" stroke-linecap="round" />
+            </g>
+          </g>
+
+          <!-- Row 4: Status Pesanan (SELESAI) -->
+          <g transform="translate(0, 108)">
+            <line x1="0" y1="12" x2="110" y2="12" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+            <g transform="translate(550, 0)">
+              <rect width="94" height="24" rx="12" fill="#F4F4F5" stroke="#27272A" stroke-width="1.2" />
+              <line x1="16" y1="12" x2="78" y2="12" stroke="#27272A" stroke-width="3.5" stroke-linecap="round" />
+            </g>
+          </g>
+        </g>
+
+        <!-- Divider Dashed -->
+        <line x1="0" y1="310" x2="644" y2="310" stroke="#E4E4E7" stroke-width="1.5" stroke-dasharray="4 4" />
+
+        <!-- C. DETAIL PELANGGAN & PENERBANGAN (baris 241-286) -->
+        <g id="Receipt-Customer-Flight" transform="translate(0, 330)">
+          <!-- Nama Pemesan -->
+          <g transform="translate(0, 0)">
+            <line x1="0" y1="10" x2="110" y2="10" stroke="#71717A" stroke-width="3" stroke-linecap="round" />
+            <line x1="460" y1="10" x2="644" y2="10" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
+          </g>
+
+          <!-- No. WhatsApp / HP -->
+          <g transform="translate(0, 32)">
+            <line x1="0" y1="10" x2="120" y2="10" stroke="#71717A" stroke-width="3" stroke-linecap="round" />
+            <line x1="490" y1="10" x2="644" y2="10" stroke="#18181B" stroke-width="4.5" stroke-linecap="round" />
+          </g>
+
+          <!-- Metode Ambil -->
+          <g transform="translate(0, 64)">
+            <line x1="0" y1="10" x2="100" y2="10" stroke="#71717A" stroke-width="3" stroke-linecap="round" />
+            <line x1="380" y1="10" x2="644" y2="10" stroke="#18181B" stroke-width="4.5" stroke-linecap="round" />
+          </g>
+
+          <!-- Penerbangan & Gate -->
+          <g transform="translate(0, 96)">
+            <line x1="0" y1="10" x2="130" y2="10" stroke="#71717A" stroke-width="3" stroke-linecap="round" />
+            <line x1="390" y1="10" x2="644" y2="10" stroke="#18181B" stroke-width="4.5" stroke-linecap="round" />
+          </g>
+
+          <!-- Catatan Pesanan Box (baris 277-285) -->
+          <g transform="translate(0, 130)">
+            <rect width="644" height="48" rx="10" fill="#F4F4F5" stroke="#D4D4D8" stroke-width="1" />
+            <line x1="16" y1="16" x2="130" y2="16" stroke="#71717A" stroke-width="2.8" stroke-linecap="round" />
+            <line x1="16" y1="32" x2="480" y2="32" stroke="#18181B" stroke-width="3.5" stroke-linecap="round" />
+          </g>
+        </g>
+
+        <!-- Divider Dashed -->
+        <line x1="0" y1="530" x2="644" y2="530" stroke="#E4E4E7" stroke-width="1.5" stroke-dasharray="4 4" />
+
+        <!-- D. RINCIAN MENU & SUBTOTAL (baris 289-316) -->
+        <g id="Receipt-Line-Items" transform="translate(0, 550)">
+          <!-- Table Header -->
+          <line x1="0" y1="10" x2="100" y2="10" stroke="#A1A1AA" stroke-width="3" stroke-linecap="round" />
+          <line x1="560" y1="10" x2="644" y2="10" stroke="#A1A1AA" stroke-width="3" stroke-linecap="round" />
+
+          <!-- Item 1 -->
+          <g transform="translate(0, 36)">
+            <line x1="0" y1="8" x2="240" y2="8" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
+            <line x1="0" y1="24" x2="130" y2="24" stroke="#71717A" stroke-width="3" stroke-linecap="round" />
+            <line x1="540" y1="16" x2="644" y2="16" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
+          </g>
+
+          <line x1="0" y1="80" x2="644" y2="80" stroke="#F4F4F5" stroke-width="1" />
+
+          <!-- Item 2 -->
+          <g transform="translate(0, 96)">
+            <line x1="0" y1="8" x2="220" y2="8" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
+            <line x1="0" y1="24" x2="120" y2="24" stroke="#71717A" stroke-width="3" stroke-linecap="round" />
+            <line x1="550" y1="16" x2="644" y2="16" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
+          </g>
+        </g>
+
+        <!-- Divider Tebal -->
+        <line x1="0" y1="700" x2="644" y2="700" stroke="#27272A" stroke-width="2" />
+
+        <!-- E. RINGKASAN BIAYA & TOTAL (baris 319-354) -->
+        <g id="Receipt-Billing-Total" transform="translate(0, 720)">
+          <!-- Subtotal Menu -->
+          <g transform="translate(0, 0)">
+            <line x1="0" y1="8" x2="110" y2="8" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+            <line x1="540" y1="8" x2="644" y2="8" stroke="#18181B" stroke-width="4.5" stroke-linecap="round" />
+          </g>
+
+          <!-- Biaya Porter -->
+          <g transform="translate(0, 28)">
+            <line x1="0" y1="8" x2="180" y2="8" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+            <line x1="560" y1="8" x2="644" y2="8" stroke="#18181B" stroke-width="4.5" stroke-linecap="round" />
+          </g>
+
+          <line x1="0" y1="52" x2="644" y2="52" stroke="#E4E4E7" stroke-width="1" />
+
+          <!-- Total Pembayaran -->
+          <g transform="translate(0, 70)">
+            <line x1="0" y1="14" x2="150" y2="14" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
+            <line x1="470" y1="14" x2="644" y2="14" stroke="#18181B" stroke-width="9" stroke-linecap="round" />
+          </g>
+
+          <!-- Metode Pembayaran -->
+          <g transform="translate(0, 108)">
+            <line x1="0" y1="8" x2="140" y2="8" stroke="#71717A" stroke-width="3" stroke-linecap="round" />
+            <line x1="490" y1="8" x2="644" y2="8" stroke="#27272A" stroke-width="4" stroke-linecap="round" />
+          </g>
+        </g>
+
+        <!-- Divider Dashed -->
+        <line x1="0" y1="870" x2="644" y2="870" stroke="#E4E4E7" stroke-width="1.5" stroke-dasharray="4 4" />
+
+        <!-- F. QR CODE & DISKLAIMER RESMI (baris 357-373) -->
+        <g id="Receipt-QR-Footer" transform="translate(0, 900)">
+          <!-- QR Frame (65x65) -->
+          <g transform="translate(40, 0)">
+            <rect width="70" height="70" rx="10" fill="#FFFFFF" stroke="#27272A" stroke-width="1.5" />
+            <!-- Inner QR Finder Blocks -->
+            <rect x="10" y="10" width="16" height="16" fill="#27272A" />
+            <rect x="44" y="10" width="16" height="16" fill="#27272A" />
+            <rect x="10" y="44" width="16" height="16" fill="#27272A" />
+            <rect x="32" y="32" width="12" height="12" fill="#27272A" />
+          </g>
+
+          <g transform="translate(130, 8)">
+            <line x1="0" y1="6" x2="170" y2="6" stroke="#A1A1AA" stroke-width="2.5" stroke-linecap="round" />
+            <line x1="0" y1="24" x2="220" y2="24" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
+            <line x1="0" y1="42" x2="480" y2="42" stroke="#71717A" stroke-width="3" stroke-linecap="round" />
+            <line x1="0" y1="56" x2="430" y2="56" stroke="#71717A" stroke-width="3" stroke-linecap="round" />
+          </g>
+        </g>
+
+      </g>
     </g>
 
-    <!-- Garis Pemisah Putus-putus 1 -->
-    <line x1="20" y1="134" x2="472" y2="134" stroke="#71717A" stroke-width="1.5" stroke-dasharray="6 6" />
+    <!-- ========================================================================= -->
+    <!-- KOLOM KANAN (460px): QUICK ACTIONS HUB (baris 380-430)                    -->
+    <!-- ========================================================================= -->
+    <g id="Right-Column-Actions" transform="translate(780, 0)">
+      <rect width="460" height="420" rx="28" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
 
-    <!-- B. Transaction Status & Code (baris 49-96) -->
-    <g transform="translate(30, 150)">
-      <!-- No Pesanan -->
-      <g transform="translate(0, 0)">
-        <line x1="0" y1="12" x2="90" y2="12" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
-        <rect x="310" y="0" width="122" height="26" rx="8" fill="#F4F4F5" stroke="#27272A" stroke-width="1.2" />
-        <line x1="324" y1="13" x2="418" y2="13" stroke="#18181B" stroke-width="4" stroke-linecap="round" />
+      <!-- Header Card: Cetak Dokumen Struk -->
+      <g transform="translate(28, 28)">
+        <rect width="42" height="42" rx="12" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
+        <rect x="13" y="13" width="16" height="16" rx="3" fill="none" stroke="#27272A" stroke-width="1.5" />
+        <line x1="17" y1="17" x2="25" y2="17" stroke="#27272A" stroke-width="1.5" />
+        
+        <g transform="translate(56, 4)">
+          <line x1="0" y1="10" x2="200" y2="10" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
+          <line x1="0" y1="26" x2="260" y2="26" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+        </g>
       </g>
 
-      <!-- Waktu Pesan -->
-      <g transform="translate(0, 36)">
-        <line x1="0" y1="8" x2="100" y2="8" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
-        <line x1="280" y1="8" x2="432" y2="8" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
-      </g>
+      <line x1="28" y1="90" x2="432" y2="90" stroke="#E4E4E7" stroke-width="1.5" />
 
-      <!-- Status Pembayaran (LUNAS) -->
-      <g transform="translate(0, 68)">
-        <line x1="0" y1="12" x2="130" y2="12" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
-        <!-- Badge LUNAS -->
-        <rect x="340" y="0" width="92" height="26" rx="13" fill="#27272A" />
-        <path d="M352 13 L355 16 L361 10" stroke="#FFFFFF" stroke-width="1.8" fill="none" stroke-linecap="round" />
-        <line x1="368" y1="13" x2="418" y2="13" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" />
-      </g>
+      <!-- Action Buttons List -->
+      <g transform="translate(28, 116)">
+        <!-- Big CTA Button: Cetak Struk / Download PDF -->
+        <g transform="translate(0, 0)">
+          <rect width="404" height="54" rx="16" fill="#27272A" stroke="#18181B" stroke-width="2" />
+          <rect x="100" y="19" width="16" height="16" rx="2" fill="none" stroke="#FFFFFF" stroke-width="1.5" />
+          <line x1="104" y1="23" x2="112" y2="23" stroke="#FFFFFF" stroke-width="1.5" />
+          <line x1="126" y1="27" x2="304" y2="27" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" />
+        </g>
 
-      <!-- Status Pesanan -->
-      <g transform="translate(0, 104)">
-        <line x1="0" y1="12" x2="110" y2="12" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
-        <!-- Badge Status -->
-        <rect x="330" y="0" width="102" height="26" rx="13" fill="#F4F4F5" stroke="#27272A" stroke-width="1.2" />
-        <line x1="344" y1="13" x2="418" y2="13" stroke="#27272A" stroke-width="4" stroke-linecap="round" />
-      </g>
-    </g>
+        <!-- Secondary Button: Lacak Status Pesanan Real-Time (baris 410-414) -->
+        <g transform="translate(0, 68)">
+          <rect width="404" height="52" rx="16" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
+          <circle cx="96" cy="26" r="4" fill="#27272A" />
+          <line x1="112" y1="26" x2="310" y2="26" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
+        </g>
 
-    <!-- Garis Pemisah Putus-putus 2 -->
-    <line x1="20" y1="294" x2="472" y2="294" stroke="#71717A" stroke-width="1.5" stroke-dasharray="6 6" />
+        <!-- 2 Grid Buttons: Riwayat & Katalog Menu (baris 416-425) -->
+        <g transform="translate(0, 134)">
+          <!-- Button 1: Riwayat -->
+          <rect width="194" height="46" rx="12" fill="#FFFFFF" stroke="#D4D4D8" stroke-width="1.2" />
+          <line x1="40" y1="23" x2="154" y2="23" stroke="#27272A" stroke-width="4" stroke-linecap="round" />
 
-    <!-- C. Customer & Flight Details (baris 99-140) -->
-    <g transform="translate(30, 314)">
-      <!-- Nama Pemesan -->
-      <g transform="translate(0, 0)">
-        <line x1="0" y1="8" x2="100" y2="8" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
-        <line x1="300" y1="8" x2="432" y2="8" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
-      </g>
+          <!-- Button 2: Katalog Menu -->
+          <g transform="translate(210, 0)">
+            <rect width="194" height="46" rx="12" fill="#FFFFFF" stroke="#D4D4D8" stroke-width="1.2" />
+            <line x1="40" y1="23" x2="154" y2="23" stroke="#27272A" stroke-width="4" stroke-linecap="round" />
+          </g>
+        </g>
 
-      <!-- Tipe Pelanggan -->
-      <g transform="translate(0, 28)">
-        <line x1="0" y1="8" x2="110" y2="8" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
-        <line x1="340" y1="8" x2="432" y2="8" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
-      </g>
-
-      <!-- No. WhatsApp -->
-      <g transform="translate(0, 56)">
-        <line x1="0" y1="8" x2="90" y2="8" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
-        <line x1="310" y1="8" x2="432" y2="8" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
-      </g>
-
-      <!-- No. Penerbangan -->
-      <g transform="translate(0, 84)">
-        <line x1="0" y1="8" x2="120" y2="8" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
-        <line x1="360" y1="8" x2="432" y2="8" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
-      </g>
-
-      <!-- Waktu Boarding -->
-      <g transform="translate(0, 112)">
-        <line x1="0" y1="8" x2="110" y2="8" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
-        <line x1="330" y1="8" x2="432" y2="8" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
-      </g>
-
-      <!-- Metode Pengambilan -->
-      <g transform="translate(0, 140)">
-        <line x1="0" y1="8" x2="130" y2="8" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
-        <line x1="280" y1="8" x2="432" y2="8" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
+        <!-- SLA & Official Airport Notice -->
+        <g transform="translate(0, 204)">
+          <rect width="404" height="60" rx="12" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1" />
+          <circle cx="20" cy="30" r="8" fill="none" stroke="#27272A" stroke-width="1.5" />
+          <line x1="36" y1="24" x2="360" y2="24" stroke="#18181B" stroke-width="3.5" stroke-linecap="round" />
+          <line x1="36" y1="38" x2="310" y2="38" stroke="#71717A" stroke-width="3" stroke-linecap="round" />
+        </g>
       </g>
     </g>
 
-    <!-- Garis Pemisah Putus-putus 3 -->
-    <line x1="20" y1="494" x2="472" y2="494" stroke="#71717A" stroke-width="1.5" stroke-dasharray="6 6" />
+  </g>
 
-    <!-- D. Rincian Item Pesanan, Varian & Catatan Khusus (baris 143-180) -->
-    <g transform="translate(30, 514)">
-      <!-- Table Header -->
-      <line x1="0" y1="8" x2="80" y2="8" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
-      <line x1="230" y1="8" x2="260" y2="8" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
-      <line x1="370" y1="8" x2="432" y2="8" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
-
-      <!-- Row Item 1 (dengan Varian Pill) -->
-      <g transform="translate(0, 32)">
-        <line x1="0" y1="8" x2="180" y2="8" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
-        <rect x="0" y="16" width="100" height="18" rx="5" fill="#F4F4F5" stroke="#27272A" stroke-width="1" />
-        <line x1="8" y1="25" x2="92" y2="25" stroke="#27272A" stroke-width="2.5" stroke-linecap="round" />
-        <line x1="240" y1="12" x2="256" y2="12" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
-        <line x1="360" y1="12" x2="432" y2="12" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
-      </g>
-
-      <!-- Row Item 2 (dengan Varian Pill) -->
-      <g transform="translate(0, 84)">
-        <line x1="0" y1="8" x2="160" y2="8" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
-        <rect x="0" y="16" width="86" height="18" rx="5" fill="#F4F4F5" stroke="#27272A" stroke-width="1" />
-        <line x1="8" y1="25" x2="78" y2="25" stroke="#27272A" stroke-width="2.5" stroke-linecap="round" />
-        <line x1="240" y1="12" x2="256" y2="12" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
-        <line x1="360" y1="12" x2="432" y2="12" stroke="#18181B" stroke-width="5" stroke-linecap="round" />
-      </g>
-
-      <!-- Box Catatan Khusus Pesanan di Struk -->
-      <g transform="translate(0, 136)">
-        <rect width="432" height="40" rx="10" fill="#F4F4F5" stroke="#27272A" stroke-width="1.2" />
-        <circle cx="16" cy="20" r="5" fill="#27272A" />
-        <line x1="28" y1="14" x2="130" y2="14" stroke="#27272A" stroke-width="2.8" stroke-linecap="round" />
-        <line x1="28" y1="26" x2="380" y2="26" stroke="#71717A" stroke-width="3" stroke-linecap="round" />
-      </g>
-    </g>
-
-    <!-- Garis Pemisah Putus-putus 4 -->
-    <line x1="20" y1="710" x2="472" y2="710" stroke="#71717A" stroke-width="1.5" stroke-dasharray="6 6" />
-
-    <!-- E. Kalkulasi Total & Billing (baris 183-210) -->
-    <g transform="translate(30, 730)">
-      <!-- Subtotal -->
-      <g transform="translate(0, 0)">
-        <line x1="0" y1="8" x2="90" y2="8" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
-        <line x1="360" y1="8" x2="432" y2="8" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
-      </g>
-
-      <!-- Biaya Layanan Porter -->
-      <g transform="translate(0, 28)">
-        <line x1="0" y1="8" x2="130" y2="8" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
-        <line x1="370" y1="8" x2="432" y2="8" stroke="#52525B" stroke-width="4" stroke-linecap="round" />
-      </g>
-
-      <!-- GRAND TOTAL -->
-      <g transform="translate(0, 64)">
-        <line x1="0" y1="14" x2="130" y2="14" stroke="#18181B" stroke-width="7" stroke-linecap="round" />
-        <line x1="290" y1="14" x2="432" y2="14" stroke="#18181B" stroke-width="9" stroke-linecap="round" />
-      </g>
-
-      <!-- Metode Pembayaran -->
-      <g transform="translate(0, 102)">
-        <line x1="0" y1="8" x2="140" y2="8" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
-        <line x1="380" y1="8" x2="432" y2="8" stroke="#27272A" stroke-width="4" stroke-linecap="round" />
-      </g>
-    </g>
-
-    <!-- Garis Pemisah Putus-putus 5 -->
-    <line x1="20" y1="870" x2="472" y2="870" stroke="#71717A" stroke-width="1.5" stroke-dasharray="6 6" />
-
-    <!-- F. Security Verification QR & Footer (baris 213-240) -->
-    <g transform="translate(20, 896)">
-      <!-- Small QR Box [X] -->
-      <g transform="translate(186, 0)">
-        <rect width="80" height="80" rx="8" fill="#F4F4F5" stroke="#27272A" stroke-width="1.5" />
-        <line x1="0" y1="0" x2="80" y2="80" stroke="#71717A" stroke-width="1" />
-        <line x1="80" y1="0" x2="0" y2="80" stroke="#71717A" stroke-width="1" />
-      </g>
-
-      <!-- Security Text Lines -->
-      <g transform="translate(20, 100)">
-        <line x1="90" y1="8" x2="322" y2="8" stroke="#71717A" stroke-width="3" stroke-linecap="round" />
-        <line x1="60" y1="22" x2="352" y2="22" stroke="#A1A1AA" stroke-width="2.5" stroke-linecap="round" />
-        <line x1="100" y1="36" x2="312" y2="36" stroke="#A1A1AA" stroke-width="2.5" stroke-linecap="round" />
-      </g>
-    </g>
-
-    <!-- G. Tombol Bawah (Cetak / Unduh PDF) -->
-    <g transform="translate(30, 1096)">
-      <rect width="432" height="52" rx="16" fill="#27272A" />
-      <circle cx="150" cy="26" r="8" fill="none" stroke="#FFFFFF" stroke-width="1.5" />
-      <line x1="170" y1="26" x2="300" y2="26" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" />
+  <!-- 3. OFFICIAL FLYDINE CORPORATE FOOTER -->
+  <g id="Footer" transform="translate(0, 1460)">
+    <rect width="1440" height="100" fill="#FFFFFF" stroke="#27272A" stroke-width="2" />
+    <g transform="translate(80, 35)">
+      <line x1="0" y1="15" x2="160" y2="15" stroke="#18181B" stroke-width="6" stroke-linecap="round" />
+      <line x1="400" y1="15" x2="800" y2="15" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
+      <line x1="1100" y1="15" x2="1280" y2="15" stroke="#71717A" stroke-width="3.5" stroke-linecap="round" />
     </g>
   </g>
 
