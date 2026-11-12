@@ -51,11 +51,12 @@
       <line x1="44" y1="23" x2="170" y2="23" stroke="#52525B" stroke-width="5" stroke-linecap="round" />
     </g>
 
-    <!-- Nav 5: Analitik Operasional (Executive) -->
+    <!-- Nav 5: Analitik Operasional (Executive Accordion) -->
     <g transform="translate(16, 354)">
       <rect width="228" height="46" rx="12" fill="#FFFFFF" />
       <path d="M16 30 L22 20 L27 24 L34 14" stroke="#71717A" stroke-width="1.8" fill="none" stroke-linecap="round" />
-      <line x1="44" y1="23" x2="180" y2="23" stroke="#52525B" stroke-width="5" stroke-linecap="round" />
+      <line x1="44" y1="23" x2="175" y2="23" stroke="#52525B" stroke-width="5" stroke-linecap="round" />
+      <path d="M196 21 L202 27 L208 21" stroke="#71717A" stroke-width="1.8" fill="none" stroke-linecap="round" />
     </g>
 
     <!-- Logout Button -->

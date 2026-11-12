@@ -48,11 +48,35 @@
       <line x1="44" y1="23" x2="170" y2="23" stroke="#52525B" stroke-width="5" stroke-linecap="round" />
     </g>
 
-    <!-- Nav 5: Analitik Operasional (AKTIF) -->
+    <!-- Nav 5: Analitik Operasional (Accordion Buka) -->
     <g transform="translate(16, 354)">
       <rect width="228" height="46" rx="12" fill="#27272A" />
       <path d="M16 30 L22 20 L27 24 L34 14" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" />
       <line x1="44" y1="23" x2="180" y2="23" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" />
+      <!-- Arrow Down Accordion -->
+      <path d="M196 21 L202 27 L208 21" stroke="#FFFFFF" stroke-width="1.8" fill="none" stroke-linecap="round" />
+
+      <!-- Submenu Analitik: 1. Ringkasan Eksekutif (Aktif) -->
+      <g transform="translate(12, 54)">
+        <rect width="204" height="34" rx="8" fill="#005EA2" />
+        <circle cx="14" cy="17" r="3" fill="#FFFFFF" />
+        <line x1="26" y1="17" x2="170" y2="17" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" />
+      </g>
+      <!-- Submenu 2: Drill-Down Pesanan -->
+      <g transform="translate(12, 94)">
+        <circle cx="14" cy="17" r="3" fill="#71717A" />
+        <line x1="26" y1="17" x2="160" y2="17" stroke="#52525B" stroke-width="3.8" stroke-linecap="round" />
+      </g>
+      <!-- Submenu 3: Simulasi What-If -->
+      <g transform="translate(12, 130)">
+        <circle cx="14" cy="17" r="3" fill="#71717A" />
+        <line x1="26" y1="17" x2="150" y2="17" stroke="#52525B" stroke-width="3.8" stroke-linecap="round" />
+      </g>
+      <!-- Submenu 4: Retensi Pelanggan -->
+      <g transform="translate(12, 166)">
+        <circle cx="14" cy="17" r="3" fill="#71717A" />
+        <line x1="26" y1="17" x2="155" y2="17" stroke="#52525B" stroke-width="3.8" stroke-linecap="round" />
+      </g>
     </g>
 
     <!-- Logout Button -->
